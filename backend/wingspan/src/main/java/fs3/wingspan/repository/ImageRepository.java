@@ -1,4 +1,4 @@
 package fs3.wingspan.repository;
 
-public class ImageRepository {
+public interface ImageRepository {
 }
