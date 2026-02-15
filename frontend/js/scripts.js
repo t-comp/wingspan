@@ -1,54 +1,124 @@
-/*!
-* Start Bootstrap - Freelancer v7.0.7 (https://startbootstrap.com/theme/freelancer)
-* Copyright 2013-2023 Start Bootstrap
-* Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-freelancer/blob/master/LICENSE)
-*/
-//
-// Scripts
-// 
+window.addEventListener("DOMContentLoaded", (event) => {
+  let butterflies = JSON.parse(localStorage.getItem("butterflies")) || [
+    {
+      name: "Monarch",
+      scientific: "Danaus plexippus",
+      sex: "Male",
+      description: "Bright orange butterfly found in North America.",
+      tags: "migratory, orange",
+      image: "assets/img/placeholder1.jpg",
+    },
+    {
+      name: "Swallowtail",
+      scientific: "Papilio machaon",
+      sex: "Female",
+      description: "Yellow butterfly with black stripes.",
+      tags: "yellow, striped",
+      image: "assets/img/placeholder2.jpg",
+    },
+    {
+      name: "Blue Morpho",
+      scientific: "Morpho peleides",
+      sex: "Unknown",
+      description: "Large iridescent blue butterfly.",
+      tags: "blue, tropical",
+      image: "assets/img/placeholder3.jpg",
+    },
+  ];
 
-window.addEventListener('DOMContentLoaded', event => {
+  function saveButterflies() {
+    localStorage.setItem("butterflies", JSON.stringify(butterflies));
+  }
 
-    // Navbar shrink function
-    var navbarShrink = function () {
-        const navbarCollapsible = document.body.querySelector('#mainNav');
-        if (!navbarCollapsible) {
-            return;
-        }
-        if (window.scrollY === 0) {
-            navbarCollapsible.classList.remove('navbar-shrink')
-        } else {
-            navbarCollapsible.classList.add('navbar-shrink')
-        }
+  const deleteBtn = document.getElementById("deleteButterflyBtn");
 
-    };
+  function renderButterflies(list) {
+    const grid = document.getElementById("butterflyGrid");
+    grid.innerHTML = "";
 
-    // Shrink the navbar 
-    navbarShrink();
+    list.forEach((b, idx) => {
+      const col = document.createElement("div");
+      col.className = "col-md-6 col-lg-4 mb-5";
+      col.innerHTML = `
+      <div class="card h-100 butterfly-card" 
+           data-name="${b.name}" 
+           data-scientific="${b.scientific}" 
+           data-sex="${b.sex}" 
+           data-description="${b.description}" 
+           data-tags="${b.tags}" 
+           data-image="${b.image}"
+           data-bs-toggle="modal" data-bs-target="#butterflyModal">
+        <img src="${b.image}" class="card-img-top" alt="${b.name}">
+        <div class="card-body">
+          <h5 class="card-title">${b.name}</h5>
+        </div>
+      </div>`;
+      grid.appendChild(col);
 
-    // Shrink the navbar when page is scrolled
-    document.addEventListener('scroll', navbarShrink);
+      const card = col.querySelector(".butterfly-card");
+      card.addEventListener("click", () => {
+        document.getElementById("butterflyModalLabel").innerText = b.name;
+        document.getElementById("butterflyModalScientific").innerText =
+          b.scientific;
+        document.getElementById("butterflyModalSex").innerText = b.sex;
+        document.getElementById("butterflyModalDescription").innerText =
+          b.description;
+        document.getElementById("butterflyModalTags").innerText = b.tags;
+        document.getElementById("butterflyModalImage").src = b.image;
 
-    // Activate Bootstrap scrollspy on the main nav element
-    const mainNav = document.body.querySelector('#mainNav');
-    if (mainNav) {
-        new bootstrap.ScrollSpy(document.body, {
-            target: '#mainNav',
-            rootMargin: '0px 0px -40%',
-        });
-    };
-
-    // Collapse responsive navbar when toggler is visible
-    const navbarToggler = document.body.querySelector('.navbar-toggler');
-    const responsiveNavItems = [].slice.call(
-        document.querySelectorAll('#navbarResponsive .nav-link')
-    );
-    responsiveNavItems.map(function (responsiveNavItem) {
-        responsiveNavItem.addEventListener('click', () => {
-            if (window.getComputedStyle(navbarToggler).display !== 'none') {
-                navbarToggler.click();
-            }
-        });
+        deleteBtn.dataset.index = idx;
+      });
     });
+  }
 
+  deleteBtn.addEventListener("click", () => {
+    const idx = parseInt(deleteBtn.dataset.index);
+    if (isNaN(idx)) return;
+    if (
+      confirm(`Are you sure you want to delete "${butterflies[idx].name}"?`)
+    ) {
+      butterflies.splice(idx, 1);
+      saveButterflies();
+      renderButterflies(butterflies);
+      bootstrap.Modal.getInstance(
+        document.getElementById("butterflyModal")
+      ).hide();
+    }
+  });
+
+  renderButterflies(butterflies);
+
+  const searchInput = document.getElementById("searchInput");
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase();
+    const filtered = butterflies.filter((b) =>
+      b.name.toLowerCase().includes(query)
+    );
+    renderButterflies(filtered);
+  });
+
+  document
+    .getElementById("addButterflyForm")
+    .addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newB = {
+        name: document.getElementById("newName").value,
+        scientific: document.getElementById("newScientific").value,
+        sex: document.getElementById("newSex").value,
+        description: document.getElementById("newDescription").value,
+        tags: document.getElementById("newTags").value,
+        image:
+          document.getElementById("newImage").value ||
+          "assets/img/noimage.jpg",
+      };
+      butterflies.push(newB);
+
+      saveButterflies();
+
+      renderButterflies(butterflies);
+
+      e.target.reset();
+      const modalEl = document.getElementById("addButterflyModal");
+      bootstrap.Modal.getInstance(modalEl).hide();
+    });
 });
