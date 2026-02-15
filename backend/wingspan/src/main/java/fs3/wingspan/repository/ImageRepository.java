@@ -5,7 +5,7 @@ import fs3.wingspan.model.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
-    Image findByPath(String path);
+    Image findById(Integer id);
     boolean existsByPath(String path);
-    Image findImageByTag(String tag);
+    Image findImageByTag(Tag tag);
 }
