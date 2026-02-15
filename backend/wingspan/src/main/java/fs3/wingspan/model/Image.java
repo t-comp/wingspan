@@ -16,10 +16,10 @@ public class Image {
     @Column(name = "id")
     private int id;
 
-//    @ManyToOne()
-//    @JoinColumn(name="species_id")
-//    @JsonIgnore
-//    private Species species;
+    @ManyToOne()
+    @JoinColumn(name="species_id")
+    @JsonIgnore
+    private Species species;
 
     @Column(name="filename")
     private String filename;
