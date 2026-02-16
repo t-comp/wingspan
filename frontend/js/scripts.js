@@ -1,5 +1,5 @@
 window.addEventListener("DOMContentLoaded", (event) => {
-  // 1. DATA INITIALIZATION
+  //---------------- DATA INITIALIZATION  ----------------//
   let butterflies = JSON.parse(localStorage.getItem("butterflies")) || [
     {
       name: "Monarch",
@@ -27,7 +27,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     },
   ];
 
-  // 2. ELEMENT SELECTORS
+  //---------------- ELEMENT SELECTORS ----------------//
   const deleteBtn = document.getElementById("deleteButterflyBtn");
   const uploadBtn = document.getElementById("uploadBtn");
   const loginForm = document.getElementById("loginForm");
@@ -35,11 +35,13 @@ window.addEventListener("DOMContentLoaded", (event) => {
   const searchInput = document.getElementById("searchInput");
   const addForm = document.getElementById("addButterflyForm");
 
-  // 3. CORE FUNCTIONS
+  //---------------- CORE FUNCTIONS ----------------//
+
   function saveButterflies() {
     localStorage.setItem("butterflies", JSON.stringify(butterflies));
   }
 
+  // UPDATED RENDER FUNCTION
   function renderButterflies(list) {
     const grid = document.getElementById("butterflyGrid");
     grid.innerHTML = "";
@@ -47,12 +49,14 @@ window.addEventListener("DOMContentLoaded", (event) => {
     list.forEach((b, idx) => {
       const col = document.createElement("div");
       col.className = "col-md-6 col-lg-4 mb-5";
+
+      // We removed <div class="card-body"> and added <div class="butterfly-overlay">
       col.innerHTML = `
       <div class="card h-100 butterfly-card" 
            data-bs-toggle="modal" data-bs-target="#butterflyModal">
-        <img src="${b.image}" class="card-img-top" alt="${b.name}">
-        <div class="card-body">
-          <h5 class="card-title">${b.name}</h5>
+        <img src="${b.image}" alt="${b.name}">
+        <div class="butterfly-overlay">
+            <div class="butterfly-name-hover">${b.name}</div>
         </div>
       </div>`;
       grid.appendChild(col);
@@ -74,7 +78,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     });
   }
 
-  // 4. EVENT LISTENERS
+  //---------------- EVENT LISTENERS ----------------//
 
   // Admin Login Logic
   loginForm.addEventListener("submit", (e) => {
@@ -117,7 +121,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     renderButterflies(filtered);
   });
 
-  // Add Butterfly Logic
+  // Butterfly Logic
   addForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const newB = {
@@ -139,14 +143,29 @@ window.addEventListener("DOMContentLoaded", (event) => {
   });
 
   // Dark Mode Logic
+  // --- UPDATED DARK MODE LOGIC ---
   themeToggle.addEventListener("click", () => {
     const body = document.body;
+    const modals = document.querySelectorAll(".modal-content"); // Select all pop-ups
+
     if (body.getAttribute("data-bs-theme") === "dark") {
+      // Switch to LIGHT
       body.setAttribute("data-bs-theme", "light");
       body.classList.remove("bg-dark", "text-white");
+
+      // Reset modals to light mode
+      modals.forEach((modal) => {
+        modal.classList.remove("bg-dark", "text-white", "border-secondary");
+      });
     } else {
+      // Switch to DARK
       body.setAttribute("data-bs-theme", "dark");
       body.classList.add("bg-dark", "text-white");
+
+      // Make modals dark and add a subtle border so they pop
+      modals.forEach((modal) => {
+        modal.classList.add("bg-dark", "text-white", "border-secondary");
+      });
     }
   });
 
