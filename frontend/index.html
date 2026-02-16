@@ -155,70 +155,6 @@
       </div>
     </nav>
 
-    <!-- <nav class="navbar navbar-light bg-light">
-      <div class="container d-flex flex-row align-items-center">
-        <input
-          id="searchInput"
-          class="form-control me-2"
-          type="search"
-          placeholder="Search butterflies..."
-          aria-label="Search"
-          style="flex: 1"
-        />
-
-        <button id="filterBtn" class="btn btn-outline-secondary me-2">
-          Filter
-        </button>
-
-        <div class="dropdown">
-          <button
-            class="btn btn-outline-secondary dropdown-toggle"
-            type="button"
-            id="settingsDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            <i class="fas fa-cog"></i> Settings
-          </button>
-          <ul
-            class="dropdown-menu dropdown-menu-end"
-            aria-labelledby="settingsDropdown"
-          >
-            <li>
-              <a
-                class="dropdown-item"
-                href="#"
-                data-bs-toggle="modal"
-                data-bs-target="#loginModal"
-                id="adminLoginBtn"
-                >Admin Login</a
-              >
-            </li>
-            <li>
-              <a class="dropdown-item d-none" href="#" id="adminLogoutLink"
-                >Logout Admin</a
-              >
-            </li>
-            <li><hr class="dropdown-divider" /></li>
-            <li>
-              <a class="dropdown-item" href="#" id="toggleTheme"
-                >Toggle Light/Dark Mode</a
-              >
-            </li>
-          </ul>
-        </div>
-
-        <button
-          id="uploadBtn"
-          class="btn btn-outline-primary ms-2 d-none"
-          data-bs-toggle="modal"
-          data-bs-target="#addButterflyModal"
-        >
-          Upload
-        </button>
-      </div>
-    </nav> -->
-
     <!-- Portfolio Section-->
     <section class="page-section portfolio" id="portfolio">
       <div class="container">
@@ -254,6 +190,7 @@
 
     <!-- Modals for Butterfly-->
     <!-- Individual Butterfly-->
+
     <div
       class="modal fade"
       id="butterflyModal"
@@ -261,10 +198,12 @@
       aria-labelledby="butterflyModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="butterflyModalLabel">Butterfly Name</h5>
+          <div class="modal-header border-0 pb-0">
+            <h3 class="modal-title fw-bold" id="butterflyModalLabel">
+              Butterfly Name
+            </h3>
             <button
               type="button"
               class="btn-close"
@@ -272,34 +211,166 @@
               aria-label="Close"
             ></button>
           </div>
+
           <div class="modal-body">
-            <img
-              id="butterflyModalImage"
-              src=""
-              class="img-fluid mb-3"
-              alt=""
-            />
-            <p>
-              <strong>Scientific Name:</strong>
-              <span id="butterflyModalScientific"></span>
-            </p>
-            <p><strong>Sex:</strong> <span id="butterflyModalSex"></span></p>
-            <p><strong>Description:</strong></p>
-            <p id="butterflyModalDescription"></p>
-            <p><strong>Tags:</strong> <span id="butterflyModalTags"></span></p>
+            <div
+              class="text-center mb-4 bg-light rounded p-2"
+              id="imgContainer"
+            >
+              <img
+                id="butterflyModalImage"
+                src=""
+                class="img-fluid rounded shadow-sm"
+                alt=""
+                style="max-height: 500px; object-fit: contain"
+              />
+            </div>
+
+            <div class="row g-4">
+              <div class="col-lg-7 border-end-lg">
+                <h5 class="text-primary mb-3">
+                  <i class="fas fa-info-circle"></i> Insect Details
+                </h5>
+
+                <div class="row mb-3">
+                  <div class="col-sm-6">
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">
+                      Scientific Name
+                    </p>
+                    <p
+                      class="fs-5 fst-italic"
+                      id="butterflyModalScientific"
+                    ></p>
+                  </div>
+                  <div class="col-sm-6">
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">
+                      Lifecycle Stage
+                    </p>
+                    <p class="fs-5" id="butterflyModalLifecycle"></p>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-sm-6">
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">
+                      Sex
+                    </p>
+                    <p class="fs-5" id="butterflyModalSex"></p>
+                  </div>
+                  <div class="col-sm-6">
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">
+                      Tags
+                    </p>
+                    <p id="butterflyModalTags"></p>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <p class="mb-1 text-muted small text-uppercase fw-bold">
+                    Description
+                  </p>
+                  <p id="butterflyModalDescription"></p>
+                </div>
+              </div>
+
+              <div class="col-lg-5">
+                <div
+                  class="p-4 bg-light border rounded h-100"
+                  id="apiContainer"
+                >
+                  <h5 class="text-success mb-3">
+                    <i class="fas fa-code"></i> Image & API Information
+                  </h5>
+
+                  <div class="mb-3">
+                    <label class="small text-muted fw-bold text-uppercase"
+                      >ID</label
+                    >
+                    <div
+                      class="font-monospace bg-white border rounded p-2 text-dark"
+                      id="butterflyModalId"
+                    ></div>
+                  </div>
+
+                  <hr />
+
+                  <h6 class="small text-muted fw-bold text-uppercase mb-3">
+                    Available Resolutions
+                  </h6>
+                  <ul class="list-group list-group-flush small mb-4 rounded">
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
+                    >
+                      <strong>Original:</strong>
+                      <span
+                        class="font-monospace"
+                        id="butterflyModalImgSize"
+                      ></span>
+                    </li>
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
+                    >
+                      <strong>Large:</strong>
+                      <span
+                        class="font-monospace"
+                        id="butterflyModalLargeSize"
+                      ></span>
+                    </li>
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
+                    >
+                      <strong>Medium:</strong>
+                      <span
+                        class="font-monospace"
+                        id="butterflyModalMediumSize"
+                      ></span>
+                    </li>
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
+                    >
+                      <strong>Small:</strong>
+                      <span
+                        class="font-monospace"
+                        id="butterflyModalSmallSize"
+                      ></span>
+                    </li>
+                  </ul>
+
+                  <div class="mb-2">
+                    <label class="small text-muted fw-bold text-uppercase"
+                      >API Endpoint</label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        class="form-control font-monospace form-control-sm"
+                        id="butterflyModalAPI"
+                        readonly
+                      />
+                      <button
+                        class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                      >
+                        <i class="far fa-copy"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="modal-footer">
+          <div class="modal-footer border-0">
             <button
               type="button"
               class="btn btn-danger d-none"
               id="deleteButterflyBtn"
             >
-              Delete
+              Delete Insect
             </button>
             <button
               type="button"
-              class="btn btn-secondary"
+              class="btn btn-secondary px-4"
               data-bs-dismiss="modal"
             >
               Close
@@ -308,6 +379,7 @@
         </div>
       </div>
     </div>
+
     <!-- Butterfly Popup-->
     <div
       class="modal fade"
