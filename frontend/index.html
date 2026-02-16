@@ -72,7 +72,80 @@
       </div>
     </header>
 
-    <nav class="navbar navbar-light bg-light">
+    <nav class="navbar navbar-light bg-light py-3 shadow-sm">
+      <div class="container d-flex flex-row align-items-center">
+        <div class="input-group me-3" style="flex: 2">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="fas fa-search text-muted"></i>
+          </span>
+          <input
+            id="searchInput"
+            class="form-control border-start-0 ps-0"
+            type="search"
+            placeholder="Search butterflies..."
+            aria-label="Search"
+          />
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <button id="filterBtn" class="btn btn-custom btn-filter">
+            <i class="fas fa-filter"></i> Filter
+          </button>
+
+          <div class="dropdown">
+            <button
+              class="btn btn-custom btn-settings dropdown-toggle"
+              type="button"
+              id="settingsDropdown"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="fas fa-cog"></i> Settings
+            </button>
+            <ul
+              class="dropdown-menu dropdown-menu-end shadow border-0"
+              aria-labelledby="settingsDropdown"
+            >
+              <li>
+                <a
+                  class="dropdown-item py-2"
+                  href="#"
+                  data-bs-toggle="modal"
+                  data-bs-target="#loginModal"
+                  id="adminLoginBtn"
+                  >Admin Login</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item d-none py-2 text-danger"
+                  href="#"
+                  id="adminLogoutLink"
+                  >Logout Admin</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item py-2" href="#" id="toggleTheme"
+                  >Toggle Light/Dark Mode</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <button
+            id="uploadBtn"
+            class="btn btn-custom btn-upload d-none"
+            data-bs-toggle="modal"
+            data-bs-target="#addButterflyModal"
+          >
+            <i class="fas fa-plus"></i> Upload
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- <nav class="navbar navbar-light bg-light">
       <div class="container d-flex flex-row align-items-center">
         <input
           id="searchInput"
@@ -107,14 +180,19 @@
                 href="#"
                 data-bs-toggle="modal"
                 data-bs-target="#loginModal"
-                id="adminLoginLink"
+                id="adminLoginBtn"
                 >Admin Login</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item d-none" href="#" id="adminLogoutLink"
+                >Logout Admin</a
               >
             </li>
             <li><hr class="dropdown-divider" /></li>
             <li>
               <a class="dropdown-item" href="#" id="toggleTheme"
-                >Toggle Dark Mode</a
+                >Toggle Light/Dark Mode</a
               >
             </li>
           </ul>
@@ -129,7 +207,7 @@
           Upload
         </button>
       </div>
-    </nav>
+    </nav> -->
 
     <!-- Portfolio Section-->
     <section class="page-section portfolio" id="portfolio">

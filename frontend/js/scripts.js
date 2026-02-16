@@ -34,6 +34,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
   const themeToggle = document.getElementById("toggleTheme");
   const searchInput = document.getElementById("searchInput");
   const addForm = document.getElementById("addButterflyForm");
+  const adminLoginBtn = document.getElementById("adminLoginBtn");
+  const adminLogoutLink = document.getElementById("adminLogoutLink");
 
   //---------------- CORE FUNCTIONS ----------------//
 
@@ -50,17 +52,32 @@ window.addEventListener("DOMContentLoaded", (event) => {
       const col = document.createElement("div");
       col.className = "col-md-6 col-lg-4 mb-5";
 
-      // We removed <div class="card-body"> and added <div class="butterfly-overlay">
+      // Create Tag Badges
+      // This splits "blue, tropical" into separate little pill shapes
+      const tagsHtml = (b.tags || "")
+        .split(",")
+        .map(
+          (tag) =>
+            `<span class="badge rounded-pill bg-light text-dark border me-1">${tag.trim()}</span>`,
+        )
+        .join("");
+
       col.innerHTML = `
-      <div class="card h-100 butterfly-card" 
+      <div class="card h-100 butterfly-card border-0 shadow-sm" 
            data-bs-toggle="modal" data-bs-target="#butterflyModal">
-        <img src="${b.image}" alt="${b.name}">
-        <div class="butterfly-overlay">
-            <div class="butterfly-name-hover">${b.name}</div>
+        
+        <div class="butterfly-img-wrapper">
+            <img src="${b.image}" alt="${b.name}">
+        </div>
+
+        <div class="card-body">
+            <h5 class="card-title fw-bold mb-2">${b.name}</h5>
+            <div class="mb-2">${tagsHtml}</div>
         </div>
       </div>`;
       grid.appendChild(col);
 
+      // Event Listener for Modal
       const card = col.querySelector(".butterfly-card");
       card.addEventListener("click", () => {
         document.getElementById("butterflyModalLabel").innerText = b.name;
@@ -71,8 +88,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
           b.description;
         document.getElementById("butterflyModalTags").innerText = b.tags;
         document.getElementById("butterflyModalImage").src = b.image;
-
-        // Attach index to the delete button
         deleteBtn.dataset.index = idx;
       });
     });
@@ -80,7 +95,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   //---------------- EVENT LISTENERS ----------------//
 
-  // Admin Login Logic
+  // --- ADMIN LOGIN LOGIC ---
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const user = document.getElementById("adminUser").value;
@@ -88,12 +103,34 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
     if (user === "admin" && pass === "123") {
       alert("Welcome, Admin! Edit mode enabled.");
-      uploadBtn.classList.remove("d-none"); // Reveal Upload
-      deleteBtn.classList.remove("d-none"); // Reveal Delete
+
+      // Reveal Admin features
+      uploadBtn.classList.remove("d-none");
+      deleteBtn.classList.remove("d-none");
+
+      // SWAP DROPDOWN ITEMS: Hide Login, Show Logout
+      adminLoginBtn.classList.add("d-none");
+      adminLogoutLink.classList.remove("d-none");
+
       bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+      e.target.reset();
     } else {
       alert("Invalid credentials!");
     }
+  });
+
+  // --- ADMIN LOGOUT LOGIC ---
+  adminLogoutLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    alert("Logged out. Admin features disabled.");
+
+    // Hide Admin features
+    uploadBtn.classList.add("d-none");
+    deleteBtn.classList.add("d-none");
+
+    // SWAP DROPDOWN ITEMS BACK: Show Login, Hide Logout
+    adminLoginBtn.classList.remove("d-none");
+    adminLogoutLink.classList.add("d-none");
   });
 
   // Delete Butterfly Logic
