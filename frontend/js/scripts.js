@@ -1,5 +1,7 @@
 window.addEventListener("DOMContentLoaded", (event) => {
-  //---------------- DATA INITIALIZATION  ----------------//
+  /* =========================================
+     1. DATA INITIALIZATION
+     ========================================= */
   let butterflies = JSON.parse(localStorage.getItem("butterflies")) || [
     {
       name: "Monarch",
@@ -27,23 +29,29 @@ window.addEventListener("DOMContentLoaded", (event) => {
     },
   ];
 
-  //---------------- ELEMENT SELECTORS ----------------//
+  /* =========================================
+     2. ELEMENT SELECTORS
+     ========================================= */
+  // Buttons & Links
   const deleteBtn = document.getElementById("deleteButterflyBtn");
   const uploadBtn = document.getElementById("uploadBtn");
-  const loginForm = document.getElementById("loginForm");
-  const themeToggle = document.getElementById("toggleTheme");
-  const searchInput = document.getElementById("searchInput");
-  const addForm = document.getElementById("addButterflyForm");
   const adminLoginBtn = document.getElementById("adminLoginBtn");
   const adminLogoutLink = document.getElementById("adminLogoutLink");
+  const themeToggle = document.getElementById("toggleTheme");
 
-  //---------------- CORE FUNCTIONS ----------------//
+  // Forms & Inputs
+  const loginForm = document.getElementById("loginForm");
+  const addForm = document.getElementById("addButterflyForm");
+  const searchInput = document.getElementById("searchInput");
+
+  /* =========================================
+     3. CORE FUNCTIONS
+     ========================================= */
 
   function saveButterflies() {
     localStorage.setItem("butterflies", JSON.stringify(butterflies));
   }
 
-  // UPDATED RENDER FUNCTION
   function renderButterflies(list) {
     const grid = document.getElementById("butterflyGrid");
     grid.innerHTML = "";
@@ -53,7 +61,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
       col.className = "col-md-6 col-lg-4 mb-5";
 
       // Create Tag Badges
-      // This splits "blue, tropical" into separate little pill shapes
       const tagsHtml = (b.tags || "")
         .split(",")
         .map(
@@ -93,9 +100,11 @@ window.addEventListener("DOMContentLoaded", (event) => {
     });
   }
 
-  //---------------- EVENT LISTENERS ----------------//
+  /* =========================================
+     4. EVENT LISTENERS: AUTHENTICATION
+     ========================================= */
 
-  // --- ADMIN LOGIN LOGIC ---
+  // Admin Login
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const user = document.getElementById("adminUser").value;
@@ -119,7 +128,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     }
   });
 
-  // --- ADMIN LOGOUT LOGIC ---
+  // Admin Logout
   adminLogoutLink.addEventListener("click", (e) => {
     e.preventDefault();
     alert("Logged out. Admin features disabled.");
@@ -133,32 +142,11 @@ window.addEventListener("DOMContentLoaded", (event) => {
     adminLogoutLink.classList.add("d-none");
   });
 
-  // Delete Butterfly Logic
-  deleteBtn.addEventListener("click", () => {
-    const idx = parseInt(deleteBtn.dataset.index);
-    if (isNaN(idx)) return;
-    if (
-      confirm(`Are you sure you want to delete "${butterflies[idx].name}"?`)
-    ) {
-      butterflies.splice(idx, 1);
-      saveButterflies();
-      renderButterflies(butterflies);
-      bootstrap.Modal.getInstance(
-        document.getElementById("butterflyModal"),
-      ).hide();
-    }
-  });
+  /* =========================================
+     5. EVENT LISTENERS: DATA MANAGEMENT
+     ========================================= */
 
-  // Search Logic
-  searchInput.addEventListener("input", () => {
-    const query = searchInput.value.toLowerCase();
-    const filtered = butterflies.filter((b) =>
-      b.name.toLowerCase().includes(query),
-    );
-    renderButterflies(filtered);
-  });
-
-  // Butterfly Logic
+  // Add New Butterfly
   addForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const newB = {
@@ -179,8 +167,36 @@ window.addEventListener("DOMContentLoaded", (event) => {
     ).hide();
   });
 
+  // Delete Butterfly
+  deleteBtn.addEventListener("click", () => {
+    const idx = parseInt(deleteBtn.dataset.index);
+    if (isNaN(idx)) return;
+    if (
+      confirm(`Are you sure you want to delete "${butterflies[idx].name}"?`)
+    ) {
+      butterflies.splice(idx, 1);
+      saveButterflies();
+      renderButterflies(butterflies);
+      bootstrap.Modal.getInstance(
+        document.getElementById("butterflyModal"),
+      ).hide();
+    }
+  });
+
+  /* =========================================
+     6. EVENT LISTENERS: UI & INTERACTION
+     ========================================= */
+
+  // Search Logic
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase();
+    const filtered = butterflies.filter((b) =>
+      b.name.toLowerCase().includes(query),
+    );
+    renderButterflies(filtered);
+  });
+
   // Dark Mode Logic
-  // --- UPDATED DARK MODE LOGIC ---
   themeToggle.addEventListener("click", () => {
     const body = document.body;
     const modals = document.querySelectorAll(".modal-content"); // Select all pop-ups
@@ -206,6 +222,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
     }
   });
 
-  // INITIAL RENDER
+  /* =========================================
+     7. INITIAL RENDER
+     ========================================= */
   renderButterflies(butterflies);
 });

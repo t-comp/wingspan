@@ -1,5 +1,5 @@
 /* =========================================
-   1. PROFESSIONAL CARD STYLING
+   PROFESSIONAL CARD STYLING
    ========================================= */
 
 /* The Card Container */
@@ -42,7 +42,7 @@
 }
 
 /* =========================================
-   2. CUSTOM BUTTONS (NAVBAR)
+   CUSTOM BUTTONS (NAVBAR)
    ========================================= */
 
 /* General Button Shape */
@@ -101,23 +101,37 @@
 
 
 /* =========================================
-   3. SEARCH BAR STYLING
+   SEARCH BAR STYLING
    ========================================= */
 
 /* Left Icon Container */
 .input-group-text {
     border-radius: 50px 0 0 50px;
+    border-right: none; /* Remove separator line */
+    transition: border-color 0.3s ease;
 }
 
 /* Input Field */
 #searchInput {
     border-radius: 0 50px 50px 0;
-    box-shadow: none !important;
-    padding-left: 15px !important; 
+    border-left: none; /* Remove separator line */
+    box-shadow: none !important; /* Turn off default Bootstrap shadow */
+    padding-left: 15px !important; /* Text sits closer to icon since border is gone */
+    transition: border-color 0.3s ease;
 }
 
-#searchInput:focus {
-    border-color: #1abc9c;
+/* --- THE "ALL AROUND" GLOW FIX --- */
+/* When the user clicks the input, light up BOTH the icon and the input */
+
+.input-group:focus-within .input-group-text,
+.input-group:focus-within #searchInput {
+    border-color: #1abc9c !important; /* Turn borders Teal */
+}
+
+.input-group:focus-within {
+    border-radius: 50px;
+    /* This creates the fuzzy green glow around the WHOLE pill */
+    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25); 
 }
 
 /* Custom 'X' Clear Button */
@@ -134,7 +148,7 @@
 
 
 /* =========================================
-   4. DARK MODE OVERRIDES
+   DARK MODE OVERRIDES
    ========================================= */
 
 /* Dark Mode Card Background */
@@ -157,21 +171,34 @@
     border-bottom: 1px solid #34495e;
 }
 
-/* Search Bar (Dark Mode) */
+/* --- SEARCH BAR (DARK MODE FIX) --- */
+
+/* 1. Base State: Grey Borders & Dark Background */
 [data-bs-theme="dark"] .input-group-text {
     background-color: #34495e !important;
-    border-color: #495057 !important;
+    border-color: #495057; /* Removed !important so focus can override */
     color: #ffffff !important;
 }
 
 [data-bs-theme="dark"] #searchInput {
     background-color: #2c3e50 !important;
-    border-color: #495057 !important;
+    border-color: #495057; /* Removed !important so focus can override */
     color: #ffffff !important;
 }
 
 [data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button {
     filter: brightness(1.5); /* Lighten the grey X */
+}
+
+/* 2. Focus State: Force Teal Border & Glow when clicking inside */
+[data-bs-theme="dark"] .input-group:focus-within .input-group-text,
+[data-bs-theme="dark"] .input-group:focus-within #searchInput {
+    border-color: #1abc9c !important; /* Force Teal Border */
+}
+
+[data-bs-theme="dark"] .input-group:focus-within {
+    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.4) !important; /* Teal Glow */
+    border-radius: 50px;
 }
 
 /* Buttons (Dark Mode) */
