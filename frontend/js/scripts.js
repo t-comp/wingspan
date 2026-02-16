@@ -1,4 +1,5 @@
 window.addEventListener("DOMContentLoaded", (event) => {
+  // 1. DATA INITIALIZATION
   let butterflies = JSON.parse(localStorage.getItem("butterflies")) || [
     {
       name: "Monarch",
@@ -26,11 +27,18 @@ window.addEventListener("DOMContentLoaded", (event) => {
     },
   ];
 
+  // 2. ELEMENT SELECTORS
+  const deleteBtn = document.getElementById("deleteButterflyBtn");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const loginForm = document.getElementById("loginForm");
+  const themeToggle = document.getElementById("toggleTheme");
+  const searchInput = document.getElementById("searchInput");
+  const addForm = document.getElementById("addButterflyForm");
+
+  // 3. CORE FUNCTIONS
   function saveButterflies() {
     localStorage.setItem("butterflies", JSON.stringify(butterflies));
   }
-
-  const deleteBtn = document.getElementById("deleteButterflyBtn");
 
   function renderButterflies(list) {
     const grid = document.getElementById("butterflyGrid");
@@ -41,12 +49,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
       col.className = "col-md-6 col-lg-4 mb-5";
       col.innerHTML = `
       <div class="card h-100 butterfly-card" 
-           data-name="${b.name}" 
-           data-scientific="${b.scientific}" 
-           data-sex="${b.sex}" 
-           data-description="${b.description}" 
-           data-tags="${b.tags}" 
-           data-image="${b.image}"
            data-bs-toggle="modal" data-bs-target="#butterflyModal">
         <img src="${b.image}" class="card-img-top" alt="${b.name}">
         <div class="card-body">
@@ -66,11 +68,31 @@ window.addEventListener("DOMContentLoaded", (event) => {
         document.getElementById("butterflyModalTags").innerText = b.tags;
         document.getElementById("butterflyModalImage").src = b.image;
 
+        // Attach index to the delete button
         deleteBtn.dataset.index = idx;
       });
     });
   }
 
+  // 4. EVENT LISTENERS
+
+  // Admin Login Logic
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const user = document.getElementById("adminUser").value;
+    const pass = document.getElementById("adminPass").value;
+
+    if (user === "admin" && pass === "123") {
+      alert("Welcome, Admin! Edit mode enabled.");
+      uploadBtn.classList.remove("d-none"); // Reveal Upload
+      deleteBtn.classList.remove("d-none"); // Reveal Delete
+      bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+    } else {
+      alert("Invalid credentials!");
+    }
+  });
+
+  // Delete Butterfly Logic
   deleteBtn.addEventListener("click", () => {
     const idx = parseInt(deleteBtn.dataset.index);
     if (isNaN(idx)) return;
@@ -81,44 +103,53 @@ window.addEventListener("DOMContentLoaded", (event) => {
       saveButterflies();
       renderButterflies(butterflies);
       bootstrap.Modal.getInstance(
-        document.getElementById("butterflyModal")
+        document.getElementById("butterflyModal"),
       ).hide();
     }
   });
 
-  renderButterflies(butterflies);
-
-  const searchInput = document.getElementById("searchInput");
+  // Search Logic
   searchInput.addEventListener("input", () => {
     const query = searchInput.value.toLowerCase();
     const filtered = butterflies.filter((b) =>
-      b.name.toLowerCase().includes(query)
+      b.name.toLowerCase().includes(query),
     );
     renderButterflies(filtered);
   });
 
-  document
-    .getElementById("addButterflyForm")
-    .addEventListener("submit", (e) => {
-      e.preventDefault();
-      const newB = {
-        name: document.getElementById("newName").value,
-        scientific: document.getElementById("newScientific").value,
-        sex: document.getElementById("newSex").value,
-        description: document.getElementById("newDescription").value,
-        tags: document.getElementById("newTags").value,
-        image:
-          document.getElementById("newImage").value ||
-          "assets/img/noimage.jpg",
-      };
-      butterflies.push(newB);
+  // Add Butterfly Logic
+  addForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const newB = {
+      name: document.getElementById("newName").value,
+      scientific: document.getElementById("newScientific").value,
+      sex: document.getElementById("newSex").value,
+      description: document.getElementById("newDescription").value,
+      tags: document.getElementById("newTags").value,
+      image:
+        document.getElementById("newImage").value || "assets/img/noimage.jpg",
+    };
+    butterflies.push(newB);
+    saveButterflies();
+    renderButterflies(butterflies);
+    e.target.reset();
+    bootstrap.Modal.getInstance(
+      document.getElementById("addButterflyModal"),
+    ).hide();
+  });
 
-      saveButterflies();
+  // Dark Mode Logic
+  themeToggle.addEventListener("click", () => {
+    const body = document.body;
+    if (body.getAttribute("data-bs-theme") === "dark") {
+      body.setAttribute("data-bs-theme", "light");
+      body.classList.remove("bg-dark", "text-white");
+    } else {
+      body.setAttribute("data-bs-theme", "dark");
+      body.classList.add("bg-dark", "text-white");
+    }
+  });
 
-      renderButterflies(butterflies);
-
-      e.target.reset();
-      const modalEl = document.getElementById("addButterflyModal");
-      bootstrap.Modal.getInstance(modalEl).hide();
-    });
+  // INITIAL RENDER
+  renderButterflies(butterflies);
 });
