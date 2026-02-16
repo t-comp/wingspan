@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,7 +41,7 @@ public class Image {
     private String fpath;
 
     @Column(name="fisize")
-    private int fisize;
+    private BigInteger fisize;
 
     @Column(name="width")
     private int width;
@@ -61,10 +62,7 @@ public class Image {
 
     }
 
-    public Image(String filename, String fpath, int fisize, int width, int height, String lifecycle_stage, String description, String nathans_notes) {
-        this.filename = filename;
-        this.fpath = fpath;
-        this.fisize = fisize;
+    public Image(int width, int height, String lifecycle_stage, String description, String nathans_notes) {
         this.width = width;
         this.height = height;
         this.lifecycle_stage = lifecycle_stage;
