@@ -1,15 +1,21 @@
 package fs3.wingspan.controller;
 
+import fs3.wingspan.dto.ImageDTO;
+import fs3.wingspan.dto.ImageResponse;
 import fs3.wingspan.model.*;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.UserRepository;
+import fs3.wingspan.services.ImageStorageService;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,103 +26,97 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/images")
+@Validated
 public class ImageController {
 
     @Autowired
-    ImageRepository imageRepository;
-//    @Autowired
-//    private UserRepository userRepository;
+    private ImageRepository imageRepository;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    @Autowired
+    private ImageStorageService imageStorageService;  //-> something for later: Separate service layer
 
     /**
      * Upload a new image
      * POST /admin/upload-image
      */
-    @PostMapping("/admin/upload-image")
-    public String uploadImage(@RequestParam("file") MultipartFile file, @RequestBody Image newImage){
-        try {
-            String filePath = saveImage(file);
-            String filename = file.getOriginalFilename();
-            BigInteger fsize = BigInteger.valueOf(file.getSize());
-            newImage.setFilename(filename);
-            newImage.setFpath(filePath);
-            newImage.setFisize(fsize);
-            imageRepository.save(newImage);
-            return "New Image Saved!";
-        }catch(IOException e){
-            return "Internal Server Error";
+    @PostMapping(value = "/admin/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
+     @RequestParam(required = false) String life_cycle,
+     @RequestParam(required = false) String description,
+     @RequestParam(required = false) String nathansNotes){
+        // Validation
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "File is empty"));
         }
+
+       try{
+           //let service handle all business logic
+           Image savedImage = imageStorageService.saveImage(file, description, nathansNotes);
+
+           return ResponseEntity.status(HttpStatus.CREATED)
+                   .body(ImageDTO.fromImage(savedImage));
+       } catch (IOException e) {
+           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                   .body(Map.of("message", "Upload failed"));
+       }
     }
+
 
     /**
      * Extracts file path and returns it as a string
      *
      */
-    private String saveImage(MultipartFile file) throws IOException {
-        Path uploadPath = Paths.get(uploadDir);
-        if(!Files.exists(uploadPath)){
-            Files.createDirectories(uploadPath);
-        }
-
-        String filename = file.getOriginalFilename();
-        //in case filename is null
-        assert filename != null;
-        Path filePath = uploadPath.resolve(filename);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        return filePath.toString();
-    }
-
-    @GetMapping("/images/{filename}")
-    public ResponseEntity<Resource> getImage(@PathVariable String filename){
-        try{
-            Path filePath = Paths.get(uploadDir).resolve(filename);
-            Resource resource = (Resource) new UrlResource(filePath.toUri());
-
-            if(resource != null){
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            }else{
-                return ResponseEntity.notFound().build();
-            }
-        } catch (MalformedURLException e) {
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+//    private String saveImage(MultipartFile file) throws IOException {
+//        Path uploadPath = Paths.get(uploadDir);
+//        if(!Files.exists(uploadPath)){
+//            Files.createDirectories(uploadPath);
+//        }
+//
+//        String filename = file.getOriginalFilename();
+//        //in case filename is null
+//        assert filename != null;
+//        Path filePath = uploadPath.resolve(filename);
+//        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+//        return filePath.toString();
+//    }
 
     /**
      * Get image by image id
      * GET /{imageId}
      */
     @GetMapping("/{imageId}")
-    public String getImageByID(@PathVariable("imageId") Integer imageId) {
-        Image i = imageRepository.findById(imageId);
-        if(i != null) {
-            return i.getFpath();
+    public ResponseEntity<ImageDTO> getImageByID(@PathVariable Integer imageId) {
+        try {
+            Image i = imageStorageService.getImageById(imageId);
+            return ResponseEntity.ok(ImageDTO.fromImage(i));
+        }catch(RuntimeException e){
+            return ResponseEntity.notFound().build();
         }
-        return null;
     }
 
     /**
      * Delete image by image id
      * DELETE /admin/delete-image
      */
-    @DeleteMapping("/admin/delete-image")
-    public String deleteImage(@RequestParam("id") int id) {
-        Image i = imageRepository.findById(id);
-        if(i == null) {
-            return "Image not found";
+    @DeleteMapping("/admin/{imageId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteImage(@PathVariable Integer imageId) {
+        try{
+            imageStorageService.deleteImage(imageId);
+            return ResponseEntity.ok(Map.of("message", "Image deleted"));
+        }catch(RuntimeException e){
+            return ResponseEntity.notFound().build();
+        }catch (IOException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Delete failed"));
         }
-
-        int imageId = i.getId();
-        imageRepository.delete(i);
-        return "Image: " + imageId + " deleted successfully";
-
 
     }
 
@@ -125,38 +125,27 @@ public class ImageController {
      * Delete all images
      * DELETE /admin/delete-all-images
      */
-    @DeleteMapping("/admin/delete-all-images")
-    public String deleteAllImages() {
-        imageRepository.deleteAll();
-        return "All images deleted";
-    }
-
-    /**
-     * Edit the image description
-     * POST /admin/edit-description
-     */
-    @PutMapping("/admin/edit-description")
-    public String editImage(@RequestParam int id, @RequestParam String newDescription) {
-        Image i = imageRepository.findById(id);
-        if(i != null) {
-            i.setDescription(newDescription);
-            return "Image updated successfully";
-        }
-        return "Image not found";
-    }
+//    @DeleteMapping("/admin/delete-all-images")
+//    public String deleteAllImages() {
+//        imageRepository.deleteAll();
+//        return "All images deleted";
+//    }
 
     /**
      * Edit the image nathans notes
      * POST /admin/edit-nathans_notes
      */
-    @PutMapping("/admin/edit-nathans_notes")
-    public String editNotes(@RequestParam int id, @RequestParam String newNotes) {
-        Image i = imageRepository.findById(id);
-        if(i != null) {
-            i.setNathans_notes(newNotes);
-            return "Image updated successfully";
+    @PatchMapping("/admin/{imageId}/description")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ImageDTO> updateDescription(@PathVariable int imageId,
+      @RequestParam String description,
+      @RequestParam(required = false) String nathansNotes) {
+        try{
+            Image updated = imageStorageService.updateImage(imageId, description, nathansNotes);
+            return ResponseEntity.ok(ImageDTO.fromImage(updated));
+        }catch(RuntimeException e){
+            return ResponseEntity.notFound().build();
         }
-        return "Image not found";
     }
 
 }
