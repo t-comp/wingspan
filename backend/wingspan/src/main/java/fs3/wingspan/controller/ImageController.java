@@ -133,7 +133,7 @@ public class ImageController {
 
     /**
      * Edit the image nathans notes
-     * POST /admin/edit-nathans_notes
+     * POST /admin/edit-nathansnotes
      */
     @PatchMapping("/admin/{imageId}/description")
     @PreAuthorize("hasRole('ADMIN')")

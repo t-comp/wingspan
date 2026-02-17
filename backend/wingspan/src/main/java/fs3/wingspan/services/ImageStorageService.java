@@ -45,7 +45,7 @@ public class ImageStorageService {
         image.setFpath(filePath);
         image.setFisize(BigInteger.valueOf(file.getSize()));
         image.setDescription(description);
-        image.setNathans_notes(nathansNotes);
+        image.setNathansnotes(nathansNotes);
 
         //extractImageDimensions(file, image);
 
@@ -109,7 +109,7 @@ public class ImageStorageService {
                 .orElseThrow(() -> new RuntimeException("Image not found"));
 
         image.setDescription(description);
-        image.setNathans_notes(nathansNotes);
+        image.setNathansnotes(nathansNotes);
         return imageRepository.save(image);
     }
 

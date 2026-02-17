@@ -1,7 +1,6 @@
 package fs3.wingspan.repository;
 
 import fs3.wingspan.model.Image;
-import fs3.wingspan.model.Tags;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,16 +13,16 @@ import java.util.Optional;
 public interface ImageRepository extends JpaRepository<Image, Integer> {
     Optional<Image> findByFilename(String filename);
 
-    List<Image> findBySpeciesID(Integer speciesID);
-    List<Image> findByLifecycleStage(String lifecycleStage);
+    List<Image> findBySpeciesId(Integer speciesId);
+    List<Image> findByLifecyclestage(String lifecyclestage);
     @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.id = :tagId")
     List<Image> findByTagId(@Param("tagId") Integer tagId);
 
     @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.category = :category")
     List<Image> findByTagCategory(@Param("category") String category);
 
-    @Query("SELECT i FROM Image i WHERE i.species.id = :speciesId AND i.lifecycle_stage = :stage")
-    List<Image> findBySpeciesAndLifecycleStage(
+    @Query("SELECT i FROM Image i WHERE i.species.id = :speciesId AND i.lifecyclestage = :stage")
+    List<Image> findBySpeciesAndLifecycle_stage(
             @Param("speciesId") Integer speciesId,
             @Param("stage") String stage
     );

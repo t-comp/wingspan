@@ -56,14 +56,14 @@ public class Image {
     @Column(name="height")
     private int height;
 
-    @Column(name="lifecycle_stage")
-    private String lifecycle_stage;
+    @Column(name="lifecyclestage")
+    private String lifecyclestage;
 
     @Column(name="description")
     private String description;
 
-    @Column(name="nathans_notes", columnDefinition = "TEXT")
-    private String nathans_notes;
+    @Column(name="nathansnotes", columnDefinition = "TEXT")
+    private String nathansnotes;
 
     public Image(){
 
@@ -72,9 +72,9 @@ public class Image {
     public Image(int width, int height, String lifecycle_stage, String description, String nathans_notes) {
         this.width = width;
         this.height = height;
-        this.lifecycle_stage = lifecycle_stage;
+        this.lifecyclestage = lifecycle_stage;
         this.description = description;
-        this.nathans_notes = nathans_notes;
+        this.nathansnotes = nathans_notes;
     }
 
     public void removeTag(Tags tag) {

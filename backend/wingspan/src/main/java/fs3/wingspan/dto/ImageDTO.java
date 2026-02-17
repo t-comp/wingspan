@@ -1,7 +1,6 @@
 package fs3.wingspan.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fs3.wingspan.model.Image;
 import lombok.*;
 
@@ -18,7 +17,7 @@ public class ImageDTO {
     private Integer fileSize;
     private int width;
     private int height;
-    private String lifecycle_stage;
+    private String lifecyclestage;
     private List<TagDTO> tags;
 
     public static ImageDTO fromImage(final Image image) {
@@ -26,7 +25,7 @@ public class ImageDTO {
                 .id(image.getId())
                 .filename(image.getFilename())
                 .description(image.getDescription())
-                .nathansNotes(image.getNathans_notes())
+                .nathansNotes(image.getNathansnotes())
                 .fileSize(image.getFisize() != null ? image.getFisize().intValue() : null)
                 .build();
     }
