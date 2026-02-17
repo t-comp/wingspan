@@ -36,7 +36,11 @@ public class APIKeysController {
             key.setExpiration(LocalDateTime.now().plusYears(1));
         }
         apiKeyRepository.save(key);
-        return "API key for team '" + key.getTeamName() + "' generated: " + kv;
+        return "API Key: " + kv +
+                "COPY THIS NOW! You will not be able to see it again." +
+                "Expires on: " + key.getExpiration();
+
+
     }
 
     /**

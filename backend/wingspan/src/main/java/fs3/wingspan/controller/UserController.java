@@ -33,7 +33,7 @@ public class UserController {
     public String createAccount(@RequestBody Users u) {
 
         // validate username
-        if (u.getUsername() == null || u.getUsername().length() < 7) {
+        if (u.getUsername() == null || u.getUsername().length() < 5) {
             return "Please make sure username is at least 5 characters.";
         }
         if (userRepository.existsByUsername(u.getUsername())) {
