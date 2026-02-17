@@ -45,7 +45,7 @@ public class ImageController {
      * POST /admin/upload-image
      */
     @PostMapping(value = "/admin/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
      @RequestParam(required = false) String life_cycle,
      @RequestParam(required = false) String description,
@@ -106,7 +106,7 @@ public class ImageController {
      * DELETE /admin/delete-image
      */
     @DeleteMapping("/admin/{imageId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteImage(@PathVariable Integer imageId) {
         try{
             imageStorageService.deleteImage(imageId);
@@ -136,7 +136,7 @@ public class ImageController {
      * POST /admin/edit-nathansnotes
      */
     @PatchMapping("/admin/{imageId}/description")
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ImageDTO> updateDescription(@PathVariable int imageId,
       @RequestParam String description,
       @RequestParam(required = false) String nathansNotes) {
