@@ -31,20 +31,35 @@ public class ImageStorageService {
      * Save image file to disk and metadata to database
      */
     @Transactional
-    public Image saveImage(MultipartFile file, String description, String nathansNotes) throws IOException {
+    public Image saveImage(MultipartFile file, String lifecycle_stage, String description, String nathansNotes) throws IOException {
         //generate unique filename to prevent collisions
         String originalFilename = file.getOriginalFilename();
-        String uniqueFilename = generateUniqueFilename(originalFilename);
+        log.info("Original filename received: {}", originalFilename);
 
-        //save physical file
-        String filePath = savePhysicalFile(file, uniqueFilename);
+        String extension = getFileExtension(originalFilename);
+        String safeFilename = getSafeFilename(originalFilename);
+
+
+        String uniqueFilename = UUID.randomUUID().toString()
+                + "_" + safeFilename
+                + extension;
+
+        Path uploadPath = Paths.get(uploadDir);
+        if(!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        Path filePath = uploadPath.resolve(uniqueFilename);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        log.info("File saved to: {}", filePath);
 
         //Create & save entity
         Image image = new Image();
         image.setFilename(uniqueFilename);
-        image.setFpath(filePath);
+        image.setFpath(filePath.toString());
         image.setFisize(BigInteger.valueOf(file.getSize()));
         image.setDescription(description);
+        image.setLifecyclestage(lifecycle_stage);
         image.setNathansnotes(nathansNotes);
 
         //extractImageDimensions(file, image);
@@ -141,4 +156,20 @@ public class ImageStorageService {
      * Possible later (extract image dimensions)
      * private void extractImageDimensions(MulitpartFile file, Image image)
      */
+    private String getFileExtension(String filename){
+        if(filename == null || filename.isEmpty() || !filename.contains(".")){
+            return "";
+        }
+
+        return "." + filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+    }
+
+    private String getSafeFilename(String originalFilename){
+        if(originalFilename == null || originalFilename.isEmpty()){
+            return "upload";
+        }
+
+        String nameWithoutExtension = originalFilename.substring(0, originalFilename.lastIndexOf("."));
+        return nameWithoutExtension.replaceAll("[^a-zA-Z0-9.-]", "_");
+    }
 }

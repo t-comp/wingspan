@@ -58,7 +58,7 @@ public class ImageController {
 
        try{
            //let service handle all business logic
-           Image savedImage = imageStorageService.saveImage(file, description, nathansNotes);
+           Image savedImage = imageStorageService.saveImage(file, life_cycle, description, nathansNotes);
 
            return ResponseEntity.status(HttpStatus.CREATED)
                    .body(ImageDTO.fromImage(savedImage));
