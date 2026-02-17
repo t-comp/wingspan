@@ -1,11 +1,31 @@
 package fs3.wingspan.repository;
 
 import fs3.wingspan.model.Image;
-import fs3.wingspan.model.Tags;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-public interface ImageRepository extends JpaRepository<Image, Long> {
-    Image findById(Integer id);
-    boolean existsByPath(String path);
-    Image findImageByTag(Tags tag);
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface ImageRepository extends JpaRepository<Image, Integer> {
+    Optional<Image> findByFilename(String filename);
+
+    List<Image> findBySpeciesId(Integer speciesId);
+    List<Image> findByLifecyclestage(String lifecyclestage);
+    @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.id = :tagId")
+    List<Image> findByTagId(@Param("tagId") Integer tagId);
+
+    @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.category = :category")
+    List<Image> findByTagCategory(@Param("category") String category);
+
+    @Query("SELECT i FROM Image i WHERE i.species.id = :speciesId AND i.lifecyclestage = :stage")
+    List<Image> findBySpeciesAndLifecycle_stage(
+            @Param("speciesId") Integer speciesId,
+            @Param("stage") String stage
+    );
+    boolean existsByFilename(String fileName);
+    long countBySpeciesId(Integer speciesID);
 }
