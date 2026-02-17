@@ -1,6 +1,6 @@
 package fs3.wingspan.controller;
 
-import fs3.wingspan.model.LoginInfo;
+import fs3.wingspan.dto.LoginInfoDTO;
 import fs3.wingspan.model.UType;
 import fs3.wingspan.model.Users;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -71,7 +71,7 @@ public class UserController {
      * POST /user/login
      */
     @PostMapping("/login")
-    public String login(@RequestBody LoginInfo info) {
+    public String login(@RequestBody LoginInfoDTO info) {
         if (info.getUsernameOrEmail() == null || info.getPassword() == null ||
                 info.getUsernameOrEmail().isEmpty() || info.getPassword().isEmpty()) {
             return "Please make sure you have entered your login information.";
