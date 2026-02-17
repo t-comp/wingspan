@@ -77,4 +77,20 @@ public class Image {
         this.nathans_notes = nathans_notes;
     }
 
+    public void removeTag(Tags tag) {
+        this.tags.remove(tag);
+        tag.getImages().remove(this);
+    }
+
+    public void addTag(Tags tag) {
+        this.tags.add(tag);
+        tag.getImages().add(this);
+    }
+
+//    public void clearTags() {
+//        for (Tags tag : new HashSet<>(this.tags)) {
+//            removeTag(tag);
+//        }
+//    }
+
 }
