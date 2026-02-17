@@ -31,20 +31,26 @@ public class ImageStorageService {
      * Save image file to disk and metadata to database
      */
     @Transactional
-    public Image saveImage(MultipartFile file, String lifecycle_stage, String description, String nathansNotes) throws IOException {
+    public Image saveImage(MultipartFile file,
+                           String lifecycle_stage, String description, String nathansNotes) throws IOException {
         //generate unique filename to prevent collisions
         String originalFilename = file.getOriginalFilename();
         log.info("Original filename received: {}", originalFilename);
 
         String extension = getFileExtension(originalFilename);
-        String safeFilename = getSafeFilename(originalFilename);
+        log.info("Extension extracted: {}", extension);  // ← Does it get here?
 
+        String safeFilename = getSafeFilename(originalFilename);
+        log.info("Extension extracted: {}", extension);  // ← Does it get here?
 
         String uniqueFilename = UUID.randomUUID().toString()
                 + "_" + safeFilename
                 + extension;
+        log.info("Unique filename: {}", uniqueFilename);
 
         Path uploadPath = Paths.get(uploadDir);
+        log.info("Upload path: {}", uploadPath.toAbsolutePath());
+
         if(!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
