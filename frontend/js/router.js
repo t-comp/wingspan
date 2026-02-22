@@ -1,10 +1,5 @@
 // js/router.js
 document.addEventListener("DOMContentLoaded", () => {
-  // Welcome Screen logic
-  if (typeof window.initWelcome === "function") {
-    window.initWelcome();
-  }
-
   const enterBtn = document.getElementById("enterBtn");
   const welcomeScreen = document.getElementById("welcome-screen");
   const mainContent = document.getElementById("main-app-content");
