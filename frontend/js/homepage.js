@@ -1,3 +1,4 @@
+// js/homepage.js
 function initHome() {
   console.log("Home Gallery Initializing...");
 
@@ -58,10 +59,8 @@ function initHome() {
      ========================================= */
   const deleteBtn = document.getElementById("deleteButterflyBtn");
   const uploadBtn = document.getElementById("uploadBtn");
-  const adminLoginBtn = document.getElementById("adminLoginBtn");
   const adminLogoutLink = document.getElementById("adminLogoutLink");
   const themeToggle = document.getElementById("toggleTheme");
-  const loginForm = document.getElementById("loginForm");
   const addForm = document.getElementById("addButterflyForm");
   const searchInput = document.getElementById("searchInput");
 
@@ -138,35 +137,31 @@ function initHome() {
   }
 
   /* =========================================
-     EVENT LISTENERS
+     ADMIN LOGIC
      ========================================= */
-  loginForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const user = document.getElementById("adminUser").value;
-    const pass = document.getElementById("adminPass").value;
 
-    if (user === "admin" && pass === "123") {
-      alert("Welcome, Admin! Edit mode enabled.");
-      uploadBtn.classList.remove("d-none");
-      deleteBtn.classList.remove("d-none");
-      adminLoginBtn.classList.add("d-none");
-      adminLogoutLink.classList.remove("d-none");
-      bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
-      e.target.reset();
-    } else {
-      alert("Invalid credentials!");
-    }
-  });
+  // Expose this so the router can trigger it upon a successful login
+  window.enableAdminMode = function () {
+    alert("Welcome, Admin! Edit mode enabled.");
+    if (uploadBtn) uploadBtn.classList.remove("d-none");
+    if (deleteBtn) deleteBtn.classList.remove("d-none");
+    if (adminLogoutLink) adminLogoutLink.classList.remove("d-none");
+  };
 
   adminLogoutLink.addEventListener("click", (e) => {
     e.preventDefault();
     alert("Logged out.");
     uploadBtn.classList.add("d-none");
     deleteBtn.classList.add("d-none");
-    adminLoginBtn.classList.remove("d-none");
     adminLogoutLink.classList.add("d-none");
+
+    // Optional: You could redirect them to the welcome screen here!
+    // location.reload();
   });
 
+  /* =========================================
+     EVENT LISTENERS
+     ========================================= */
   addForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const newB = {
