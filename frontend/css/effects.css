@@ -1,267 +1,223 @@
 /* =========================================
-   CARD STYLING
+   VARIABLES & THEMING
    ========================================= */
-
-/* The Card Container */
-.butterfly-card {
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background-color: white; /* Default light bg */
+:root {
+  /* Light Mode Colors */
+  --card-bg: #ffffff;
+  --card-text: #212529;
+  --card-border: transparent;
+  --btn-color: #2c3e50;
+  --btn-hover-bg: #2c3e50;
+  --btn-hover-text: #ffffff;
+  --tag-bg: #f8f9fa;
+  --tag-text: #212529;
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --input-text: #212529;
+  --glow-color: rgba(26, 188, 156, 0.25);
 }
 
-/* Hover Effect: Lift the whole card slightly */
-.butterfly-card:hover {
-    transform: translateY(-5px); /* Moves up slightly */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; /* Soft shadow appears */
-}
-
-/* Image Wrapper (The "Window") */
-.butterfly-img-wrapper {
-    overflow: hidden; /* Traps the zoom inside */
-    height: 250px;    /* Forces all images to be the same height */
-    border-radius: 0.5rem 0.5rem 0 0; /* Rounds only top corners */
-    position: relative;
-}
-
-/* The Image Itself */
-.butterfly-img-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Ensures image fills the box without stretching */
-    transition: transform 0.5s ease; /* Smooth slow zoom */
-}
-
-/* Zoom Trigger */
-.butterfly-card:hover .butterfly-img-wrapper img {
-    transform: scale(1.15); /* Zoom in 15% */
-}
-
-/* Card Body Styling */
-.card-body {
-    padding: 1.5rem;
+[data-bs-theme="dark"] {
+  /* Dark Mode Colors */
+  --card-bg: #2c3e50;
+  --card-text: #ffffff;
+  --card-border: #495057;
+  --btn-color: #ffffff;
+  --btn-hover-bg: rgba(255, 255, 255, 0.1);
+  --btn-hover-text: #ffffff;
+  --tag-bg: #34495e;
+  --tag-text: #ecf0f1;
+  --input-bg: #2c3e50;
+  --input-border: #495057;
+  --input-text: #ffffff;
+  --glow-color: rgba(26, 188, 156, 0.4);
 }
 
 /* =========================================
-   CUSTOM BUTTONS (NAVBAR)
+   CARD STYLING
    ========================================= */
+.butterfly-card {
+  cursor: pointer;
+  background-color: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid var(--card-border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-/* General Button Shape */
+.butterfly-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.butterfly-img-wrapper {
+  overflow: hidden;
+  height: 250px;
+  border-radius: 0.5rem 0.5rem 0 0;
+  position: relative;
+}
+
+.butterfly-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.butterfly-card:hover .butterfly-img-wrapper img {
+  transform: scale(1.15);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.butterfly-card .badge {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-text) !important;
+  border-color: var(--card-border) !important;
+}
+
+/* =========================================
+   CUSTOM BUTTONS
+   ========================================= */
 .btn-custom {
-    border-radius: 50px;
-    padding: 8px 20px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-width: 2px;
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-weight: 600;
+  border-width: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
 }
 
-/* Filter Button */
-.btn-filter {
-    color: #6c757d;
-    border-color: #6c757d;
-}
-
-.btn-filter:hover {
-    background-color: #6c757d;
-    color: white;
-}
-
-/* Settings Button */
+/* Filter & Settings Buttons */
+.btn-filter,
 .btn-settings {
-    color: #2c3e50;
-    border-color: #2c3e50;
+  color: var(--btn-color);
+  border-color: var(--btn-color);
 }
 
+.btn-filter:hover,
 .btn-settings:hover {
-    background-color: #2c3e50;
-    color: white;
+  background-color: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
 }
 
-/* Upload Button */
+/* Upload Button (Always Teal) */
 .btn-upload {
-    background-color: #1abc9c;
-    border-color: #1abc9c;
-    color: white;
+  background-color: #1abc9c;
+  border-color: #1abc9c;
+  color: white;
 }
 
 .btn-upload:hover {
-    color: white;
-    background-color: #15967d;
-    border-color: #15967d;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: #15967d;
+  border-color: #15967d;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Logout Link Hover (Light Mode) */
+/* Admin Logout Link */
+#adminLogoutLink {
+  color: #dc3545;
+}
 #adminLogoutLink:hover {
-    background-color: rgba(220, 53, 69, 0.15) !important;
-    color: #dc3545 !important;
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #ff6b6b; /* Slightly brighter red for visibility in dark mode */
 }
-
 
 /* =========================================
-   SEARCH BAR STYLING
+   SEARCH BAR
    ========================================= */
-
-/* Left Icon Container */
-.input-group-text {
-    border-radius: 50px 0 0 50px;
-    border-right: none; /* Remove separator line */
-    transition: border-color 0.3s ease;
-}
-
-/* Input Field */
+.input-group-text,
 #searchInput {
-    border-radius: 0 50px 50px 0;
-    border-left: none; /* Remove separator line */
-    box-shadow: none !important; /* Turn off default Bootstrap shadow */
-    padding-left: 15px !important; /* Text sits closer to icon since border is gone */
-    transition: border-color 0.3s ease;
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* --- THE "ALL AROUND" GLOW FIX --- */
-/* When the user clicks the input, light up BOTH the icon and the input */
+.input-group-text {
+  border-radius: 50px 0 0 50px;
+  border-right: none;
+}
 
+#searchInput {
+  border-radius: 0 50px 50px 0;
+  border-left: none;
+  box-shadow: none;
+  padding-left: 15px;
+}
+
+/* Search Focus State */
 .input-group:focus-within .input-group-text,
 .input-group:focus-within #searchInput {
-    border-color: #1abc9c !important; /* Turn borders Teal */
+  border-color: #1abc9c;
 }
 
 .input-group:focus-within {
-    border-radius: 50px;
-    /* This creates the fuzzy green glow around the WHOLE pill */
-    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25); 
+  border-radius: 50px;
+  box-shadow: 0 0 0 0.25rem var(--glow-color);
 }
 
 /* Custom 'X' Clear Button */
 #searchInput::-webkit-search-cancel-button {
-    -webkit-appearance: none;
-    height: 18px;
-    width: 18px;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
-    background-repeat: no-repeat;
-    background-size: contain;
-    cursor: pointer;
-    margin-right: 12px;
-}
-
-
-/* =========================================
-   DARK MODE OVERRIDES
-   ========================================= */
-
-/* Dark Mode Card Background */
-[data-bs-theme="dark"] .butterfly-card {
-    background-color: #2c3e50;
-    color: white;
-    border: 1px solid #495057; /* Subtle border to define edges */
-}
-
-/* Dark Mode Tags */
-[data-bs-theme="dark"] .badge {
-    background-color: #34495e !important;
-    color: #ecf0f1 !important;
-    border-color: #586e75 !important;
-}
-
-/* Navbar & General Backgrounds */
-[data-bs-theme="dark"] .navbar.bg-light {
-    background-color: #1a252f !important;
-    border-bottom: 1px solid #34495e;
-}
-
-/* --- SEARCH BAR (DARK MODE FIX) --- */
-
-/* 1. Base State: Grey Borders & Dark Background */
-[data-bs-theme="dark"] .input-group-text {
-    background-color: #34495e !important;
-    border-color: #495057; /* Removed !important so focus can override */
-    color: #ffffff !important;
-}
-
-[data-bs-theme="dark"] #searchInput {
-    background-color: #2c3e50 !important;
-    border-color: #495057; /* Removed !important so focus can override */
-    color: #ffffff !important;
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: pointer;
+  margin-right: 12px;
 }
 
 [data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button {
-    filter: brightness(1.5); /* Lighten the grey X */
+  filter: brightness(1.5);
 }
 
-/* 2. Focus State: Force Teal Border & Glow when clicking inside */
-[data-bs-theme="dark"] .input-group:focus-within .input-group-text,
-[data-bs-theme="dark"] .input-group:focus-within #searchInput {
-    border-color: #1abc9c !important; /* Force Teal Border */
+/* =========================================
+   MODALS & MISC OVERRIDES
+   ========================================= */
+[data-bs-theme="dark"] .navbar.bg-light {
+  background-color: #1a252f !important;
+  border-bottom: 1px solid #34495e;
 }
 
-[data-bs-theme="dark"] .input-group:focus-within {
-    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.4) !important; /* Teal Glow */
-    border-radius: 50px;
-}
-
-/* Buttons (Dark Mode) */
-[data-bs-theme="dark"] .btn-filter,
-[data-bs-theme="dark"] .btn-settings {
-    color: #ffffff !important;
-    border-color: #ffffff !important;
-}
-
-[data-bs-theme="dark"] .btn-filter:hover,
-[data-bs-theme="dark"] .btn-settings:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Dropdown Menu (Dark Mode) */
 [data-bs-theme="dark"] .dropdown-menu {
-    background-color: #2c3e50 !important;
-    border: 1px solid #495057 !important;
+  background-color: #2c3e50;
+  border: 1px solid #495057;
 }
 
 [data-bs-theme="dark"] .dropdown-item {
-    color: #ffffff !important;
+  color: #ffffff;
 }
 
 [data-bs-theme="dark"] .dropdown-item:hover {
-    background-color: #34495e !important;
+  background-color: #34495e;
 }
 
-/* Logout Link (Dark Mode) */
-[data-bs-theme="dark"] #adminLogoutLink {
-    color: #dc3545 !important;
-}
-
-[data-bs-theme="dark"] #adminLogoutLink:hover {
-    background-color: rgba(220, 53, 69, 0.15) !important;
-    color: #ff6b6b !important;
-}
-
-/* Modals (Dark Mode) */
 [data-bs-theme="dark"] .modal-content {
-    background-color: #2c3e50 !important;
-    color: white !important;
+  background-color: #2c3e50;
+  color: white;
 }
 
-[data-bs-theme="dark"] .modal-header, 
+[data-bs-theme="dark"] .modal-header,
 [data-bs-theme="dark"] .modal-footer {
-    border-color: #495057;
+  border-color: #495057;
 }
 
 [data-bs-theme="dark"] .modal-body input,
 [data-bs-theme="dark"] .modal-body textarea,
 [data-bs-theme="dark"] .modal-body select {
-    background-color: #343a40;
-    border-color: #495057;
-    color: white;
+  background-color: #343a40;
+  border-color: #495057;
+  color: white;
 }
 
-/* =========================================
-   MASTHEAD BUTTERFLY BLEND
-   ========================================= */
-
 .divider-custom-icon img {
-    filter: brightness(0) invert(1); 
-    width: 50px; 
-    height: auto;
+  filter: brightness(0) invert(1);
+  width: 50px;
+  height: auto;
 }
