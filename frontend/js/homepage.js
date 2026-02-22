@@ -1,4 +1,6 @@
-window.addEventListener("DOMContentLoaded", (event) => {
+function initHome() {
+  console.log("Home Gallery Initializing...");
+
   /* =========================================
      DATA INITIALIZATION 
      ========================================= */
@@ -13,7 +15,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
         "Bright orange butterfly found in North America. Known for their long migration.",
       tags: "migratory, orange",
       image: "assets/img/placeholder1.jpg",
-      // Tech Specs
       imgSize: "1920x1080",
       largeSize: "1024x768",
       mediumSize: "640x480",
@@ -29,7 +30,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
       description: "Yellow butterfly with black stripes. Common in gardens.",
       tags: "yellow, striped",
       image: "assets/img/placeholder2.jpg",
-      // Tech Specs
       imgSize: "2000x1500",
       largeSize: "1024x768",
       mediumSize: "640x480",
@@ -45,7 +45,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
       description: "Large iridescent blue butterfly. Native to rainforests.",
       tags: "blue, tropical",
       image: "assets/img/placeholder3.jpg",
-      // Tech Specs
       imgSize: "4000x3000",
       largeSize: "1920x1440",
       mediumSize: "800x600",
@@ -69,7 +68,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
   /* =========================================
      CORE FUNCTIONS
      ========================================= */
-
   function saveButterflies() {
     localStorage.setItem("butterflies", JSON.stringify(butterflies));
   }
@@ -91,8 +89,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
         .join("");
 
       col.innerHTML = `
-      <div class="card h-100 butterfly-card border-0 shadow-sm" 
-           data-bs-toggle="modal" data-bs-target="#butterflyModal">
+      <div class="card h-100 butterfly-card border-0 shadow-sm" data-bs-toggle="modal" data-bs-target="#butterflyModal">
         <div class="butterfly-img-wrapper">
             <img src="${b.image}" alt="${b.name}">
         </div>
@@ -103,10 +100,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
       </div>`;
       grid.appendChild(col);
 
-      // --- CLICK LISTENER: POPULATE MODAL ---
       const card = col.querySelector(".butterfly-card");
       card.addEventListener("click", () => {
-        // Basic Info
         document.getElementById("butterflyModalLabel").innerText = b.name;
         document.getElementById("butterflyModalScientific").innerText =
           b.scientific;
@@ -117,7 +112,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
           b.description;
         document.getElementById("butterflyModalImage").src = b.image;
 
-        // Tags
         document.getElementById("butterflyModalTags").innerHTML = (b.tags || "")
           .split(",")
           .map(
@@ -126,7 +120,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
           )
           .join("");
 
-        // Developer / API Info
         document.getElementById("butterflyModalId").innerText = b.id || "N/A";
         document.getElementById("butterflyModalImgSize").innerText =
           b.imgSize || "Unknown";
@@ -147,7 +140,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
   /* =========================================
      EVENT LISTENERS
      ========================================= */
-
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const user = document.getElementById("adminUser").value;
@@ -187,7 +179,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
       tags: document.getElementById("newTags").value,
       image:
         document.getElementById("newImage").value || "assets/img/noimage.jpg",
-      // Default Tech Specs for new entries
       imgSize: "Unknown",
       largeSize: "Pending",
       mediumSize: "Pending",
@@ -224,56 +215,37 @@ window.addEventListener("DOMContentLoaded", (event) => {
     renderButterflies(filtered);
   });
 
-  // Dark Mode Logic
   themeToggle.addEventListener("click", () => {
     const body = document.body;
     const modals = document.querySelectorAll(".modal-content");
-    const apiBox = document.getElementById("apiContainer"); // The new Developer Box
-    const imgBox = document.getElementById("imgContainer"); // The Image background
-    const listItems = document.querySelectorAll(".list-group-item"); // Size list items
+    const apiBox = document.getElementById("apiContainer");
+    const imgBox = document.getElementById("imgContainer");
+    const listItems = document.querySelectorAll(".list-group-item");
 
     if (body.getAttribute("data-bs-theme") === "dark") {
-      // Switch to LIGHT
       body.setAttribute("data-bs-theme", "light");
       body.classList.remove("bg-dark", "text-white");
       modals.forEach((m) =>
         m.classList.remove("bg-dark", "text-white", "border-secondary"),
       );
-
-      if (apiBox) {
-        apiBox.classList.remove("bg-secondary", "border-secondary");
-        apiBox.classList.add("bg-light");
-      }
-      if (imgBox) {
-        imgBox.classList.remove("bg-secondary");
-        imgBox.classList.add("bg-light");
-      }
-      listItems.forEach((li) => {
-        li.classList.remove("bg-dark", "text-white");
-        li.classList.add("bg-white", "text-dark");
-      });
+      if (apiBox) apiBox.classList.replace("bg-secondary", "bg-light");
+      if (imgBox) imgBox.classList.replace("bg-secondary", "bg-light");
+      listItems.forEach((li) => li.classList.replace("bg-dark", "bg-white"));
     } else {
-      // Switch to DARK
       body.setAttribute("data-bs-theme", "dark");
       body.classList.add("bg-dark", "text-white");
       modals.forEach((m) =>
         m.classList.add("bg-dark", "text-white", "border-secondary"),
       );
-
-      if (apiBox) {
-        apiBox.classList.remove("bg-light");
-        apiBox.classList.add("bg-secondary", "border-secondary");
-      }
-      if (imgBox) {
-        imgBox.classList.remove("bg-light");
-        imgBox.classList.add("bg-secondary");
-      }
-      listItems.forEach((li) => {
-        li.classList.remove("bg-white", "text-dark");
-        li.classList.add("bg-dark", "text-white");
-      });
+      if (apiBox) apiBox.classList.replace("bg-light", "bg-secondary");
+      if (imgBox) imgBox.classList.replace("bg-light", "bg-secondary");
+      listItems.forEach((li) => li.classList.replace("bg-white", "bg-dark"));
     }
   });
 
+  // Initial render when the home screen is called
   renderButterflies(butterflies);
-});
+}
+
+// Make it global so router.js can find it
+window.initHome = initHome;
