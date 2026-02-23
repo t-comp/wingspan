@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const welcomeScreen = document.getElementById("welcome-screen");
   const studentLoginScreen = document.getElementById("student-login");
   const adminLoginScreen = document.getElementById("admin-login");
-  const mainContent = document.getElementById("main-app-content");
+  const mainContent = document.getElementById("homepage");
 
   // Welcome Screen Buttons
   const studentLoginBtn = document.getElementById("studentLoginBtn");
