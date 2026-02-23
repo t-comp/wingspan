@@ -62,6 +62,13 @@ function initHome() {
   const searchInput = document.getElementById("searchInput");
   const themeToggle = document.getElementById("toggleTheme");
 
+  // View Toggle Selectors
+  const viewGalleryBtn = document.getElementById("viewGalleryBtn");
+  const viewCheckoutBtn = document.getElementById("viewCheckoutBtn");
+  const searchNavBar = document.getElementById("searchNavBar");
+  const portfolio = document.getElementById("portfolio");
+  const checkoutView = document.getElementById("checkoutView");
+
   /* =========================================
      CORE FUNCTIONS
      ========================================= */
@@ -192,6 +199,28 @@ function initHome() {
     document.getElementById("imgContainer")?.classList.toggle("bg-secondary");
   });
 
+  // View Toggle Listeners
+  if (viewGalleryBtn && viewCheckoutBtn) {
+    viewGalleryBtn.addEventListener("click", () => {
+      if (searchNavBar) searchNavBar.style.display = "block";
+      if (portfolio) portfolio.style.display = "block";
+      if (checkoutView) checkoutView.style.display = "none";
+
+      viewGalleryBtn.classList.add("active");
+      viewCheckoutBtn.classList.remove("active");
+    });
+
+    viewCheckoutBtn.addEventListener("click", () => {
+      if (searchNavBar) searchNavBar.style.display = "none";
+      if (portfolio) portfolio.style.display = "none";
+      if (checkoutView) checkoutView.style.display = "block";
+
+      viewCheckoutBtn.classList.add("active");
+      viewGalleryBtn.classList.remove("active");
+    });
+  }
+
+  // Initial Render
   renderButterflies(butterflies);
 }
 
