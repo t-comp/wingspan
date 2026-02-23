@@ -126,7 +126,7 @@ function initHome() {
   }
 
   /* =========================================
-     EVENT LISTENERS (Gallery Logic)
+     EVENT LISTENERS 
      ========================================= */
 
   addForm.addEventListener("submit", (e) => {
