@@ -111,29 +111,6 @@
                 required
               />
             </div>
-
-            <!-- CLASS API KEY INFO -->
-            <!-- <div class="mb-3">
-              <label class="form-label fw-bold">Class API Key</label>
-              <div class="input-group">
-                <span
-                  class="input-group-text bg-light border-end-0 rounded-start-pill ps-3"
-                >
-                  <i class="fas fa-key text-muted"></i>
-                </span>
-                <input
-                  type="text"
-                  class="form-control border-start-0 rounded-end-pill py-2"
-                  id="classApiKey"
-                  placeholder="e.g. COMS-402-2026"
-                  required
-                />
-              </div>
-              <div class="form-text ms-2">
-                Enter the key provided by your instructor.
-              </div>
-            </div> -->
-
             <div class="mb-4">
               <label class="form-label fw-bold">Password</label>
               <input
@@ -237,9 +214,9 @@
       </div>
     </div>
 
-    <!-------------------->
-    <!-- HOMEPAGE SCREEN-->
-    <!-------------------->
+    <!--------------------->
+    <!-- HOMEPAGE SCREEN -->
+    <!--------------------->
     <div id="homepage" style="display: none">
       <!------------------------------ WINGSPAN NAV BAR------------------------------>
       <nav class="wingspan-nav fixed-top">
@@ -247,6 +224,13 @@
           <div class="nav-brand">
             <img src="assets/img/butterfly.png" alt="Logo" class="nav-logo" />
             <span>WINGSPAN</span>
+          </div>
+
+          <div class="nav-toggle-group">
+            <button id="viewGalleryBtn" class="toggle-btn active">
+              GALLERY
+            </button>
+            <button id="viewCheckoutBtn" class="toggle-btn">CHECKOUT</button>
           </div>
 
           <div class="nav-profile dropdown">
@@ -263,6 +247,10 @@
               class="dropdown-menu dropdown-menu-end shadow border-0 mt-2"
               aria-labelledby="profileDropdown"
             >
+              <li>
+                <a class="dropdown-item py-2">Documentation</a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item py-2" href="#" id="toggleTheme"
                   >Toggle Light/Dark Mode</a
@@ -292,6 +280,7 @@
 
       <!------------------------------ SEARCH NAV BAR------------------------------>
       <nav
+        id="searchNavBar"
         class="navbar navbar-light bg-light py-3 shadow-sm"
         style="margin-top: 80px"
       >
@@ -313,7 +302,6 @@
             <button id="filterBtn" class="btn btn-custom btn-filter">
               <i class="fas fa-filter"></i> Filter
             </button>
-
             <button
               id="uploadBtn"
               class="btn btn-custom btn-upload d-none"
@@ -331,21 +319,16 @@
           <div class="row justify-content-center" id="butterflyGrid"></div>
         </div>
       </section>
-      <footer class="footer text-center">
-        <div class="container">
-          <div class="row">
-            <div class="row justify-content-center align-items-center">
-              <div class="col-lg-4 mb-5 mb-lg-0 text-center">
-                <h4 class="text-uppercase mb-4">About Us</h4>
-                <p class="lead mb-0">
-                  Developers: Siri, Taylor, Lexi, Abby<br />
-                  We are building this project for our Senior Design class!
-                </p>
-              </div>
-            </div>
-          </div>
+
+      <section
+        class="page-section"
+        id="checkoutView"
+        style="display: none; margin-top: 100px; min-height: 50vh"
+      >
+        <div class="container text-center">
+          <h2 class="text-muted">Checkout</h2>
         </div>
-      </footer>
+      </section>
 
       <div
         class="modal fade"
@@ -595,25 +578,41 @@
         </div>
       </div>
 
+      <!------------------- FOOTER SECTION ------------------------->
+      <footer class="footer text-center">
+        <div class="container">
+          <div class="row">
+            <div class="row justify-content-center align-items-center">
+              <div class="col-lg-4 mb-5 mb-lg-0 text-center">
+                <h4 class="text-uppercase mb-4">About Us</h4>
+                <p class="lead mb-0">
+                  Developers: Siri, Taylor, Lexi, Abby<br />
+                  We are building this project for our Senior Design class!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+
       <!------------------- COPYRIGHT SECTION ------------------------->
       <div class="copyright py-4 text-center text-white">
         <div class="container">
           <small>Copyright &copy; Senior Design</small>
         </div>
       </div>
-
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-
-      <script src="js/homepage.js"></script>
-      <script src="js/login.js"></script>
-
-      <script src="js/router.js"></script>
     </div>
+
+    <!------------------- JS LINKS ------------------------->
+    <script src="js/homepage.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/router.js"></script>
 
     <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
     <!-- * *                               SB Forms JS                               * *-->
     <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
     <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
   </body>
 </html>
