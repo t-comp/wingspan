@@ -118,10 +118,15 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Admin Logout Link */
+/* =========================================
+   LOGOUT LINKS (Student & Admin)
+   ========================================= */
+
+#studentLogoutLink,
 #adminLogoutLink {
   color: #dc3545;
 }
+#studentLogoutLink:hover,
 #adminLogoutLink:hover {
   background-color: rgba(220, 53, 69, 0.15);
   color: #ff6b6b; /* Slightly brighter red for visibility in dark mode */

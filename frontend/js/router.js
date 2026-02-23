@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const studentLoginForm = document.getElementById("studentLoginForm");
   const adminLoginForm = document.getElementById("adminLoginForm");
 
-  // Helper function to hide everything cleanly
+  // Helper function to hide everything cleanly and handle Bootstrap d-flex
   function hideAllScreens() {
     if (welcomeScreen) {
       welcomeScreen.classList.remove("d-flex");
@@ -49,8 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (studentLoginBtn) {
     studentLoginBtn.addEventListener("click", () => {
       hideAllScreens();
-      studentLoginScreen.classList.add("d-flex");
-      studentLoginScreen.style.display = "flex";
+      if (studentLoginScreen) {
+        studentLoginScreen.classList.add("d-flex");
+        studentLoginScreen.style.display = "flex";
+      }
       window.scrollTo(0, 0);
     });
   }
@@ -59,18 +61,22 @@ document.addEventListener("DOMContentLoaded", () => {
   if (adminLoginBtn) {
     adminLoginBtn.addEventListener("click", () => {
       hideAllScreens();
-      adminLoginScreen.classList.add("d-flex");
-      adminLoginScreen.style.display = "flex";
+      if (adminLoginScreen) {
+        adminLoginScreen.classList.add("d-flex");
+        adminLoginScreen.style.display = "flex";
+      }
       window.scrollTo(0, 0);
     });
   }
 
-  // Routes: Back Buttons -> Welcome
+  // Routes: Back Buttons -> Welcome Screen
   if (studentBackToWelcomeBtn) {
     studentBackToWelcomeBtn.addEventListener("click", () => {
       hideAllScreens();
-      welcomeScreen.classList.add("d-flex");
-      welcomeScreen.style.display = "flex";
+      if (welcomeScreen) {
+        welcomeScreen.classList.add("d-flex");
+        welcomeScreen.style.display = "flex";
+      }
       window.scrollTo(0, 0);
     });
   }
@@ -78,8 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (adminBackToWelcomeBtn) {
     adminBackToWelcomeBtn.addEventListener("click", () => {
       hideAllScreens();
-      welcomeScreen.classList.add("d-flex");
-      welcomeScreen.style.display = "flex";
+      if (welcomeScreen) {
+        welcomeScreen.classList.add("d-flex");
+        welcomeScreen.style.display = "flex";
+      }
       window.scrollTo(0, 0);
     });
   }
@@ -95,11 +103,20 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Student successfully logged in!");
 
       hideAllScreens();
-      mainContent.style.display = "block";
+      if (mainContent) {
+        mainContent.style.display = "block";
+      }
       window.scrollTo(0, 0);
 
-      // Start Homepage in standard mode
-      if (typeof window.initHome === "function") window.initHome();
+      // Initialize the gallery
+      if (typeof window.initHome === "function") {
+        window.initHome();
+      }
+
+      // ACTIVATE STUDENT LOGOUT FEATURE
+      if (typeof window.enableStudentMode === "function") {
+        window.enableStudentMode();
+      }
     });
   }
 
@@ -116,16 +133,27 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Admin successfully logged in!");
 
         hideAllScreens();
-        mainContent.style.display = "block";
+        if (mainContent) {
+          mainContent.style.display = "block";
+        }
         window.scrollTo(0, 0);
 
-        // Start Homepage and activate secret admin powers!
-        if (typeof window.initHome === "function") window.initHome();
-        if (typeof window.enableAdminMode === "function")
+        // Start Homepage and activate admin powers
+        if (typeof window.initHome === "function") {
+          window.initHome();
+        }
+        if (typeof window.enableAdminMode === "function") {
           window.enableAdminMode();
+        }
       } else {
         alert("Invalid credentials! Hint: Try user 'admin' and pass '123'");
       }
     });
   }
 });
+
+// Global function to reset the app during logout
+window.showWelcomeScreen = function () {
+  // We use location.reload() to cleanly wipe all session states and roles
+  location.reload();
+};

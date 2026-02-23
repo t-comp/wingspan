@@ -58,11 +58,9 @@ function initHome() {
      ELEMENT SELECTORS
      ========================================= */
   const deleteBtn = document.getElementById("deleteButterflyBtn");
-  const uploadBtn = document.getElementById("uploadBtn");
-  const adminLogoutLink = document.getElementById("adminLogoutLink");
-  const themeToggle = document.getElementById("toggleTheme");
   const addForm = document.getElementById("addButterflyForm");
   const searchInput = document.getElementById("searchInput");
+  const themeToggle = document.getElementById("toggleTheme");
 
   /* =========================================
      CORE FUNCTIONS
@@ -110,15 +108,7 @@ function initHome() {
         document.getElementById("butterflyModalDescription").innerText =
           b.description;
         document.getElementById("butterflyModalImage").src = b.image;
-
-        document.getElementById("butterflyModalTags").innerHTML = (b.tags || "")
-          .split(",")
-          .map(
-            (tag) =>
-              `<span class="badge rounded-pill bg-secondary me-1">${tag.trim()}</span>`,
-          )
-          .join("");
-
+        document.getElementById("butterflyModalTags").innerHTML = tagsHtml;
         document.getElementById("butterflyModalId").innerText = b.id || "N/A";
         document.getElementById("butterflyModalImgSize").innerText =
           b.imgSize || "Unknown";
@@ -130,38 +120,15 @@ function initHome() {
           b.smallSize || "320x240";
         document.getElementById("butterflyModalAPI").value =
           b.apiEndpoint || `GET /api/species/${b.id}`;
-
         deleteBtn.dataset.index = idx;
       });
     });
   }
 
   /* =========================================
-     ADMIN LOGIC
+     EVENT LISTENERS (Gallery Logic)
      ========================================= */
 
-  // Expose this so the router can trigger it upon a successful login
-  window.enableAdminMode = function () {
-    alert("Welcome, Admin! Edit mode enabled.");
-    if (uploadBtn) uploadBtn.classList.remove("d-none");
-    if (deleteBtn) deleteBtn.classList.remove("d-none");
-    if (adminLogoutLink) adminLogoutLink.classList.remove("d-none");
-  };
-
-  adminLogoutLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    alert("Logged out.");
-    uploadBtn.classList.add("d-none");
-    deleteBtn.classList.add("d-none");
-    adminLogoutLink.classList.add("d-none");
-
-    // Optional: You could redirect them to the welcome screen here!
-    // location.reload();
-  });
-
-  /* =========================================
-     EVENT LISTENERS
-     ========================================= */
   addForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const newB = {
@@ -212,35 +179,20 @@ function initHome() {
 
   themeToggle.addEventListener("click", () => {
     const body = document.body;
-    const modals = document.querySelectorAll(".modal-content");
-    const apiBox = document.getElementById("apiContainer");
-    const imgBox = document.getElementById("imgContainer");
-    const listItems = document.querySelectorAll(".list-group-item");
+    const isDark = body.getAttribute("data-bs-theme") === "dark";
+    body.setAttribute("data-bs-theme", isDark ? "light" : "dark");
+    body.classList.toggle("bg-dark");
+    body.classList.toggle("text-white");
 
-    if (body.getAttribute("data-bs-theme") === "dark") {
-      body.setAttribute("data-bs-theme", "light");
-      body.classList.remove("bg-dark", "text-white");
-      modals.forEach((m) =>
-        m.classList.remove("bg-dark", "text-white", "border-secondary"),
-      );
-      if (apiBox) apiBox.classList.replace("bg-secondary", "bg-light");
-      if (imgBox) imgBox.classList.replace("bg-secondary", "bg-light");
-      listItems.forEach((li) => li.classList.replace("bg-dark", "bg-white"));
-    } else {
-      body.setAttribute("data-bs-theme", "dark");
-      body.classList.add("bg-dark", "text-white");
-      modals.forEach((m) =>
-        m.classList.add("bg-dark", "text-white", "border-secondary"),
-      );
-      if (apiBox) apiBox.classList.replace("bg-light", "bg-secondary");
-      if (imgBox) imgBox.classList.replace("bg-light", "bg-secondary");
-      listItems.forEach((li) => li.classList.replace("bg-white", "bg-dark"));
-    }
+    // Toggle modal and container colors
+    document
+      .querySelectorAll(".modal-content")
+      .forEach((m) => m.classList.toggle("bg-dark"));
+    document.getElementById("apiContainer")?.classList.toggle("bg-secondary");
+    document.getElementById("imgContainer")?.classList.toggle("bg-secondary");
   });
 
-  // Initial render when the home screen is called
   renderButterflies(butterflies);
 }
 
-// Make it global so router.js can find it
 window.initHome = initHome;
