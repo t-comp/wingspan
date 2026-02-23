@@ -1,7 +1,7 @@
 // js/login.js
 
 /* =========================================
-   SESSION LOGIC (Identity Management)
+   SESSION LOGIC 
    ========================================= */
 
 // Triggered by router when a Student logs in
