@@ -34,7 +34,7 @@
 
   <body id="page-top">
     <!-------------------->
-    <!-- WELCOME SCREENppp -->
+    <!-- WELCOME SCREEN -->
     <!-------------------->
     <div
       id="welcome-screen"
@@ -249,15 +249,51 @@
             <span>WINGSPAN</span>
           </div>
 
-          <div class="nav-profile">
-            <div class="profile-circle">A</div>
+          <div class="nav-profile dropdown">
+            <div
+              class="profile-circle"
+              id="profileDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              style="cursor: pointer"
+            ></div>
+
+            <ul
+              class="dropdown-menu dropdown-menu-end shadow border-0 mt-2"
+              aria-labelledby="profileDropdown"
+            >
+              <li>
+                <a
+                  class="dropdown-item d-none py-2 text-danger"
+                  href="#"
+                  id="studentLogoutLink"
+                  >Logout</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item d-none py-2 text-danger"
+                  href="#"
+                  id="adminLogoutLink"
+                  >Logout</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item py-2" href="#" id="toggleTheme"
+                  >Toggle Light/Dark Mode</a
+                >
+              </li>
+            </ul>
           </div>
         </div>
       </nav>
 
+      <!------------------------------ SEARCH NAV BAR------------------------------>
       <nav
         class="navbar navbar-light bg-light py-3 shadow-sm"
-        style="margin-top: 100px"
+        style="margin-top: 80px"
       >
         <div class="container d-flex flex-row align-items-center">
           <div class="input-group me-3" style="flex: 2">
@@ -277,44 +313,7 @@
             <button id="filterBtn" class="btn btn-custom btn-filter">
               <i class="fas fa-filter"></i> Filter
             </button>
-            <div class="dropdown">
-              <button
-                class="btn btn-custom btn-settings dropdown-toggle"
-                type="button"
-                id="settingsDropdown"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i class="fas fa-cog"></i> Settings
-              </button>
-              <ul
-                class="dropdown-menu dropdown-menu-end shadow border-0"
-                aria-labelledby="settingsDropdown"
-              >
-                <li>
-                  <a
-                    class="dropdown-item d-none py-2 text-danger"
-                    href="#"
-                    id="studentLogoutLink"
-                    >Logout</a
-                  >
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item d-none py-2 text-danger"
-                    href="#"
-                    id="adminLogoutLink"
-                    >Logout</a
-                  >
-                </li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <a class="dropdown-item py-2" href="#" id="toggleTheme"
-                    >Toggle Light/Dark Mode</a
-                  >
-                </li>
-              </ul>
-            </div>
+
             <button
               id="uploadBtn"
               class="btn btn-custom btn-upload d-none"
@@ -332,7 +331,6 @@
           <div class="row justify-content-center" id="butterflyGrid"></div>
         </div>
       </section>
-
       <footer class="footer text-center">
         <div class="container">
           <div class="row">
