@@ -24,7 +24,7 @@ public class ImageStorageService {
     @Autowired
     private ImageRepository imageRepository;
 
-    @Value("${file.upload-dir}")
+    @Value("${cloud.aws.endpoint.uri}")
     private String uploadDir;
 
     /**
