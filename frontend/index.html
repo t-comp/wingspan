@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -308,8 +308,8 @@
     <!--------------------->
     <!-- HOMEPAGE SCREEN -->
     <!--------------------->
+
     <div id="homepage" style="display: none">
-      <!------------------------------ WINGSPAN NAV BAR------------------------------>
       <nav class="wingspan-nav fixed-top">
         <div class="nav-container">
           <div class="nav-brand">
@@ -321,7 +321,7 @@
             <button id="viewGalleryBtn" class="toggle-btn active">
               GALLERY
             </button>
-            <button id="viewCheckoutBtn" class="toggle-btn">CHECKOUT</button>
+            <button id="viewTeamBtn" class="toggle-btn">TEAM</button>
           </div>
 
           <div class="nav-profile dropdown">
@@ -338,9 +338,7 @@
               class="dropdown-menu dropdown-menu-end shadow border-0 mt-2"
               aria-labelledby="profileDropdown"
             >
-              <li>
-                <a class="dropdown-item py-2">Documentation</a>
-              </li>
+              <li><a class="dropdown-item py-2">Documentation</a></li>
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item py-2" href="#" id="toggleTheme"
@@ -369,7 +367,6 @@
         </div>
       </nav>
 
-      <!------------------------------ SEARCH NAV BAR------------------------------>
       <nav
         id="searchNavBar"
         class="navbar navbar-light bg-light py-3 shadow-sm"
@@ -399,7 +396,10 @@
               <i class="fas fa-plus"></i> Upload
             </button>
 
-            <button id="deleteSpeciesBtn" class="btn btn-danger btn-custom d-none">
+            <button
+              id="deleteSpeciesBtn"
+              class="btn btn-danger btn-custom d-none"
+            >
               <i class="fas fa-trash"></i> Delete
             </button>
           </div>
@@ -411,12 +411,10 @@
           <div class="row justify-content-center" id="butterflyGrid"></div>
         </div>
       </section>
-      <!-- species view -->
-      <!-- SPECIES VIEW SCREEN -->
+
       <div id="speciesView" style="display: none; margin-top: 100px">
         <div class="container">
           <div class="row">
-            <!-- Left: main image -->
             <div class="col-lg-6">
               <img
                 id="speciesImage"
@@ -424,10 +422,7 @@
                 style="max-height: 500px; object-fit: contain"
               />
             </div>
-
-            <!-- Right: info + images -->
             <div class="col-lg-6 d-flex flex-column">
-              <!-- BACK TO GALLERY BUTTON -->
               <button
                 id="backToGalleryBtn"
                 class="btn btn-outline-primary mb-3 align-self-start"
@@ -435,23 +430,17 @@
               >
                 &larr; Back to Gallery
               </button>
-
               <h2 id="speciesName" class="fw-bold mb-3"></h2>
               <p class="text-muted fst-italic" id="speciesScientific"></p>
-
               <hr />
-
               <p><strong>Sex:</strong> <span id="speciesSex"></span></p>
               <p>
                 <strong>Lifecycle:</strong> <span id="speciesLifecycle"></span>
               </p>
-
               <div class="mb-3">
                 <strong>Description:</strong>
                 <p id="speciesDescription"></p>
               </div>
-
-              <!-- IMAGES SECTION -->
               <div class="mt-4">
                 <h5 class="fw-bold">Images</h5>
                 <div
@@ -470,243 +459,158 @@
         </div>
       </div>
 
-      <!-- for the additional images  -->
-      <!-- Additional Image Modal -->
-      <div
-        class="modal fade"
-        id="additionalImageModal"
-        tabindex="-1"
-        aria-labelledby="additionalImageModalLabel"
-        aria-hidden="true"
+      <section
+        class="page-section"
+        id="teamView"
+        style="display: none; margin-top: 100px; min-height: 50vh"
       >
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="additionalImageModalLabel">
-                Butterfly Info
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <div class="row">
-                <!-- Left: Image -->
-                <div class="col-lg-6 text-center">
-                  <img
-                    id="modalImage"
-                    src=""
-                    class="img-fluid rounded shadow-sm"
-                    style="max-height: 500px; object-fit: contain"
-                  />
-                </div>
-                <!-- Right: Info -->
-                <div class="col-lg-6">
-                  <h3 id="modalName"></h3>
-                  <p class="fst-italic text-muted" id="modalScientific"></p>
-                  <p id="modalDescription"></p>
-                  <p>
-                    <strong>Image Size:</strong>
-                    <span id="modalImgSize">Unknown</span>
-                  </p>
-                  <a
-                    href="#"
-                    id="modalDownloadLink"
-                    class="btn btn-outline-primary mt-2"
-                    >Download</a
-                  >
-                </div>
+        <div class="container">
+          <div id="studentTeamContent" style="display: none">
+            <h2 class="text-muted mb-4">My Team Overview</h2>
+            <div class="card shadow-sm border-0 bg-light p-4">
+              <div class="card-body">
+                <h4 class="fw-bold text-primary">Your Team Information</h4>
+                <p class="text-muted">
+                  Currently, you are assigned as a Student user. Future updates
+                  will display your assigned team members and project API keys
+                  here.
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <section
-        class="page-section"
-        id="checkoutView"
-        style="display: none; margin-top: 100px; min-height: 50vh"
-      >
-        <div class="container text-center">
-          <h2 class="text-muted">Checkout</h2>
+          <div id="adminTeamContent" style="display: none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2 class="text-muted">User & Team Management</h2>
+              <button
+                class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#adminAddUserModal"
+              >
+                <i class="fas fa-user-plus"></i> Create User
+              </button>
+            </div>
+
+            <div class="table-responsive bg-white rounded shadow-sm p-3 border">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
       <div
         class="modal fade"
-        id="butterflyModal"
+        id="adminAddUserModal"
         tabindex="-1"
-        aria-labelledby="butterflyModalLabel"
         aria-hidden="true"
       >
-        <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
-            <div class="modal-header border-0 pb-0">
-              <h3 class="modal-title fw-bold" id="butterflyModalLabel">
-                Butterfly Name
-              </h3>
+            <div class="modal-header">
+              <h5 class="modal-title fw-bold">Add New User</h5>
               <button
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="modal"
-                aria-label="Close"
               ></button>
             </div>
             <div class="modal-body">
-              <div
-                class="text-center mb-4 bg-light rounded p-2"
-                id="imgContainer"
-              >
-                <img
-                  id="butterflyModalImage"
-                  src=""
-                  class="img-fluid rounded shadow-sm"
-                  alt=""
-                  style="max-height: 500px; object-fit: contain"
-                />
-              </div>
-              <div class="row g-4">
-                <div class="col-lg-7 border-end-lg">
-                  <h5 class="text-primary mb-3">
-                    <i class="fas fa-info-circle"></i> Insect Details
-                  </h5>
-                  <div class="row mb-3">
-                    <div class="col-sm-6">
-                      <p class="mb-1 text-muted small text-uppercase fw-bold">
-                        Scientific Name
-                      </p>
-                      <p
-                        class="fs-5 fst-italic"
-                        id="butterflyModalScientific"
-                      ></p>
-                    </div>
-                    <div class="col-sm-6">
-                      <p class="mb-1 text-muted small text-uppercase fw-bold">
-                        Lifecycle Stage
-                      </p>
-                      <p class="fs-5" id="butterflyModalLifecycle"></p>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <div class="col-sm-6">
-                      <p class="mb-1 text-muted small text-uppercase fw-bold">
-                        Sex
-                      </p>
-                      <p class="fs-5" id="butterflyModalSex"></p>
-                    </div>
-                    <div class="col-sm-6">
-                      <p class="mb-1 text-muted small text-uppercase fw-bold">
-                        Tags
-                      </p>
-                      <p id="butterflyModalTags"></p>
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <p class="mb-1 text-muted small text-uppercase fw-bold">
-                      Description
-                    </p>
-                    <p id="butterflyModalDescription"></p>
-                  </div>
+              <form id="adminAddUserForm">
+                <div class="mb-3">
+                  <label class="form-label">Username</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="adminNewUsername"
+                    required
+                  />
                 </div>
-                <div class="col-lg-5">
-                  <div
-                    class="p-4 bg-light border rounded h-100"
-                    id="apiContainer"
-                  >
-                    <h5 class="text-success mb-3">
-                      <i class="fas fa-code"></i> Image & API Information
-                    </h5>
-                    <div class="mb-3">
-                      <label class="small text-muted fw-bold text-uppercase"
-                        >ID</label
-                      >
-                      <div
-                        class="font-monospace bg-white border rounded p-2 text-dark"
-                        id="butterflyModalId"
-                      ></div>
-                    </div>
-                    <hr />
-                    <h6 class="small text-muted fw-bold text-uppercase mb-3">
-                      Available Resolutions
-                    </h6>
-                    <ul class="list-group list-group-flush small mb-4 rounded">
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
-                      >
-                        <strong>Original:</strong>
-                        <span
-                          class="font-monospace"
-                          id="butterflyModalImgSize"
-                        ></span>
-                      </li>
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
-                      >
-                        <strong>Large:</strong>
-                        <span
-                          class="font-monospace"
-                          id="butterflyModalLargeSize"
-                        ></span>
-                      </li>
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
-                      >
-                        <strong>Medium:</strong>
-                        <span
-                          class="font-monospace"
-                          id="butterflyModalMediumSize"
-                        ></span>
-                      </li>
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center bg-white text-dark"
-                      >
-                        <strong>Small:</strong>
-                        <span
-                          class="font-monospace"
-                          id="butterflyModalSmallSize"
-                        ></span>
-                      </li>
-                    </ul>
-                    <div class="mb-2">
-                      <label class="small text-muted fw-bold text-uppercase"
-                        >API Endpoint</label
-                      >
-                      <div class="input-group">
-                        <input
-                          type="text"
-                          class="form-control font-monospace form-control-sm"
-                          id="butterflyModalAPI"
-                          readonly
-                        />
-                        <button
-                          class="btn btn-outline-secondary btn-sm"
-                          type="button"
-                        >
-                          <i class="far fa-copy"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="adminNewEmail"
+                    required
+                  />
                 </div>
-              </div>
+                <div class="mb-3">
+                  <label class="form-label">Password</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="adminNewPassword"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Role</label>
+                  <select class="form-select" id="adminNewRole">
+                    <option value="STUDENT">Student</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                  Create User
+                </button>
+              </form>
             </div>
-            <div class="modal-footer border-0">
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="adminUpdateUserModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title fw-bold">Update User Info</h5>
               <button
                 type="button"
-                class="btn btn-danger d-none"
-                id="deleteButterflyBtn"
-              >
-                Delete Insect
-              </button>
-              <button
-                type="button"
-                class="btn btn-secondary px-4"
+                class="btn-close"
                 data-bs-dismiss="modal"
-              >
-                Close
-              </button>
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="adminUpdateUserForm">
+                <input type="hidden" id="updateUserId" />
+                <div class="mb-3">
+                  <label class="form-label">Update Username</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="updateUsername"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Update Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="updateEmail"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-warning w-100">
+                  Save Changes
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -716,7 +620,6 @@
         class="modal fade"
         id="addButterflyModal"
         tabindex="-1"
-        aria-labelledby="addButterflyLabel"
         aria-hidden="true"
       >
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -732,8 +635,8 @@
             <div class="modal-body">
               <form id="addButterflyForm">
                 <div class="mb-3">
-                  <label class="form-label">Common Name</label>
-                  <input
+                  <label class="form-label">Common Name</label
+                  ><input
                     type="text"
                     class="form-control"
                     id="newName"
@@ -741,8 +644,8 @@
                   />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Scientific Name</label>
-                  <input type="text" class="form-control" id="newScientific" />
+                  <label class="form-label">Scientific Name</label
+                  ><input type="text" class="form-control" id="newScientific" />
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Sex</label>
@@ -753,20 +656,20 @@
                   </select>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Description</label>
-                  <textarea
+                  <label class="form-label">Description</label
+                  ><textarea
                     class="form-control"
                     id="newDescription"
                     rows="3"
                   ></textarea>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Tags (comma separated)</label>
-                  <input type="text" class="form-control" id="newTags" />
+                  <label class="form-label">Tags (comma separated)</label
+                  ><input type="text" class="form-control" id="newTags" />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Image URL</label>
-                  <input
+                  <label class="form-label">Image URL</label
+                  ><input
                     type="text"
                     class="form-control"
                     id="newImage"
@@ -782,24 +685,20 @@
         </div>
       </div>
 
-      <!------------------- FOOTER SECTION ------------------------->
-      <footer class="footer text-center">
+      <footer class="footer text-center mt-5">
         <div class="container">
-          <div class="row">
-            <div class="row justify-content-center align-items-center">
-              <div class="col-lg-4 mb-5 mb-lg-0 text-center">
-                <h4 class="text-uppercase mb-4">About Us</h4>
-                <p class="lead mb-0">
-                  Developers: Siri, Taylor, Lexi, Abby<br />
-                  We are building this project for our Senior Design class!
-                </p>
-              </div>
+          <div class="row justify-content-center align-items-center">
+            <div class="col-lg-4 mb-5 mb-lg-0 text-center">
+              <h4 class="text-uppercase mb-4">About Us</h4>
+              <p class="lead mb-0">
+                Developers: Siri, Taylor, Lexi, Abby<br />
+                We are building this project for our Senior Design class!
+              </p>
             </div>
           </div>
         </div>
       </footer>
 
-      <!------------------- COPYRIGHT SECTION ------------------------->
       <div class="copyright py-4 text-center text-white">
         <div class="container">
           <small>Copyright &copy; Senior Design</small>
