@@ -8,44 +8,108 @@ export async function initHome(userRole) {
   let butterflies = await ButterflyAPI.getAll();
 
   // 2. ELEMENT SELECTORS
-  const searchInput = document.getElementById("searchInput");
-  const themeToggle = document.getElementById("toggleTheme");
-  const addForm = document.getElementById("addButterflyForm");
+  const portfolio = document.getElementById("portfolio");
+  const teamView = document.getElementById("teamView"); // Replaced checkoutView
+  const speciesView = document.getElementById("speciesView");
+  const searchNavBar = document.getElementById("searchNavBar");
 
   const viewGalleryBtn = document.getElementById("viewGalleryBtn");
-  const viewTeamBtn = document.getElementById("viewTeamBtn");
-  const searchNavBar = document.getElementById("searchNavBar");
-  const portfolio = document.getElementById("portfolio");
-  const teamView = document.getElementById("teamView");
+  const viewTeamBtn = document.getElementById("viewTeamBtn"); // Replaced viewCheckoutBtn
+  const backBtn = document.getElementById("backToGalleryBtn");
+
+  const searchInput = document.getElementById("searchInput");
+  const themeToggle = document.getElementById("toggleTheme");
+
+  const deleteBtn = document.getElementById("deleteButterflyBtn");
+  const addForm = document.getElementById("addButterflyForm");
 
   const adminTeamContent = document.getElementById("adminTeamContent");
   const studentTeamContent = document.getElementById("studentTeamContent");
 
-  // 3. CORE REFRESH FUNCTION FOR GALLERY
-  const refresh = () => {
-    UI.renderGrid(butterflies, (b, idx, tagsHtml) => {
-      UI.populateModal(b, idx, tagsHtml);
-
-      // --- FIX: Actually show the modal! ---
-      const modalElem = document.getElementById("butterflyModal");
-      if (modalElem) {
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElem);
-        modalInstance.show();
+  // 3. VIEW MANAGEMENT HELPERS
+  const showView = (view) => {
+    // Hide all main views
+    [portfolio, speciesView, teamView].forEach((v) => {
+      if (v) {
+        v.style.display = "none";
       }
+    });
+    if (view) {
+      view.style.display = "block";
+    }
+    window.scrollTo(0, 0);
+  };
+
+  const showSpeciesView = (b) => {
+    showView(speciesView);
+    if (searchNavBar) {
+      searchNavBar.style.display = "none";
+    }
+
+    document.getElementById("speciesName").innerText = b.name;
+    document.getElementById("speciesScientific").innerText = b.scientific;
+    document.getElementById("speciesSex").innerText = b.sex;
+    document.getElementById("speciesLifecycle").innerText =
+      b.lifecycle || "N/A";
+    document.getElementById("speciesDescription").innerText = b.description;
+    document.getElementById("speciesImage").src = b.image;
+
+    const speciesImagesContainer = document.getElementById("speciesImages");
+    if (speciesImagesContainer) {
+      speciesImagesContainer.innerHTML = "";
+
+      (b.additionalImages || []).forEach((imgUrl) => {
+        const img = document.createElement("img");
+        img.src = imgUrl;
+        img.className = "img-fluid rounded shadow-sm";
+        img.style.width = "30%";
+        img.style.maxHeight = "150px";
+        img.style.objectFit = "cover";
+        img.style.cursor = "pointer";
+
+        img.addEventListener("click", () => {
+          const modalElem = document.getElementById("additionalImageModal");
+          if (modalElem) {
+            const modal = new bootstrap.Modal(modalElem);
+            document.getElementById("modalImage").src = imgUrl;
+            document.getElementById("modalName").innerText = b.name;
+            document.getElementById("modalScientific").innerText = b.scientific;
+            document.getElementById("modalDescription").innerText =
+              b.description;
+            document.getElementById("modalImgSize").innerText =
+              b.imgSize || "Unknown";
+            document.getElementById("modalDownloadLink").href = imgUrl;
+            modal.show();
+          }
+        });
+
+        speciesImagesContainer.appendChild(img);
+      });
+    }
+  };
+
+  const refreshGallery = (data = butterflies) => {
+    UI.renderGrid(data, (b) => {
+      showSpeciesView(b);
     });
   };
 
-  // 4. ADMIN TABLE LOGIC
+  // 4. ADMIN TABLE LOGIC (For Teams Tab)
   async function loadAdminTable() {
     const users = await ButterflyAPI.getAllUsers();
     const tbody = document.getElementById("adminUsersTableBody");
-    if (!tbody) return;
+    if (!tbody) {
+      return;
+    }
 
     tbody.innerHTML = "";
 
     users.forEach((u) => {
       const tr = document.createElement("tr");
-      let badgeClass = u.uType === "ADMIN" ? "bg-danger" : "bg-primary";
+      let badgeClass = "bg-primary";
+      if (u.uType === "ADMIN") {
+        badgeClass = "bg-danger";
+      }
 
       tr.innerHTML = `
         <td>${u.id || "N/A"}</td>
@@ -61,6 +125,7 @@ export async function initHome(userRole) {
     });
   }
 
+  // Attach global functions for the inline onclick handlers in the admin table
   window.deleteSystemUser = async (userId) => {
     if (confirm("Are you sure you want to delete this user?")) {
       await ButterflyAPI.deleteUser(userId);
@@ -77,59 +142,75 @@ export async function initHome(userRole) {
     await loadAdminTable();
   };
 
-  // 5. VIEW TOGGLE LOGIC (Gallery vs Team)
-  if (viewGalleryBtn && viewTeamBtn) {
-    viewGalleryBtn.addEventListener("click", () => {
-      if (searchNavBar) searchNavBar.style.display = "flex";
-      if (portfolio) portfolio.style.display = "block";
-      if (teamView) teamView.style.display = "none";
+  // ==========================
+  // 5. EVENT LISTENERS
+  // ==========================
 
-      viewGalleryBtn.classList.add("active");
-      viewTeamBtn.classList.remove("active");
-    });
-
-    viewTeamBtn.addEventListener("click", async () => {
-      if (searchNavBar) searchNavBar.style.display = "none";
-      if (portfolio) portfolio.style.display = "none";
-      if (teamView) teamView.style.display = "block";
-
-      viewTeamBtn.classList.add("active");
-      viewGalleryBtn.classList.remove("active");
-
-      if (userRole === "ADMIN") {
-        if (adminTeamContent) adminTeamContent.style.display = "block";
-        if (studentTeamContent) studentTeamContent.style.display = "none";
-        await loadAdminTable();
-      } else {
-        if (adminTeamContent) adminTeamContent.style.display = "none";
-        if (studentTeamContent) studentTeamContent.style.display = "block";
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      showView(portfolio);
+      if (searchNavBar) {
+        searchNavBar.style.display = "flex";
       }
     });
   }
 
-  // 6. GALLERY EVENT LISTENERS
+  if (viewGalleryBtn) {
+    viewGalleryBtn.addEventListener("click", () => {
+      showView(portfolio);
+      if (searchNavBar) {
+        searchNavBar.style.display = "flex";
+      }
+      viewGalleryBtn.classList.add("active");
+      if (viewTeamBtn) {
+        viewTeamBtn.classList.remove("active");
+      }
+    });
+  }
 
-  // Search Logic
+  if (viewTeamBtn) {
+    viewTeamBtn.addEventListener("click", async () => {
+      showView(teamView);
+      if (searchNavBar) {
+        searchNavBar.style.display = "none";
+      }
+      viewTeamBtn.classList.add("active");
+      if (viewGalleryBtn) {
+        viewGalleryBtn.classList.remove("active");
+      }
+
+      // Role-based logic for Teams View
+      if (userRole === "ADMIN") {
+        if (adminTeamContent) {
+          adminTeamContent.style.display = "block";
+        }
+        if (studentTeamContent) {
+          studentTeamContent.style.display = "none";
+        }
+        await loadAdminTable();
+      } else {
+        if (adminTeamContent) {
+          adminTeamContent.style.display = "none";
+        }
+        if (studentTeamContent) {
+          studentTeamContent.style.display = "block";
+        }
+      }
+    });
+  }
+
+  // Search logic
   if (searchInput) {
     searchInput.addEventListener("input", () => {
       const query = searchInput.value.toLowerCase();
       const filtered = butterflies.filter((b) =>
         b.name.toLowerCase().includes(query),
       );
-      UI.renderGrid(filtered, (b, idx, tagsHtml) => {
-        UI.populateModal(b, idx, tagsHtml);
-
-        // --- FIX: Show modal when searching too! ---
-        const modalElem = document.getElementById("butterflyModal");
-        if (modalElem) {
-          const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElem);
-          modalInstance.show();
-        }
-      });
+      refreshGallery(filtered);
     });
   }
 
-  // Add Butterfly Form Submit
+  // Add new butterfly
   if (addForm) {
     addForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -145,12 +226,24 @@ export async function initHome(userRole) {
 
       const savedSpecies = await ButterflyAPI.create(newB);
       butterflies.push(savedSpecies);
-      refresh();
-
+      refreshGallery();
       e.target.reset();
       const modalElem = document.getElementById("addButterflyModal");
       if (modalElem) {
         bootstrap.Modal.getInstance(modalElem).hide();
+      }
+    });
+  }
+
+  // Delete butterfly
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", async () => {
+      const idx = parseInt(deleteBtn.dataset.index);
+      if (isNaN(idx)) return;
+      if (confirm(`Delete "${butterflies[idx].name}"?`)) {
+        butterflies.splice(idx, 1);
+        await ButterflyAPI.delete(butterflies[idx].id); // Updated to use the new API method
+        refreshGallery();
       }
     });
   }
@@ -168,14 +261,19 @@ export async function initHome(userRole) {
         .querySelectorAll(".modal-content")
         .forEach((m) => m.classList.toggle("bg-dark"));
       const apiContainer = document.getElementById("apiContainer");
+      if (apiContainer) {
+        apiContainer.classList.toggle("bg-secondary");
+      }
       const imgContainer = document.getElementById("imgContainer");
-      if (apiContainer) apiContainer.classList.toggle("bg-secondary");
-      if (imgContainer) imgContainer.classList.toggle("bg-secondary");
+      if (imgContainer) {
+        imgContainer.classList.toggle("bg-secondary");
+      }
     });
   }
 
-  // 7. INITIAL RENDER
-  refresh();
+  // 6. INITIAL RENDER
+  showView(portfolio);
+  refreshGallery();
 }
 
 // import { ButterflyAPI } from "./api.js";
