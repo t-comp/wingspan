@@ -78,58 +78,20 @@ document.addEventListener("DOMContentLoaded", () => {
       uType: "ADMIN",
       username: "admin",
     };
-  
+
     showScreen("home");
-    initHome();
-    initHome(user.uType); 
+    initHome(); // Only call this once!
     toggleLogoutButtons(user.uType);
-  
+
     const uploadBtn = document.getElementById("uploadBtn");
-    const deleteButterflyBtn = document.getElementById("deleteSpeciesBtn");
-    if (uploadBtn) uploadBtn.classList.remove("d-none");
-    if (deleteButterflyBtn) deleteButterflyBtn.classList.remove("d-none");
-  
+    const deleteSpeciesBtn = document.getElementById("deleteSpeciesBtn");
 
-
-    //COMMENT OUT THE BELOW AND DELETE THE ABOVE ONCE DESIGN IS FINISHED
-    //USED TEMPORARILY WHILE BACKEND IS BEING FIGURED OUT
-
-    // const credentials = {
-    //   usernameOrEmail: document.getElementById(emailId).value,
-    //   password: document.getElementById(passId).value,
-    // };
-
-    // try {
-    //   const user = await ButterflyAPI.login(credentials);
-
-    //   if (user && user.uType) {
-    //     showScreen("home");
-    //     initHome();
-    //     toggleLogoutButtons(user.uType);
-
-    //     const uploadBtn = document.getElementById("uploadBtn");
-    //     const deleteButterflyBtn =
-    //       document.getElementById("deleteButterflyBtn");
-
-    //     if (user.uType === "ADMIN") {
-    //       if (uploadBtn) {
-    //         uploadBtn.classList.remove("d-none");
-    //       }
-    //       if (deleteButterflyBtn) {
-    //         deleteButterflyBtn.classList.remove("d-none");
-    //       }
-    //     } else {
-    //       if (uploadBtn) {
-    //         uploadBtn.classList.add("d-none");
-    //       }
-    //     }
-    //   } else {
-    //     alert("Login failed. Please check your credentials.");
-    //   }
-    // } catch (error) {
-    //   console.error("Login Error:", error);
-    //   alert("Could not connect to the server.");
-    // }
+    if (uploadBtn) {
+      uploadBtn.classList.remove("d-none");
+    }
+    if (deleteSpeciesBtn) {
+      deleteSpeciesBtn.classList.remove("d-none");
+    }
   }
 
   // Student Login Form
