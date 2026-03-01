@@ -16,7 +16,7 @@ export const UI = {
         .join("");
 
       col.innerHTML = `
-        <div class="card h-100 butterfly-card border-0 shadow-sm" data-bs-toggle="modal" data-bs-target="#butterflyModal">
+        <div class="card h-100 butterfly-card border-0 shadow-sm">
           <div class="butterfly-img-wrapper"><img src="${b.image}" alt="${b.name}"></div>
           <div class="card-body">
             <h5 class="card-title fw-bold mb-2">${b.name}</h5>

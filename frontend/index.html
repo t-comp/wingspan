@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -390,9 +390,6 @@
           </div>
 
           <div class="d-flex align-items-center gap-2">
-            <button id="filterBtn" class="btn btn-custom btn-filter">
-              <i class="fas fa-filter"></i> Filter
-            </button>
             <button
               id="uploadBtn"
               class="btn btn-custom btn-upload d-none"
@@ -400,6 +397,10 @@
               data-bs-target="#addButterflyModal"
             >
               <i class="fas fa-plus"></i> Upload
+            </button>
+
+            <button id="deleteSpeciesBtn" class="btn btn-danger btn-custom d-none">
+              <i class="fas fa-trash"></i> Delete
             </button>
           </div>
         </div>
@@ -410,6 +411,118 @@
           <div class="row justify-content-center" id="butterflyGrid"></div>
         </div>
       </section>
+      <!-- species view -->
+      <!-- SPECIES VIEW SCREEN -->
+      <div id="speciesView" style="display: none; margin-top: 100px">
+        <div class="container">
+          <div class="row">
+            <!-- Left: main image -->
+            <div class="col-lg-6">
+              <img
+                id="speciesImage"
+                class="img-fluid rounded shadow-sm"
+                style="max-height: 500px; object-fit: contain"
+              />
+            </div>
+
+            <!-- Right: info + images -->
+            <div class="col-lg-6 d-flex flex-column">
+              <!-- BACK TO GALLERY BUTTON -->
+              <button
+                id="backToGalleryBtn"
+                class="btn btn-outline-primary mb-3 align-self-start"
+                style="width: fit-content"
+              >
+                &larr; Back to Gallery
+              </button>
+
+              <h2 id="speciesName" class="fw-bold mb-3"></h2>
+              <p class="text-muted fst-italic" id="speciesScientific"></p>
+
+              <hr />
+
+              <p><strong>Sex:</strong> <span id="speciesSex"></span></p>
+              <p>
+                <strong>Lifecycle:</strong> <span id="speciesLifecycle"></span>
+              </p>
+
+              <div class="mb-3">
+                <strong>Description:</strong>
+                <p id="speciesDescription"></p>
+              </div>
+
+              <!-- IMAGES SECTION -->
+              <div class="mt-4">
+                <h5 class="fw-bold">Images</h5>
+                <div
+                  id="speciesImages"
+                  style="
+                    max-height: 250px;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- for the additional images  -->
+      <!-- Additional Image Modal -->
+      <div
+        class="modal fade"
+        id="additionalImageModal"
+        tabindex="-1"
+        aria-labelledby="additionalImageModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="additionalImageModalLabel">
+                Butterfly Info
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <!-- Left: Image -->
+                <div class="col-lg-6 text-center">
+                  <img
+                    id="modalImage"
+                    src=""
+                    class="img-fluid rounded shadow-sm"
+                    style="max-height: 500px; object-fit: contain"
+                  />
+                </div>
+                <!-- Right: Info -->
+                <div class="col-lg-6">
+                  <h3 id="modalName"></h3>
+                  <p class="fst-italic text-muted" id="modalScientific"></p>
+                  <p id="modalDescription"></p>
+                  <p>
+                    <strong>Image Size:</strong>
+                    <span id="modalImgSize">Unknown</span>
+                  </p>
+                  <a
+                    href="#"
+                    id="modalDownloadLink"
+                    class="btn btn-outline-primary mt-2"
+                    >Download</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <section
         class="page-section"
