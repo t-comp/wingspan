@@ -1,10 +1,10 @@
 // js/api.js
-const API_BASE_URL = "https://your-api-domain.com";
+const API_BASE_URL = "https://your-api-domain.com"; // Replace with your actual base URL
 
 export const ButterflyAPI = {
   // --- SPECIES ENDPOINTS ---
   async getAll() {
-    const response = await fetch(`${API_BASE_URL}/species/all`);
+    const response = await fetch(`${API_BASE_URL}/species/all`); //
     return await response.json();
   },
 
@@ -15,7 +15,7 @@ export const ButterflyAPI = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: data.name,
-        scientificName: data.scientific,
+        scientificName: data.scientific, // Maps to your doc
         description: data.description,
         type: "BUTTERFLY",
       }),
@@ -26,7 +26,7 @@ export const ButterflyAPI = {
   async delete(speciesId) {
     return await fetch(`${API_BASE_URL}/species/${speciesId}`, {
       method: "DELETE",
-    });
+    }); //
   },
 
   // --- IMAGE ENDPOINTS ---
@@ -49,13 +49,6 @@ export const ButterflyAPI = {
     });
     return await response.json();
   },
-
-  async createAccount(userData) {
-    const response = await fetch(`${API_BASE_URL}/user/create-account`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData), // Needs: username, email, password, uType
-    });
-    return await response.json();
-  },
 };
+
+v;
