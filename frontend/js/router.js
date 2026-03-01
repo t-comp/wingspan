@@ -73,42 +73,63 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleLogin(e, emailId, passId) {
     e.preventDefault();
 
-    const credentials = {
-      usernameOrEmail: document.getElementById(emailId).value,
-      password: document.getElementById(passId).value,
+    //TEMP ADMIN LOGIN DELETE LATER
+    const user = {
+      uType: "ADMIN",
+      username: "admin",
     };
+  
+    showScreen("home");
+    initHome();
+    initHome(user.uType); 
+    toggleLogoutButtons(user.uType);
+  
+    const uploadBtn = document.getElementById("uploadBtn");
+    const deleteButterflyBtn = document.getElementById("deleteSpeciesBtn");
+    if (uploadBtn) uploadBtn.classList.remove("d-none");
+    if (deleteButterflyBtn) deleteButterflyBtn.classList.remove("d-none");
+  
 
-    try {
-      const user = await ButterflyAPI.login(credentials);
 
-      if (user && user.uType) {
-        showScreen("home");
-        initHome();
-        toggleLogoutButtons(user.uType);
+    //COMMENT OUT THE BELOW AND DELETE THE ABOVE ONCE DESIGN IS FINISHED
+    //USED TEMPORARILY WHILE BACKEND IS BEING FIGURED OUT
 
-        const uploadBtn = document.getElementById("uploadBtn");
-        const deleteButterflyBtn =
-          document.getElementById("deleteButterflyBtn");
+    // const credentials = {
+    //   usernameOrEmail: document.getElementById(emailId).value,
+    //   password: document.getElementById(passId).value,
+    // };
 
-        if (user.uType === "ADMIN") {
-          if (uploadBtn) {
-            uploadBtn.classList.remove("d-none");
-          }
-          if (deleteButterflyBtn) {
-            deleteButterflyBtn.classList.remove("d-none");
-          }
-        } else {
-          if (uploadBtn) {
-            uploadBtn.classList.add("d-none");
-          }
-        }
-      } else {
-        alert("Login failed. Please check your credentials.");
-      }
-    } catch (error) {
-      console.error("Login Error:", error);
-      alert("Could not connect to the server.");
-    }
+    // try {
+    //   const user = await ButterflyAPI.login(credentials);
+
+    //   if (user && user.uType) {
+    //     showScreen("home");
+    //     initHome();
+    //     toggleLogoutButtons(user.uType);
+
+    //     const uploadBtn = document.getElementById("uploadBtn");
+    //     const deleteButterflyBtn =
+    //       document.getElementById("deleteButterflyBtn");
+
+    //     if (user.uType === "ADMIN") {
+    //       if (uploadBtn) {
+    //         uploadBtn.classList.remove("d-none");
+    //       }
+    //       if (deleteButterflyBtn) {
+    //         deleteButterflyBtn.classList.remove("d-none");
+    //       }
+    //     } else {
+    //       if (uploadBtn) {
+    //         uploadBtn.classList.add("d-none");
+    //       }
+    //     }
+    //   } else {
+    //     alert("Login failed. Please check your credentials.");
+    //   }
+    // } catch (error) {
+    //   console.error("Login Error:", error);
+    //   alert("Could not connect to the server.");
+    // }
   }
 
   // Student Login Form
