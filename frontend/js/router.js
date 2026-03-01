@@ -1,26 +1,32 @@
 import { initHome } from "./homepage.js";
+import { ButterflyAPI } from "./api.js"; // Import your new API service
 
 document.addEventListener("DOMContentLoaded", () => {
   const screens = {
     welcome: document.getElementById("welcome-screen"),
     student: document.getElementById("student-login"),
     admin: document.getElementById("admin-login"),
+    create: document.getElementById("create-account-screen"), // Added Create Screen
     home: document.getElementById("homepage"),
   };
 
-  // Helper to show/hide the correct logout link
   function toggleLogoutButtons(role) {
     const studentLogout = document.getElementById("studentLogoutLink");
     const adminLogout = document.getElementById("adminLogoutLink");
 
-    // Reset both first
-    if (studentLogout) studentLogout.classList.add("d-none");
-    if (adminLogout) adminLogout.classList.add("d-none");
+    if (studentLogout) {
+      studentLogout.classList.add("d-none");
+    }
+    if (adminLogout) {
+      adminLogout.classList.add("d-none");
+    }
 
-    // Show the relevant one
-    if (role === "student" && studentLogout)
+    if (role === "STUDENT" && studentLogout) {
       studentLogout.classList.remove("d-none");
-    if (role === "admin" && adminLogout) adminLogout.classList.remove("d-none");
+    }
+    if (role === "ADMIN" && adminLogout) {
+      adminLogout.classList.remove("d-none");
+    }
   }
 
   function showScreen(key) {
@@ -31,218 +37,133 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     const target = screens[key];
-    if (key === "home") target.style.display = "block";
-    else {
-      target.style.display = "flex";
-      target.classList.add("d-flex");
+    if (target) {
+      if (key === "home") {
+        target.style.display = "block";
+      } else {
+        target.style.display = "flex";
+        target.classList.add("d-flex");
+      }
     }
     window.scrollTo(0, 0);
   }
 
-  // Nav Buttons
-  document.getElementById("studentLoginBtn").onclick = () =>
-    showScreen("student");
-  document.getElementById("adminLoginBtn").onclick = () => showScreen("admin");
-  document
-    .querySelectorAll("[id$='BackToWelcomeBtn']")
-    .forEach((btn) => (btn.onclick = () => showScreen("welcome")));
+  // Navigation
+  const studentLoginBtn = document.getElementById("studentLoginBtn");
+  if (studentLoginBtn) {
+    studentLoginBtn.onclick = () => showScreen("student");
+  }
 
-  // Student Login
-  document.getElementById("studentLoginForm").onsubmit = (e) => {
-    e.preventDefault();
-    showScreen("home");
-    initHome();
-    toggleLogoutButtons("student"); // <--- Restore Student Logout
-    document.getElementById("uploadBtn")?.classList.add("d-none");
-  };
+  const adminLoginBtn = document.getElementById("adminLoginBtn");
+  if (adminLoginBtn) {
+    adminLoginBtn.onclick = () => showScreen("admin");
+  }
 
-  // Admin Login
-  document.getElementById("adminLoginForm").onsubmit = (e) => {
+  const createAccountBtn = document.getElementById("goToCreateAccountBtn");
+  if (createAccountBtn) {
+    createAccountBtn.onclick = () => showScreen("create");
+  }
+
+  const backBtns = document.querySelectorAll("[id$='BackToWelcomeBtn']");
+  backBtns.forEach((btn) => {
+    btn.onclick = () => showScreen("welcome");
+  });
+
+  // Reusable Login Logic
+  async function handleLogin(e, emailId, passId) {
     e.preventDefault();
-    if (
-      document.getElementById("adminEmail").value === "admin" &&
-      document.getElementById("adminPassword").value === "123"
-    ) {
-      showScreen("home");
-      initHome();
-      toggleLogoutButtons("admin"); // <--- Restore Admin Logout
-      document.getElementById("uploadBtn")?.classList.remove("d-none");
-      document.getElementById("deleteButterflyBtn")?.classList.remove("d-none");
-    } else {
-      alert("Wrong login!");
+
+    const credentials = {
+      usernameOrEmail: document.getElementById(emailId).value,
+      password: document.getElementById(passId).value,
+    };
+
+    try {
+      const user = await ButterflyAPI.login(credentials);
+
+      if (user && user.uType) {
+        showScreen("home");
+        initHome();
+        toggleLogoutButtons(user.uType);
+
+        const uploadBtn = document.getElementById("uploadBtn");
+        const deleteButterflyBtn =
+          document.getElementById("deleteButterflyBtn");
+
+        if (user.uType === "ADMIN") {
+          if (uploadBtn) {
+            uploadBtn.classList.remove("d-none");
+          }
+          if (deleteButterflyBtn) {
+            deleteButterflyBtn.classList.remove("d-none");
+          }
+        } else {
+          if (uploadBtn) {
+            uploadBtn.classList.add("d-none");
+          }
+        }
+      } else {
+        alert("Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Could not connect to the server.");
     }
-  };
+  }
 
-  // Logout Click Handler (Refresh the page to reset state)
+  // Student Login Form
+  const studentLoginForm = document.getElementById("studentLoginForm");
+  if (studentLoginForm) {
+    studentLoginForm.onsubmit = (e) =>
+      handleLogin(e, "studentEmail", "studentPassword");
+  }
+
+  // Admin Login Form
+  const adminLoginForm = document.getElementById("adminLoginForm");
+  if (adminLoginForm) {
+    adminLoginForm.onsubmit = (e) =>
+      handleLogin(e, "adminEmail", "adminPassword");
+  }
+
+  // Handle Account Creation Submit
+  const createAccountForm = document.getElementById("createAccountForm");
+  if (createAccountForm) {
+    createAccountForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const newUser = {
+        username: document.getElementById("createUsername").value,
+        email: document.getElementById("createEmail").value,
+        password: document.getElementById("createPassword").value,
+        uType: "STUDENT",
+      };
+
+      try {
+        await ButterflyAPI.createAccount(newUser);
+
+        alert("Account created successfully! Please log in.");
+        e.target.reset();
+        showScreen("welcome");
+      } catch (error) {
+        console.error("Account Creation Error:", error);
+        alert("Could not create account. Please try again.");
+      }
+    });
+  }
+
+  // Logout
   const handleLogout = (e) => {
     e.preventDefault();
     location.reload();
   };
 
-  document
-    .getElementById("studentLogoutLink")
-    ?.addEventListener("click", handleLogout);
-  document
-    .getElementById("adminLogoutLink")
-    ?.addEventListener("click", handleLogout);
+  const studentLogoutLink = document.getElementById("studentLogoutLink");
+  if (studentLogoutLink) {
+    studentLogoutLink.addEventListener("click", handleLogout);
+  }
+
+  const adminLogoutLink = document.getElementById("adminLogoutLink");
+  if (adminLogoutLink) {
+    adminLogoutLink.addEventListener("click", handleLogout);
+  }
 });
-
-// // js/router.js
-// document.addEventListener("DOMContentLoaded", () => {
-//   // Screens
-//   const welcomeScreen = document.getElementById("welcome-screen");
-//   const studentLoginScreen = document.getElementById("student-login");
-//   const adminLoginScreen = document.getElementById("admin-login");
-//   const mainContent = document.getElementById("homepage");
-
-//   // Welcome Screen Buttons
-//   const studentLoginBtn = document.getElementById("studentLoginBtn");
-//   const adminLoginBtn = document.getElementById("adminLoginBtn");
-
-//   // Back Buttons
-//   const studentBackToWelcomeBtn = document.getElementById(
-//     "studentBackToWelcomeBtn",
-//   );
-//   const adminBackToWelcomeBtn = document.getElementById(
-//     "adminBackToWelcomeBtn",
-//   );
-
-//   // Forms
-//   const studentLoginForm = document.getElementById("studentLoginForm");
-//   const adminLoginForm = document.getElementById("adminLoginForm");
-
-//   // Helper function to hide everything cleanly and handle Bootstrap d-flex
-//   function hideAllScreens() {
-//     if (welcomeScreen) {
-//       welcomeScreen.classList.remove("d-flex");
-//       welcomeScreen.style.display = "none";
-//     }
-//     if (studentLoginScreen) {
-//       studentLoginScreen.classList.remove("d-flex");
-//       studentLoginScreen.style.display = "none";
-//     }
-//     if (adminLoginScreen) {
-//       adminLoginScreen.classList.remove("d-flex");
-//       adminLoginScreen.style.display = "none";
-//     }
-//     if (mainContent) {
-//       mainContent.style.display = "none";
-//     }
-//   }
-
-//   // -------------------------------------------
-//   // NAVIGATION ROUTES
-//   // -------------------------------------------
-
-//   // Route: Welcome -> Student Login
-//   if (studentLoginBtn) {
-//     studentLoginBtn.addEventListener("click", () => {
-//       hideAllScreens();
-//       if (studentLoginScreen) {
-//         studentLoginScreen.classList.add("d-flex");
-//         studentLoginScreen.style.display = "flex";
-//       }
-//       window.scrollTo(0, 0);
-//     });
-//   }
-
-//   // Route: Welcome -> Admin Login
-//   if (adminLoginBtn) {
-//     adminLoginBtn.addEventListener("click", () => {
-//       hideAllScreens();
-//       if (adminLoginScreen) {
-//         adminLoginScreen.classList.add("d-flex");
-//         adminLoginScreen.style.display = "flex";
-//       }
-//       window.scrollTo(0, 0);
-//     });
-//   }
-
-//   // Routes: Back Buttons -> Welcome Screen
-//   if (studentBackToWelcomeBtn) {
-//     studentBackToWelcomeBtn.addEventListener("click", () => {
-//       hideAllScreens();
-//       if (welcomeScreen) {
-//         welcomeScreen.classList.add("d-flex");
-//         welcomeScreen.style.display = "flex";
-//       }
-//       window.scrollTo(0, 0);
-//     });
-//   }
-
-//   if (adminBackToWelcomeBtn) {
-//     adminBackToWelcomeBtn.addEventListener("click", () => {
-//       hideAllScreens();
-//       if (welcomeScreen) {
-//         welcomeScreen.classList.add("d-flex");
-//         welcomeScreen.style.display = "flex";
-//       }
-//       window.scrollTo(0, 0);
-//     });
-//   }
-
-//   // -------------------------------------------
-//   // FORM SUBMISSIONS
-//   // -------------------------------------------
-
-//   // Student Logs In
-//   if (studentLoginForm) {
-//     studentLoginForm.addEventListener("submit", (e) => {
-//       e.preventDefault();
-//       console.log("Student successfully logged in!");
-
-//       hideAllScreens();
-//       if (mainContent) {
-//         mainContent.style.display = "block";
-//       }
-//       window.scrollTo(0, 0);
-
-//       // Initialize the gallery
-//       if (typeof window.initHome === "function") {
-//         window.initHome();
-//       }
-
-//       // ACTIVATE STUDENT LOGOUT FEATURE
-//       if (typeof window.enableStudentMode === "function") {
-//         window.enableStudentMode();
-//       }
-//     });
-//   }
-
-//   // Admin Logs In
-//   if (adminLoginForm) {
-//     adminLoginForm.addEventListener("submit", (e) => {
-//       e.preventDefault();
-
-//       const user = document.getElementById("adminEmail").value;
-//       const pass = document.getElementById("adminPassword").value;
-
-//       // Simple credential check
-//       if (user === "admin" && pass === "123") {
-//         console.log("Admin successfully logged in!");
-
-//         hideAllScreens();
-//         if (mainContent) {
-//           mainContent.style.display = "block";
-//         }
-//         window.scrollTo(0, 0);
-
-//         // Start Homepage and activate admin powers
-//         if (typeof window.initHome === "function") {
-//           window.initHome();
-//         }
-//         if (typeof window.enableAdminMode === "function") {
-//           window.enableAdminMode();
-//         }
-//       } else {
-//         alert("Invalid credentials! Hint: Try user 'admin' and pass '123'");
-//       }
-//     });
-//   }
-// });
-
-// // Global function to reset the app during logout
-// window.showWelcomeScreen = function () {
-//   // We use location.reload() to cleanly wipe all session states and roles
-//   location.reload();
-// };
