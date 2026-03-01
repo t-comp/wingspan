@@ -28,4 +28,15 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
     );
     boolean existsByFilename(String fileName);
     long countBySpeciesId(Integer speciesID);
+
+    @Query("""
+        SELECT i FROM Image i
+        JOIN i.tags t
+        WHERE t.id IN :tagIds
+        GROUP BY i
+        HAVING COUNT(DISTINCT t.id) = :tagCount
+        """)
+    List<Image> findByAllTags(
+            @Param("tagIds") List<Integer> tagIds,
+            @Param("tagCount") Long tagCount);
 }

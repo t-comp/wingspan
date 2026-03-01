@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -177,5 +178,12 @@ public class ImageStorageService {
 
         String nameWithoutExtension = originalFilename.substring(0, originalFilename.lastIndexOf("."));
         return nameWithoutExtension.replaceAll("[^a-zA-Z0-9.-]", "_");
+    }
+
+    public List<Image> filterByAllTags(List<Integer> tagIds){
+        if (tagIds == null || tagIds.isEmpty()) {
+            return imageRepository.findAll(); // return everything if no tags specified
+        }
+        return imageRepository.findByAllTags(tagIds, (long) tagIds.size());
     }
 }

@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -146,6 +147,19 @@ public class ImageController {
         }catch(RuntimeException e){
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * Filter images by tags (image must have ALL specified tags
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<List<ImageDTO>> filterImagesByTags(
+            @RequestParam List<Integer> tagIds
+    ){
+        List<Image> images = imageStorageService.filterByAllTags(tagIds);
+        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
+
+        return ResponseEntity.ok(dtos);
     }
 
 }
