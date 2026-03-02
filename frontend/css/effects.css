@@ -386,3 +386,40 @@
   border-color: #0399b0 !important;
   box-shadow: 0 0 8px rgba(3, 153, 176, 0.4);
 }
+
+/* =========================================
+   CIRCULAR BACK BUTTON
+   ========================================= */
+.btn-back-circle {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #ffffff; /* White background */
+  color: #333333; /* Dark gray icon */
+  border: 1px solid #dee2e6; /* Very subtle border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0; /* Clears default Bootstrap button padding */
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover State */
+.btn-back-circle:hover {
+  background-color: #0399b0; /* Changes to WingSpan teal */
+  color: #ffffff; /* Changes icon to white */
+  border-color: #0399b0;
+  transform: scale(1.05); /* Slight pop effect when hovering */
+}
+
+/* Dark Mode Support (Optional, based on your theme logic) */
+[data-bs-theme="dark"] .btn-back-circle {
+  background-color: #34495e;
+  color: #ffffff;
+  border-color: #495057;
+}
+
+[data-bs-theme="dark"] .btn-back-circle:hover {
+  background-color: #0399b0;
+  border-color: #0399b0;
+}

@@ -412,67 +412,74 @@
       >
         <div class="container">
           <div class="row">
-            <div class="col-lg-6 mb-4 d-flex flex-column">
+            <div class="col-lg-6 mb-4 d-flex flex-row align-items-start">
               <button
                 id="backToGalleryBtn"
-                class="btn btn-outline-secondary mb-3 align-self-start"
+                class="btn btn-back-circle flex-shrink-0 me-3 mt-2 shadow-sm"
+                aria-label="Back to Main Gallery"
               >
-                &larr; Back to Main Gallery
+                <i class="fas fa-chevron-left"></i>
               </button>
 
-              <div
-                class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center position-relative image-hover-container mb-4"
-                style="aspect-ratio: 4/3; overflow: hidden; cursor: pointer"
-                data-bs-toggle="modal"
-                data-bs-target="#butterflyModal"
-              >
-                <img
-                  id="speciesImage"
-                  class="img-fluid"
-                  style="
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transition: transform 0.3s ease;
-                  "
-                />
+              <div class="flex-grow-1 d-flex flex-column">
                 <div
-                  class="image-overlay d-flex justify-content-center align-items-center"
+                  class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center position-relative image-hover-container mb-4"
+                  style="aspect-ratio: 4/3; overflow: hidden; cursor: pointer"
+                  data-bs-toggle="modal"
+                  data-bs-target="#butterflyModal"
                 >
-                  <span
-                    class="text-white fw-bold px-4 py-2 rounded-pill shadow"
-                    style="background-color: rgba(3, 153, 176, 0.9)"
+                  <img
+                    id="speciesImage"
+                    class="img-fluid"
+                    style="
+                      width: 100%;
+                      height: 100%;
+                      object-fit: cover;
+                      transition: transform 0.3s ease;
+                    "
+                  />
+                  <div
+                    class="image-overlay d-flex justify-content-center align-items-center"
                   >
-                    <i class="fas fa-expand me-2"></i>Click to see full image
-                  </span>
+                    <span
+                      class="text-white fw-bold px-4 py-2 rounded-pill shadow"
+                      style="background-color: rgba(3, 153, 176, 0.9)"
+                    >
+                      <i class="fas fa-expand me-2"></i>Click to see full image
+                    </span>
+                  </div>
+                </div>
+
+                <h2 id="speciesName" class="fw-bold mb-1"></h2>
+                <p
+                  class="text-muted fst-italic mb-3"
+                  id="speciesScientific"
+                ></p>
+
+                <p class="mb-2 fw-bold">
+                  Sex: <span class="fw-normal" id="speciesSex"></span>
+                </p>
+                <p class="mb-3 fw-bold">
+                  Lifecycle:
+                  <span class="fw-normal" id="speciesLifecycle"></span>
+                </p>
+
+                <p class="small text-muted mb-4" id="speciesDescription"></p>
+
+                <div
+                  class="p-3 bg-light rounded border-start border-4 shadow-sm mt-auto"
+                  style="border-color: #0399b0 !important"
+                >
+                  <h6 class="fw-bold mb-2" style="color: #0399b0">
+                    Specific Image Information
+                  </h6>
+                  <p class="mb-0 fs-6">
+                    <strong>Image Size:</strong>
+                    <span id="currentImgSize"></span>
+                  </p>
                 </div>
               </div>
-
-              <h2 id="speciesName" class="fw-bold mb-1"></h2>
-              <p class="text-muted fst-italic mb-3" id="speciesScientific"></p>
-
-              <p class="mb-2 fw-bold">
-                Sex: <span class="fw-normal" id="speciesSex"></span>
-              </p>
-              <p class="mb-3 fw-bold">
-                Lifecycle: <span class="fw-normal" id="speciesLifecycle"></span>
-              </p>
-
-              <p class="small text-muted mb-4" id="speciesDescription"></p>
-
-              <div
-                class="p-3 bg-light rounded border-start border-4 shadow-sm mt-auto"
-                style="border-color: #0399b0 !important"
-              >
-                <h6 class="fw-bold mb-2" style="color: #0399b0">
-                  Specific Image Information
-                </h6>
-                <p class="mb-0 fs-6">
-                  <strong>Image Size:</strong> <span id="currentImgSize"></span>
-                </p>
-              </div>
             </div>
-
             <div class="col-lg-6 d-flex flex-column">
               <div
                 class="p-3 rounded border mb-4"
@@ -500,16 +507,24 @@
 
               <h6 class="fw-bold mb-2">Image Gallery</h6>
               <div
-                id="speciesImages"
-                class="row g-3 pe-2 pb-3"
-                style="
-                  overflow-y: auto;
-                  max-height: 500px;
-                  align-content: flex-start;
-                  margin-left: 0;
-                  margin-right: 0;
-                "
-              ></div>
+                class="pe-2"
+                style="overflow-y: auto; overflow-x: hidden; max-height: 500px"
+              >
+                <div
+                  id="speciesImages"
+                  class="row g-3 pb-3 mt-0"
+                  style="margin-left: 0; margin-right: 0"
+                ></div>
+              </div>
+              <button
+                type="button"
+                class="btn rounded-pill fw-bold text-white w-100 mt-3 py-2 shadow-sm"
+                style="background-color: #0399b0; transition: all 0.2s ease"
+                onmouseover="this.style.backgroundColor = '#028094'"
+                onmouseout="this.style.backgroundColor = '#0399b0'"
+              >
+                Get Image
+              </button>
             </div>
           </div>
         </div>
