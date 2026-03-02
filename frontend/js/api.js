@@ -157,6 +157,47 @@ export const ButterflyAPI = {
       method: "DELETE",
     });
   },
+
+  // --- TAG & FILTER ENDPOINTS ---
+  // --- TAG ENDPOINTS ---
+  async getAllTags() {
+    const response = await fetch(`${API_BASE_URL}/tags`); //
+    return await response.json();
+  },
+
+  async createTag(tagData) {
+    const response = await fetch(`${API_BASE_URL}/tags/admin`, {
+      //
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tagData),
+    });
+    return await response.json();
+  },
+
+  async deleteTag(tagId) {
+    return await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
+      //
+      method: "DELETE",
+    });
+  },
+
+  async updateTag(tagId, tagData) {
+    return await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
+      //
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tagData),
+    });
+  },
+
+  async filterImagesByTags(tagIds) {
+    const queryString = tagIds.map((id) => `tagIds=${id}`).join("&"); //
+    const response = await fetch(
+      `${API_BASE_URL}/images/filter?${queryString}`,
+    );
+    return await response.json();
+  },
 };
 
 // // js/api.js

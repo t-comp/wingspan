@@ -30,6 +30,10 @@ export async function initHome(userRole) {
   const adminGenerateKeyForm = document.getElementById("adminGenerateKeyForm");
   const adminExtendKeyForm = document.getElementById("adminExtendKeyForm");
 
+  // --- NEW: TAG MANAGEMENT STATE ---
+  let activeTagFilters = new Set();
+  const filterTagCloud = document.getElementById("filterTagCloud");
+
   // 3. VIEW MANAGEMENT HELPERS
   const showView = (view) => {
     [portfolio, speciesView, teamView].forEach((v) => {
@@ -43,82 +47,75 @@ export async function initHome(userRole) {
     window.scrollTo(0, 0);
   };
 
-  const showSpeciesView = (b) => {
+  const showSpeciesView = async (b) => {
     showView(speciesView);
-    if (searchNavBar) {
-      searchNavBar.style.display = "none";
-    }
 
-    // Populate General Species Info
+    // Basic Info Setup
     document.getElementById("speciesName").innerText = b.name;
     document.getElementById("speciesScientific").innerText = b.scientific;
-    document.getElementById("speciesSex").innerText = b.sex;
-    document.getElementById("speciesLifecycle").innerText =
-      b.lifecycle || "N/A";
     document.getElementById("speciesDescription").innerText = b.description;
 
-    // Helper function to swap the main image and its specific details
     const setMainImage = (imgUrl, sizeText) => {
       document.getElementById("speciesImage").src = imgUrl;
-      document.getElementById("fullImageBtn").href = imgUrl; // Sets the button link!
+      document.getElementById("butterflyModalImage").src = imgUrl; // For the popup
       document.getElementById("currentImgSize").innerText =
         sizeText || "Unknown";
     };
 
-    // Set the default main image when the page first loads
-    setMainImage(b.image, b.imgSize);
+    // Build the Grid
+    const gridContainer = document.getElementById("speciesImages");
+    gridContainer.innerHTML = "";
 
-    // Build the thumbnail gallery
-    const speciesImagesContainer = document.getElementById("speciesImages");
-    if (speciesImagesContainer) {
-      speciesImagesContainer.innerHTML = "";
+    // Combine images into a list we can work with
+    const allImgs = [
+      { url: b.image, size: b.imgSize, tags: b.tags || [] },
+      ...(b.additionalImages || []).map((img) => ({
+        url: img.url,
+        size: "Unknown",
+        tags: img.tagIds || [],
+      })),
+    ];
 
-      // Combine the main image and any additional images into one array
-      const allImages = [b.image];
-      if (b.additionalImages) {
-        b.additionalImages.forEach((img) => allImages.push(img));
+    // Helper to render the grid
+    const renderInnerGrid = (imagesToRender) => {
+      gridContainer.innerHTML = "";
+      if (imagesToRender.length === 0) {
+        gridContainer.innerHTML =
+          '<p class="text-muted">No images match the selected tags.</p>';
+        return;
       }
 
-      // Render each thumbnail
-      allImages.forEach((imgUrl, index) => {
-        const img = document.createElement("img");
-        img.src = imgUrl;
-        img.className = "img-fluid rounded shadow-sm thumbnail-img";
-        // Square thumbnails for the bottom row
-        img.style.width = "80px";
-        img.style.height = "80px";
-        img.style.objectFit = "cover";
-        img.style.cursor = "pointer";
-        img.style.border = "3px solid transparent";
+      imagesToRender.forEach((imgObj, idx) => {
+        const col = document.createElement("div");
+        col.className = "col-4";
 
-        // Highlight the first thumbnail by default
-        if (index === 0) {
-          img.style.borderColor = "#0399b0";
-        }
+        col.innerHTML = `
+        <div class="inner-thumb-wrapper rounded ${idx === 0 ? "active" : ""}">
+          <img src="${imgObj.url}" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+      `;
 
-        // Add the click listener to swap images!
-        img.addEventListener("click", () => {
-          // 1. Remove border from all thumbnails
-          const allThumbs = document.querySelectorAll(".thumbnail-img");
-          allThumbs.forEach((t) => {
-            if (t) {
-              t.style.borderColor = "transparent";
-            }
-          });
+        col.querySelector(".inner-thumb-wrapper").onclick = (e) => {
+          document
+            .querySelectorAll(".inner-thumb-wrapper")
+            .forEach((el) => el.classList.remove("active"));
+          e.currentTarget.classList.add("active");
+          setMainImage(imgObj.url, imgObj.size);
+        };
 
-          // 2. Add border to the clicked one
-          img.style.borderColor = "#0399b0";
-
-          // 3. Swap the main image display and update the specific info
-          // (Mocking specific sizes for additional images for now!)
-          const mockSpecificSize =
-            index === 0 ? b.imgSize : "Unknown (Additional Image)";
-          setMainImage(imgUrl, mockSpecificSize);
-        });
-
-        speciesImagesContainer.appendChild(img);
+        gridContainer.appendChild(col);
       });
-    }
+      // Set main image to the first one in the filtered list
+      if (imagesToRender.length > 0) {
+        setMainImage(imagesToRender[0].url, imagesToRender[0].size);
+      }
+    };
+
+    // Render initial grid
+    renderInnerGrid(allImgs);
+
+    // Load Tags for this view
+    await renderTags(userRole, renderInnerGrid, allImgs);
   };
 
   const refreshGallery = (data = butterflies) => {
@@ -127,7 +124,117 @@ export async function initHome(userRole) {
     });
   };
 
-  // 4. ADMIN TABLE LOGIC (Users)
+  // --- 4. TAG MANAGEMENT LOGIC ---
+  // --- 4. TAG MANAGEMENT LOGIC ---
+  const renderTags = async (role, gridRenderFunction, currentImages) => {
+    if (!filterTagCloud) return;
+
+    try {
+      const tags = await ButterflyAPI.getAllTags();
+      filterTagCloud.innerHTML = "";
+
+      // Clear active filters when a new species is loaded
+      activeTagFilters.clear();
+
+      tags.forEach((tag) => {
+        const tagWrapper = document.createElement("div");
+        tagWrapper.className = "d-flex align-items-center gap-1 mb-1";
+
+        const btn = document.createElement("button");
+        // Styled like your mockup!
+        btn.className = "btn btn-sm btn-outline-dark rounded-pill fw-bold";
+        btn.innerText = tag.name;
+
+        // Filtering logic (Species-specific!)
+        btn.onclick = async () => {
+          if (activeTagFilters.has(tag.id)) {
+            activeTagFilters.delete(tag.id);
+            btn.classList.replace("btn-success", "btn-outline-dark");
+            btn.classList.replace("text-white", "text-dark");
+          } else {
+            activeTagFilters.add(tag.id);
+            btn.classList.replace("btn-outline-dark", "btn-success");
+            btn.classList.replace("text-dark", "text-white");
+          }
+
+          // LOCAL FILTERING: Only filter the images belonging to THIS species!
+          if (activeTagFilters.size === 0) {
+            gridRenderFunction(currentImages); // Show all if no filters
+          } else {
+            const activeArray = Array.from(activeTagFilters);
+            const filteredImgs = currentImages.filter((img) => {
+              // Check if this image has ALL the selected tags
+              return activeArray.every((selectedTagId) =>
+                img.tags.includes(selectedTagId),
+              );
+            });
+            gridRenderFunction(filteredImgs);
+          }
+        };
+
+        tagWrapper.appendChild(btn);
+
+        // Admin-only Delete Button (Red X icon)
+        if (role === "ADMIN") {
+          const delBtn = document.createElement("button");
+          delBtn.className = "btn btn-sm btn-link p-0 text-danger ms-1";
+          delBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+          delBtn.onclick = async () => {
+            if (confirm("Delete this tag entirely?")) {
+              await ButterflyAPI.deleteTag(tag.id);
+              await renderTags(role, gridRenderFunction, currentImages);
+            }
+          };
+          tagWrapper.appendChild(delBtn);
+        }
+
+        filterTagCloud.appendChild(tagWrapper);
+      });
+
+      // Admin "Add Tag" Button
+      if (role === "ADMIN") {
+        const addTagBtn = document.createElement("button");
+        addTagBtn.className =
+          "btn btn-sm btn-success rounded-pill fw-bold ms-2";
+        addTagBtn.innerHTML = '<i class="fas fa-plus"></i> Add Filter';
+        addTagBtn.setAttribute("data-bs-toggle", "modal");
+        addTagBtn.setAttribute("data-bs-target", "#adminTagModal");
+        filterTagCloud.appendChild(addTagBtn);
+      }
+    } catch (error) {
+      console.error("Error loading tags:", error);
+    }
+  };
+
+  // Handle Tag Creation Form (Admin Only)
+  const adminTagForm = document.getElementById("adminTagForm");
+  if (adminTagForm) {
+    adminTagForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const tagData = {
+        name: document.getElementById("tagName").value,
+        category: document.getElementById("tagCategory").value,
+      };
+
+      await ButterflyAPI.createTag(tagData);
+
+      // Re-render tags (assuming we are looking at the species view)
+      const currentSpecies = butterflies.find(
+        (b) => b.name === document.getElementById("speciesName").innerText,
+      );
+      if (currentSpecies) {
+        showSpeciesView(currentSpecies);
+      }
+
+      e.target.reset();
+      const modalElem = document.getElementById("adminTagModal");
+      if (modalElem) {
+        bootstrap.Modal.getInstance(modalElem).hide();
+      }
+    });
+  }
+
+  // 5. ADMIN TABLE LOGIC (Users)
   async function loadAdminTable() {
     const users = await ButterflyAPI.getAllUsers();
     const tbody = document.getElementById("adminUsersTableBody");
@@ -174,7 +281,7 @@ export async function initHome(userRole) {
     await loadAdminTable();
   };
 
-  // 5. ADMIN TABLE LOGIC (API Keys)
+  // 6. ADMIN TABLE LOGIC (API Keys)
   async function loadApiKeysTable() {
     const keys = await ButterflyAPI.getAllApiKeys();
     const tbody = document.getElementById("adminApiKeysTableBody");
@@ -239,8 +346,22 @@ export async function initHome(userRole) {
   };
 
   // ==========================
-  // 6. EVENT LISTENERS
+  // 7. EVENT LISTENERS
   // ==========================
+
+  // Clear Tags Button
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener("click", () => {
+      activeTagFilters.clear();
+      const currentSpecies = butterflies.find(
+        (b) => b.name === document.getElementById("speciesName").innerText,
+      );
+      if (currentSpecies) {
+        showSpeciesView(currentSpecies);
+      }
+    });
+  }
 
   if (backBtn) {
     backBtn.addEventListener("click", () => {
@@ -407,7 +528,7 @@ export async function initHome(userRole) {
     });
   }
 
-  // 7. INITIAL RENDER
+  // 8. INITIAL RENDER
   showView(portfolio);
   refreshGallery();
 }
