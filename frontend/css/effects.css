@@ -308,14 +308,7 @@
   box-shadow: 0 0 4px rgba(0,0,0,0.2);
 }
 
-#speciesImages {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  max-height: 250px;
-  overflow-y: auto;
-  padding-bottom: 20px; /* space at the bottom */
-}
+
 
 /* Custom full-image lightbox styles */
 .modal-image .modal-content {

@@ -411,14 +411,17 @@
         style="display: none; margin-top: 100px; margin-bottom: 50px"
       >
         <div class="container">
-          <button id="backToGalleryBtn" class="btn btn-outline-secondary mb-4">
-            &larr; Back to Main Gallery
-          </button>
-
           <div class="row">
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-6 mb-4 d-flex flex-column">
+              <button
+                id="backToGalleryBtn"
+                class="btn btn-outline-secondary mb-3 align-self-start"
+              >
+                &larr; Back to Main Gallery
+              </button>
+
               <div
-                class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center position-relative image-hover-container"
+                class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center position-relative image-hover-container mb-4"
                 style="aspect-ratio: 4/3; overflow: hidden; cursor: pointer"
                 data-bs-toggle="modal"
                 data-bs-target="#butterflyModal"
@@ -445,26 +448,34 @@
                 </div>
               </div>
 
-              <div class="p-3 bg-light rounded border mt-3 text-center">
+              <h2 id="speciesName" class="fw-bold mb-1"></h2>
+              <p class="text-muted fst-italic mb-3" id="speciesScientific"></p>
+
+              <p class="mb-2 fw-bold">
+                Sex: <span class="fw-normal" id="speciesSex"></span>
+              </p>
+              <p class="mb-3 fw-bold">
+                Lifecycle: <span class="fw-normal" id="speciesLifecycle"></span>
+              </p>
+
+              <p class="small text-muted mb-4" id="speciesDescription"></p>
+
+              <div
+                class="p-3 bg-light rounded border-start border-4 shadow-sm mt-auto"
+                style="border-color: #0399b0 !important"
+              >
+                <h6 class="fw-bold mb-2" style="color: #0399b0">
+                  Specific Image Information
+                </h6>
                 <p class="mb-0 fs-6">
-                  <strong>Specific Image Size:</strong>
-                  <span id="currentImgSize"></span>
+                  <strong>Image Size:</strong> <span id="currentImgSize"></span>
                 </p>
               </div>
             </div>
 
-            <div class="col-lg-6 d-flex flex-column" style="max-height: 85vh">
-              <div class="mb-3">
-                <h2 id="speciesName" class="fw-bold mb-1"></h2>
-                <p
-                  class="text-muted fst-italic mb-2"
-                  id="speciesScientific"
-                ></p>
-                <p class="small text-muted mb-0" id="speciesDescription"></p>
-              </div>
-
+            <div class="col-lg-6 d-flex flex-column">
               <div
-                class="p-3 rounded border mb-3"
+                class="p-3 rounded border mb-4"
                 style="background-color: #f1f8f9"
               >
                 <div
@@ -487,11 +498,17 @@
                 ></div>
               </div>
 
-              <h6 class="fw-bold">Image Gallery</h6>
+              <h6 class="fw-bold mb-2">Image Gallery</h6>
               <div
                 id="speciesImages"
-                class="row g-2 overflow-auto pr-2"
-                style="flex-grow: 1; min-height: 200px"
+                class="row g-3 pe-2 pb-3"
+                style="
+                  overflow-y: auto;
+                  max-height: 500px;
+                  align-content: flex-start;
+                  margin-left: 0;
+                  margin-right: 0;
+                "
               ></div>
             </div>
           </div>
