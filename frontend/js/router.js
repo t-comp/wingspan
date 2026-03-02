@@ -1,3 +1,4 @@
+// js/router.js
 import { initHome } from "./homepage.js";
 import { ButterflyAPI } from "./api.js";
 
@@ -73,23 +74,23 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleLogin(e, emailId, passId) {
     e.preventDefault();
 
-    const credentials = {
-      usernameOrEmail: document.getElementById(emailId).value,
-      password: document.getElementById(passId).value,
-    };
+    const emailVal = document.getElementById(emailId).value;
+    const passVal = document.getElementById(passId).value;
 
     try {
-      const user = await ButterflyAPI.login(credentials);
+      const user = await ButterflyAPI.login(emailVal, passVal);
 
-      if (user && user.uType) {
+      const role = user.utype || user.uType;
+
+      if (user && role) {
         showScreen("home");
-        initHome(user.uType); // Passing the role to homepage!
-        toggleLogoutButtons(user.uType);
+        initHome(role);
+        toggleLogoutButtons(role);
 
         const uploadBtn = document.getElementById("uploadBtn");
         const deleteSpeciesBtn = document.getElementById("deleteSpeciesBtn");
 
-        if (user.uType === "ADMIN") {
+        if (role === "ADMIN") {
           if (uploadBtn) {
             uploadBtn.classList.remove("d-none");
           }
@@ -106,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Could not connect to the server.");
+      alert("Could not connect to the server or invalid credentials.");
     }
   }
 
@@ -134,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
         username: document.getElementById("createUsername").value,
         email: document.getElementById("createEmail").value,
         password: document.getElementById("createPassword").value,
-        uType: "STUDENT",
+        utype: "STUDENT",
       };
 
       try {
@@ -167,14 +168,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // import { initHome } from "./homepage.js";
-// import { ButterflyAPI } from "./api.js"; // Import your new API service
+// import { ButterflyAPI } from "./api.js";
 
 // document.addEventListener("DOMContentLoaded", () => {
 //   const screens = {
 //     welcome: document.getElementById("welcome-screen"),
 //     student: document.getElementById("student-login"),
 //     admin: document.getElementById("admin-login"),
-//     create: document.getElementById("create-account-screen"), // Added Create Screen
+//     create: document.getElementById("create-account-screen"),
 //     home: document.getElementById("homepage"),
 //   };
 
@@ -241,24 +242,40 @@ document.addEventListener("DOMContentLoaded", () => {
 //   async function handleLogin(e, emailId, passId) {
 //     e.preventDefault();
 
-//     //TEMP ADMIN LOGIN DELETE LATER
-//     const user = {
-//       uType: "ADMIN",
-//       username: "admin",
+//     const credentials = {
+//       usernameOrEmail: document.getElementById(emailId).value,
+//       password: document.getElementById(passId).value,
 //     };
 
-//     showScreen("home");
-//     initHome(); // Only call this once!
-//     toggleLogoutButtons(user.uType);
+//     try {
+//       const user = await ButterflyAPI.login(credentials);
 
-//     const uploadBtn = document.getElementById("uploadBtn");
-//     const deleteSpeciesBtn = document.getElementById("deleteSpeciesBtn");
+//       if (user && user.uType) {
+//         showScreen("home");
+//         initHome(user.uType); // Passing the role to homepage!
+//         toggleLogoutButtons(user.uType);
 
-//     if (uploadBtn) {
-//       uploadBtn.classList.remove("d-none");
-//     }
-//     if (deleteSpeciesBtn) {
-//       deleteSpeciesBtn.classList.remove("d-none");
+//         const uploadBtn = document.getElementById("uploadBtn");
+//         const deleteSpeciesBtn = document.getElementById("deleteSpeciesBtn");
+
+//         if (user.uType === "ADMIN") {
+//           if (uploadBtn) {
+//             uploadBtn.classList.remove("d-none");
+//           }
+//           if (deleteSpeciesBtn) {
+//             deleteSpeciesBtn.classList.remove("d-none");
+//           }
+//         } else {
+//           if (uploadBtn) {
+//             uploadBtn.classList.add("d-none");
+//           }
+//         }
+//       } else {
+//         alert("Login failed. Please check your credentials.");
+//       }
+//     } catch (error) {
+//       console.error("Login Error:", error);
+//       alert("Could not connect to the server.");
 //     }
 //   }
 
@@ -291,7 +308,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //       try {
 //         await ButterflyAPI.createAccount(newUser);
-
 //         alert("Account created successfully! Please log in.");
 //         e.target.reset();
 //         showScreen("welcome");

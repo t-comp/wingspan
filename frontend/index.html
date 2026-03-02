@@ -125,7 +125,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold">Email Address</label>
               <input
-                type="email"
+                type="text"
                 class="form-control rounded-pill px-3 py-2"
                 id="createEmail"
                 placeholder="name@iastate.edu"
@@ -195,7 +195,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold">Student Email/Username</label>
               <input
-                type="email"
+                type="text"
                 class="form-control rounded-pill px-3 py-2"
                 id="studentEmail"
                 placeholder="name@iastate.edu"
@@ -481,7 +481,7 @@
 
           <div id="adminTeamContent" style="display: none">
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h2 class="text-muted">User & Team Management</h2>
+              <h2 class="text-muted">User Management</h2>
               <button
                 class="btn btn-success"
                 data-bs-toggle="modal"
@@ -491,7 +491,9 @@
               </button>
             </div>
 
-            <div class="table-responsive bg-white rounded shadow-sm p-3 border">
+            <div
+              class="table-responsive bg-white rounded shadow-sm p-3 border mb-5"
+            >
               <table class="table table-hover align-middle">
                 <thead class="table-light">
                   <tr>
@@ -503,6 +505,35 @@
                   </tr>
                 </thead>
                 <tbody id="adminUsersTableBody"></tbody>
+              </table>
+            </div>
+
+            <hr class="mb-5" />
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2 class="text-muted">Team & API Key Management</h2>
+              <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#adminGenerateKeyModal"
+              >
+                <i class="fas fa-key"></i> Generate API Key
+              </button>
+            </div>
+
+            <div class="table-responsive bg-white rounded shadow-sm p-3 border">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Key ID</th>
+                    <th>Team Name</th>
+                    <th>Project</th>
+                    <th>Semester</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminApiKeysTableBody"></tbody>
               </table>
             </div>
           </div>
@@ -539,7 +570,7 @@
                 <div class="mb-3">
                   <label class="form-label">Email</label>
                   <input
-                    type="email"
+                    type="text"
                     class="form-control"
                     id="adminNewEmail"
                     required
@@ -561,7 +592,7 @@
                     <option value="ADMIN">Admin</option>
                   </select>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">
+                <button type="submit" class="btn btn-success w-100">
                   Create User
                 </button>
               </form>
@@ -572,14 +603,14 @@
 
       <div
         class="modal fade"
-        id="adminUpdateUserModal"
+        id="adminGenerateKeyModal"
         tabindex="-1"
         aria-hidden="true"
       >
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title fw-bold">Update User Info</h5>
+              <h5 class="modal-title fw-bold">Generate New API Key</h5>
               <button
                 type="button"
                 class="btn-close"
@@ -587,30 +618,128 @@
               ></button>
             </div>
             <div class="modal-body">
-              <form id="adminUpdateUserForm">
-                <input type="hidden" id="updateUserId" />
+              <form id="adminGenerateKeyForm">
                 <div class="mb-3">
-                  <label class="form-label">Update Username</label>
+                  <label class="form-label">Team Name</label>
                   <input
                     type="text"
                     class="form-control"
-                    id="updateUsername"
+                    id="newTeamName"
+                    placeholder="e.g., Team Bugs"
                     required
                   />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Update Email</label>
+                  <label class="form-label">Project Name</label>
                   <input
-                    type="email"
+                    type="text"
                     class="form-control"
-                    id="updateEmail"
+                    id="newProjectName"
+                    placeholder="e.g., Net App"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Semester</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="newSemester"
+                    placeholder="e.g., Spring 2026"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                  Generate Key
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="adminExtendKeyModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title fw-bold">Extend API Key</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="adminExtendKeyForm">
+                <input type="hidden" id="extendKeyId" />
+                <div class="mb-3">
+                  <label class="form-label">Additional Months</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="extendMonths"
+                    min="1"
                     required
                   />
                 </div>
                 <button type="submit" class="btn btn-warning w-100">
-                  Save Changes
+                  Extend Time
                 </button>
               </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="additionalImageModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="additionalImageModalLabel">
+                Butterfly Info
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-lg-6 text-center">
+                  <img
+                    id="modalImage"
+                    src=""
+                    class="img-fluid rounded shadow-sm"
+                    style="max-height: 500px; object-fit: contain"
+                  />
+                </div>
+                <div class="col-lg-6">
+                  <h3 id="modalName"></h3>
+                  <p class="fst-italic text-muted" id="modalScientific"></p>
+                  <p id="modalDescription"></p>
+                  <p>
+                    <strong>Image Size:</strong>
+                    <span id="modalImgSize">Unknown</span>
+                  </p>
+                  <a
+                    href="#"
+                    id="modalDownloadLink"
+                    class="btn btn-outline-primary mt-2"
+                    >Download</a
+                  >
+                </div>
+              </div>
             </div>
           </div>
         </div>
