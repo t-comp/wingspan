@@ -308,7 +308,6 @@
     <!--------------------->
     <!-- HOMEPAGE SCREEN -->
     <!--------------------->
-
     <div id="homepage" style="display: none">
       <nav class="wingspan-nav fixed-top">
         <div class="nav-container">
@@ -316,14 +315,12 @@
             <img src="assets/img/butterfly.png" alt="Logo" class="nav-logo" />
             <span>WINGSPAN</span>
           </div>
-
           <div class="nav-toggle-group">
             <button id="viewGalleryBtn" class="toggle-btn active">
               GALLERY
             </button>
             <button id="viewTeamBtn" class="toggle-btn">TEAM</button>
           </div>
-
           <div class="nav-profile dropdown">
             <div
               class="profile-circle"
@@ -333,7 +330,6 @@
               aria-expanded="false"
               style="cursor: pointer"
             ></div>
-
             <ul
               class="dropdown-menu dropdown-menu-end shadow border-0 mt-2"
               aria-labelledby="profileDropdown"
@@ -385,7 +381,6 @@
               aria-label="Search"
             />
           </div>
-
           <div class="d-flex align-items-center gap-2">
             <button
               id="uploadBtn"
@@ -395,7 +390,6 @@
             >
               <i class="fas fa-plus"></i> Upload
             </button>
-
             <button
               id="deleteSpeciesBtn"
               class="btn btn-danger btn-custom d-none"
@@ -412,45 +406,74 @@
         </div>
       </section>
 
-      <div id="speciesView" style="display: none; margin-top: 100px">
+      <div
+        id="speciesView"
+        style="display: none; margin-top: 100px; margin-bottom: 50px"
+      >
         <div class="container">
           <div class="row">
-            <div class="col-lg-6">
-              <img
-                id="speciesImage"
-                class="img-fluid rounded shadow-sm"
-                style="max-height: 500px; object-fit: contain"
-              />
+            <div class="col-lg-6 mb-4">
+              <div
+                class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center"
+                style="aspect-ratio: 4/3; overflow: hidden"
+              >
+                <img
+                  id="speciesImage"
+                  class="img-fluid"
+                  style="width: 100%; height: 100%; object-fit: cover"
+                />
+              </div>
+              <div class="mt-3 text-center">
+                <a
+                  id="fullImageBtn"
+                  href="#"
+                  target="_blank"
+                  class="btn btn-outline-primary w-100 fw-bold"
+                  >Click to see full image</a
+                >
+              </div>
             </div>
+
             <div class="col-lg-6 d-flex flex-column">
               <button
                 id="backToGalleryBtn"
-                class="btn btn-outline-primary mb-3 align-self-start"
+                class="btn btn-outline-secondary mb-3 align-self-start"
                 style="width: fit-content"
               >
                 &larr; Back to Gallery
               </button>
-              <h2 id="speciesName" class="fw-bold mb-3"></h2>
-              <p class="text-muted fst-italic" id="speciesScientific"></p>
-              <hr />
+
+              <h2 id="speciesName" class="fw-bold mb-1"></h2>
+              <p class="text-muted fst-italic mb-3" id="speciesScientific"></p>
+              <hr class="mt-0" />
               <p><strong>Sex:</strong> <span id="speciesSex"></span></p>
               <p>
                 <strong>Lifecycle:</strong> <span id="speciesLifecycle"></span>
               </p>
               <div class="mb-3">
-                <strong>Description:</strong>
+                <strong>General Description:</strong>
                 <p id="speciesDescription"></p>
               </div>
-              <div class="mt-4">
-                <h5 class="fw-bold">Images</h5>
+
+              <div class="p-3 bg-light rounded border mb-4">
+                <h6 class="fw-bold text-primary mb-2">
+                  Specific Image Information
+                </h6>
+                <p class="mb-0 fs-6">
+                  <strong>Image Size:</strong> <span id="currentImgSize"></span>
+                </p>
+              </div>
+
+              <div class="mt-auto">
+                <h5 class="fw-bold">Image Gallery</h5>
                 <div
                   id="speciesImages"
                   style="
-                    max-height: 250px;
-                    overflow-y: auto;
                     display: flex;
-                    flex-wrap: wrap;
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
                     gap: 10px;
+                    padding-bottom: 10px;
                   "
                 ></div>
               </div>
@@ -691,55 +714,6 @@
                   Extend Time
                 </button>
               </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="modal fade"
-        id="additionalImageModal"
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="additionalImageModalLabel">
-                Butterfly Info
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <div class="row">
-                <div class="col-lg-6 text-center">
-                  <img
-                    id="modalImage"
-                    src=""
-                    class="img-fluid rounded shadow-sm"
-                    style="max-height: 500px; object-fit: contain"
-                  />
-                </div>
-                <div class="col-lg-6">
-                  <h3 id="modalName"></h3>
-                  <p class="fst-italic text-muted" id="modalScientific"></p>
-                  <p id="modalDescription"></p>
-                  <p>
-                    <strong>Image Size:</strong>
-                    <span id="modalImgSize">Unknown</span>
-                  </p>
-                  <a
-                    href="#"
-                    id="modalDownloadLink"
-                    class="btn btn-outline-primary mt-2"
-                    >Download</a
-                  >
-                </div>
-              </div>
             </div>
           </div>
         </div>

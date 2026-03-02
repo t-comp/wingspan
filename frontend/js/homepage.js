@@ -49,41 +49,71 @@ export async function initHome(userRole) {
       searchNavBar.style.display = "none";
     }
 
+    // Populate General Species Info
     document.getElementById("speciesName").innerText = b.name;
     document.getElementById("speciesScientific").innerText = b.scientific;
     document.getElementById("speciesSex").innerText = b.sex;
     document.getElementById("speciesLifecycle").innerText =
       b.lifecycle || "N/A";
     document.getElementById("speciesDescription").innerText = b.description;
-    document.getElementById("speciesImage").src = b.image;
 
+    // Helper function to swap the main image and its specific details
+    const setMainImage = (imgUrl, sizeText) => {
+      document.getElementById("speciesImage").src = imgUrl;
+      document.getElementById("fullImageBtn").href = imgUrl; // Sets the button link!
+      document.getElementById("currentImgSize").innerText =
+        sizeText || "Unknown";
+    };
+
+    // Set the default main image when the page first loads
+    setMainImage(b.image, b.imgSize);
+
+    // Build the thumbnail gallery
     const speciesImagesContainer = document.getElementById("speciesImages");
     if (speciesImagesContainer) {
       speciesImagesContainer.innerHTML = "";
 
-      (b.additionalImages || []).forEach((imgUrl) => {
+      // Combine the main image and any additional images into one array
+      const allImages = [b.image];
+      if (b.additionalImages) {
+        b.additionalImages.forEach((img) => allImages.push(img));
+      }
+
+      // Render each thumbnail
+      allImages.forEach((imgUrl, index) => {
         const img = document.createElement("img");
         img.src = imgUrl;
-        img.className = "img-fluid rounded shadow-sm";
-        img.style.width = "30%";
-        img.style.maxHeight = "150px";
+        img.className = "img-fluid rounded shadow-sm thumbnail-img";
+        // Square thumbnails for the bottom row
+        img.style.width = "80px";
+        img.style.height = "80px";
         img.style.objectFit = "cover";
         img.style.cursor = "pointer";
+        img.style.border = "3px solid transparent";
 
+        // Highlight the first thumbnail by default
+        if (index === 0) {
+          img.style.borderColor = "#0399b0";
+        }
+
+        // Add the click listener to swap images!
         img.addEventListener("click", () => {
-          const modalElem = document.getElementById("additionalImageModal");
-          if (modalElem) {
-            const modal = new bootstrap.Modal(modalElem);
-            document.getElementById("modalImage").src = imgUrl;
-            document.getElementById("modalName").innerText = b.name;
-            document.getElementById("modalScientific").innerText = b.scientific;
-            document.getElementById("modalDescription").innerText =
-              b.description;
-            document.getElementById("modalImgSize").innerText =
-              b.imgSize || "Unknown";
-            document.getElementById("modalDownloadLink").href = imgUrl;
-            modal.show();
-          }
+          // 1. Remove border from all thumbnails
+          const allThumbs = document.querySelectorAll(".thumbnail-img");
+          allThumbs.forEach((t) => {
+            if (t) {
+              t.style.borderColor = "transparent";
+            }
+          });
+
+          // 2. Add border to the clicked one
+          img.style.borderColor = "#0399b0";
+
+          // 3. Swap the main image display and update the specific info
+          // (Mocking specific sizes for additional images for now!)
+          const mockSpecificSize =
+            index === 0 ? b.imgSize : "Unknown (Additional Image)";
+          setMainImage(imgUrl, mockSpecificSize);
         });
 
         speciesImagesContainer.appendChild(img);
