@@ -73,7 +73,7 @@ export async function initHome(userRole) {
       { url: b.image, size: b.imgSize, tags: b.tags || [] },
       ...(b.additionalImages || []).map((img) => ({
         url: img.url,
-        size: "Unknown",
+        size: img.imgSize || "Unknown",
         tags: img.tagIds || [],
       })),
     ];
