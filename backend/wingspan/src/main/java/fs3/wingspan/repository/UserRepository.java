@@ -1,5 +1,6 @@
 package fs3.wingspan.repository;
 
+import fs3.wingspan.model.UType;
 import fs3.wingspan.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     Users findByEmail(String email);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-    Users findBySetupToken(String setupToken);
+    // teams
     List<Users> findByTeamId(Integer teamId);
+    List<Users> findByTeamIdIsNullAndUtype(UType utype);
 }

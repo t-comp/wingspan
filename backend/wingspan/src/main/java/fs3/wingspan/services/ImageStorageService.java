@@ -4,6 +4,7 @@ import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
+import io.awspring.cloud.s3.S3Template;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,10 +24,17 @@ public class ImageStorageService {
     @Autowired
     private ImageRepository imageRepository;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
     @Autowired
     private SpeciesRepository speciesRepository;
+
+    @Autowired
+    private S3Template s3Template;
+
+    @Value("${digitalocean.bucket.name}")
+    private String bucketName;
+
+    @Value("${spring.cloud.aws.endpoint}")
+    private String endpoint;
 
     /**
      * Save image file to disk and metadata to database
@@ -50,7 +54,6 @@ public class ImageStorageService {
         s3Template.upload(bucketName, uniqueFilename, file.getInputStream());
 
         String fileUrl = endpoint + "/" + bucketName + "/" + uniqueFilename;
-
 
         //Create & save entity
         Image image = new Image();
@@ -111,7 +114,6 @@ public class ImageStorageService {
         Image image = getImageById(imageId);
 
         s3Template.deleteObject(bucketName, image.getFilename());
-
 
         //delete database record
         imageRepository.delete(image);
