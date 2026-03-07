@@ -19,6 +19,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>io.awspring.cloud</groupId>
+			<artifactId>spring-cloud-aws-starter-s3</artifactId>
+			<version>3.1.1</version>
+		</dependency>
 		<!-- Spring Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

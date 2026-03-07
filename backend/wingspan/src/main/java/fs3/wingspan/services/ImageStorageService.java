@@ -1,7 +1,9 @@
 package fs3.wingspan.services;
 
 import fs3.wingspan.model.Image;
+import fs3.wingspan.model.Species;
 import fs3.wingspan.repository.ImageRepository;
+import fs3.wingspan.repository.SpeciesRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,43 +29,34 @@ public class ImageStorageService {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+    @Autowired
+    private SpeciesRepository speciesRepository;
 
     /**
      * Save image file to disk and metadata to database
      */
     @Transactional
-    public Image saveImage(MultipartFile file,
+    public Image saveImage(MultipartFile file, int speciesId,
                            String lifecycle_stage, String description, String nathansNotes) throws IOException {
+        //look up species - throws if not found
+        Species species = speciesRepository.findById(speciesId).orElseThrow(() -> new RuntimeException("Species not found with id: " + speciesId));
+
         //generate unique filename to prevent collisions
         String originalFilename = file.getOriginalFilename();
-        log.info("Original filename received: {}", originalFilename);
-
         String extension = getFileExtension(originalFilename);
-        log.info("Extension extracted: {}", extension);  // ← Does it get here?
-
         String safeFilename = getSafeFilename(originalFilename);
-        log.info("Extension extracted: {}", extension);  // ← Does it get here?
+        String uniqueFilename = UUID.randomUUID() + "_" + safeFilename + extension;
 
-        String uniqueFilename = UUID.randomUUID().toString()
-                + "_" + safeFilename
-                + extension;
-        log.info("Unique filename: {}", uniqueFilename);
+        s3Template.upload(bucketName, uniqueFilename, file.getInputStream());
 
-        Path uploadPath = Paths.get(uploadDir);
-        log.info("Upload path: {}", uploadPath.toAbsolutePath());
+        String fileUrl = endpoint + "/" + bucketName + "/" + uniqueFilename;
 
-        if(!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        Path filePath = uploadPath.resolve(uniqueFilename);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        log.info("File saved to: {}", filePath);
 
         //Create & save entity
         Image image = new Image();
+        image.setSpecies(species);
         image.setFilename(uniqueFilename);
-        image.setFpath(filePath.toString());
+        image.setFpath(fileUrl);
         image.setFisize(BigInteger.valueOf(file.getSize()));
         image.setDescription(description);
         image.setLifecyclestage(lifecycle_stage);
@@ -78,26 +72,6 @@ public class ImageStorageService {
     }
 
     /**
-     * save physical file to disk
-     */
-    private String savePhysicalFile(MultipartFile file, String uniqueFilename) throws IOException {
-
-        Path uploadPath = Paths.get(uploadDir);
-
-        //create directory if doesn't exit
-        if(!Files.exists(uploadPath)){
-            Files.createDirectories(uploadPath);
-            log.info("Created upload directory: {}", uploadPath);
-        }
-
-        //Save file
-        Path filePath = uploadPath.resolve(uniqueFilename);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        return filePath.toString();
-    }
-
-    /**
      * Generate unique filename using UUID
      */
     private String generateUniqueFilename(String originalFilename) {
@@ -106,19 +80,6 @@ public class ImageStorageService {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
         return UUID.randomUUID().toString() + extension;
-    }
-
-    /**
-     * Delete physical file from disk
-     */
-    public void deletePhysicalFile(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        if(Files.exists(path)) {
-            Files.delete(path);
-            log.info("Deleted physical file: {}", filePath);
-        }else{
-            log.warn("File not found for deletion: {}", filePath);
-        }
     }
 
     /**
@@ -149,8 +110,8 @@ public class ImageStorageService {
     public void deleteImage(Integer imageId) throws IOException {
         Image image = getImageById(imageId);
 
-        //Delete physical file (first)
-        deletePhysicalFile(image.getFpath());
+        s3Template.deleteObject(bucketName, image.getFilename());
+
 
         //delete database record
         imageRepository.delete(image);
@@ -170,6 +131,9 @@ public class ImageStorageService {
         return "." + filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
     }
 
+    /**
+     * Saves the original file name for the photos
+     */
     private String getSafeFilename(String originalFilename){
         if(originalFilename == null || originalFilename.isEmpty()){
             return "upload";
@@ -177,5 +141,12 @@ public class ImageStorageService {
 
         String nameWithoutExtension = originalFilename.substring(0, originalFilename.lastIndexOf("."));
         return nameWithoutExtension.replaceAll("[^a-zA-Z0-9.-]", "_");
+    }
+
+    public List<Image> filterByAllTags(List<Integer> tagIds){
+        if (tagIds == null || tagIds.isEmpty()) {
+            return imageRepository.findAll(); // return everything if no tags specified
+        }
+        return imageRepository.findByAllTags(tagIds, (long) tagIds.size());
     }
 }

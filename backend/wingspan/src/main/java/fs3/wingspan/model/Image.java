@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,7 +31,7 @@ public class Image {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="species_id")
+    @JoinColumn(name="species_id", nullable = false)
     @JsonIgnore
     private Species species;
 
@@ -69,9 +70,8 @@ public class Image {
 
     }
 
-    public Image(int width, int height, String lifecycle_stage, String description, String nathans_notes) {
-        this.width = width;
-        this.height = height;
+    public Image(Species species, String lifecycle_stage, String description, String nathans_notes) {
+        this.species = species;
         this.lifecyclestage = lifecycle_stage;
         this.description = description;
         this.nathansnotes = nathans_notes;

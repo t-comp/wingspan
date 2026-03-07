@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,6 +48,7 @@ public class ImageController {
     @PostMapping(value = "/admin/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
+     @RequestParam(required = true) int species_id,
      @RequestParam(required = false) String life_cycle,
      @RequestParam(required = false) String description,
      @RequestParam(required = false) String nathansNotes){
@@ -56,12 +58,16 @@ public class ImageController {
                     .body(Map.of("message", "File is empty"));
         }
 
-       try{
+       try {
            //let service handle all business logic
-           Image savedImage = imageStorageService.saveImage(file, life_cycle, description, nathansNotes);
+           Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes);
 
            return ResponseEntity.status(HttpStatus.CREATED)
                    .body(ImageDTO.fromImage(savedImage));
+       }catch(RuntimeException e) {
+           //Catches species not found
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
        } catch (IOException e) {
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                    .body(Map.of("message", "Upload failed"));
@@ -146,6 +152,19 @@ public class ImageController {
         }catch(RuntimeException e){
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * Filter images by tags (image must have ALL specified tags
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<List<ImageDTO>> filterImagesByTags(
+            @RequestParam List<Integer> tagIds
+    ){
+        List<Image> images = imageStorageService.filterByAllTags(tagIds);
+        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
+
+        return ResponseEntity.ok(dtos);
     }
 
 }
