@@ -1,6 +1,10 @@
 package fs3.wingspan.controller;
 import fs3.wingspan.model.APIKeys;
+import fs3.wingspan.model.Teams;
 import fs3.wingspan.repository.APIKeyRepository;
+//import fs3.wingspan.repository.TeamsRepository;
+import fs3.wingspan.repository.UserRepository;
+//import fs3.wingspan.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +18,15 @@ public class APIKeysController {
 
     @Autowired
     private APIKeyRepository apiKeyRepository;
+//
+//    @Autowired
+//    private TeamsRepository teamRepository;
+//
+//    @Autowired
+//    private UserRepository userRepository;
+//
+//    @Autowired
+//    private EmailService emailService;
 
     /**
      * generate api key for student team
@@ -22,6 +35,13 @@ public class APIKeysController {
 
     @PostMapping("/keygen")
     public String generateApiKey(@RequestBody APIKeys key) {
+        //
+//        Teams t = new Teams();
+//        t.setName(request.getTeamName());
+//        t.setProjectName(request.getProjectName());
+//        t.setSemester(request.getSemester());
+//        // saved tea,
+//        Teams sTeam = teamRepository.save(team);
 
         // key value gen
         String kv = "rgds_" + UUID.randomUUID().toString().replace("-", "");

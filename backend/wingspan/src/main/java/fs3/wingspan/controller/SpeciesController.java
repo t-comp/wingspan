@@ -119,7 +119,4 @@ public class SpeciesController {
         speciesRepository.delete(s);
         return name + "has been deleted.";
     }
-
-
-
 }

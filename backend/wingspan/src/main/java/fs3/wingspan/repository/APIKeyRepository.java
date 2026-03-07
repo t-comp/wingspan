@@ -12,4 +12,5 @@ public interface APIKeyRepository extends JpaRepository<APIKeys, Integer>{
     List<APIKeys> findByProjectName(String projectName);
     List<APIKeys> findByActive(boolean active);
     boolean existsByKeyVal(String keyVal);
+    APIKeys findByTeamId(Integer teamId);
 }
