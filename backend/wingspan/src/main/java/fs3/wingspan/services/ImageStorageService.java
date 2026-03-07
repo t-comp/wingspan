@@ -1,7 +1,9 @@
 package fs3.wingspan.services;
 
 import fs3.wingspan.model.Image;
+import fs3.wingspan.model.Species;
 import fs3.wingspan.repository.ImageRepository;
+import fs3.wingspan.repository.SpeciesRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +29,18 @@ public class ImageStorageService {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+    @Autowired
+    private SpeciesRepository speciesRepository;
 
     /**
      * Save image file to disk and metadata to database
      */
     @Transactional
-    public Image saveImage(MultipartFile file,
+    public Image saveImage(MultipartFile file, int speciesId,
                            String lifecycle_stage, String description, String nathansNotes) throws IOException {
+        //look up species - throws if not found
+        Species species = speciesRepository.findById(speciesId).orElseThrow(() -> new RuntimeException("Species not found with id: " + speciesId));
+
         //generate unique filename to prevent collisions
         String originalFilename = file.getOriginalFilename();
         log.info("Original filename received: {}", originalFilename);
@@ -62,6 +69,7 @@ public class ImageStorageService {
 
         //Create & save entity
         Image image = new Image();
+        image.setSpecies(species);
         image.setFilename(uniqueFilename);
         image.setFpath(filePath.toString());
         image.setFisize(BigInteger.valueOf(file.getSize()));
