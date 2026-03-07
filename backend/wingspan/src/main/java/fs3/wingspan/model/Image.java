@@ -69,7 +69,9 @@ public class Image {
 
     }
 
-    public Image(int width, int height, String lifecycle_stage, String description, String nathans_notes) {
+    public Image(Species species,int width, int height, String lifecycle_stage, String description, String nathans_notes) {
+        this.species = species;
+        //int species_id = species.getId();
         this.width = width;
         this.height = height;
         this.lifecyclestage = lifecycle_stage;
