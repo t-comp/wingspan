@@ -1,6 +1,6 @@
 // js/api.js
-const API_BASE_URL = "http://localhost:8080";
-//const API_BASE_URL = "http://159.203.134.226:8080";
+//const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "http://159.203.134.226:8080";
 
 export const ButterflyAPI = {
   // --- SPECIES ENDPOINTS ---
@@ -57,11 +57,13 @@ export const ButterflyAPI = {
       }),
     });
 
+    console.log("trying to send login");
+
     if (!response.ok) {
       throw new Error("Invalid credentials");
     }
 
-    return await response.json();
+    return await response.text();
   },
 
   async createAccount(userData) {
@@ -70,7 +72,7 @@ export const ButterflyAPI = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
     });
-    return await response.json();
+    return await response.text();
   },
 
   // --- NEW: USER MANAGEMENT ENDPOINTS ---
