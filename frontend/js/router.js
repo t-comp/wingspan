@@ -80,7 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const user = await ButterflyAPI.login(emailVal, passVal);
 
-      const role = user.utype || user.uType;
+      console.log("BACKEND LOGIN RESPONSE:", user);
+      const role = user.userType || user.utype || user.uType;
 
       if (user && role) {
         showScreen("home");
@@ -91,23 +92,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const deleteSpeciesBtn = document.getElementById("deleteSpeciesBtn");
 
         if (role === "ADMIN") {
-          if (uploadBtn) {
-            uploadBtn.classList.remove("d-none");
-          }
-          if (deleteSpeciesBtn) {
-            deleteSpeciesBtn.classList.remove("d-none");
-          }
+          if (uploadBtn) uploadBtn.classList.remove("d-none");
+          if (deleteSpeciesBtn) deleteSpeciesBtn.classList.remove("d-none");
         } else {
-          if (uploadBtn) {
-            uploadBtn.classList.add("d-none");
-          }
+          if (uploadBtn) uploadBtn.classList.add("d-none");
         }
       } else {
-        alert("Login failed. Please check your credentials.");
+        alert("Login failed: The backend didn't send back the user role!");
       }
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Could not connect to the server or invalid credentials.");
+      alert(`Login Error: ${error.message}`);
     }
   }
 
