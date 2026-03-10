@@ -304,9 +304,27 @@ export async function initHome(userRole, userEmail) {
   // 6. ADMIN TABBED INTERFACE LOGIC
   // ==========================================
   let allCachedUsers = [];
+  let globalUserTeamMap = {}; // Maps userId -> Team Name
 
   async function loadAdminData() {
-    allCachedUsers = await ButterflyAPI.getAllUsers();
+    // 1. Fetch Users & Sort Alphabetically
+    let users = await ButterflyAPI.getAllUsers();
+    users.sort((a, b) =>
+      a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
+    );
+    allCachedUsers = users;
+
+    // 2. Fetch Teams & Members to build the mapping workaround
+    globalUserTeamMap = {};
+    const teams = await ButterflyAPI.getAllTeams();
+    for (const t of teams) {
+      const members = await ButterflyAPI.getTeamMembers(t.id);
+      for (const m of members) {
+        globalUserTeamMap[m.userId] = t.name;
+      }
+    }
+
+    // 3. Render all tables
     renderAllUsersTable(allCachedUsers);
     await loadUnassignedStudents();
     await loadTeams();
@@ -324,10 +342,16 @@ export async function initHome(userRole, userEmail) {
       const currentRole = u.uType || u.userType || u.utype;
       const badgeClass = currentRole === "ADMIN" ? "bg-danger" : "bg-primary";
 
+      // Look up the team name, default to "Unassigned" if not found
+      const teamName =
+        globalUserTeamMap[u.userId] ||
+        '<span class="text-muted fst-italic">Unassigned</span>';
+
       tr.innerHTML = `
         <td>${u.username}</td>
         <td>${u.email}</td>
         <td><span class="badge ${badgeClass}">${currentRole}</span></td>
+        <td><span class="fw-bold text-secondary">${teamName}</span></td>
         <td class="text-end">
             <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditUserModal('${u.userId}', '${u.username}', '${u.email}')"><i class="fas fa-edit"></i></button>
             <button class="btn btn-sm btn-outline-secondary me-1" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">Toggle Role</button>
@@ -476,11 +500,50 @@ export async function initHome(userRole, userEmail) {
   };
 
   window.toggleUserRole = async (userId, currentRole) => {
+    // Find the user being modified from our cached list
+    const targetUser = allCachedUsers.find(
+      (u) => u.userId.toString() === userId.toString(),
+    );
+
     if (currentRole === "ADMIN") {
+      // 1. Check how many admins currently exist
+      const adminCount = allCachedUsers.filter(
+        (u) => (u.uType || u.userType || u.utype) === "ADMIN",
+      ).length;
+
+      // 2. Prevent demoting the final admin
+      if (adminCount <= 1) {
+        return alert(
+          "Action Denied: The system must always have at least one administrator.",
+        );
+      }
+
+      // 3. Check if the admin is trying to demote themselves
+      if (targetUser && targetUser.email === userEmail) {
+        const proceed = confirm(
+          "WARNING: You are about to remove your own admin privileges! You will be logged out immediately if you proceed. Do you want to continue?",
+        );
+
+        if (!proceed) return; // Stop if they click Cancel
+
+        try {
+          await ButterflyAPI.makeStudent(userId);
+          alert("Your admin privileges have been revoked. Logging out...");
+          location.reload(); // Refreshing the page effectively logs them out and resets to the welcome screen
+          return;
+        } catch (error) {
+          return alert("Failed to change role.");
+        }
+      }
+
+      // 4. Demoting another admin (not themselves)
       await ButterflyAPI.makeStudent(userId);
     } else {
+      // Promoting a student to admin
       await ButterflyAPI.makeAdmin(userId);
     }
+
+    // Refresh the table to show the new roles
     await loadAdminData();
   };
 
@@ -657,6 +720,8 @@ export async function initHome(userRole, userEmail) {
         await ButterflyAPI.updateUsername(userId, newUsername);
         await ButterflyAPI.updateEmail(userId, newEmail);
         await loadAdminData();
+
+        document.activeElement.blur();
 
         bootstrap.Modal.getInstance(
           document.getElementById("adminEditUserModal"),
