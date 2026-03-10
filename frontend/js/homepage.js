@@ -317,6 +317,168 @@ export async function initHome(userRole) {
     });
   }
 
+  // --- ADMIN TEAM & USER MANAGEMENT LOGIC ---
+
+  async function loadAdminData() {
+    await loadUnassignedStudents();
+    await loadTeams();
+  }
+
+  async function loadUnassignedStudents() {
+    const unassigned = await ButterflyAPI.getUnassignedStudents();
+    const tbody = document.getElementById("unassignedUsersTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+    unassigned.forEach((u) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${u.username}</td>
+        <td>${u.email}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-danger" onclick="window.deleteSystemUser('${u.id}')">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadTeams() {
+    const teams = await ButterflyAPI.getAllTeams();
+    const unassigned = await ButterflyAPI.getUnassignedStudents();
+    const container = document.getElementById("teamsContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    // Build dropdown options for unassigned students
+    let studentOptions = `<option value="">Select a student...</option>`;
+    unassigned.forEach((u) => {
+      studentOptions += `<option value="${u.id}">${u.username}</option>`;
+    });
+
+    for (const team of teams) {
+      // Fetch members for this specific team
+      const members = await ButterflyAPI.getTeamMembers(team.id);
+
+      let membersHtml =
+        members.length === 0
+          ? `<p class="text-muted small mb-0">No members assigned.</p>`
+          : members
+              .map(
+                (m) => `
+            <span class="badge bg-secondary me-1 mb-1 d-inline-flex align-items-center">
+              ${m.username}
+              <i class="fas fa-times ms-2" style="cursor:pointer;" onclick="window.removeStudentFromTeam('${team.id}', '${m.id}')"></i>
+            </span>
+          `,
+              )
+              .join("");
+
+      const card = document.createElement("div");
+      card.className = "card shadow-sm border-0";
+      card.innerHTML = `
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="fw-bold mb-0 text-primary">${team.name}</h5>
+            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="window.deleteTeam('${team.id}')"><i class="fas fa-trash"></i></button>
+          </div>
+          <p class="small text-muted mb-2">${team.projectName} | ${team.semester}</p>
+          <div class="mb-3">
+            <h6 class="small fw-bold text-dark mb-1">Members:</h6>
+            <div>${membersHtml}</div>
+          </div>
+          <div class="input-group input-group-sm">
+            <select class="form-select" id="assignStudentSelect-${team.id}">
+              ${studentOptions}
+            </select>
+            <button class="btn btn-outline-success" onclick="window.addStudentToTeam('${team.id}')">Add</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    }
+  }
+
+  // --- WINDOW ATTACHED FUNCTIONS FOR INLINE HTML CALLS ---
+
+  window.deleteSystemUser = async (userId) => {
+    if (confirm("Delete this user permanently?")) {
+      await ButterflyAPI.deleteUser(userId);
+      await loadAdminData();
+    }
+  };
+
+  window.deleteTeam = async (teamId) => {
+    if (confirm("Delete this team entirely?")) {
+      await ButterflyAPI.deleteTeam(teamId);
+      await loadAdminData();
+    }
+  };
+
+  window.addStudentToTeam = async (teamId) => {
+    const select = document.getElementById(`assignStudentSelect-${teamId}`);
+    const userId = select.value;
+    if (!userId) return alert("Please select a student first.");
+
+    await ButterflyAPI.addTeamMember(teamId, userId);
+    await loadAdminData(); // Refresh UI
+  };
+
+  window.removeStudentFromTeam = async (teamId, userId) => {
+    if (confirm("Remove this student from the team?")) {
+      await ButterflyAPI.removeTeamMember(teamId, userId);
+      await loadAdminData();
+    }
+  };
+
+  // --- FORM EVENT LISTENERS ---
+
+  const adminCreateTeamForm = document.getElementById("adminCreateTeamForm");
+  if (adminCreateTeamForm) {
+    adminCreateTeamForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const teamData = {
+        name: document.getElementById("newCreateTeamName").value,
+        projectName: document.getElementById("newCreateProjectName").value,
+        semester: document.getElementById("newCreateSemester").value,
+      };
+
+      await ButterflyAPI.createTeam(teamData);
+      await loadAdminData();
+
+      e.target.reset();
+      bootstrap.Modal.getInstance(
+        document.getElementById("adminCreateTeamModal"),
+      ).hide();
+    });
+  }
+
+  const adminAddUserForm = document.getElementById("adminAddUserForm");
+  if (adminAddUserForm) {
+    adminAddUserForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      // Using the exact structure from your API endpoints
+      const newUserData = {
+        username: document.getElementById("adminNewUsername").value,
+        email: document.getElementById("adminNewEmail").value,
+        password: document.getElementById("adminNewPassword").value,
+        utype: document.getElementById("adminNewRole").value,
+      };
+
+      // Since the new API allows creating a user from admin without assigning a team immediately
+      await ButterflyAPI.adminCreateAccount(newUserData);
+      await loadAdminData(); // Refresh the unassigned table
+
+      e.target.reset();
+      bootstrap.Modal.getInstance(
+        document.getElementById("adminAddUserModal"),
+      ).hide();
+    });
+  }
+
   // Global functions for inline buttons in API Key Table
   window.deleteSystemApiKey = async (keyId) => {
     if (confirm("Are you sure you want to delete this API key?")) {
@@ -398,6 +560,7 @@ export async function initHome(userRole) {
       }
 
       // Role-based logic for Teams View
+      // Role-based logic for Teams View
       if (userRole === "ADMIN") {
         if (adminTeamContent) {
           adminTeamContent.style.display = "block";
@@ -405,8 +568,10 @@ export async function initHome(userRole) {
         if (studentTeamContent) {
           studentTeamContent.style.display = "none";
         }
-        await loadAdminTable();
-        await loadApiKeysTable(); // Load keys too!
+
+        // THIS IS THE FIX: Call the new data loader
+        await loadAdminData();
+        await loadApiKeysTable();
       } else {
         if (adminTeamContent) {
           adminTeamContent.style.display = "none";

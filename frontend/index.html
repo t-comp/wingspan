@@ -565,38 +565,61 @@
           </div>
 
           <div id="adminTeamContent" style="display: none">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h2 class="text-muted">User Management</h2>
-              <button
-                class="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#adminAddUserModal"
-              >
-                <i class="fas fa-user-plus"></i> Create User
-              </button>
+            <div class="row">
+              <div class="col-lg-6 mb-4">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <h3 class="text-muted mb-0">Unassigned Students</h3>
+                  <button
+                    class="btn btn-sm btn-success"
+                    data-bs-toggle="modal"
+                    data-bs-target="#adminAddUserModal"
+                  >
+                    <i class="fas fa-user-plus"></i> Create User
+                  </button>
+                </div>
+                <div
+                  class="table-responsive bg-white rounded shadow-sm p-3 border"
+                  style="max-height: 400px; overflow-y: auto"
+                >
+                  <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="unassignedUsersTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="col-lg-6 mb-4">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <h3 class="text-muted mb-0">Teams</h3>
+                  <button
+                    class="btn btn-sm btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#adminCreateTeamModal"
+                  >
+                    <i class="fas fa-users"></i> Create Team
+                  </button>
+                </div>
+                <div
+                  id="teamsContainer"
+                  class="d-flex flex-column gap-3"
+                  style="max-height: 400px; overflow-y: auto"
+                ></div>
+              </div>
             </div>
-
-            <div
-              class="table-responsive bg-white rounded shadow-sm p-3 border mb-5"
-            >
-              <table class="table table-hover align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th class="text-end">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="adminUsersTableBody"></tbody>
-              </table>
-            </div>
-
-            <hr class="mb-5" />
+            <hr class="mb-5 mt-4" />
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h2 class="text-muted">Team & API Key Management</h2>
+              <h3 class="text-muted mb-0">Team & API Key Management</h3>
               <button
                 class="btn btn-primary"
                 data-bs-toggle="modal"
@@ -606,7 +629,9 @@
               </button>
             </div>
 
-            <div class="table-responsive bg-white rounded shadow-sm p-3 border">
+            <div
+              class="table-responsive bg-white rounded shadow-sm p-3 border mb-5"
+            >
               <table class="table table-hover align-middle">
                 <thead class="table-light">
                   <tr>
@@ -620,6 +645,60 @@
                 </thead>
                 <tbody id="adminApiKeysTableBody"></tbody>
               </table>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="adminCreateTeamModal"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title fw-bold">Create Empty Team</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <form id="adminCreateTeamForm">
+                    <div class="mb-3">
+                      <label class="form-label">Team Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="newCreateTeamName"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Project Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="newCreateProjectName"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Semester</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="newCreateSemester"
+                        required
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                      Create Team & API Key
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           </div>
         </div>

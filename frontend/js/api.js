@@ -366,7 +366,7 @@ export const ButterflyAPI = {
 
   async addTeamMember(teamId, userId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/add-member`, {
-      method: "POST",
+      method: "PUT",
       headers: jsonHeaders,
       body: JSON.stringify({ userId: parseInt(userId) }),
     });
@@ -377,7 +377,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/teams/${teamId}/remove-member`,
       {
-        method: "POST",
+        method: "PUT",
         headers: jsonHeaders,
         body: JSON.stringify({ userId: parseInt(userId) }),
       },
