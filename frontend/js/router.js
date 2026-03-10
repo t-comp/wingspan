@@ -71,17 +71,33 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Reusable Login Logic
-  async function handleLogin(e, emailId, passId) {
+  async function handleLogin(e, emailId, passId, expectedRole) {
     e.preventDefault();
 
     const emailVal = document.getElementById(emailId).value;
     const passVal = document.getElementById(passId).value;
+
+    // Strict Length Validation for Login
+    if (emailVal.length !== 5) {
+      return alert("Username must be exactly 5 characters long.");
+    }
+    if (passVal.length !== 7) {
+      return alert("Password must be exactly 7 characters long.");
+    }
 
     try {
       const user = await ButterflyAPI.login(emailVal, passVal);
 
       console.log("BACKEND LOGIN RESPONSE:", user);
       const role = user.userType || user.utype || user.uType;
+
+      // Role Restriction Check
+      if (role !== expectedRole) {
+        alert(
+          `Access Denied: You are a ${role}. Please use the correct login screen.`,
+        );
+        return;
+      }
 
       if (user && role) {
         showScreen("home");
@@ -102,22 +118,29 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      alert(`Login Error: ${error.message}`);
+      // Prompt unregistered users to create an account
+      if (
+        confirm(
+          `Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`,
+        )
+      ) {
+        showScreen("create");
+      }
     }
   }
 
-  // Student Login Form
+  // Student Login Form (Pass expected role "STUDENT")
   const studentLoginForm = document.getElementById("studentLoginForm");
   if (studentLoginForm) {
     studentLoginForm.onsubmit = (e) =>
-      handleLogin(e, "studentEmail", "studentPassword");
+      handleLogin(e, "studentEmail", "studentPassword", "STUDENT");
   }
 
-  // Admin Login Form
+  // Admin Login Form (Pass expected role "ADMIN")
   const adminLoginForm = document.getElementById("adminLoginForm");
   if (adminLoginForm) {
     adminLoginForm.onsubmit = (e) =>
-      handleLogin(e, "adminEmail", "adminPassword");
+      handleLogin(e, "adminEmail", "adminPassword", "ADMIN");
   }
 
   // Handle Account Creation Submit
@@ -126,21 +149,51 @@ document.addEventListener("DOMContentLoaded", () => {
     createAccountForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const newUser = {
-        username: document.getElementById("createUsername").value,
-        email: document.getElementById("createEmail").value,
-        password: document.getElementById("createPassword").value,
-        utype: "STUDENT",
-      };
+      const usernameVal = document.getElementById("createUsername").value;
+      const emailVal = document.getElementById("createEmail").value;
+      const passVal = document.getElementById("createPassword").value;
+
+      // Email Format Validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailVal)) {
+        return alert("Please enter a valid email address.");
+      }
+
+      // Strict Length Validation for Creation
+      if (usernameVal.length !== 5) {
+        return alert("Username must be exactly 5 characters long.");
+      }
+      if (passVal.length !== 7) {
+        return alert("Password must be exactly 7 characters long.");
+      }
 
       try {
+        // Uniqueness Check: See if username already exists
+        const allUsers = await ButterflyAPI.getAllUsers();
+        const usernameExists = allUsers.some(
+          (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
+        );
+
+        if (usernameExists) {
+          return alert(
+            "This username already exists. Please choose a different one.",
+          );
+        }
+
+        const newUser = {
+          username: usernameVal,
+          email: emailVal,
+          password: passVal,
+          utype: "STUDENT",
+        };
+
         await ButterflyAPI.createAccount(newUser);
         alert("Account created successfully! Please log in.");
         e.target.reset();
         showScreen("welcome");
       } catch (error) {
         console.error("Account Creation Error:", error);
-        alert("Could not create account. Please try again.");
+        alert(`Could not create account: ${error.message}`);
       }
     });
   }

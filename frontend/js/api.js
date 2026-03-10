@@ -154,6 +154,14 @@ export const ButterflyAPI = {
         utype: "STUDENT",
       }),
     });
+
+    if (!response.ok) {
+      const errorMsg = await response.text();
+      throw new Error(
+        errorMsg || `Server responded with status ${response.status}`,
+      );
+    }
+
     return await response.json();
   },
 

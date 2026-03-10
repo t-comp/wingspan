@@ -564,26 +564,65 @@ export async function initHome(userRole, userEmail) {
     });
   }
 
+  // Handle Admin User Creation Form
   const adminAddUserForm = document.getElementById("adminAddUserForm");
   if (adminAddUserForm) {
     adminAddUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      // Using the exact structure from your API endpoints
-      const newUserData = {
-        username: document.getElementById("adminNewUsername").value,
-        email: document.getElementById("adminNewEmail").value,
-        password: document.getElementById("adminNewPassword").value,
-        utype: document.getElementById("adminNewRole").value,
-      };
 
-      // Since the new API allows creating a user from admin without assigning a team immediately
-      await ButterflyAPI.adminCreateAccount(newUserData);
-      await loadAdminData(); // Refresh the unassigned table
+      const usernameVal = document.getElementById("adminNewUsername").value;
+      const emailVal = document.getElementById("adminNewEmail").value;
+      const passVal = document.getElementById("adminNewPassword").value;
+      const roleVal = document.getElementById("adminNewRole").value;
 
-      e.target.reset();
-      bootstrap.Modal.getInstance(
-        document.getElementById("adminAddUserModal"),
-      ).hide();
+      // Email Format Validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailVal)) {
+        return alert("Please enter a valid email address.");
+      }
+
+      // Strict Length Validation
+      if (usernameVal.length !== 5) {
+        return alert("Username must be exactly 5 characters long.");
+      }
+      if (passVal.length !== 7) {
+        return alert("Password must be exactly 7 characters long.");
+      }
+
+      try {
+        // Uniqueness Check: See if username already exists
+        const allUsers = await ButterflyAPI.getAllUsers();
+        const usernameExists = allUsers.some(
+          (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
+        );
+
+        if (usernameExists) {
+          return alert(
+            "This username already exists. Please choose a different one.",
+          );
+        }
+
+        const newUserData = {
+          username: usernameVal,
+          email: emailVal,
+          password: passVal,
+          utype: roleVal,
+        };
+
+        // Call the admin creation endpoint
+        await ButterflyAPI.adminCreateAccount(newUserData);
+        await loadAdminData(); // Refresh the tables
+
+        e.target.reset();
+        bootstrap.Modal.getInstance(
+          document.getElementById("adminAddUserModal"),
+        ).hide();
+
+        alert("User successfully created!");
+      } catch (error) {
+        console.error("Admin User Creation Error:", error);
+        alert(`Could not create user: ${error.message}`);
+      }
     });
   }
 
