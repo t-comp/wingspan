@@ -370,7 +370,7 @@ export const ButterflyAPI = {
       headers: jsonHeaders,
       body: JSON.stringify({ userId: parseInt(userId) }),
     });
-    return await response.json();
+    return await response.json(); // test
   },
 
   async removeTeamMember(teamId, userId) {
