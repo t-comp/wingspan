@@ -31,24 +31,19 @@ export async function initHome(userRole, userEmail) {
   const adminTeamContent = document.getElementById("adminTeamContent");
   const studentTeamContent = document.getElementById("studentTeamContent");
 
-  // New Forms
   const adminGenerateKeyForm = document.getElementById("adminGenerateKeyForm");
   const adminExtendKeyForm = document.getElementById("adminExtendKeyForm");
 
-  // --- NEW: TAG MANAGEMENT STATE ---
+  // Tag Management State
   let activeTagFilters = new Set();
   const filterTagCloud = document.getElementById("filterTagCloud");
 
   // 3. VIEW MANAGEMENT HELPERS
   const showView = (view) => {
     [portfolio, speciesView, teamView].forEach((v) => {
-      if (v) {
-        v.style.display = "none";
-      }
+      if (v) v.style.display = "none";
     });
-    if (view) {
-      view.style.display = "block";
-    }
+    if (view) view.style.display = "block";
     window.scrollTo(0, 0);
   };
 
@@ -57,23 +52,22 @@ export async function initHome(userRole, userEmail) {
 
     if (searchNavBar) searchNavBar.style.display = "none";
 
-    // Basic Info Setup
     document.getElementById("speciesName").innerText = b.name;
     document.getElementById("speciesScientific").innerText = b.scientific;
     document.getElementById("speciesDescription").innerText = b.description;
 
     const setMainImage = (imgUrl, sizeText) => {
-      document.getElementById("speciesImage").src = imgUrl;
-      document.getElementById("butterflyModalImage").src = imgUrl; // For the popup
+      document.getElementById("speciesImage").src =
+        imgUrl || "assets/img/noimage.jpg";
+      document.getElementById("butterflyModalImage").src =
+        imgUrl || "assets/img/noimage.jpg";
       document.getElementById("currentImgSize").innerText =
         sizeText || "Unknown";
     };
 
-    // Build the Grid
     const gridContainer = document.getElementById("speciesImages");
     gridContainer.innerHTML = "";
 
-    // Combine images into a list we can work with
     const allImgs = [
       { url: b.image, size: b.imgSize, tags: b.tags || [] },
       ...(b.additionalImages || []).map((img) => ({
@@ -83,7 +77,6 @@ export async function initHome(userRole, userEmail) {
       })),
     ];
 
-    // Helper to render the grid
     const renderInnerGrid = (imagesToRender) => {
       gridContainer.innerHTML = "";
       if (imagesToRender.length === 0) {
@@ -94,12 +87,10 @@ export async function initHome(userRole, userEmail) {
 
       imagesToRender.forEach((imgObj, idx) => {
         const col = document.createElement("div");
-
         col.className = "col-4";
-
         col.innerHTML = `
         <div class="inner-thumb-wrapper rounded ${idx === 0 ? "active" : ""}" style="aspect-ratio: 1/1;">
-          <img src="${imgObj.url}" style="width:100%; height:100%; object-fit:cover;">
+          <img src="${imgObj.url || "assets/img/noimage.jpg"}" style="width:100%; height:100%; object-fit:cover;">
         </div>
       `;
 
@@ -113,15 +104,13 @@ export async function initHome(userRole, userEmail) {
 
         gridContainer.appendChild(col);
       });
-      // Set main image to the first one in the filtered list
+
       if (imagesToRender.length > 0) {
         setMainImage(imagesToRender[0].url, imagesToRender[0].size);
       }
     };
-    // Render initial grid
-    renderInnerGrid(allImgs);
 
-    // Load Tags for this view
+    renderInnerGrid(allImgs);
     await renderTags(userRole, renderInnerGrid, allImgs);
   };
 
@@ -138,8 +127,6 @@ export async function initHome(userRole, userEmail) {
     try {
       const tags = await ButterflyAPI.getAllTags();
       filterTagCloud.innerHTML = "";
-
-      // Clear active filters when a new species is loaded
       activeTagFilters.clear();
 
       tags.forEach((tag) => {
@@ -147,11 +134,9 @@ export async function initHome(userRole, userEmail) {
         tagWrapper.className = "d-flex align-items-center gap-1 mb-1";
 
         const btn = document.createElement("button");
-        // Styled like your mockup!
         btn.className = "btn btn-sm btn-outline-dark rounded-pill fw-bold";
         btn.innerText = tag.name;
 
-        // Filtering logic (Species-specific!)
         btn.onclick = async () => {
           if (activeTagFilters.has(tag.id)) {
             activeTagFilters.delete(tag.id);
@@ -163,13 +148,11 @@ export async function initHome(userRole, userEmail) {
             btn.classList.replace("text-dark", "text-white");
           }
 
-          // LOCAL FILTERING: Only filter the images belonging to THIS species!
           if (activeTagFilters.size === 0) {
-            gridRenderFunction(currentImages); // Show all if no filters
+            gridRenderFunction(currentImages);
           } else {
             const activeArray = Array.from(activeTagFilters);
             const filteredImgs = currentImages.filter((img) => {
-              // Check if this image has ALL the selected tags
               return activeArray.every((selectedTagId) =>
                 img.tags.includes(selectedTagId),
               );
@@ -180,7 +163,6 @@ export async function initHome(userRole, userEmail) {
 
         tagWrapper.appendChild(btn);
 
-        // Admin-only Delete Button (Red X icon)
         if (role === "ADMIN") {
           const delBtn = document.createElement("button");
           delBtn.className = "btn btn-sm btn-link p-0 text-danger ms-1";
@@ -197,7 +179,6 @@ export async function initHome(userRole, userEmail) {
         filterTagCloud.appendChild(tagWrapper);
       });
 
-      // Admin "Add Tag" Button
       if (role === "ADMIN") {
         const addTagBtn = document.createElement("button");
         addTagBtn.className =
@@ -212,7 +193,6 @@ export async function initHome(userRole, userEmail) {
     }
   };
 
-  // Handle Tag Creation Form (Admin Only)
   const adminTagForm = document.getElementById("adminTagForm");
   if (adminTagForm) {
     adminTagForm.addEventListener("submit", async (e) => {
@@ -224,60 +204,24 @@ export async function initHome(userRole, userEmail) {
 
       await ButterflyAPI.createTag(tagData);
 
-      // Re-render tags (assuming we are looking at the species view)
       const currentSpecies = butterflies.find(
         (b) => b.name === document.getElementById("speciesName").innerText,
       );
-      if (currentSpecies) {
-        showSpeciesView(currentSpecies);
-      }
+      if (currentSpecies) showSpeciesView(currentSpecies);
 
       e.target.reset();
       const modalElem = document.getElementById("adminTagModal");
-      if (modalElem) {
-        bootstrap.Modal.getInstance(modalElem).hide();
-      }
+      if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
     });
   }
 
-  // 5. ADMIN TABLE LOGIC (Users)
-  async function loadAdminTable() {
-    const users = await ButterflyAPI.getAllUsers();
-    const tbody = document.getElementById("adminUsersTableBody");
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
-
-    users.forEach((u) => {
-      const tr = document.createElement("tr");
-      const currentRole = u.uType || u.userType || u.utype;
-      let badgeClass = "bg-primary";
-      if (currentRole === "ADMIN") {
-        badgeClass = "bg-danger";
-      }
-
-      // Use u.userId
-      tr.innerHTML = `
-        <td>${u.userId || "N/A"}</td>
-        <td>${u.username}</td>
-        <td>${u.email}</td>
-        <td><span class="badge ${badgeClass}">${currentRole}</span></td>
-        <td class="text-end">
-            <button class="btn btn-sm btn-outline-secondary me-1" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">Toggle Role</button>
-            <button class="btn btn-sm btn-outline-danger" onclick="window.deleteSystemUser('${u.userId}')"><i class="fas fa-trash"></i></button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // --- STUDENT DASHBOARD LOGIC ---
-  // --- STUDENT DASHBOARD LOGIC ---
+  // ==========================================
+  // 5. STUDENT DASHBOARD LOGIC
+  // ==========================================
   async function loadStudentData(email) {
     if (!email) return;
 
     try {
-      // Step 1: Try the dashboard endpoint first (in case the backend gets fixed!)
       const dashboardData = await ButterflyAPI.getStudentDashboard(email);
       let myTeam = dashboardData ? dashboardData.team : null;
       let myApiKey =
@@ -285,8 +229,6 @@ export async function initHome(userRole, userEmail) {
           ? dashboardData.apiKey.id
           : "No active API Key found";
 
-      // Step 2: FRONTEND WORKAROUND
-      // If the dashboard says null, manually search the teams to find where they were assigned
       if (!myTeam) {
         console.warn(
           "Dashboard endpoint missed the team. Searching manually...",
@@ -295,11 +237,8 @@ export async function initHome(userRole, userEmail) {
 
         for (const t of allTeams) {
           const members = await ButterflyAPI.getTeamMembers(t.id);
-          // Check if the current student is inside this team's member list
           if (members.some((m) => m.email === email)) {
             myTeam = t;
-
-            // Try to pull the API key for this specific team
             const keys = await ButterflyAPI.getAllApiKeys();
             const teamKey = keys.find(
               (k) => k.teamName === t.name && k.active !== false,
@@ -313,7 +252,6 @@ export async function initHome(userRole, userEmail) {
       const container = document.getElementById("studentTeamContent");
       if (!container) return;
 
-      // If they STILL aren't found in any team
       if (!myTeam) {
         container.innerHTML = `
           <h2 class="text-muted mb-4">My Team Overview</h2>
@@ -328,7 +266,6 @@ export async function initHome(userRole, userEmail) {
         return;
       }
 
-      // If we found their team, fetch the rest of their teammates to display
       const members = await ButterflyAPI.getTeamMembers(myTeam.id);
       const membersHtml = members
         .map(
@@ -337,7 +274,6 @@ export async function initHome(userRole, userEmail) {
         )
         .join("");
 
-      // Render the Team Info UI
       container.innerHTML = `
         <h2 class="text-muted mb-4">My Team Overview</h2>
         <div class="card shadow-sm border-0 bg-light p-4">
@@ -364,64 +300,56 @@ export async function initHome(userRole, userEmail) {
     }
   }
 
-  window.deleteSystemUser = async (userId) => {
-    if (confirm("Are you sure you want to delete this user?")) {
-      await ButterflyAPI.deleteUser(userId);
-      await loadAdminTable();
-    }
-  };
+  // ==========================================
+  // 6. ADMIN TABBED INTERFACE LOGIC
+  // ==========================================
+  let allCachedUsers = [];
 
-  window.toggleUserRole = async (userId, currentRole) => {
-    if (currentRole === "ADMIN") {
-      await ButterflyAPI.makeStudent(userId);
-    } else {
-      await ButterflyAPI.makeAdmin(userId);
-    }
-    await loadAdminTable();
-  };
+  async function loadAdminData() {
+    allCachedUsers = await ButterflyAPI.getAllUsers();
+    renderAllUsersTable(allCachedUsers);
+    await loadUnassignedStudents();
+    await loadTeams();
+    await loadApiKeysTable();
+  }
 
-  // 6. ADMIN TABLE LOGIC (API Keys)
-  async function loadApiKeysTable() {
-    const keys = await ButterflyAPI.getAllApiKeys();
-    const tbody = document.getElementById("adminApiKeysTableBody");
-    if (!tbody) {
-      return;
-    }
-
+  // --- TAB 1: USERS ---
+  function renderAllUsersTable(usersList) {
+    const tbody = document.getElementById("allUsersTableBody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
-    keys.forEach((k) => {
+    usersList.forEach((u) => {
       const tr = document.createElement("tr");
-
-      // Determine if key is active to style the badge
-      let statusBadge = '<span class="badge bg-success">Active</span>';
-      if (k.status === "INACTIVE" || k.active === false) {
-        statusBadge = '<span class="badge bg-secondary">Inactive</span>';
-      }
+      const currentRole = u.uType || u.userType || u.utype;
+      const badgeClass = currentRole === "ADMIN" ? "bg-danger" : "bg-primary";
 
       tr.innerHTML = `
-        <td class="font-monospace text-primary fw-bold">${k.id || "N/A"}</td>
-        <td>${k.teamName}</td>
-        <td>${k.projectName}</td>
-        <td>${k.semester}</td>
-        <td>${statusBadge}</td>
+        <td>${u.username}</td>
+        <td>${u.email}</td>
+        <td><span class="badge ${badgeClass}">${currentRole}</span></td>
         <td class="text-end">
-            <button class="btn btn-sm btn-outline-secondary me-1" onclick="window.toggleApiKeyStatus('${k.id}', ${k.active !== false && k.status !== "INACTIVE"})">Toggle</button>
-            <button class="btn btn-sm btn-outline-warning me-1" onclick="window.openExtendModal('${k.id}')">Extend</button>
-            <button class="btn btn-sm btn-outline-danger" onclick="window.deleteSystemApiKey('${k.id}')"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditUserModal('${u.userId}', '${u.username}', '${u.email}')"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-sm btn-outline-secondary me-1" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">Toggle Role</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="window.deleteSystemUser('${u.userId}')"><i class="fas fa-trash"></i></button>
         </td>
       `;
       tbody.appendChild(tr);
     });
   }
 
-  // --- ADMIN TEAM & USER MANAGEMENT LOGIC ---
-
-  async function loadAdminData() {
-    await loadUnassignedStudents();
-    await loadTeams();
+  const adminUserSearch = document.getElementById("adminUserSearch");
+  if (adminUserSearch) {
+    adminUserSearch.addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = allCachedUsers.filter((u) =>
+        u.username.toLowerCase().includes(query),
+      );
+      renderAllUsersTable(filtered);
+    });
   }
 
+  // --- TAB 2: ASSIGN TO TEAM ---
   async function loadUnassignedStudents() {
     const unassigned = await ButterflyAPI.getUnassignedStudents();
     const tbody = document.getElementById("unassignedUsersTableBody");
@@ -430,15 +358,9 @@ export async function initHome(userRole, userEmail) {
     tbody.innerHTML = "";
     unassigned.forEach((u) => {
       const tr = document.createElement("tr");
-      // Use u.userId
       tr.innerHTML = `
         <td>${u.username}</td>
         <td>${u.email}</td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-danger" onclick="window.deleteSystemUser('${u.userId}')">
-            <i class="fas fa-trash"></i>
-          </button>
-        </td>
       `;
       tbody.appendChild(tr);
     });
@@ -454,7 +376,6 @@ export async function initHome(userRole, userEmail) {
 
     let studentOptions = `<option value="">Select a student...</option>`;
     unassigned.forEach((u) => {
-      // Use u.userId for the dropdown value
       studentOptions += `<option value="${u.userId}">${u.username}</option>`;
     });
 
@@ -481,9 +402,7 @@ export async function initHome(userRole, userEmail) {
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="fw-bold mb-0 text-primary">${team.name}</h5>
-            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="window.deleteTeam('${team.id}')"><i class="fas fa-trash"></i></button>
           </div>
-          <p class="small text-muted mb-2">${team.projectName} | ${team.semester}</p>
           <div class="mb-3">
             <h6 class="small fw-bold text-dark mb-1">Members:</h6>
             <div>${membersHtml}</div>
@@ -500,13 +419,69 @@ export async function initHome(userRole, userEmail) {
     }
   }
 
-  // --- WINDOW ATTACHED FUNCTIONS FOR INLINE HTML CALLS ---
+  // --- TAB 3: TEAMS & API KEYS ---
+  async function loadApiKeysTable() {
+    const keys = await ButterflyAPI.getAllApiKeys();
+    const teams = await ButterflyAPI.getAllTeams();
+    const tbody = document.getElementById("adminApiKeysTableBody");
+    if (!tbody) return;
 
+    tbody.innerHTML = "";
+
+    teams.forEach((team) => {
+      const tr = document.createElement("tr");
+      const teamKey = keys.find((k) => k.teamName === team.name);
+
+      let statusBadge = '<span class="badge bg-secondary">No Key Found</span>';
+      let keyIdDisplay = "N/A";
+      let keyActions = "";
+
+      if (teamKey) {
+        keyIdDisplay = teamKey.id;
+        const isActive =
+          teamKey.active !== false && teamKey.status !== "INACTIVE";
+        statusBadge = isActive
+          ? '<span class="badge bg-success">Active</span>'
+          : '<span class="badge bg-warning text-dark">Inactive</span>';
+
+        keyActions = `
+          <button class="btn btn-sm btn-outline-secondary me-1" onclick="window.toggleApiKeyStatus('${teamKey.id}', ${isActive})">Toggle Key</button>
+          <button class="btn btn-sm btn-outline-warning me-1" onclick="window.openExtendModal('${teamKey.id}')">Extend</button>
+        `;
+      }
+
+      tr.innerHTML = `
+        <td class="fw-bold">${team.name}</td>
+        <td>${team.projectName}</td>
+        <td>${team.semester}</td>
+        <td class="font-monospace text-primary">${keyIdDisplay}</td>
+        <td>${statusBadge}</td>
+        <td class="text-end">
+            ${keyActions}
+            <button class="btn btn-sm btn-outline-danger" onclick="window.deleteTeam('${team.id}')"><i class="fas fa-trash"></i></button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ==========================================
+  // 7. WINDOW ATTACHED FUNCTIONS (INLINE HTML)
+  // ==========================================
   window.deleteSystemUser = async (userId) => {
     if (confirm("Delete this user permanently?")) {
       await ButterflyAPI.deleteUser(userId);
       await loadAdminData();
     }
+  };
+
+  window.toggleUserRole = async (userId, currentRole) => {
+    if (currentRole === "ADMIN") {
+      await ButterflyAPI.makeStudent(userId);
+    } else {
+      await ButterflyAPI.makeAdmin(userId);
+    }
+    await loadAdminData();
   };
 
   window.deleteTeam = async (teamId) => {
@@ -523,7 +498,7 @@ export async function initHome(userRole, userEmail) {
 
     try {
       await ButterflyAPI.addTeamMember(teamId, userId);
-      await loadAdminData(); // Refresh UI
+      await loadAdminData();
     } catch (error) {
       console.error("Add Student Error:", error);
       alert(`Could not add student: ${error.message}`);
@@ -542,7 +517,33 @@ export async function initHome(userRole, userEmail) {
     }
   };
 
-  // --- FORM EVENT LISTENERS ---
+  window.toggleApiKeyStatus = async (keyId, currentlyActive) => {
+    if (currentlyActive) {
+      await ButterflyAPI.deactivateApiKey(keyId);
+    } else {
+      await ButterflyAPI.activateApiKey(keyId);
+    }
+    await loadAdminData();
+  };
+
+  window.openExtendModal = (keyId) => {
+    const extendInput = document.getElementById("extendKeyId");
+    if (extendInput) extendInput.value = keyId;
+
+    const modalElem = document.getElementById("adminExtendKeyModal");
+    if (modalElem) new bootstrap.Modal(modalElem).show();
+  };
+
+  window.openEditUserModal = (userId, currentUsername, currentEmail) => {
+    document.getElementById("editUserId").value = userId;
+    document.getElementById("editUsername").value = currentUsername;
+    document.getElementById("editEmail").value = currentEmail;
+    new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
+  };
+
+  // ==========================================
+  // 8. FORM EVENT LISTENERS
+  // ==========================================
 
   const adminCreateTeamForm = document.getElementById("adminCreateTeamForm");
   if (adminCreateTeamForm) {
@@ -575,13 +576,11 @@ export async function initHome(userRole, userEmail) {
       const passVal = document.getElementById("adminNewPassword").value;
       const roleVal = document.getElementById("adminNewRole").value;
 
-      // Email Format Validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailVal)) {
         return alert("Please enter a valid email address.");
       }
 
-      // Strict Length Validation
       if (usernameVal.length !== 5) {
         return alert("Username must be exactly 5 characters long.");
       }
@@ -590,7 +589,6 @@ export async function initHome(userRole, userEmail) {
       }
 
       try {
-        // Uniqueness Check: See if username already exists
         const allUsers = await ButterflyAPI.getAllUsers();
         const usernameExists = allUsers.some(
           (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
@@ -609,15 +607,13 @@ export async function initHome(userRole, userEmail) {
           utype: roleVal,
         };
 
-        // Call the admin creation endpoint
         await ButterflyAPI.adminCreateAccount(newUserData);
-        await loadAdminData(); // Refresh the tables
+        await loadAdminData();
 
         e.target.reset();
         bootstrap.Modal.getInstance(
           document.getElementById("adminAddUserModal"),
         ).hide();
-
         alert("User successfully created!");
       } catch (error) {
         console.error("Admin User Creation Error:", error);
@@ -626,38 +622,86 @@ export async function initHome(userRole, userEmail) {
     });
   }
 
-  // Global functions for inline buttons in API Key Table
-  window.deleteSystemApiKey = async (keyId) => {
-    if (confirm("Are you sure you want to delete this API key?")) {
-      await ButterflyAPI.deleteApiKey(keyId);
-      await loadApiKeysTable();
-    }
-  };
+  // Handle Edit User Form
+  const adminEditUserForm = document.getElementById("adminEditUserForm");
+  if (adminEditUserForm) {
+    adminEditUserForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById("editUserId").value;
+      const newUsername = document.getElementById("editUsername").value;
+      const newEmail = document.getElementById("editEmail").value;
 
-  window.toggleApiKeyStatus = async (keyId, currentlyActive) => {
-    if (currentlyActive) {
-      await ButterflyAPI.deactivateApiKey(keyId);
-    } else {
-      await ButterflyAPI.activateApiKey(keyId);
-    }
-    await loadApiKeysTable();
-  };
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newEmail)) {
+        return alert("Please enter a valid email address.");
+      }
 
-  window.openExtendModal = (keyId) => {
-    const extendInput = document.getElementById("extendKeyId");
-    if (extendInput) {
-      extendInput.value = keyId;
-    }
-    const modalElem = document.getElementById("adminExtendKeyModal");
-    if (modalElem) {
-      const modal = new bootstrap.Modal(modalElem);
-      modal.show();
-    }
-  };
+      if (newUsername.length !== 5) {
+        return alert("Username must be exactly 5 characters long.");
+      }
 
-  // ==========================
-  // 7. EVENT LISTENERS
-  // ==========================
+      try {
+        const allUsers = await ButterflyAPI.getAllUsers();
+        const usernameExists = allUsers.some(
+          (u) =>
+            u.username.toLowerCase() === newUsername.toLowerCase() &&
+            u.userId.toString() !== userId.toString(),
+        );
+
+        if (usernameExists) {
+          return alert(
+            "This username already exists. Please choose a different one.",
+          );
+        }
+
+        await ButterflyAPI.updateUsername(userId, newUsername);
+        await ButterflyAPI.updateEmail(userId, newEmail);
+        await loadAdminData();
+
+        bootstrap.Modal.getInstance(
+          document.getElementById("adminEditUserModal"),
+        ).hide();
+        alert("User successfully updated!");
+      } catch (error) {
+        alert("Failed to update user.");
+      }
+    });
+  }
+
+  // Handle Generate Key Form
+  if (adminGenerateKeyForm) {
+    adminGenerateKeyForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const newKeyData = {
+        teamName: document.getElementById("newTeamName").value,
+        projectName: document.getElementById("newProjectName").value,
+        semester: document.getElementById("newSemester").value,
+      };
+
+      await ButterflyAPI.generateApiKey(newKeyData);
+      await loadAdminData();
+
+      e.target.reset();
+      const modalElem = document.getElementById("adminGenerateKeyModal");
+      if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
+    });
+  }
+
+  // Handle Extend Key Form
+  if (adminExtendKeyForm) {
+    adminExtendKeyForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const keyId = document.getElementById("extendKeyId").value;
+      const months = document.getElementById("extendMonths").value;
+
+      await ButterflyAPI.extendApiKey(keyId, months);
+      await loadAdminData();
+
+      e.target.reset();
+      const modalElem = document.getElementById("adminExtendKeyModal");
+      if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
+    });
+  }
 
   // Clear Tags Button
   const clearFiltersBtn = document.getElementById("clearFiltersBtn");
@@ -667,63 +711,40 @@ export async function initHome(userRole, userEmail) {
       const currentSpecies = butterflies.find(
         (b) => b.name === document.getElementById("speciesName").innerText,
       );
-      if (currentSpecies) {
-        showSpeciesView(currentSpecies);
-      }
+      if (currentSpecies) showSpeciesView(currentSpecies);
     });
   }
 
   if (backBtn) {
     backBtn.addEventListener("click", () => {
       showView(portfolio);
-      if (searchNavBar) {
-        searchNavBar.style.display = "flex";
-      }
+      if (searchNavBar) searchNavBar.style.display = "flex";
     });
   }
 
   if (viewGalleryBtn) {
     viewGalleryBtn.addEventListener("click", () => {
       showView(portfolio);
-      if (searchNavBar) {
-        searchNavBar.style.display = "flex";
-      }
+      if (searchNavBar) searchNavBar.style.display = "flex";
       viewGalleryBtn.classList.add("active");
-      if (viewTeamBtn) {
-        viewTeamBtn.classList.remove("active");
-      }
+      if (viewTeamBtn) viewTeamBtn.classList.remove("active");
     });
   }
 
   if (viewTeamBtn) {
     viewTeamBtn.addEventListener("click", async () => {
       showView(teamView);
-      if (searchNavBar) {
-        searchNavBar.style.display = "none";
-      }
+      if (searchNavBar) searchNavBar.style.display = "none";
       viewTeamBtn.classList.add("active");
-      if (viewGalleryBtn) {
-        viewGalleryBtn.classList.remove("active");
-      }
+      if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
 
-      // Role-based logic for Teams View
       if (userRole === "ADMIN") {
-        if (adminTeamContent) {
-          adminTeamContent.style.display = "block";
-        }
-        if (studentTeamContent) {
-          studentTeamContent.style.display = "none";
-        }
-
+        if (adminTeamContent) adminTeamContent.style.display = "block";
+        if (studentTeamContent) studentTeamContent.style.display = "none";
         await loadAdminData();
-        await loadApiKeysTable();
       } else {
-        if (adminTeamContent) {
-          adminTeamContent.style.display = "none";
-        }
-        if (studentTeamContent) {
-          studentTeamContent.style.display = "block";
-        }
+        if (adminTeamContent) adminTeamContent.style.display = "none";
+        if (studentTeamContent) studentTeamContent.style.display = "block";
         await loadStudentData(userEmail);
       }
     });
@@ -759,9 +780,7 @@ export async function initHome(userRole, userEmail) {
       refreshGallery();
       e.target.reset();
       const modalElem = document.getElementById("addButterflyModal");
-      if (modalElem) {
-        bootstrap.Modal.getInstance(modalElem).hide();
-      }
+      if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
     });
   }
 
@@ -778,46 +797,7 @@ export async function initHome(userRole, userEmail) {
     });
   }
 
-  // Handle Generate Key Form
-  if (adminGenerateKeyForm) {
-    adminGenerateKeyForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const newKeyData = {
-        teamName: document.getElementById("newTeamName").value,
-        projectName: document.getElementById("newProjectName").value,
-        semester: document.getElementById("newSemester").value,
-      };
-
-      await ButterflyAPI.generateApiKey(newKeyData);
-      await loadApiKeysTable();
-
-      e.target.reset();
-      const modalElem = document.getElementById("adminGenerateKeyModal");
-      if (modalElem) {
-        bootstrap.Modal.getInstance(modalElem).hide();
-      }
-    });
-  }
-
-  // Handle Extend Key Form
-  if (adminExtendKeyForm) {
-    adminExtendKeyForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const keyId = document.getElementById("extendKeyId").value;
-      const months = document.getElementById("extendMonths").value;
-
-      await ButterflyAPI.extendApiKey(keyId, months);
-      await loadApiKeysTable();
-
-      e.target.reset();
-      const modalElem = document.getElementById("adminExtendKeyModal");
-      if (modalElem) {
-        bootstrap.Modal.getInstance(modalElem).hide();
-      }
-    });
-  }
-
-  // Theme Toggle (Light/Dark Mode)
+  // Theme Toggle
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
       const body = document.body;
@@ -830,17 +810,13 @@ export async function initHome(userRole, userEmail) {
         .querySelectorAll(".modal-content")
         .forEach((m) => m.classList.toggle("bg-dark"));
       const apiContainer = document.getElementById("apiContainer");
-      if (apiContainer) {
-        apiContainer.classList.toggle("bg-secondary");
-      }
+      if (apiContainer) apiContainer.classList.toggle("bg-secondary");
       const imgContainer = document.getElementById("imgContainer");
-      if (imgContainer) {
-        imgContainer.classList.toggle("bg-secondary");
-      }
+      if (imgContainer) imgContainer.classList.toggle("bg-secondary");
     });
   }
 
-  // 8. INITIAL RENDER
+  // 9. INITIAL RENDER
   showView(portfolio);
   refreshGallery();
 }
