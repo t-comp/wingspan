@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (user && role) {
         showScreen("home");
-        initHome(role);
+        initHome(role, user.email);
         toggleLogoutButtons(role);
 
         const uploadBtn = document.getElementById("uploadBtn");

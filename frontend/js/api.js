@@ -370,7 +370,14 @@ export const ButterflyAPI = {
       headers: jsonHeaders,
       body: JSON.stringify({ userId: parseInt(userId) }),
     });
-    return await response.json(); // test
+
+    if (!response.ok) {
+      const errorMsg = await response.text();
+      throw new Error(
+        errorMsg || `Server responded with status ${response.status}`,
+      );
+    }
+    return await response.json();
   },
 
   async removeTeamMember(teamId, userId) {
@@ -382,6 +389,13 @@ export const ButterflyAPI = {
         body: JSON.stringify({ userId: parseInt(userId) }),
       },
     );
+
+    if (!response.ok) {
+      const errorMsg = await response.text();
+      throw new Error(
+        errorMsg || `Server responded with status ${response.status}`,
+      );
+    }
     return await response.json();
   },
 
