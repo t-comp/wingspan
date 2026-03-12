@@ -1,9 +1,11 @@
 package fs3.wingspan.services;
 
+import fs3.wingspan.dto.ImageDTO;
 import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
+import io.awspring.cloud.s3.S3Template;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,8 +32,17 @@ public class ImageStorageService {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+
+    @Value("${digitalocean.bucket.name}")
+    private String bucketName;
+
+    @Value("${cloud.aws.endpoint}")
+    private String endpoint;
+
     @Autowired
     private SpeciesRepository speciesRepository;
+    @Autowired
+    private S3Template s3Template;
 
     /**
      * Save image file to disk and metadata to database
@@ -148,5 +160,58 @@ public class ImageStorageService {
             return imageRepository.findAll(); // return everything if no tags specified
         }
         return imageRepository.findByAllTags(tagIds, (long) tagIds.size());
+    }
+
+    @Transactional
+    public List<ImageDTO> bulkSaveImages(List<MultipartFile> images, int species_id,
+                                         String life_cycle, String description, String nathansNotes) throws IOException{
+        //Validate species exists
+        Species species = speciesRepository.findById(species_id)
+                .orElseThrow(() -> new RuntimeException("Species not found with id: " + species_id));
+
+        List<ImageDTO> savedImages = new ArrayList<>();
+        List<String> failures = new ArrayList<>();
+
+        for(MultipartFile image : images){
+            try{
+                if(image.isEmpty()){
+                    failures.add(image.getOriginalFilename() + " (empty)");
+                    continue;
+                }
+
+                String originalFilename = image.getOriginalFilename();
+                String extension = getFileExtension(originalFilename);
+                String safeFilename = getSafeFilename(originalFilename);
+                String uniqueFilename = UUID.randomUUID() + "_" + safeFilename + extension;
+
+                //Upload to DigitalOcean
+                s3Template.upload(bucketName, uniqueFilename, image.getInputStream());
+                String fileUrl = endpoint + "/" + bucketName + "/" + uniqueFilename;
+
+
+                Image newImage = new Image();
+                newImage.setSpecies(species);
+                newImage.setFilename(uniqueFilename);
+                newImage.setFpath(fileUrl);
+                newImage.setFisize(BigInteger.valueOf(image.getSize()));
+                newImage.setDescription(description);
+                newImage.setLifecyclestage(life_cycle);
+                newImage.setNathansnotes(nathansNotes);
+
+                Image saved = imageRepository.save(newImage);
+                savedImages.add(ImageDTO.fromImage(saved));
+                log.info("Bulk upload - saved image: {}", uniqueFilename);
+
+
+            }catch(IOException e){
+                log.error("Failed to upload image: {}", image.getOriginalFilename(), e);
+                failures.add(image.getOriginalFilename());
+            }
+        }
+
+        if(!failures.isEmpty()){
+            log.warn("Bulk upload completed with failures: {}", failures);
+        }
+        return savedImages;
     }
 }

@@ -7,6 +7,7 @@ import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.UserRepository;
 import fs3.wingspan.services.ImageStorageService;
 import jakarta.annotation.Resource;
+import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,6 +75,36 @@ public class ImageController {
        }
     }
 
+    @PostMapping(value = "/admin/bulk-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> bulkUploadImage(@RequestParam("files") List<MultipartFile> images,
+             @RequestParam(required = true) int species_id,
+             @RequestParam(required = false) String life_cycle,
+             @RequestParam(required = false) String description,
+             @RequestParam(required = false) String nathansNotes){
+
+        if(images == null || images.isEmpty()){
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "No files found"));
+        }
+
+        try{
+            List<ImageDTO> savedImages = imageStorageService.bulkSaveImages(images, species_id, life_cycle, description, nathansNotes);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of(
+                            "message", savedImages.size() + " images uploaded successfully",
+                            "images", savedImages
+
+                    ));
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
+        }catch(IOException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Bulk upload failed"));
+        }
+
+    }
 
     /**
      * Extracts file path and returns it as a string
