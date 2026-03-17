@@ -6,6 +6,7 @@ import fs3.wingspan.model.Tags;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
 import fs3.wingspan.repository.TagRepository;
+import io.awspring.cloud.s3.ObjectMetadata;
 import io.awspring.cloud.s3.S3Template;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -59,7 +61,11 @@ public class ImageStorageService {
         String safeFilename = getSafeFilename(originalFilename);
         String uniqueFilename = UUID.randomUUID() + "_" + safeFilename + extension;
 
-        s3Template.upload(bucketName, uniqueFilename, file.getInputStream());
+        s3Template.upload(bucketName, uniqueFilename, file.getInputStream(),
+                ObjectMetadata.builder()
+                        .acl(ObjectCannedACL.PUBLIC_READ)
+                        .contentType(file.getContentType())
+                        .build());
 
         String fileUrl = endpoint + "/" + bucketName + "/" + uniqueFilename;
 
