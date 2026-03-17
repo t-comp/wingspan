@@ -545,9 +545,9 @@
       </div>
 
       <section
-        class="page-section"
         id="teamView"
-        style="display: none; margin-top: 100px; min-height: 50vh"
+        class="py-4"
+        style="display: none; margin-top: 80px; min-height: 50vh"
       >
         <div class="container">
           <div id="studentTeamContent" style="display: none">
@@ -565,61 +565,301 @@
           </div>
 
           <div id="adminTeamContent" style="display: none">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h2 class="text-muted">User Management</h2>
-              <button
-                class="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#adminAddUserModal"
-              >
-                <i class="fas fa-user-plus"></i> Create User
-              </button>
-            </div>
-
-            <div
-              class="table-responsive bg-white rounded shadow-sm p-3 border mb-5"
+            <ul
+              class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm border"
+              id="adminTeamTabs"
+              role="tablist"
             >
-              <table class="table table-hover align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th class="text-end">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="adminUsersTableBody"></tbody>
-              </table>
-            </div>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active fw-bold"
+                  id="users-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-users"
+                  type="button"
+                  role="tab"
+                  style="color: #0399b0"
+                >
+                  Users
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link fw-bold"
+                  id="assign-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-assign"
+                  type="button"
+                  role="tab"
+                  style="color: #0399b0"
+                >
+                  Assign to Team
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link fw-bold"
+                  id="teams-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-teams"
+                  type="button"
+                  role="tab"
+                  style="color: #0399b0"
+                >
+                  Teams
+                </button>
+              </li>
+            </ul>
 
-            <hr class="mb-5" />
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h2 class="text-muted">Team & API Key Management</h2>
-              <button
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#adminGenerateKeyModal"
+            <div class="tab-content" id="adminTeamTabsContent">
+              <div
+                class="tab-pane fade show active"
+                id="tab-users"
+                role="tabpanel"
+                tabindex="0"
               >
-                <i class="fas fa-key"></i> Generate API Key
-              </button>
-            </div>
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <div class="input-group" style="max-width: 300px">
+                    <span class="input-group-text bg-white border-end-0"
+                      ><i class="fas fa-search text-muted"></i
+                    ></span>
+                    <input
+                      type="text"
+                      class="form-control border-start-0 ps-0"
+                      id="adminUserSearch"
+                      placeholder="Search by username..."
+                    />
+                  </div>
+                  <button
+                    class="btn btn-success"
+                    data-bs-toggle="modal"
+                    data-bs-target="#adminAddUserModal"
+                  >
+                    <i class="fas fa-user-plus"></i> Create User
+                  </button>
+                </div>
 
-            <div class="table-responsive bg-white rounded shadow-sm p-3 border">
-              <table class="table table-hover align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th>Key ID</th>
-                    <th>Team Name</th>
-                    <th>Project</th>
-                    <th>Semester</th>
-                    <th>Status</th>
-                    <th class="text-end">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="adminApiKeysTableBody"></tbody>
-              </table>
+                <div class="bg-white rounded shadow-sm p-3 border">
+                  <div
+                    class="table-responsive m-0"
+                    style="max-height: 400px; overflow-y: auto"
+                  >
+                    <table class="table table-hover align-middle mb-0">
+                      <thead
+                        class="table-light"
+                        style="position: sticky; top: 0; z-index: 10"
+                      >
+                        <tr>
+                          <th>Username</th>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Team</th>
+                          <th class="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="allUsersTableBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="tab-pane fade"
+                id="tab-assign"
+                role="tabpanel"
+                tabindex="0"
+              >
+                <div class="row">
+                  <div class="col-lg-6 mb-4">
+                    <h3 class="text-muted mb-3">Unassigned Students</h3>
+                    <div class="bg-white rounded shadow-sm p-3 border">
+                      <div
+                        class="table-responsive m-0"
+                        style="max-height: 400px; overflow-y: auto"
+                      >
+                        <table class="table table-hover align-middle mb-0">
+                          <thead
+                            class="table-light"
+                            style="position: sticky; top: 0; z-index: 10"
+                          >
+                            <tr>
+                              <th>Username</th>
+                              <th>Email</th>
+                            </tr>
+                          </thead>
+                          <tbody id="unassignedUsersTableBody"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 mb-4">
+                    <h3 class="text-muted mb-3">Team Rosters</h3>
+                    <div
+                      id="teamsContainer"
+                      class="d-flex flex-column gap-3"
+                      style="
+                        max-height: 450px;
+                        overflow-y: auto;
+                        padding-right: 5px;
+                      "
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="tab-pane fade"
+                id="tab-teams"
+                role="tabpanel"
+                tabindex="0"
+              >
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <h3 class="text-muted mb-0">Team & API Key Management</h3>
+                  <div>
+                    <button
+                      class="btn btn-primary me-2"
+                      data-bs-toggle="modal"
+                      data-bs-target="#adminCreateTeamModal"
+                    >
+                      <i class="fas fa-users"></i> Create Team
+                    </button>
+                    <button
+                      class="btn btn-info text-white"
+                      data-bs-toggle="modal"
+                      data-bs-target="#adminGenerateKeyModal"
+                    >
+                      <i class="fas fa-key"></i> Generate Standalone Key
+                    </button>
+                  </div>
+                </div>
+                <div class="bg-white rounded shadow-sm p-3 border">
+                  <div
+                    class="table-responsive m-0"
+                    style="max-height: 400px; overflow-y: auto"
+                  >
+                    <table class="table table-hover align-middle mb-0">
+                      <thead
+                        class="table-light"
+                        style="position: sticky; top: 0; z-index: 10"
+                      >
+                        <tr>
+                          <th>Team Name</th>
+                          <th>Project</th>
+                          <th>Semester</th>
+                          <th>API Key ID</th>
+                          <th>Status</th>
+                          <th class="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="adminApiKeysTableBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="adminEditUserModal"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title fw-bold">Edit User</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <form id="adminEditUserForm">
+                    <input type="hidden" id="editUserId" />
+                    <div class="mb-3">
+                      <label class="form-label">Username</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="editUsername"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Email</label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        id="editEmail"
+                        required
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                      Save Changes
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="adminCreateTeamModal"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title fw-bold">Create Empty Team</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <form id="adminCreateTeamForm">
+                    <div class="mb-3">
+                      <label class="form-label">Team Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="newCreateTeamName"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Project Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="newCreateProjectName"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Semester</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="newCreateSemester"
+                        required
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                      Create Team & API Key
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           </div>
         </div>
