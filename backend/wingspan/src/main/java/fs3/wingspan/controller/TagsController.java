@@ -78,7 +78,7 @@ public class TagsController {
      * Create a New Tag
      */
     @PostMapping("/admin")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> createTag(@RequestBody CreateTagRequest request) {
         try{
             Tags tag = tagsService.createTag(request.getName(), request.getCategory());
@@ -94,7 +94,7 @@ public class TagsController {
      * Update existing tag
      */
     @PutMapping("/admin/{tagId}")
-   // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> updateTag(
             @PathVariable Integer tagId,
             @RequestBody UpdateTagRequest request) {
@@ -115,7 +115,7 @@ public class TagsController {
      * Delete tag
      */
     @DeleteMapping("/admin/{tagId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteTag(@PathVariable Integer tagId){
         try{
             tagsService.deleteTag(tagId);
@@ -129,7 +129,7 @@ public class TagsController {
      * Add tag to image
      */
     @PostMapping("/{tagId}/images/{imageId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> addTagToImage(
             @PathVariable Integer tagId,
             @PathVariable Integer imageId){
@@ -146,7 +146,7 @@ public class TagsController {
      * Remove tag from image
      */
     @DeleteMapping("/{tagId}/images/{imageId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> removeTagFromImage(
             @PathVariable Integer tagId,
             @PathVariable Integer imageId){
@@ -163,7 +163,7 @@ public class TagsController {
      * Bulk create tags
      */
     @PostMapping("/admin/bulk")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<TagDTO>> bulkCreateTags(
             @RequestBody List<CreateTagRequest> requests){
         List<Tags> createdTags = tagsService.bulkCreateTags(requests);

@@ -5,6 +5,10 @@ import fs3.wingspan.model.UType;
 import fs3.wingspan.model.Users;
 import fs3.wingspan.model.Teams;
 import fs3.wingspan.model.APIKeys;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -91,7 +95,7 @@ public class UserController {
      * POST /user/admin/create-account
      */
     @PostMapping("/admin/create-account")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> adminCreateAccount(@RequestBody Users u) {
 
         // validate username
@@ -146,10 +150,12 @@ public class UserController {
 
     /**
      * user logs in with username or email and password
+     * stores user in session on success
      * POST /user/login
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginInfoDTO info) {
+    public ResponseEntity<?> login(@RequestBody LoginInfoDTO info, HttpSession session) {
+
         if (info.getUsernameOrEmail() == null || info.getPassword() == null ||
                 info.getUsernameOrEmail().isEmpty() || info.getPassword().isEmpty()) {
             return ResponseEntity.badRequest()
@@ -165,11 +171,45 @@ public class UserController {
         }
 
         if (u != null && passwordEncoder.matches(info.getPassword(), u.getPassword())) {
+            // store in session
+            session.setAttribute("user", u);
+
+            // tell spring security who is logged in
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    u, null, u.getAuthorities()
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
             return ResponseEntity.ok(UsersDTO.fromUser(u));
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new MessageResponse("Username/email or password is incorrect."));
+    }
+
+    /**
+     * log out - invalidates session
+     * POST /user/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponse> logout(HttpSession session) {
+        session.invalidate();
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
+    }
+
+    /**
+     * get currently logged in user from session
+     * GET /user/me
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(HttpSession session) {
+        Users u = (Users) session.getAttribute("user");
+        if (u == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Not logged in"));
+        }
+        return ResponseEntity.ok(UsersDTO.fromUser(u));
     }
 
 
@@ -187,7 +227,7 @@ public class UserController {
      */
     private boolean isValidEmail(String email) {
         if (email == null) return false;
-        String emailRegex= "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
+        String emailRegex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
         return email.matches(emailRegex);
     }
 
@@ -199,6 +239,7 @@ public class UserController {
      * GET /user/all
      */
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<UsersDTO>> getAllUsers() {
         List<Users> users = userRepository.findAll();
         List<UsersDTO> dtos = users.stream()
@@ -334,7 +375,7 @@ public class UserController {
      * PUT /user/{userId}/make-admin
      */
     @PutMapping("/{userId}/make-admin")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> setAdmin(@PathVariable int userId) {
         Users u = userRepository.findById(userId).orElse(null);
         if (u == null) {
@@ -353,7 +394,7 @@ public class UserController {
      * PUT /user/{userId}/make-student
      */
     @PutMapping("/{userId}/make-student")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> setStudent(@PathVariable int userId) {
         Users u = userRepository.findById(userId).orElse(null);
         if (u == null) {
@@ -372,7 +413,7 @@ public class UserController {
      * PUT /user/{userId}/activate
      */
     @PutMapping("/{userId}/activate")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> activateUser(@PathVariable int userId) {
         Users u = userRepository.findById(userId).orElse(null);
         if (u == null) {
@@ -391,7 +432,7 @@ public class UserController {
      * PUT /user/{userId}/deactivate
      */
     @PutMapping("/{userId}/deactivate")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deactivateUser(@PathVariable int userId) {
         Users u = userRepository.findById(userId).orElse(null);
         if (u == null) {
@@ -410,7 +451,7 @@ public class UserController {
      * DELETE /user/{userId}
      */
     @DeleteMapping("/{userId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deleteUser(@PathVariable int userId) {
         Users u = userRepository.findById(userId).orElse(null);
         if (u == null) {
@@ -429,14 +470,14 @@ public class UserController {
      * DELETE /user/delete-all
      */
     @DeleteMapping("/delete-all")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deleteAllUsers() {
         userRepository.deleteAll();
         return ResponseEntity.ok(new MessageResponse("Goodbye everyone! All users have been deleted."));
     }
 
     /**
-     * get user's dashboard info (including API key)
+     * get user's db info
      * GET /user/dashboard?email=student@iastate.edu
      */
     @GetMapping("/dashboard")
@@ -448,7 +489,7 @@ public class UserController {
                     .body(new MessageResponse("User not found"));
         }
 
-        // build response map
+        // response map
         Map<String, Object> dash = new HashMap<>();
         dash.put("user", UsersDTO.fromUser(u));
 
@@ -457,11 +498,8 @@ public class UserController {
             dash.put("message", "You are not currently assigned to a team.");
             return ResponseEntity.ok(dash);
         }
-
-        // get team info
         Teams t = teamsRepository.findById(u.getTeamId()).orElse(null);
 
-        // get API key for team
         APIKeys apiKey = apiKeyRepository.findByTeamId(u.getTeamId());
 
         if (t == null || apiKey == null) {

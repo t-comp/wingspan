@@ -12,6 +12,7 @@ import fs3.wingspan.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -39,7 +40,7 @@ public class TeamsController {
      * POST /teams/create
      */
     @PostMapping("/create")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> createTeam(@RequestBody Teams t) {
 
         if (t.getName() == null || t.getName().isEmpty()) {
@@ -79,7 +80,7 @@ public class TeamsController {
      * GET /teams/all
      */
     @GetMapping("/all")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<Teams>> getAllTeams() {
         return ResponseEntity.ok(teamsRepository.findAll());
     }
@@ -103,7 +104,7 @@ public class TeamsController {
      * GET /teams/unassigned-students
      */
     @GetMapping("/unassigned-students")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<UsersDTO>> getUnassignedStudents() {
         List<Users> students = userRepository.findByTeamIdIsNullAndUtype(UType.STUDENT);
         List<UsersDTO> dtos = students.stream()
@@ -133,7 +134,7 @@ public class TeamsController {
      * PUT /teams/{teamId}/add-member
      */
     @PutMapping("/{teamId}/add-member")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> addMemberToTeam(@PathVariable Integer teamId, @RequestBody Map<String, Integer> request) {
 
         Integer userId = request.get("userId");
@@ -165,8 +166,8 @@ public class TeamsController {
      * PUT /teams/{teamId}/remove-member
      */
     @PutMapping("/{teamId}/remove-member")
-    //@PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> removeMemberFromTeam(@PathVariable Integer teamId,  @RequestBody Map<String, Integer> request) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<MessageResponse> removeMemberFromTeam(@PathVariable Integer teamId, @RequestBody Map<String, Integer> request) {
 
         Integer userId = request.get("userId");
         if (userId == null) {
@@ -191,7 +192,7 @@ public class TeamsController {
      * PUT /teams/{teamId}/update
      */
     @PutMapping("/{teamId}/update")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> updateTeam(@PathVariable Integer teamId, @RequestBody Teams nTeam) {
         Teams t = teamsRepository.findById(teamId).orElse(null);
         if (t == null) {
@@ -218,14 +219,14 @@ public class TeamsController {
      * DELETE /teams/{teamId}
      */
     @DeleteMapping("/{teamId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deleteTeam(@PathVariable Integer teamId) {
         Teams t = teamsRepository.findById(teamId).orElse(null);
         if (t == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Team not found"));
         }
-        
+
         List<Users> members = userRepository.findByTeamId(teamId);
         for (Users u : members) {
             u.setTeamId(null);
