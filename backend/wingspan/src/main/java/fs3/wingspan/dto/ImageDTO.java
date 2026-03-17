@@ -26,7 +26,7 @@ public class ImageDTO {
                 .filename(image.getFilename())
                 .description(image.getDescription())
                 .nathansNotes(image.getNathansnotes())
-                .fileSize(image.getFisize() != null ? image.getFisize().intValue() : null)
+                .fileSize(image.getFsize() != null ? image.getFsize().intValue() : null)
                 .build();
     }
 

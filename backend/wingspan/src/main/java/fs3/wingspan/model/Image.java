@@ -48,8 +48,8 @@ public class Image {
 //    @Column(name = "storage_key", length = 500)
 //    private String storageKey;
 
-    @Column(name="fisize")
-    private BigInteger fisize;
+    @Column(name="fsize")
+    private BigInteger fsize;
 
     @Column(name="width")
     private int width;
