@@ -1,5 +1,6 @@
 package fs3.wingspan.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,18 @@ public class Species {
     @Column(name = "description")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private SpeciesType type;
+    @Column(name = "order_name")
+    private String orderName;
+
+    @Column(name = "family")
+    private String family;
+
+    @Column(name = "genus")
+    private String genus;
+
+    // thumbnail image
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_id")
+    private Image thumbnail;
 }
