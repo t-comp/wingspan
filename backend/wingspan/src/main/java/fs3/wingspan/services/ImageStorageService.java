@@ -4,6 +4,7 @@ import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
+import io.awspring.cloud.s3.S3Template;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,14 @@ public class ImageStorageService {
     @Autowired
     private ImageRepository imageRepository;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    @Autowired
+    private S3Template s3Template;
+
+    @Value("${digitalocean.bucket.name}")
+    private String bucketName;
+
+    @Value("${cloud.aws.endpoint}")
+    private String endpoint;
     @Autowired
     private SpeciesRepository speciesRepository;
 
