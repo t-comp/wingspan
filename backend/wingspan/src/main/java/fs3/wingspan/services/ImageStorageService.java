@@ -2,8 +2,11 @@ package fs3.wingspan.services;
 
 import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
+import fs3.wingspan.model.Tags;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
+import fs3.wingspan.repository.TagRepository;
+import io.awspring.cloud.s3.S3Template;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +30,26 @@ public class ImageStorageService {
     @Autowired
     private ImageRepository imageRepository;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    @Autowired
+    private S3Template s3Template;
+
+    @Value("${digitalocean.bucket.name}")
+    private String bucketName;
+
+    @Value("${spring.cloud.aws.endpoint}")
+    private String endpoint;
     @Autowired
     private SpeciesRepository speciesRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     /**
      * Save image file to disk and metadata to database
      */
     @Transactional
     public Image saveImage(MultipartFile file, int speciesId,
-                           String lifecycle_stage, String description, String nathansNotes) throws IOException {
+                           String lifecycle_stage, String description, String nathansNotes, List<Integer> tagIds) throws IOException {
         //look up species - throws if not found
         Species species = speciesRepository.findById(speciesId).orElseThrow(() -> new RuntimeException("Species not found with id: " + speciesId));
 
@@ -57,12 +69,22 @@ public class ImageStorageService {
         image.setSpecies(species);
         image.setFilename(uniqueFilename);
         image.setFpath(fileUrl);
-        image.setFisize(BigInteger.valueOf(file.getSize()));
-        image.setDescription(description);
+        image.setFsize(BigInteger.valueOf(file.getSize()));
         image.setLifecyclestage(lifecycle_stage);
         image.setNathansnotes(nathansNotes);
+        image.setDescription(description);
+
+        log.info("About to save - lifecycle: {}, nathansNotes: {}, description: {}",
+                image.getLifecyclestage(), image.getNathansnotes(), image.getDescription());
 
         //extractImageDimensions(file, image);
+        if(tagIds != null && !tagIds.isEmpty()){
+            List<Tags> tags = tagRepository.findAllById(tagIds);
+            if(tags.size() != tagIds.size()){
+                throw new RuntimeException("One or more tag IDs not found.");
+            }
+            tags.forEach(image::addTag);
+        }
 
         Image savedImage = imageRepository.save(image);
 

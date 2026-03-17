@@ -51,7 +51,8 @@ public class ImageController {
      @RequestParam(required = true) int species_id,
      @RequestParam(required = false) String life_cycle,
      @RequestParam(required = false) String description,
-     @RequestParam(required = false) String nathansNotes){
+     @RequestParam(required = false) String nathansNotes,
+     @RequestParam(required = false) List<Integer> tagId){
         // Validation
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
@@ -60,7 +61,7 @@ public class ImageController {
 
        try {
            //let service handle all business logic
-           Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes);
+           Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes, tagId);
 
            return ResponseEntity.status(HttpStatus.CREATED)
                    .body(ImageDTO.fromImage(savedImage));
