@@ -1,7 +1,7 @@
 package fs3.wingspan.repository;
 
-import fs3.wingspan.model.UType;
 import fs3.wingspan.model.Users;
+import fs3.wingspan.model.UType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
