@@ -290,6 +290,41 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Add these towards the bottom of router.js
+
+// 1. DELETE ENTIRE SPECIES
+const deleteSpeciesBtn = document.getElementById("deleteSpeciesFullBtn");
+if (deleteSpeciesBtn) {
+  deleteSpeciesBtn.onclick = async () => {
+    const id = deleteSpeciesBtn.dataset.speciesId;
+    if (confirm("Are you sure? This deletes the species and ALL its images!")) {
+      try {
+        await ButterflyAPI.delete(id); // Make sure this is in api.js
+        alert("Species Deleted");
+        location.reload(); 
+      } catch (err) {
+        alert("Delete failed: " + err.message);
+      }
+    }
+  };
+}
+
+// 2. DELETE SINGLE IMAGE (Inside the gallery)
+// This will be called via a global function since items are dynamic
+window.handleDeleteSingleImage = async (imageId) => {
+  if (confirm("Delete this specific photo?")) {
+    try {
+      await ButterflyAPI.deleteImage(imageId); // Make sure this is in api.js
+      alert("Image Deleted");
+      // You'd ideally refresh the gallery here
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+};
+
+
   //added this 
   const savedUser = localStorage.getItem("butterflyUser");
   if (savedUser) {
@@ -304,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Keep admin buttons visible if applicable
       if (role === "ADMIN") {
         document.getElementById("uploadBtn")?.classList.remove("d-none");
-        document.getElementById("deleteSpeciesBtn")?.classList.remove("d-none");
+        // document.getElementById("deleteSpeciesBtn")?.classList.remove("d-none");
       }
     } catch (e) {
       console.error("Error loading saved user", e);

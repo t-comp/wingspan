@@ -448,6 +448,7 @@ async uploadImage(formData) {
       },
       body: formData,
   });
+  
 
   if (!response.ok) {
       const errorData = await response.json();
@@ -470,6 +471,10 @@ async uploadImage(formData) {
       body: JSON.stringify(tagData),
     });
     return await response.json();
+  },
+
+  async deleteImage(id) {
+    return await fetch(`${API_BASE_URL}/images/admin/${id}`, { method: "DELETE" });
   },
 
   async deleteTag(tagId) {

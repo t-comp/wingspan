@@ -56,7 +56,9 @@ export async function initHome(userRole, userEmail) {
     document.getElementById("speciesName").innerText = b.name;
     document.getElementById("speciesScientific").innerText = b.scientificName;
     document.getElementById("speciesDescription").innerText = b.description;
+    const isAdmin = (userRole === "ADMIN");
 
+    UI.populateSpeciesView(b, isAdmin);
     const setMainImage = (imgUrl, sizeText) => {
       document.getElementById("speciesImage").src =
         imgUrl || "assets/img/noimage.jpg";
@@ -830,15 +832,20 @@ export async function initHome(userRole, userEmail) {
   // Delete butterfly
   if (deleteBtn) {
     deleteBtn.addEventListener("click", async () => {
-      const idx = parseInt(deleteBtn.dataset.index);
-      if (isNaN(idx)) return;
-      if (confirm(`Delete "${butterflies[idx].name}"?`)) {
-        butterflies.splice(idx, 1);
-        await ButterflyAPI.delete(butterflies[idx].id);
-        refreshGallery();
-      }
+        const id = document.getElementById("deleteSpeciesFullBtn").dataset.speciesId;
+        if (!id) return;
+        
+        if (confirm(`Are you sure you want to delete this species?`)) {
+            try {
+                await ButterflyAPI.delete(id);
+                alert("Deleted successfully");
+                location.reload();
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
     });
-  }
+}
 
   // Theme Toggle
   if (themeToggle) {
