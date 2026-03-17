@@ -11,6 +11,7 @@ export async function initHome(userRole, userEmail) {
 
   // 1. DATA INITIALIZATION
   let butterflies = await ButterflyAPI.getAll();
+  console.log("DATABASES SPECIES LIST:", butterflies); // CLICK THE ARROW in the browser console to see the properties
 
   // 2. ELEMENT SELECTORS
   const portfolio = document.getElementById("portfolio");
@@ -53,7 +54,7 @@ export async function initHome(userRole, userEmail) {
     if (searchNavBar) searchNavBar.style.display = "none";
 
     document.getElementById("speciesName").innerText = b.name;
-    document.getElementById("speciesScientific").innerText = b.scientific;
+    document.getElementById("speciesScientific").innerText = b.scientificName;
     document.getElementById("speciesDescription").innerText = b.description;
 
     const setMainImage = (imgUrl, sizeText) => {
@@ -823,29 +824,6 @@ export async function initHome(userRole, userEmail) {
         b.name.toLowerCase().includes(query),
       );
       refreshGallery(filtered);
-    });
-  }
-
-  // Add new butterfly
-  if (addForm) {
-    addForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const newB = {
-        name: document.getElementById("newName").value,
-        scientific: document.getElementById("newScientific").value,
-        sex: document.getElementById("newSex").value,
-        description: document.getElementById("newDescription").value,
-        tags: document.getElementById("newTags").value,
-        image:
-          document.getElementById("newImage").value || "assets/img/noimage.jpg",
-      };
-
-      const savedSpecies = await ButterflyAPI.create(newB);
-      butterflies.push(savedSpecies);
-      refreshGallery();
-      e.target.reset();
-      const modalElem = document.getElementById("addButterflyModal");
-      if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
     });
   }
 
