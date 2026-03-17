@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,22 +33,22 @@ public class ImageController {
      * POST /admin/upload-image
      */
     @PostMapping(value = "/admin/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
-     @RequestParam(required = true) int species_id,
-     @RequestParam(required = false) String life_cycle,
-     @RequestParam(required = false) String description,
-     @RequestParam(required = false) String nathansNotes,
-     @RequestParam(required = false) List<Integer> tagId){
+                                         @RequestParam(required = true) int species_id,
+                                         @RequestParam(required = false) String life_cycle,
+                                         @RequestParam(required = false) String description,
+                                         @RequestParam(required = false) String nathansNotes,
+                                         @RequestParam(required = false) List<Integer> tagId){
         // Validation
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "File is empty"));
         }
 
-       try {
-           //let service handle all business logic
-           Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes, tagId);
+        try {
+            //let service handle all business logic
+            Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes, tagId);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ImageDTO.fromImage(savedImage));
@@ -80,7 +81,7 @@ public class ImageController {
      * DELETE /admin/delete-image
      */
     @DeleteMapping("/admin/{imageId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteImage(@PathVariable Integer imageId) {
         try{
             imageStorageService.deleteImage(imageId);
@@ -99,7 +100,7 @@ public class ImageController {
      * POST /admin/edit-nathansnotes
      */
     @PatchMapping("/admin/{imageId}/description")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ImageDTO> updateDescription(@PathVariable int imageId,
                                                       @RequestParam String description,
                                                       @RequestParam(required = false) String nathansNotes) {

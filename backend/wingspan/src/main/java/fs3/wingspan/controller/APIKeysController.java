@@ -6,6 +6,7 @@ import fs3.wingspan.repository.APIKeyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -29,7 +30,7 @@ public class APIKeysController {
      * POST /api-key/keygen
      */
     @PostMapping("/keygen")
-//@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> generateApiKey(@RequestBody APIKeys request) {
         if (request.getTeamName() == null || request.getTeamName().isEmpty()) {
             return ResponseEntity.badRequest()
@@ -56,7 +57,7 @@ public class APIKeysController {
      * GET /api-key/all
      */
     @GetMapping("/all")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<APIKeys>> getAllApiKeys() {
         return ResponseEntity.ok(apiKeyRepository.findAll());
     }
@@ -66,7 +67,7 @@ public class APIKeysController {
      * GET /api-key/{keyId}
      */
     @GetMapping("/{keyId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getApiKeyById(@PathVariable int keyId) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
@@ -81,7 +82,7 @@ public class APIKeysController {
      * GET /api-key/active
      */
     @GetMapping("/active")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<APIKeys>> getActiveApiKeys() {
         return ResponseEntity.ok(apiKeyRepository.findByActive(true));
     }
@@ -91,7 +92,7 @@ public class APIKeysController {
      * GET /api-key/team/{teamName}
      */
     @GetMapping("/team/{teamName}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<APIKeys>> getApiKeysByTeam(@PathVariable String teamName) {
         return ResponseEntity.ok(apiKeyRepository.findByTeamName(teamName));
     }
@@ -101,7 +102,7 @@ public class APIKeysController {
      * GET /api-key/project/{projectName}
      */
     @GetMapping("/project/{projectName}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<APIKeys>> getApiKeysByProject(@PathVariable String projectName) {
         return ResponseEntity.ok(apiKeyRepository.findByProjectName(projectName));
     }
@@ -111,7 +112,7 @@ public class APIKeysController {
      * PUT /api-key/deactivate/team/{teamName}
      */
     @PutMapping("/deactivate/team/{teamName}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deactivateByTeam(@PathVariable String teamName) {
         List<APIKeys> keys = apiKeyRepository.findByTeamName(teamName);
 
@@ -137,7 +138,7 @@ public class APIKeysController {
      * PUT /api-key/{keyId}/deactivate
      */
     @PutMapping("/{keyId}/deactivate")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deactivateApiKey(@PathVariable int keyId) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
@@ -155,7 +156,7 @@ public class APIKeysController {
      * PUT /api-key/activate/team/{teamName}
      */
     @PutMapping("/activate/team/{teamName}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> activateByTeam(@PathVariable String teamName) {
         List<APIKeys> keys = apiKeyRepository.findByTeamName(teamName);
 
@@ -181,7 +182,7 @@ public class APIKeysController {
      * PUT /api-key/{keyId}/activate
      */
     @PutMapping("/{keyId}/activate")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> activateApiKey(@PathVariable int keyId) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
@@ -199,7 +200,7 @@ public class APIKeysController {
      * PUT /api-key/{keyId}/extra-time?months={months_here}
      */
     @PutMapping("/{keyId}/extra-time")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> extendApiKey(@PathVariable int keyId, @RequestParam int months) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
@@ -219,7 +220,7 @@ public class APIKeysController {
      * DELETE /api-key/team/{teamName}
      */
     @DeleteMapping("/team/{teamName}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deleteByTeam(@PathVariable String teamName) {
         List<APIKeys> keys = apiKeyRepository.findByTeamName(teamName);
 
@@ -237,7 +238,7 @@ public class APIKeysController {
      * DELETE /api-key/{keyId}
      */
     @DeleteMapping("/{keyId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deleteApiKey(@PathVariable int keyId) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {

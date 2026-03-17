@@ -9,6 +9,7 @@ import fs3.wingspan.repository.SpeciesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class SpeciesController {
      * POST /species/create
      */
     @PostMapping("/create")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> createSpecies(@RequestBody Species s) {
 
         if (s.getName() == null || s.getName().isEmpty()) {
@@ -120,7 +121,7 @@ public class SpeciesController {
      * PUT /species/{speciesId}/set-thumbnail?imageId=5
      */
     @PutMapping("/{speciesId}/set-thumbnail")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> setThumbnail(@PathVariable int speciesId, @RequestParam int imageId) {
         Species s = speciesRepository.findById(speciesId).orElse(null);
         if (s == null) {
@@ -145,7 +146,7 @@ public class SpeciesController {
      * PUT /species/{speciesId}/remove-thumbnail
      */
     @PutMapping("/{speciesId}/remove-thumbnail")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> removeThumbnail(@PathVariable int speciesId) {
         Species s = speciesRepository.findById(speciesId).orElse(null);
         if (s == null) {
@@ -164,7 +165,7 @@ public class SpeciesController {
      * PUT /species/{speciesId}/update
      */
     @PutMapping("/{speciesId}/update")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> updateSpecies(@PathVariable int speciesId, @RequestBody Species updatedSpecies) {
         Species s = speciesRepository.findById(speciesId).orElse(null);
         if (s == null) {
@@ -200,7 +201,7 @@ public class SpeciesController {
      * DELETE /species/{speciesId}
      */
     @DeleteMapping("/{speciesId}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageResponse> deleteSpecies(@PathVariable int speciesId) {
         Species s = speciesRepository.findById(speciesId).orElse(null);
         if (s == null) {
