@@ -1,34 +1,20 @@
 package fs3.wingspan.controller;
 
 import fs3.wingspan.dto.ImageDTO;
-import fs3.wingspan.dto.ImageResponse;
 import fs3.wingspan.model.*;
 import fs3.wingspan.repository.ImageRepository;
-import fs3.wingspan.repository.UserRepository;
 import fs3.wingspan.services.ImageStorageService;
-import jakarta.annotation.Resource;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/images")
@@ -63,36 +49,17 @@ public class ImageController {
            //let service handle all business logic
            Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes, tagId);
 
-           return ResponseEntity.status(HttpStatus.CREATED)
-                   .body(ImageDTO.fromImage(savedImage));
-       }catch(RuntimeException e) {
-           //Catches species not found
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ImageDTO.fromImage(savedImage));
+        }catch(RuntimeException e) {
+            //Catches species not found
             return ResponseEntity.badRequest()
                     .body(Map.of("message", e.getMessage()));
-       } catch (IOException e) {
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                   .body(Map.of("message", "Upload failed"));
-       }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Upload failed"));
+        }
     }
-
-
-    /**
-     * Extracts file path and returns it as a string
-     *
-     */
-//    private String saveImage(MultipartFile file) throws IOException {
-//        Path uploadPath = Paths.get(uploadDir);
-//        if(!Files.exists(uploadPath)){
-//            Files.createDirectories(uploadPath);
-//        }
-//
-//        String filename = file.getOriginalFilename();
-//        //in case filename is null
-//        assert filename != null;
-//        Path filePath = uploadPath.resolve(filename);
-//        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-//        return filePath.toString();
-//    }
 
     /**
      * Get image by image id
@@ -127,17 +94,6 @@ public class ImageController {
 
     }
 
-
-    /**
-     * Delete all images
-     * DELETE /admin/delete-all-images
-     */
-//    @DeleteMapping("/admin/delete-all-images")
-//    public String deleteAllImages() {
-//        imageRepository.deleteAll();
-//        return "All images deleted";
-//    }
-
     /**
      * Edit the image nathans notes
      * POST /admin/edit-nathansnotes
@@ -145,8 +101,8 @@ public class ImageController {
     @PatchMapping("/admin/{imageId}/description")
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ImageDTO> updateDescription(@PathVariable int imageId,
-      @RequestParam String description,
-      @RequestParam(required = false) String nathansNotes) {
+                                                      @RequestParam String description,
+                                                      @RequestParam(required = false) String nathansNotes) {
         try{
             Image updated = imageStorageService.updateImage(imageId, description, nathansNotes);
             return ResponseEntity.ok(ImageDTO.fromImage(updated));

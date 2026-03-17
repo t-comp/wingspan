@@ -1,13 +1,22 @@
 package fs3.wingspan.controller;
+
+import fs3.wingspan.dto.MessageResponse;
 import fs3.wingspan.model.APIKeys;
 import fs3.wingspan.repository.APIKeyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * admin management of API keys
+ * note: API keys are auto-generated when a team is created in TeamsController
+ * this controller handles viewing, activating, deactivating, and extending keys
+ */
 @RestController
 @RequestMapping("/api-key")
 public class APIKeysController {
@@ -16,27 +25,30 @@ public class APIKeysController {
     private APIKeyRepository apiKeyRepository;
 
     /**
-     * generate api key for student team
+     * manually generate/regenerate API key for a team
      * POST /api-key/keygen
      */
-
     @PostMapping("/keygen")
-    public String generateApiKey(@RequestBody APIKeys key) {
-
-        // key value gen
-        String kv = "rgds_" + UUID.randomUUID().toString().replace("-", "");
-        key.setKeyVal(kv);
-
-        if (key.getActive() == null) {
-            key.setActive(true);
+//@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> generateApiKey(@RequestBody APIKeys request) {
+        if (request.getTeamName() == null || request.getTeamName().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Team name is required"));
         }
 
-        // expiration = 1 year if not specified
-        if (key.getExpiration() == null) {
-            key.setExpiration(LocalDateTime.now().plusYears(1));
-        }
-        apiKeyRepository.save(key);
-        return "API key for team '" + key.getTeamName() + "' generated: " + kv;
+        String keyVal = "rgds_" + UUID.randomUUID().toString().replace("-", "");
+
+        APIKeys k = new APIKeys();
+        k.setKeyVal(keyVal);
+        k.setTeamName(request.getTeamName());
+        k.setProjectName(request.getProjectName());
+        k.setSemester(request.getSemester());
+        k.setActive(true);
+        k.setExpiration(LocalDateTime.now().plusYears(1));
+        apiKeyRepository.save(k);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MessageResponse("API key generated: " + keyVal));
     }
 
     /**
@@ -44,8 +56,9 @@ public class APIKeysController {
      * GET /api-key/all
      */
     @GetMapping("/all")
-    public List<APIKeys> getAllApiKeys() {
-        return apiKeyRepository.findAll();
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<APIKeys>> getAllApiKeys() {
+        return ResponseEntity.ok(apiKeyRepository.findAll());
     }
 
     /**
@@ -53,8 +66,14 @@ public class APIKeysController {
      * GET /api-key/{keyId}
      */
     @GetMapping("/{keyId}")
-    public APIKeys getApiKeyById(@PathVariable int keyId) {
-        return apiKeyRepository.findById(keyId).orElse(null);
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getApiKeyById(@PathVariable int keyId) {
+        APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
+        if (k == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("API key not found"));
+        }
+        return ResponseEntity.ok(k);
     }
 
     /**
@@ -62,8 +81,9 @@ public class APIKeysController {
      * GET /api-key/active
      */
     @GetMapping("/active")
-    public List<APIKeys> getActiveApiKeys() {
-        return apiKeyRepository.findByActive(true);
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<APIKeys>> getActiveApiKeys() {
+        return ResponseEntity.ok(apiKeyRepository.findByActive(true));
     }
 
     /**
@@ -71,8 +91,9 @@ public class APIKeysController {
      * GET /api-key/team/{teamName}
      */
     @GetMapping("/team/{teamName}")
-    public List<APIKeys> getApiKeysByTeam(@PathVariable String teamName) {
-        return apiKeyRepository.findByTeamName(teamName);
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<APIKeys>> getApiKeysByTeam(@PathVariable String teamName) {
+        return ResponseEntity.ok(apiKeyRepository.findByTeamName(teamName));
     }
 
     /**
@@ -80,8 +101,9 @@ public class APIKeysController {
      * GET /api-key/project/{projectName}
      */
     @GetMapping("/project/{projectName}")
-    public List<APIKeys> getApiKeysByProject(@PathVariable String projectName) {
-        return apiKeyRepository.findByProjectName(projectName);
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<APIKeys>> getApiKeysByProject(@PathVariable String projectName) {
+        return ResponseEntity.ok(apiKeyRepository.findByProjectName(projectName));
     }
 
     /**
@@ -89,11 +111,13 @@ public class APIKeysController {
      * PUT /api-key/deactivate/team/{teamName}
      */
     @PutMapping("/deactivate/team/{teamName}")
-    public String deactivateByTeam(@PathVariable String teamName) {
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deactivateByTeam(@PathVariable String teamName) {
         List<APIKeys> keys = apiKeyRepository.findByTeamName(teamName);
 
         if (keys.isEmpty()) {
-            return "No API keys found for" + teamName;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("No API keys found for team: " + teamName));
         }
 
         int i = 0;
@@ -105,7 +129,7 @@ public class APIKeysController {
             }
         }
 
-        return  i + " API key(s) for " + teamName + " have been deactivated.";
+        return ResponseEntity.ok(new MessageResponse(i + " API key(s) for " + teamName + " have been deactivated."));
     }
 
     /**
@@ -113,15 +137,17 @@ public class APIKeysController {
      * PUT /api-key/{keyId}/deactivate
      */
     @PutMapping("/{keyId}/deactivate")
-    public String deactivateApiKey(@PathVariable int keyId) {
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deactivateApiKey(@PathVariable int keyId) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
-            return "Key was not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("API key not found"));
         }
 
         k.setActive(false);
         apiKeyRepository.save(k);
-        return "Key for" + k.getTeamName() + " has been deactivated.";
+        return ResponseEntity.ok(new MessageResponse("Key for " + k.getTeamName() + " has been deactivated."));
     }
 
     /**
@@ -129,11 +155,13 @@ public class APIKeysController {
      * PUT /api-key/activate/team/{teamName}
      */
     @PutMapping("/activate/team/{teamName}")
-    public String activateByTeam(@PathVariable String teamName) {
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> activateByTeam(@PathVariable String teamName) {
         List<APIKeys> keys = apiKeyRepository.findByTeamName(teamName);
 
         if (keys.isEmpty()) {
-            return "No API keys found for " + teamName;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("No API keys found for team: " + teamName));
         }
 
         int i = 0;
@@ -145,7 +173,7 @@ public class APIKeysController {
             }
         }
 
-        return i + " API key(s) for " + teamName + " have been reactivated.";
+        return ResponseEntity.ok(new MessageResponse(i + " API key(s) for " + teamName + " have been reactivated."));
     }
 
     /**
@@ -153,15 +181,17 @@ public class APIKeysController {
      * PUT /api-key/{keyId}/activate
      */
     @PutMapping("/{keyId}/activate")
-    public String activateApiKey(@PathVariable int keyId) {
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> activateApiKey(@PathVariable int keyId) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
-            return "Key was not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("API key not found"));
         }
 
         k.setActive(true);
         apiKeyRepository.save(k);
-        return "API key for team '" + k.getTeamName() + "' has been reactivated.";
+        return ResponseEntity.ok(new MessageResponse("API key for team '" + k.getTeamName() + "' has been reactivated."));
     }
 
     /**
@@ -169,17 +199,19 @@ public class APIKeysController {
      * PUT /api-key/{keyId}/extra-time?months={months_here}
      */
     @PutMapping("/{keyId}/extra-time")
-    public String extendApiKey(@PathVariable int keyId, @RequestParam int months) {
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> extendApiKey(@PathVariable int keyId, @RequestParam int months) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
-            return "Key was not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("API key not found"));
         }
 
         LocalDateTime time = LocalDateTime.now().plusMonths(months);
         k.setExpiration(time);
         apiKeyRepository.save(k);
 
-        return "API key for " + k.getTeamName() + " has been extended until " + time;
+        return ResponseEntity.ok(new MessageResponse("API key for " + k.getTeamName() + " has been extended until " + time));
     }
 
     /**
@@ -187,15 +219,17 @@ public class APIKeysController {
      * DELETE /api-key/team/{teamName}
      */
     @DeleteMapping("/team/{teamName}")
-    public String deleteByTeam(@PathVariable String teamName) {
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deleteByTeam(@PathVariable String teamName) {
         List<APIKeys> keys = apiKeyRepository.findByTeamName(teamName);
 
         if (keys.isEmpty()) {
-            return "No API keys found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("No API keys found for team: " + teamName));
         }
 
         apiKeyRepository.deleteAll(keys);
-        return keys.size() + " API key(s) for team " + teamName + "have been deleted";
+        return ResponseEntity.ok(new MessageResponse(keys.size() + " API key(s) for team " + teamName + " have been deleted"));
     }
 
     /**
@@ -203,15 +237,16 @@ public class APIKeysController {
      * DELETE /api-key/{keyId}
      */
     @DeleteMapping("/{keyId}")
-    public String deleteApiKey(@PathVariable int keyId) {
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deleteApiKey(@PathVariable int keyId) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
-            return "Key was not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("API key not found"));
         }
 
         String teamName = k.getTeamName();
         apiKeyRepository.delete(k);
-        return "API key for " + teamName + " has been perma deleted";
+        return ResponseEntity.ok(new MessageResponse("API key for " + teamName + " has been perma deleted"));
     }
 }
-
