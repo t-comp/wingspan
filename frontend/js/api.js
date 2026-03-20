@@ -8,6 +8,11 @@ const jsonHeaders = {
   Accept: "application/json",
 };
 
+// hi! it's taylor and i added this: default fetch options to send session cookie
+const defaultOpts = {
+  credentials: "include",
+};
+
 export const ButterflyAPI = {
   // ==========================
   // SPECIES ENDPOINTS
@@ -15,6 +20,7 @@ export const ButterflyAPI = {
   async getAll() {
     try {
       const response = await fetch(`${API_BASE_URL}/species/all`, {
+        ...defaultOpts,
         headers: { Accept: "application/json" },
       });
       return await response.json();
@@ -26,20 +32,7 @@ export const ButterflyAPI = {
 
   async getSpeciesById(speciesId) {
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-  },
-
-  async getButterflies() {
-    const response = await fetch(`${API_BASE_URL}/species/butterflies`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-  },
-
-  async getInsects() {
-    const response = await fetch(`${API_BASE_URL}/species/insects`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -47,13 +40,17 @@ export const ButterflyAPI = {
 
   async create(data) {
     const response = await fetch(`${API_BASE_URL}/species/create`, {
+      ...defaultOpts,
       method: "POST",
       headers: jsonHeaders,
+      // hi! i changed this: removed butterfly field type
       body: JSON.stringify({
         name: data.name,
         scientificName: data.scientific,
         description: data.description,
-        type: "BUTTERFLY",
+        orderName: data.orderName,
+        family: data.family,
+        genus: data.genus,
       }),
     });
     return await response.json();
@@ -63,6 +60,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/species/${speciesId}/update`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: jsonHeaders,
         body: JSON.stringify(data),
@@ -73,6 +71,7 @@ export const ButterflyAPI = {
 
   async delete(speciesId) {
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
+      ...defaultOpts,
       method: "DELETE",
       headers: { Accept: "application/json" },
     });
@@ -87,13 +86,17 @@ export const ButterflyAPI = {
 
     const response = await fetch(
       `${API_BASE_URL}/species/filter?${params.toString()}`,
-      { headers: { Accept: "application/json" } },
+      {
+        ...defaultOpts,
+        headers: { Accept: "application/json" },
+      },
     );
     return await response.json();
   },
 
   async getFilterOptions() {
     const response = await fetch(`${API_BASE_URL}/species/filter-options`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -103,6 +106,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/species/${speciesId}/set-thumbnail?imageId=${imageId}`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: { Accept: "application/json" },
       },
@@ -114,6 +118,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/species/${speciesId}/remove-thumbnail`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: { Accept: "application/json" },
       },
@@ -126,6 +131,7 @@ export const ButterflyAPI = {
   // ==========================
   async login(usernameVal, passwordVal) {
     const response = await fetch(`${API_BASE_URL}/user/login`, {
+      ...defaultOpts,
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify({
@@ -143,8 +149,19 @@ export const ButterflyAPI = {
     return await response.json();
   },
 
+  // hi, i added this: logout endpoint to invalidate session on the server
+  async logout() {
+    const response = await fetch(`${API_BASE_URL}/user/logout`, {
+      ...defaultOpts,
+      method: "POST",
+      headers: { Accept: "application/json" },
+    });
+    return await response.json();
+  },
+
   async createAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/create-account`, {
+      ...defaultOpts,
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify({
@@ -167,6 +184,7 @@ export const ButterflyAPI = {
 
   async adminCreateAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/admin/create-account`, {
+      ...defaultOpts,
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify(userData),
@@ -177,7 +195,10 @@ export const ButterflyAPI = {
   async getStudentDashboard(email) {
     const response = await fetch(
       `${API_BASE_URL}/user/dashboard?email=${email}`,
-      { headers: { Accept: "application/json" } },
+      {
+        ...defaultOpts,
+        headers: { Accept: "application/json" },
+      },
     );
     return await response.json();
   },
@@ -185,6 +206,7 @@ export const ButterflyAPI = {
   async getAllUsers() {
     try {
       const response = await fetch(`${API_BASE_URL}/user/all`, {
+        ...defaultOpts,
         headers: { Accept: "application/json" },
       });
       return await response.json();
@@ -196,6 +218,7 @@ export const ButterflyAPI = {
 
   async deleteUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}`, {
+      ...defaultOpts,
       method: "DELETE",
       headers: { Accept: "application/json" },
     });
@@ -206,6 +229,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-username?newUsername=${newUsername}`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: { Accept: "application/json" },
       },
@@ -217,6 +241,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-email?newEmail=${newEmail}`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: { Accept: "application/json" },
       },
@@ -226,6 +251,7 @@ export const ButterflyAPI = {
 
   async makeAdmin(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/make-admin`, {
+      ...defaultOpts,
       method: "PUT",
       headers: { Accept: "application/json" },
     });
@@ -236,6 +262,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/make-student`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: { Accept: "application/json" },
       },
@@ -245,6 +272,7 @@ export const ButterflyAPI = {
 
   async activateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/activate`, {
+      ...defaultOpts,
       method: "PUT",
       headers: { Accept: "application/json" },
     });
@@ -253,6 +281,7 @@ export const ButterflyAPI = {
 
   async deactivateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/deactivate`, {
+      ...defaultOpts,
       method: "PUT",
       headers: { Accept: "application/json" },
     });
@@ -265,6 +294,7 @@ export const ButterflyAPI = {
   async getAllApiKeys() {
     try {
       const response = await fetch(`${API_BASE_URL}/api-key/all`, {
+        ...defaultOpts,
         headers: { Accept: "application/json" },
       });
       return await response.json();
@@ -276,6 +306,7 @@ export const ButterflyAPI = {
 
   async getActiveApiKeys() {
     const response = await fetch(`${API_BASE_URL}/api-key/active`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -283,6 +314,7 @@ export const ButterflyAPI = {
 
   async generateApiKey(data) {
     const response = await fetch(`${API_BASE_URL}/api-key/keygen`, {
+      ...defaultOpts,
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify({
@@ -298,6 +330,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/api-key/${keyId}/deactivate`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: { Accept: "application/json" },
       },
@@ -307,6 +340,7 @@ export const ButterflyAPI = {
 
   async activateApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}/activate`, {
+      ...defaultOpts,
       method: "PUT",
       headers: { Accept: "application/json" },
     });
@@ -317,6 +351,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/api-key/${keyId}/extra-time?months=${months}`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: { Accept: "application/json" },
       },
@@ -326,6 +361,7 @@ export const ButterflyAPI = {
 
   async deleteApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}`, {
+      ...defaultOpts,
       method: "DELETE",
       headers: { Accept: "application/json" },
     });
@@ -337,6 +373,7 @@ export const ButterflyAPI = {
   // ==========================
   async createTeam(data) {
     const response = await fetch(`${API_BASE_URL}/teams/create`, {
+      ...defaultOpts,
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify(data),
@@ -346,6 +383,7 @@ export const ButterflyAPI = {
 
   async getAllTeams() {
     const response = await fetch(`${API_BASE_URL}/teams/all`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -353,6 +391,7 @@ export const ButterflyAPI = {
 
   async getTeamById(teamId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -360,6 +399,7 @@ export const ButterflyAPI = {
 
   async getUnassignedStudents() {
     const response = await fetch(`${API_BASE_URL}/teams/unassigned-students`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -367,6 +407,7 @@ export const ButterflyAPI = {
 
   async getTeamMembers(teamId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -374,6 +415,7 @@ export const ButterflyAPI = {
 
   async addTeamMember(teamId, userId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/add-member`, {
+      ...defaultOpts,
       method: "PUT",
       headers: jsonHeaders,
       body: JSON.stringify({ userId: parseInt(userId) }),
@@ -392,6 +434,7 @@ export const ButterflyAPI = {
     const response = await fetch(
       `${API_BASE_URL}/teams/${teamId}/remove-member`,
       {
+        ...defaultOpts,
         method: "PUT",
         headers: jsonHeaders,
         body: JSON.stringify({ userId: parseInt(userId) }),
@@ -409,6 +452,7 @@ export const ButterflyAPI = {
 
   async updateTeam(teamId, data) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/update`, {
+      ...defaultOpts,
       method: "PUT",
       headers: jsonHeaders,
       body: JSON.stringify(data),
@@ -418,6 +462,7 @@ export const ButterflyAPI = {
 
   async deleteTeam(teamId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
+      ...defaultOpts,
       method: "DELETE",
       headers: { Accept: "application/json" },
     });
@@ -428,8 +473,8 @@ export const ButterflyAPI = {
   // TAG / IMAGE ENDPOINTS
   // ==========================
   async uploadImage(formData) {
-    // Note: Do not set Content-Type for FormData, the browser sets it to multipart/form-data automatically
     const response = await fetch(`${API_BASE_URL}/images/admin/upload`, {
+      ...defaultOpts,
       method: "POST",
       headers: { Accept: "application/json" },
       body: formData,
@@ -439,6 +484,7 @@ export const ButterflyAPI = {
 
   async getAllTags() {
     const response = await fetch(`${API_BASE_URL}/tags`, {
+      ...defaultOpts,
       headers: { Accept: "application/json" },
     });
     return await response.json();
@@ -446,6 +492,7 @@ export const ButterflyAPI = {
 
   async createTag(tagData) {
     const response = await fetch(`${API_BASE_URL}/tags/admin`, {
+      ...defaultOpts,
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify(tagData),
@@ -455,6 +502,7 @@ export const ButterflyAPI = {
 
   async deleteTag(tagId) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
+      ...defaultOpts,
       method: "DELETE",
       headers: { Accept: "application/json" },
     });
@@ -463,6 +511,7 @@ export const ButterflyAPI = {
 
   async updateTag(tagId, tagData) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
+      ...defaultOpts,
       method: "PUT",
       headers: jsonHeaders,
       body: JSON.stringify(tagData),
@@ -474,7 +523,10 @@ export const ButterflyAPI = {
     const queryString = tagIds.map((id) => `tagIds=${id}`).join("&");
     const response = await fetch(
       `${API_BASE_URL}/images/filter?${queryString}`,
-      { headers: { Accept: "application/json" } },
+      {
+        ...defaultOpts,
+        headers: { Accept: "application/json" },
+      },
     );
     return await response.json();
   },

@@ -77,12 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailVal = document.getElementById(emailId).value;
     const passVal = document.getElementById(passId).value;
 
-    // Strict Length Validation for Login
-    if (emailVal.length !== 5) {
-      return alert("Username must be exactly 5 characters long.");
+    // hello! CHANGE: fixed validation to use min length not exact length
+    if (emailVal.length < 5) {
+      return alert("Username must be at least 5 characters long.");
     }
-    if (passVal.length !== 7) {
-      return alert("Password must be exactly 7 characters long.");
+    if (passVal.length < 7) {
+      return alert("Password must be at least 7 characters long.");
     }
 
     try {
@@ -91,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("BACKEND LOGIN RESPONSE:", user);
       const role = user.userType || user.utype || user.uType;
 
-      // Role Restriction Check
       if (role !== expectedRole) {
         alert(
           `Access Denied: You are a ${role}. Please use the correct login screen.`,
@@ -118,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      // Prompt unregistered users to create an account
       if (
         confirm(
           `Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`,
@@ -153,22 +151,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const emailVal = document.getElementById("createEmail").value;
       const passVal = document.getElementById("createPassword").value;
 
-      // Email Format Validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailVal)) {
         return alert("Please enter a valid email address.");
       }
 
-      // Strict Length Validation for Creation
-      if (usernameVal.length !== 5) {
-        return alert("Username must be exactly 5 characters long.");
+      // CHANGE HERE: fixed validation to use min length not exact length
+      if (usernameVal.length < 5) {
+        return alert("Username must be at least 5 characters long.");
       }
-      if (passVal.length !== 7) {
-        return alert("Password must be exactly 7 characters long.");
+      if (passVal.length < 7) {
+        return alert("Password must be at least 7 characters long.");
       }
 
       try {
-        // Uniqueness Check: See if username already exists
         const allUsers = await ButterflyAPI.getAllUsers();
         const usernameExists = allUsers.some(
           (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
@@ -198,9 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Logout
-  const handleLogout = (e) => {
+  // CHANGE HERE AGAIN: logout now calls backend to invalidate session instead of just reloading
+  const handleLogout = async (e) => {
     e.preventDefault();
+    await ButterflyAPI.logout();
     location.reload();
   };
 
