@@ -208,6 +208,10 @@ public class SpeciesController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Species not found"));
         }
+
+        List<Image> images = imageRepository.findBySpeciesId(speciesId);
+        imageRepository.deleteAll(images);
+
         String name = s.getName();
         speciesRepository.delete(s);
         return ResponseEntity.ok(new MessageResponse(name + " has been deleted."));
@@ -230,5 +234,35 @@ public class SpeciesController {
         }
 
         return null;
+    }
+
+    /**
+     * set attribute definitions for a species (what custom fields this species has)
+     * PUT /species/{speciesId}/attributes
+     * body: { "Wing Pattern": "text", "Wingspan (inches)": "number" }
+     */
+    @PutMapping("/{speciesId}/attributes")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> setAttributeDefinitions(@PathVariable int speciesId, @RequestBody Map<String, String> defs) {
+        Species s = speciesRepository.findById(speciesId).orElse(null);
+        if (s == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Species not found"));
+        }
+        s.setAttributeDefs(defs);
+        speciesRepository.save(s);
+        return ResponseEntity.ok(new MessageResponse("Attribute definitions updated for " + s.getName()));
+    }
+
+    /**
+     * get attribute definitions for a species
+     * GET /species/{speciesId}/attributes
+     */
+    @GetMapping("/{speciesId}/attributes")
+    public ResponseEntity<?> getAttributeDefinitions(@PathVariable int speciesId) {
+        Species s = speciesRepository.findById(speciesId).orElse(null);
+        if (s == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Species not found"));
+        }
+        return ResponseEntity.ok(s.getAttributeDefs());
     }
 }

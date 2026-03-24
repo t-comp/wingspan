@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.Map;
 
 @Entity
 @Getter
@@ -38,4 +42,8 @@ public class Species {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "thumbnail_id")
     private Image thumbnail;
+
+    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> attributeDefs;
 }

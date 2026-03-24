@@ -1,14 +1,12 @@
 package fs3.wingspan.controller;
 
+import fs3.wingspan.config.JwtUtils;
 import fs3.wingspan.dto.*;
 import fs3.wingspan.model.UType;
 import fs3.wingspan.model.Users;
 import fs3.wingspan.model.Teams;
 import fs3.wingspan.model.APIKeys;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -39,11 +37,14 @@ public class UserController {
     @Autowired
     private APIKeyRepository apiKeyRepository;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
 
     //********** ACCOUNT CREATION + LOGGING IN **********
 
     /**
-     * create new account (student self-registers)
+     * create new account (student reg)
      * POST /user/create-account
      */
     @PostMapping("/create-account")
@@ -124,7 +125,7 @@ public class UserController {
                     .body(new MessageResponse("Please make sure password is at least 7 characters."));
         }
 
-        // if a teamId was provided, make sure it actually exists
+        // if a teamId was given make sure it exits
         if (u.getTeamId() != null) {
             if (!teamsRepository.existsById(u.getTeamId())) {
                 return ResponseEntity.badRequest()
@@ -150,11 +151,11 @@ public class UserController {
 
     /**
      * user logs in with username or email and password
-     * stores user in session on success
+     * returns JWT token on success
      * POST /user/login
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginInfoDTO info, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody LoginInfoDTO info) {
 
         if (info.getUsernameOrEmail() == null || info.getPassword() == null ||
                 info.getUsernameOrEmail().isEmpty() || info.getPassword().isEmpty()) {
@@ -171,16 +172,13 @@ public class UserController {
         }
 
         if (u != null && passwordEncoder.matches(info.getPassword(), u.getPassword())) {
-            // store in session
-            session.setAttribute("user", u);
+            String token = jwtUtils.generateToken(u);
 
-            // tell spring security who is logged in
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    u, null, u.getAuthorities()
-            );
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("token", token);
+            responseBody.put("user", UsersDTO.fromUser(u));
 
-            return ResponseEntity.ok(UsersDTO.fromUser(u));
+            return ResponseEntity.ok(responseBody);
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -188,29 +186,15 @@ public class UserController {
     }
 
     /**
-     * log out - invalidates session
+     * logout with JWT
      * POST /user/logout
      */
     @PostMapping("/logout")
-    public ResponseEntity<MessageResponse> logout(HttpSession session) {
-        session.invalidate();
-        SecurityContextHolder.clearContext();
+    public ResponseEntity<MessageResponse> logout() {
         return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
     }
 
-    /**
-     * get currently logged in user from session
-     * GET /user/me
-     */
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpSession session) {
-        Users u = (Users) session.getAttribute("user");
-        if (u == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageResponse("Not logged in"));
-        }
-        return ResponseEntity.ok(UsersDTO.fromUser(u));
-    }
+
 
 
     // ACCOUNT VALIDATION HELPER METHODS
