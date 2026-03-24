@@ -24,6 +24,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+
 @Service
 @Slf4j
 public class ImageStorageService {
@@ -74,15 +77,21 @@ public class ImageStorageService {
 
         String fileUrl = endpoint + "/" + bucketName + "/" + uniqueFilename;
 
+        int[] dimensions = getImageDimensions(file);
+        log.info("Image dimensions: {}x{}", dimensions[0], dimensions[1]);
+
         //Create & save entity
         Image image = new Image();
         image.setSpecies(species);
         image.setFilename(uniqueFilename);
         image.setFpath(fileUrl);
         image.setFsize(BigInteger.valueOf(file.getSize()));
+        image.setWidth(dimensions[0]);
+        image.setHeight(dimensions[1]);
+        image.setDescription(description);
         image.setLifecyclestage(lifecycle_stage);
         image.setNathansnotes(nathansNotes);
-        image.setDescription(description);
+
 
         log.info("About to save - lifecycle: {}, nathansNotes: {}, description: {}",
                 image.getLifecyclestage(), image.getNathansnotes(), image.getDescription());
@@ -179,5 +188,17 @@ public class ImageStorageService {
             return imageRepository.findAll(); // return everything if no tags specified
         }
         return imageRepository.findByAllTags(tagIds, (long) tagIds.size());
+    }
+
+    private int[] getImageDimensions(MultipartFile file){
+        try{
+            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+            if(bufferedImage != null){
+                return new int[]{bufferedImage.getWidth(), bufferedImage.getHeight()};
+            }
+        }catch(IOException e){
+            log.warn("Could not extract image height and width for file: {}", file.getOriginalFilename());
+        }
+        return new int[]{0,0};
     }
 }
