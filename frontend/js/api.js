@@ -3,7 +3,7 @@ const API_BASE_URL = "http://159.203.134.226:8080";
 
 // const API_BASE_URL = "http://localhost:8080";
 
-// builds headers for every request, attaching the JWT token if one is stored
+// TAYLOR CHANGE: headers for attaching JWT token to every request
 function getHeaders() {
   const headers = {
     "Content-Type": "application/json",
@@ -14,9 +14,6 @@ function getHeaders() {
   return headers;
 }
 
-<<<<<<< Updated upstream
-=======
-// same as getHeaders() but without Content-Type, used for multipart/form-data uploads
 function getAuthOnlyHeaders() {
   const headers = { Accept: "application/json" };
   const token = localStorage.getItem("jwt");
@@ -24,7 +21,7 @@ function getAuthOnlyHeaders() {
   return headers;
 }
 
-// reads body once, parses error message, throws if not ok
+// TAYLOR CHANGE: reads respionse body once and handles both JSON and plain text errors
 async function checkResponse(response) {
   const text = await response.text();
   if (!response.ok) {
@@ -36,20 +33,13 @@ async function checkResponse(response) {
   try { return JSON.parse(text); } catch { return text; }
 }
 
->>>>>>> Stashed changes
 export const ButterflyAPI = {
   // ==========================
   // SPECIES ENDPOINTS
   // ==========================
   async getAll() {
     try {
-<<<<<<< Updated upstream
-      const response = await fetch(`${API_BASE_URL}/species/all`, {
-        headers: { Accept: "application/json" },
-      });
-=======
       const response = await fetch(`${API_BASE_URL}/species/all`, { headers: getHeaders() });
->>>>>>> Stashed changes
       return await response.json();
     } catch (error) {
       console.error("Error fetching species. Is the server running?", error);
@@ -58,68 +48,33 @@ export const ButterflyAPI = {
   },
 
   async getSpeciesById(speciesId) {
-<<<<<<< Updated upstream
-    const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-  },
-
-  async getButterflies() {
-    const response = await fetch(`${API_BASE_URL}/species/butterflies`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-  },
-
-  async getInsects() {
-    const response = await fetch(`${API_BASE_URL}/species/insects`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, { headers: getHeaders() });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async create(data) {
     const response = await fetch(`${API_BASE_URL}/species/create`, {
       method: "POST",
-<<<<<<< Updated upstream
-      headers: jsonHeaders,
-=======
       headers: getHeaders(),
->>>>>>> Stashed changes
       body: JSON.stringify({
         name: data.name,
         scientificName: data.scientificName,
         description: data.description,
-        type: "BUTTERFLY",
+        orderName: data.orderName,
+        family: data.family,
+        genus: data.genus,
       }),
     });
     return checkResponse(response);
   },
 
   async updateSpecies(speciesId, data) {
-<<<<<<< Updated upstream
-    const response = await fetch(
-      `${API_BASE_URL}/species/${speciesId}/update`,
-      {
-        method: "PUT",
-        headers: jsonHeaders,
-        body: JSON.stringify(data),
-      },
-    );
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}/update`, {
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async delete(speciesId) {
@@ -135,21 +90,6 @@ export const ButterflyAPI = {
     if (orderName) params.append("orderName", orderName);
     if (family) params.append("family", family);
     if (genus) params.append("genus", genus);
-<<<<<<< Updated upstream
-
-    const response = await fetch(
-      `${API_BASE_URL}/species/filter?${params.toString()}`,
-      { headers: { Accept: "application/json" } },
-    );
-    return await response.json();
-  },
-
-  async getFilterOptions() {
-    const response = await fetch(`${API_BASE_URL}/species/filter-options`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/species/filter?${params.toString()}`, { headers: getHeaders() });
     return checkResponse(response);
   },
@@ -157,45 +97,27 @@ export const ButterflyAPI = {
   async getFilterOptions() {
     const response = await fetch(`${API_BASE_URL}/species/filter-options`, { headers: getHeaders() });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async setThumbnail(speciesId, imageId) {
     const response = await fetch(
       `${API_BASE_URL}/species/${speciesId}/set-thumbnail?imageId=${imageId}`,
-<<<<<<< Updated upstream
-      {
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-=======
       { method: "PUT", headers: getHeaders() }
->>>>>>> Stashed changes
     );
     return checkResponse(response);
   },
 
   async removeThumbnail(speciesId) {
-<<<<<<< Updated upstream
-    const response = await fetch(
-      `${API_BASE_URL}/species/${speciesId}/remove-thumbnail`,
-      {
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}/remove-thumbnail`, {
       method: "PUT", headers: getHeaders(),
     });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   // ==========================
   // USER / AUTH ENDPOINTS
   // ==========================
+  // TAYLOR CHANGE: save JWT token
   async login(usernameVal, passwordVal) {
     const response = await fetch(`${API_BASE_URL}/user/login`, {
       method: "POST",
@@ -211,13 +133,10 @@ export const ButterflyAPI = {
     return data.user;
   },
 
-<<<<<<< Updated upstream
-=======
   async logout() {
     localStorage.removeItem("jwt");
   },
 
->>>>>>> Stashed changes
   async createAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/create-account`, {
       method: "POST",
@@ -242,27 +161,13 @@ export const ButterflyAPI = {
   },
 
   async getStudentDashboard(email) {
-<<<<<<< Updated upstream
-    const response = await fetch(
-      `${API_BASE_URL}/user/dashboard?email=${email}`,
-      { headers: { Accept: "application/json" } },
-    );
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/user/dashboard?email=${email}`, { headers: getHeaders() });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async getAllUsers() {
     try {
-<<<<<<< Updated upstream
-      const response = await fetch(`${API_BASE_URL}/user/all`, {
-        headers: { Accept: "application/json" },
-      });
-=======
       const response = await fetch(`${API_BASE_URL}/user/all`, { headers: getHeaders() });
->>>>>>> Stashed changes
       return await response.json();
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -272,12 +177,7 @@ export const ButterflyAPI = {
 
   async deleteUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}`, {
-<<<<<<< Updated upstream
-      method: "DELETE",
-      headers: { Accept: "application/json" },
-=======
       method: "DELETE", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
@@ -285,14 +185,7 @@ export const ButterflyAPI = {
   async updateUsername(userId, newUsername) {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-username?newUsername=${newUsername}`,
-<<<<<<< Updated upstream
-      {
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-=======
       { method: "PUT", headers: getHeaders() }
->>>>>>> Stashed changes
     );
     return checkResponse(response);
   },
@@ -300,68 +193,35 @@ export const ButterflyAPI = {
   async updateEmail(userId, newEmail) {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-email?newEmail=${newEmail}`,
-<<<<<<< Updated upstream
-      {
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-=======
       { method: "PUT", headers: getHeaders() }
->>>>>>> Stashed changes
     );
     return checkResponse(response);
   },
 
   async makeAdmin(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/make-admin`, {
-<<<<<<< Updated upstream
-      method: "PUT",
-      headers: { Accept: "application/json" },
-=======
       method: "PUT", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
 
   async makeStudent(userId) {
-<<<<<<< Updated upstream
-    const response = await fetch(
-      `${API_BASE_URL}/user/${userId}/make-student`,
-      {
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/user/${userId}/make-student`, {
       method: "PUT", headers: getHeaders(),
     });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async activateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/activate`, {
-<<<<<<< Updated upstream
-      method: "PUT",
-      headers: { Accept: "application/json" },
-=======
       method: "PUT", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
 
   async deactivateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/deactivate`, {
-<<<<<<< Updated upstream
-      method: "PUT",
-      headers: { Accept: "application/json" },
-=======
       method: "PUT", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
@@ -371,13 +231,7 @@ export const ButterflyAPI = {
   // ==========================
   async getAllApiKeys() {
     try {
-<<<<<<< Updated upstream
-      const response = await fetch(`${API_BASE_URL}/api-key/all`, {
-        headers: { Accept: "application/json" },
-      });
-=======
       const response = await fetch(`${API_BASE_URL}/api-key/all`, { headers: getHeaders() });
->>>>>>> Stashed changes
       return await response.json();
     } catch (error) {
       console.error("Error fetching API keys:", error);
@@ -386,15 +240,8 @@ export const ButterflyAPI = {
   },
 
   async getActiveApiKeys() {
-<<<<<<< Updated upstream
-    const response = await fetch(`${API_BASE_URL}/api-key/active`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/api-key/active`, { headers: getHeaders() });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async generateApiKey(data) {
@@ -411,31 +258,15 @@ export const ButterflyAPI = {
   },
 
   async deactivateApiKey(keyId) {
-<<<<<<< Updated upstream
-    const response = await fetch(
-      `${API_BASE_URL}/api-key/${keyId}/deactivate`,
-      {
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}/deactivate`, {
       method: "PUT", headers: getHeaders(),
     });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async activateApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}/activate`, {
-<<<<<<< Updated upstream
-      method: "PUT",
-      headers: { Accept: "application/json" },
-=======
       method: "PUT", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
@@ -443,26 +274,14 @@ export const ButterflyAPI = {
   async extendApiKey(keyId, months) {
     const response = await fetch(
       `${API_BASE_URL}/api-key/${keyId}/extra-time?months=${months}`,
-<<<<<<< Updated upstream
-      {
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-=======
       { method: "PUT", headers: getHeaders() }
->>>>>>> Stashed changes
     );
     return checkResponse(response);
   },
 
   async deleteApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}`, {
-<<<<<<< Updated upstream
-      method: "DELETE",
-      headers: { Accept: "application/json" },
-=======
       method: "DELETE", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
@@ -480,33 +299,6 @@ export const ButterflyAPI = {
   },
 
   async getAllTeams() {
-<<<<<<< Updated upstream
-    const response = await fetch(`${API_BASE_URL}/teams/all`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-  },
-
-  async getTeamById(teamId) {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-  },
-
-  async getUnassignedStudents() {
-    const response = await fetch(`${API_BASE_URL}/teams/unassigned-students`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-  },
-
-  async getTeamMembers(teamId) {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, {
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/teams/all`, { headers: getHeaders() });
     return checkResponse(response);
   },
@@ -524,7 +316,6 @@ export const ButterflyAPI = {
   async getTeamMembers(teamId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, { headers: getHeaders() });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async addTeamMember(teamId, userId) {
@@ -537,31 +328,12 @@ export const ButterflyAPI = {
   },
 
   async removeTeamMember(teamId, userId) {
-<<<<<<< Updated upstream
-    const response = await fetch(
-      `${API_BASE_URL}/teams/${teamId}/remove-member`,
-      {
-        method: "PUT",
-        headers: jsonHeaders,
-        body: JSON.stringify({ userId: parseInt(userId) }),
-      },
-    );
-
-    if (!response.ok) {
-      const errorMsg = await response.text();
-      throw new Error(
-        errorMsg || `Server responded with status ${response.status}`,
-      );
-    }
-    return await response.json();
-=======
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/remove-member`, {
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify({ userId: parseInt(userId) }),
     });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 
   async updateTeam(teamId, data) {
@@ -575,12 +347,7 @@ export const ButterflyAPI = {
 
   async deleteTeam(teamId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
-<<<<<<< Updated upstream
-      method: "DELETE",
-      headers: { Accept: "application/json" },
-=======
       method: "DELETE", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
@@ -589,7 +356,6 @@ export const ButterflyAPI = {
   // IMAGE ENDPOINTS
   // ==========================
   async uploadImage(formData) {
-    // Note: Do not set Content-Type for FormData, the browser sets it to multipart/form-data automatically
     const response = await fetch(`${API_BASE_URL}/images/admin/upload`, {
       method: "POST",
       headers: getAuthOnlyHeaders(),
@@ -598,11 +364,7 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
-<<<<<<< Updated upstream
-  async getAllTags() {
-    const response = await fetch(`${API_BASE_URL}/tags`, {
-      headers: { Accept: "application/json" },
-=======
+  // TAYLOR CHANGE: added getImagesBySpecies, deleteImage, updateImageDescription, addTagToImage, removeTagFromImage
   async getImagesBySpecies(speciesId) {
     const response = await fetch(`${API_BASE_URL}/images/species/${speciesId}`, { headers: getHeaders() });
     return checkResponse(response);
@@ -611,7 +373,6 @@ export const ButterflyAPI = {
   async deleteImage(id) {
     const response = await fetch(`${API_BASE_URL}/images/admin/${id}`, {
       method: "DELETE", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
@@ -660,12 +421,7 @@ export const ButterflyAPI = {
 
   async deleteTag(tagId) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
-<<<<<<< Updated upstream
-      method: "DELETE",
-      headers: { Accept: "application/json" },
-=======
       method: "DELETE", headers: getHeaders(),
->>>>>>> Stashed changes
     });
     return checkResponse(response);
   },
@@ -680,17 +436,8 @@ export const ButterflyAPI = {
   },
 
   async filterImagesByTags(tagIds) {
-<<<<<<< Updated upstream
-    const queryString = tagIds.map((id) => `tagIds=${id}`).join("&");
-    const response = await fetch(
-      `${API_BASE_URL}/images/filter?${queryString}`,
-      { headers: { Accept: "application/json" } },
-    );
-    return await response.json();
-=======
     const queryString = tagIds.map((id) => "tagIds=" + id).join("&");
     const response = await fetch(`${API_BASE_URL}/images/filter?${queryString}`, { headers: getHeaders() });
     return checkResponse(response);
->>>>>>> Stashed changes
   },
 };
