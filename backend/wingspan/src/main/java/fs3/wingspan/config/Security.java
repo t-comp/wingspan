@@ -29,6 +29,9 @@ public class Security {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private APIKeyFilter keyFilter;
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -45,7 +48,8 @@ public class Security {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(keyFilter, JwtFilter.class);
 
         return http.build();
     }

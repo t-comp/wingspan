@@ -181,8 +181,7 @@ public class UserController {
             return ResponseEntity.ok(responseBody);
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new MessageResponse("Username/email or password is incorrect."));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Username/email or password is incorrect."));
     }
 
     /**
