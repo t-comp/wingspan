@@ -415,6 +415,10 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
+  async deleteImage(id) {
+    return await fetch(`${API_BASE_URL}/images/admin/${id}`, { method: "DELETE" });
+  },
+
   async deleteTag(tagId) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
       method: "DELETE", headers: getHeaders(),

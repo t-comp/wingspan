@@ -6,6 +6,7 @@ import fs3.wingspan.model.Tags;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
 import fs3.wingspan.repository.TagRepository;
+import io.awspring.cloud.s3.ObjectMetadata;
 import io.awspring.cloud.s3.S3Template;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 
 @Service
 @Slf4j
@@ -40,6 +48,9 @@ public class ImageStorageService {
     @Autowired
     private TagRepository tagRepository;
 
+    @Autowired
+    private S3Client s3Client;
+
     /**
      * Save image file to disk and metadata to database
      */
@@ -55,9 +66,19 @@ public class ImageStorageService {
         String safeFilename = getSafeFilename(originalFilename);
         String uniqueFilename = UUID.randomUUID() + "_" + safeFilename + extension;
 
-        s3Template.upload(bucketName, uniqueFilename, file.getInputStream());
+        PutObjectRequest putRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(uniqueFilename)
+                .contentType(file.getContentType())
+                .acl(ObjectCannedACL.PUBLIC_READ)  // ← makes file publicly accessible
+                .build();
+
+        s3Client.putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
 
         String fileUrl = endpoint + "/" + bucketName + "/" + uniqueFilename;
+
+        int[] dimensions = getImageDimensions(file);
+        log.info("Image dimensions: {}x{}", dimensions[0], dimensions[1]);
 
         //Create & save entity
         Image image = new Image();
@@ -65,9 +86,12 @@ public class ImageStorageService {
         image.setFilename(uniqueFilename);
         image.setFpath(fileUrl);
         image.setFsize(BigInteger.valueOf(file.getSize()));
+        image.setWidth(dimensions[0]);
+        image.setHeight(dimensions[1]);
+        image.setDescription(description);
         image.setLifecyclestage(lifecycle_stage);
         image.setNathansnotes(nathansNotes);
-        image.setDescription(description);
+
 
         log.info("About to save - lifecycle: {}, nathansNotes: {}, description: {}",
                 image.getLifecyclestage(), image.getNathansnotes(), image.getDescription());
@@ -164,5 +188,17 @@ public class ImageStorageService {
             return imageRepository.findAll(); // return everything if no tags specified
         }
         return imageRepository.findByAllTags(tagIds, (long) tagIds.size());
+    }
+
+    private int[] getImageDimensions(MultipartFile file){
+        try{
+            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+            if(bufferedImage != null){
+                return new int[]{bufferedImage.getWidth(), bufferedImage.getHeight()};
+            }
+        }catch(IOException e){
+            log.warn("Could not extract image height and width for file: {}", file.getOriginalFilename());
+        }
+        return new int[]{0,0};
     }
 }
