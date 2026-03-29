@@ -2,6 +2,8 @@ import { ButterflyAPI } from "./api.js";
 import { UI } from "./ui.js";
 import { TagManager } from "./tags.js";
 
+let currentSpeciesId = null;
+
 export async function initHome(userRole, userEmail) {
     console.log("Home Initializing with role:", userRole, "and email:", userEmail);
 
@@ -29,6 +31,7 @@ export async function initHome(userRole, userEmail) {
     let activeTagFilters = new Set();
     const filterTagCloud = document.getElementById("filterTagCloud");
 
+
     const showView = (view) => {
         [portfolio, speciesView, teamView].forEach((v) => {
             if (v) v.style.display = "none";
@@ -37,9 +40,168 @@ export async function initHome(userRole, userEmail) {
         window.scrollTo(0, 0);
     };
 
+    const openImageDetailsModal = (img) => {
+        const editBtn = document.getElementById("editImageBtn");
+        const saveBtn = document.getElementById("saveImageBtn");
+        const notesDisplay = document.getElementById("modalNotes");
+        const tagsDisplay = document.getElementById("modalTags");
+        const editTagsContainer = document.getElementById("editTagsContainer");
+
+        if (!editBtn || !saveBtn || !notesDisplay || !tagsDisplay) return;
+
+        editBtn.classList.remove("d-none");
+        saveBtn.classList.add("d-none");
+        tagsDisplay.classList.remove("d-none");
+        if (editTagsContainer) editTagsContainer.classList.add("d-none");
+
+        const sizeElem = document.getElementById("modalSize");
+        if (sizeElem) sizeElem.innerText = img.size || "Unknown";
+
+        const noteText = img.nathansNotes || img.nathansnotes || img.nathan_notes || img.notes || "";
+        notesDisplay.innerText = (noteText && noteText !== "undefined") ? noteText : "No researcher notes available.";
+
+        tagsDisplay.innerHTML = "";
+        if (img.tags && img.tags.length > 0) {
+            img.tags.forEach(t => {
+                const span = document.createElement("span");
+                span.className = "badge rounded-pill border border-info text-dark me-1 px-2 py-1";
+                span.innerText = t.tagName || t.name || t;
+                tagsDisplay.appendChild(span);
+            });
+        } else {
+            tagsDisplay.innerHTML = '<span class="text-muted small">No tags assigned.</span>';
+        }
+
+        setupImageEditing(img);
+
+        const modalElement = document.getElementById('imageDetailsModal');
+        if (modalElement) {
+            let detailModal = bootstrap.Modal.getInstance(modalElement);
+            if (!detailModal) detailModal = new bootstrap.Modal(modalElement);
+            detailModal.show();
+        }
+    };
+
+    const setupImageEditing = (img) => {
+        const editBtn = document.getElementById("editImageBtn");
+        const saveBtn = document.getElementById("saveImageBtn");
+        const notesDisplay = document.getElementById("modalNotes");
+        const tagsDisplay = document.getElementById("modalTags");
+        const editTagsContainer = document.getElementById("editTagsContainer");
+        const checkboxList = document.getElementById("tagCheckboxList");
+
+        if (!editBtn || !saveBtn) return;
+
+        editBtn.onclick = async () => {
+            editBtn.classList.add("d-none");
+            saveBtn.classList.remove("d-none");
+            if (tagsDisplay) tagsDisplay.classList.add("d-none");
+            if (editTagsContainer) editTagsContainer.classList.remove("d-none");
+
+            const currentNotes = (notesDisplay.innerText === "No researcher notes available.") ? "" : notesDisplay.innerText;
+            notesDisplay.innerHTML = `<textarea id="editNotesInput" class="form-control" rows="3">${currentNotes}</textarea>`;
+
+            try {
+                const dbTags = await ButterflyAPI.getAllTags();
+                const currentTagIds = (img.tags || []).map(t => String(t.tagId || t.id || t));
+
+                let finalHtml = '';
+
+                for (const [categoryName, tagNames] of Object.entries(TagManager.tagData)) {
+                    let categoryGroupHtml = '';
+                    let hasFoundAny = false;
+
+                    tagNames.forEach(name => {
+                        const match = dbTags.find(t =>
+                            t && t.tagName && t.tagName.toString().trim().toLowerCase() === name.trim().toLowerCase()
+                        );
+
+                        if (match) {
+                            hasFoundAny = true;
+                            const isChecked = currentTagIds.includes(String(match.tagId));
+                            categoryGroupHtml += `
+                                <div class="form-check" style="width: 180px; margin-bottom: 5px;">
+                                    <input class="form-check-input edit-tag-checkbox" type="checkbox"
+                                           value="${match.tagId}" id="edit-tag-${match.tagId}" ${isChecked ? 'checked' : ''}>
+                                    <label class="form-check-label small text-dark" for="edit-tag-${match.tagId}">
+                                        ${match.tagName}
+                                    </label>
+                                </div>`;
+                        }
+                    });
+
+                    if (hasFoundAny) {
+                        finalHtml += `
+                            <div class="tag-category-block mb-3 w-100">
+                                <h6 class="fw-bold text-primary mb-1" style="font-size: 0.85rem;">${categoryName}</h6>
+                                <div class="d-flex flex-wrap border-bottom pb-2 mb-2">
+                                    ${categoryGroupHtml}
+                                </div>
+                            </div>`;
+                    }
+                }
+                if (checkboxList) {
+                    checkboxList.innerHTML = finalHtml || '<p class="text-muted small">No matching tags found.</p>';
+                }
+            } catch (err) {
+                console.error("Edit Tag UI Error:", err);
+            }
+        };
+
+        saveBtn.onclick = async () => {
+            const id = img.id || img.imageId;
+            if (!id) {
+                alert("Error: Could not find the ID for this image.");
+                return;
+            }
+
+            const editInput = document.getElementById("editNotesInput");
+            const newNotes = editInput ? editInput.value : "";
+
+            const selectedCheckboxes = document.querySelectorAll('.edit-tag-checkbox:checked');
+            const newTagIds = Array.from(selectedCheckboxes).map(cb => String(cb.value));
+
+            const oldTagIds = (img.tags || []).map(t => String(t.id || t.tagId || t));
+
+            const toAdd = newTagIds.filter(tagId => !oldTagIds.includes(tagId));
+            const toRemove = oldTagIds.filter(tagId => !newTagIds.includes(tagId));
+
+            console.log("SYNCING DATA:", { imageId: id, adding: toAdd, removing: toRemove, notes: newNotes });
+
+            try {
+                await ButterflyAPI.updateImageDescription(id, img.description || "", newNotes);
+
+                const tagPromises = [
+                    ...toAdd.map(tagId => ButterflyAPI.addTagToImage(tagId, id)),
+                    ...toRemove.map(tagId => ButterflyAPI.removeTagFromImage(tagId, id))
+                ];
+                await Promise.all(tagPromises);
+
+                const modalElement = document.getElementById('imageDetailsModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) modalInstance.hide();
+
+                if (currentSpeciesId) {
+                    const freshButterfly = await ButterflyAPI.getSpeciesById(currentSpeciesId);
+                    await showSpeciesView(freshButterfly);
+                    alert("Changes saved successfully!");
+                } else {
+                    location.reload();
+                }
+
+            } catch (err) {
+                console.error("Save failed:", err);
+                alert("Update failed: " + err.message);
+            }
+        };
+    };
+
+    // SPECIES VIEW
     const showSpeciesView = async (b) => {
         showView(speciesView);
         if (searchNavBar) searchNavBar.style.display = "none";
+
+        currentSpeciesId = b.id;
 
         const isAdmin = (userRole === "ADMIN");
         UI.populateSpeciesView(b, isAdmin);
@@ -58,9 +220,16 @@ export async function initHome(userRole, userEmail) {
                 const noteText = img.nathansNotes || img.nathan_notes || img.notes;
                 notesElem.innerText = (noteText && noteText !== "undefined") ? noteText : "No researcher notes available.";
             }
+
+            const viewMoreBtn = document.getElementById("viewMoreDetails");
+            if (viewMoreBtn) {
+                viewMoreBtn.onclick = (e) => {
+                    e.preventDefault();
+                    openImageDetailsModal(img);
+                };
+            }
         };
 
-        // TAYLOR CHANGE: fetch images from backend
         let fetchedImages = [];
         try {
             fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
@@ -112,11 +281,11 @@ export async function initHome(userRole, userEmail) {
             if (filtered.length > 0) setMainImage(filtered[0]);
         };
 
+
         const renderFilterPills = () => {
             const filterBar = document.getElementById("filterTagCloud");
             if (!filterBar) return;
 
-            // TAYLOR CHANGE: changed to use use tagId/tagName to match backend dto
             const allUniqueTags = Array.from(new Map(
                 allImgs.flatMap(img => img.tags || []).map(t => [t.tagId || t.id, t])
             ).values());
@@ -281,7 +450,6 @@ export async function initHome(userRole, userEmail) {
         });
     }
 
-    // TAYLOR CHANGE: team card
     async function loadTeams() {
         const teams = await ButterflyAPI.getAllTeams();
         const unassigned = await ButterflyAPI.getUnassignedStudents();
@@ -500,6 +668,23 @@ export async function initHome(userRole, userEmail) {
         }
     };
 
+    window.handleDeleteSingleImage = async (imageId) => {
+        if (confirm("Delete this specific photo?")) {
+            try {
+                await ButterflyAPI.deleteImage(imageId);
+                alert("Image Deleted");
+                if (currentSpeciesId) {
+                    const freshButterfly = await ButterflyAPI.getSpeciesById(currentSpeciesId);
+                    await showSpeciesView(freshButterfly);
+                } else {
+                    location.reload();
+                }
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+    };
+
     window.openExtendModal = (keyId) => {
         const extendInput = document.getElementById("extendKeyId");
         if (extendInput) extendInput.value = keyId;
@@ -514,6 +699,7 @@ export async function initHome(userRole, userEmail) {
         new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
     };
 
+    // FORM LISTENERS
     const adminCreateTeamForm = document.getElementById("adminCreateTeamForm");
     if (adminCreateTeamForm) {
         adminCreateTeamForm.addEventListener("submit", async (e) => {
@@ -615,8 +801,6 @@ export async function initHome(userRole, userEmail) {
             if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
         });
     }
-
-    // TAYLOR CHANGE: bulk upload and adding orderName/family/genus
     const universalUploadForm = document.getElementById("universalUploadForm");
     if (universalUploadForm) {
         const uploadModal = document.getElementById("addButterflyModal");

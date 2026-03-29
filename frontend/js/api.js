@@ -3,7 +3,6 @@ const API_BASE_URL = "http://159.203.134.226:8080";
 
 // const API_BASE_URL = "http://localhost:8080";
 
-// TAYLOR CHANGE: headers for attaching JWT token to every request
 function getHeaders() {
   const headers = {
     "Content-Type": "application/json",
@@ -21,7 +20,6 @@ function getAuthOnlyHeaders() {
   return headers;
 }
 
-// TAYLOR CHANGE: reads respionse body once and handles both JSON and plain text errors
 async function checkResponse(response) {
   const text = await response.text();
   if (!response.ok) {
@@ -117,7 +115,6 @@ export const ButterflyAPI = {
   // ==========================
   // USER / AUTH ENDPOINTS
   // ==========================
-  // TAYLOR CHANGE: save JWT token
   async login(usernameVal, passwordVal) {
     const response = await fetch(`${API_BASE_URL}/user/login`, {
       method: "POST",
@@ -364,7 +361,6 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
-  // TAYLOR CHANGE: added getImagesBySpecies, deleteImage, updateImageDescription, addTagToImage, removeTagFromImage
   async getImagesBySpecies(speciesId) {
     const response = await fetch(`${API_BASE_URL}/images/species/${speciesId}`, { headers: getHeaders() });
     return checkResponse(response);
