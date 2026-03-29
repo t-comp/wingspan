@@ -143,6 +143,86 @@
 </div>
 
 
+    <!--------------------------->
+    <!-- CREATE ACCOUNT SCREEN -->
+    <!--------------------------->
+    <div
+      id="create-account-screen"
+      class="justify-content-center align-items-center text-center text-white"
+      style="
+        min-height: 100vh;
+        width: 100%;
+        background: linear-gradient(180deg, #0097b2 0%, #7ed957 100%);
+        display: none;
+      "
+    >
+      <div class="container d-flex flex-column align-items-center">
+        <img
+          src="assets/img/butterfly.png"
+          alt="WingSpan Logo"
+          style="width: 70px; filter: brightness(0) invert(1)"
+          class="mb-3"
+        />
+        <h1 class="display-5 fw-bold text-uppercase mb-4">Create Account</h1>
+
+        <div
+          class="card p-4 shadow-lg text-dark text-start"
+          style="max-width: 400px; width: 100%; border-radius: 15px"
+        >
+          <form id="createAccountForm">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Username</label>
+              <input
+                type="text"
+                class="form-control rounded-pill px-3 py-2"
+                id="createUsername"
+                placeholder="e.g., isubugs"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Email Address</label>
+              <input
+                type="text"
+                class="form-control rounded-pill px-3 py-2"
+                id="createEmail"
+                placeholder="name@iastate.edu"
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">Password</label>
+              <input
+                type="password"
+                class="form-control rounded-pill px-3 py-2"
+                id="createPassword"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-lg rounded-pill fw-bold text-white w-100 mb-3"
+              style="background-color: #0399b0"
+            >
+              Sign Up
+            </button>
+
+            <div class="text-center">
+              <button
+                type="button"
+                id="createBackToWelcomeBtn"
+                class="btn btn-link text-muted text-decoration-none"
+              >
+                &larr; Back
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!--------------------->
     <!-- HOMEPAGE SCREEN -->
     <!--------------------->
@@ -157,7 +237,6 @@
             <button id="viewGalleryBtn" class="toggle-btn active">
               GALLERY
             </button>
-            <!-- TAYLOR CHANGE: renamed team to dashboard -->
             <button id="viewTeamBtn" class="toggle-btn">DASHBOARD</button>
           </div>
           <div class="nav-profile dropdown">
@@ -168,27 +247,33 @@
               data-bs-toggle="dropdown"
               aria-expanded="false"
               style="cursor: pointer"
+              id="profileCircle"
             ></div>
             <ul
               class="dropdown-menu dropdown-menu-end shadow border-0 mt-2"
               aria-labelledby="profileDropdown"
+              style="min-width: 220px;"
             >
+              <li class="px-3 py-2">
+                <div class="fw-bold" id="dropdownUsername" style="color: #0399b0;"></div>
+                <div class="small text-muted" id="dropdownEmail"></div>
+                <span class="badge mt-1" id="dropdownRole"
+                  style="background-color: #0399b0; font-size: 0.7rem;"></span>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
               <li><a class="dropdown-item py-2">Documentation</a></li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item py-2" href="#" id="toggleTheme"
-                  >Toggle Light/Dark Mode</a
-                >
+                <a class="dropdown-item py-2" href="#" id="toggleTheme">
+                  Toggle Light/Dark Mode
+                </a>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a
-                  class="dropdown-item d-none py-2 text-danger"
-                  href="#"
-                  <!-- TAYLOR CHANGE: single logout -->
-                  id="logoutLink"
-                  >Logout</a
-                >
+                <a class="dropdown-item d-none py-2 text-danger fw-bold" href="#" id="logoutLink">
+                  <i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+
+
               </li>
             </ul>
           </div>
@@ -294,7 +379,6 @@
                     </div>
                     <div class="col-8 text-muted" id="speciesDescription"></div>
                   </div>
-                  <!-- TAYLOR CHANGE: added ordger, family, genus -->
                   <div class="row mb-2">
                     <div class="col-4 fw-bold" style="color: #0399b0">
                       Order:
@@ -323,8 +407,9 @@
                     Specific Image Information
                   </h6>
                   <p class="mb-0 fs-6">
-                    <strong>Image Size:</strong>
-                    <span id="currentImgSize"></span>
+                    <a href="#" id="viewMoreDetails" class="text-decoration-none fw-bold" style="color: #027a8d;">
+                      <i class="fas fa-info-circle me-1"></i> View More Details
+                    </a>
                   </p>
                 </div>
               </div>
@@ -437,7 +522,6 @@
 
             <div class="tab-content" id="adminTeamTabsContent">
 
-              <!-- TAYLOR CHANGE: teams tab design w API key management-->
               <div class="tab-pane fade" id="tab-teams" role="tabpanel" tabindex="0">
                 <div id="teamsContainer" class="d-flex flex-column gap-3"></div>
               </div>
@@ -765,7 +849,6 @@
                     <label class="form-label fw-bold">Description</label>
                     <textarea class="form-control" id="newDescription" rows="2"></textarea>
                   </div>
-                  <!-- TAYLOR CHANGE: added order/family/genus fields-->
                   <div class="row">
                     <div class="col-md-4 mb-3">
                       <label class="form-label fw-bold">Order</label>
@@ -798,7 +881,6 @@
                   </div>
                   <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Image Files <span class="text-danger">*</span></label>
-                    <!-- TAYLOR CHANGE: attribute added for bulk upload -->
                     <input type="file" class="form-control" id="newImageFile" accept="image/*" multiple required />
                     <div class="form-text text-muted">Select multiple files to upload in bulk</div>
                   </div>
@@ -831,6 +913,42 @@
                 </button>
 
               </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="imageDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Image Record Details</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>Image Size:</strong> <span id="modalSize"></span></p>
+              <hr>
+              <h6>Researcher Notes</h6>
+              <p id="modalNotes" class="text-muted"></p>
+              <hr>
+              <h6>Tags</h6>
+              <div id="modalTags" class="d-flex flex-wrap gap-1"></div>
+              <div id="editTagsContainer" class="d-none">
+                <hr>
+                <h6 class="small fw-bold text-muted">Manage Tags:</h6>
+                <div id="tagCheckboxList" class="d-flex flex-wrap border p-2 rounded bg-white"></div>
+              </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <div>
+                <button id="editImageBtn" class="btn btn-sm btn-outline-secondary">
+                  <i class="fas fa-edit"></i> Edit Details
+                </button>
+                <button id="saveImageBtn" class="btn btn-sm btn-success d-none">
+                  <i class="fas fa-save"></i> Save Changes
+                </button>
+              </div>
+              <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>

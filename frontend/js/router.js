@@ -11,9 +11,34 @@ document.addEventListener("DOMContentLoaded", () => {
     home: document.getElementById("homepage"),
   };
 
-  function toggleLogoutButtons(role) {
+  function toggleLogoutButtons(role, user) {
     const logoutLink = document.getElementById("logoutLink");
     if (logoutLink) logoutLink.classList.remove("d-none");
+
+    const circle = document.getElementById("profileDropdown");
+    if (circle && user) {
+      const initials = (user.username || "?").substring(0, 2).toUpperCase();
+      circle.innerText = initials;
+      circle.style.background = role === "ADMIN"
+        ? "linear-gradient(135deg, #e74c3c, #c0392b)"
+        : "linear-gradient(135deg, #0399b0, #027a8d)";
+      circle.style.color = "white";
+      circle.style.fontWeight = "bold";
+      circle.style.fontSize = "0.8rem";
+      circle.style.display = "flex";
+      circle.style.alignItems = "center";
+      circle.style.justifyContent = "center";
+    }
+
+    const dropdownUsername = document.getElementById("dropdownUsername");
+    const dropdownEmail = document.getElementById("dropdownEmail");
+    const dropdownRole = document.getElementById("dropdownRole");
+    if (dropdownUsername && user) dropdownUsername.innerText = user.username || "";
+    if (dropdownEmail && user) dropdownEmail.innerText = user.email || "";
+    if (dropdownRole && user) {
+      dropdownRole.innerText = role;
+      dropdownRole.style.backgroundColor = role === "ADMIN" ? "#e74c3c" : "#0399b0";
+    }
   }
 
   function showScreen(key) {
@@ -51,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.onclick = () => showScreen("welcome");
   });
 
-    // TAYLOR CHANGE: auto save JWT token
     async function handleLogin(e) {
     e.preventDefault();
     const emailVal = document.getElementById("loginEmail").value;
@@ -70,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showScreen("home");
         initHome(role, user.email);
-        toggleLogoutButtons(role);
+        toggleLogoutButtons(role, user);
 
         const uploadBtn = document.getElementById("uploadBtn");
         if (role === "ADMIN") {
@@ -100,14 +124,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const emailVal = document.getElementById("createEmail").value;
       const passVal = document.getElementById("createPassword").value;
 
-      // Email Format Validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailVal)) return alert("Please enter a valid email address.");
       if (usernameVal.length < 5) return alert("Username must be at least 5 characters long.");
       if (passVal.length < 7) return alert("Password must be at least 7 characters long.");
 
       try {
-        // Uniqueness Check: See if username already exists
         const allUsers = await ButterflyAPI.getAllUsers();
         if (allUsers.some((u) => u.username.toLowerCase() === usernameVal.toLowerCase())) {
           return alert("This username already exists. Please choose a different one.");
@@ -122,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // TAYLOR CHANGE: remove jwt token and butterfl user after logout
   const handleLogout = async (e) => {
     e.preventDefault();
     await ButterflyAPI.logout();
@@ -140,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const role = user.userType || user.utype || user.uType;
       showScreen("home");
       initHome(role, user.email);
-      toggleLogoutButtons(role);
+      toggleLogoutButtons(role, user);
       const uploadBtn = document.getElementById("uploadBtn");
       if (role === "ADMIN" && uploadBtn) uploadBtn.classList.remove("d-none");
     } catch (e) {
@@ -149,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("jwt");
     }
   }
+
   document.addEventListener("show.bs.modal", function (event) {
     if (event.target.id === "addButterflyModal") {
       TagManager.initTagContainer();

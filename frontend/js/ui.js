@@ -27,6 +27,7 @@ export const UI = {
     },
 
     populateSpeciesView(b, isAdmin) {
+        console.log("Populating View. Is Admin?", isAdmin);
         document.getElementById("speciesName").innerText = b.name;
         document.getElementById("speciesScientific").innerText = b.scientificName || "N/A";
         document.getElementById("speciesDescription").innerText = b.description || "No description provided.";
@@ -52,6 +53,18 @@ export const UI = {
             document.getElementById("deleteSpeciesFullBtn").dataset.speciesId = b.id;
         }
 
+        const addImageBtn = document.getElementById("openAddImageModalBtn");
+        if (addImageBtn) {
+            if (isAdmin) {
+                addImageBtn.classList.remove("d-none");
+                const targetIdInput = document.getElementById("targetSpeciesId");
+                if (targetIdInput) targetIdInput.value = b.id;
+                const targetNameDisplay = document.getElementById("targetSpeciesNameDisplay");
+                if (targetNameDisplay) targetNameDisplay.innerText = b.name;
+            } else {
+                addImageBtn.classList.add("d-none");
+            }
+        }
 
         const galleryContainer = document.getElementById("speciesImages");
         if (galleryContainer) {
