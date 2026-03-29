@@ -1,32 +1,43 @@
 // js/router.js
 import { initHome } from "./homepage.js";
 import { ButterflyAPI } from "./api.js";
+import { TagManager } from "./tags.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const screens = {
     welcome: document.getElementById("welcome-screen"),
-    student: document.getElementById("student-login"),
-    admin: document.getElementById("admin-login"),
+    login: document.getElementById("login-screen"),
     create: document.getElementById("create-account-screen"),
     home: document.getElementById("homepage"),
   };
 
-  function toggleLogoutButtons(role) {
-    const studentLogout = document.getElementById("studentLogoutLink");
-    const adminLogout = document.getElementById("adminLogoutLink");
+  function toggleLogoutButtons(role, user) {
+    const logoutLink = document.getElementById("logoutLink");
+    if (logoutLink) logoutLink.classList.remove("d-none");
 
-    if (studentLogout) {
-      studentLogout.classList.add("d-none");
-    }
-    if (adminLogout) {
-      adminLogout.classList.add("d-none");
+    const circle = document.getElementById("profileDropdown");
+    if (circle && user) {
+      const initials = (user.username || "?").substring(0, 2).toUpperCase();
+      circle.innerText = initials;
+      circle.style.background = role === "ADMIN"
+        ? "linear-gradient(135deg, #e74c3c, #c0392b)"
+        : "linear-gradient(135deg, #0399b0, #027a8d)";
+      circle.style.color = "white";
+      circle.style.fontWeight = "bold";
+      circle.style.fontSize = "0.8rem";
+      circle.style.display = "flex";
+      circle.style.alignItems = "center";
+      circle.style.justifyContent = "center";
     }
 
-    if (role === "STUDENT" && studentLogout) {
-      studentLogout.classList.remove("d-none");
-    }
-    if (role === "ADMIN" && adminLogout) {
-      adminLogout.classList.remove("d-none");
+    const dropdownUsername = document.getElementById("dropdownUsername");
+    const dropdownEmail = document.getElementById("dropdownEmail");
+    const dropdownRole = document.getElementById("dropdownRole");
+    if (dropdownUsername && user) dropdownUsername.innerText = user.username || "";
+    if (dropdownEmail && user) dropdownEmail.innerText = user.email || "";
+    if (dropdownRole && user) {
+      dropdownRole.innerText = role;
+      dropdownRole.style.backgroundColor = role === "ADMIN" ? "#e74c3c" : "#0399b0";
     }
   }
 
@@ -49,20 +60,15 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo(0, 0);
   }
 
-  // Navigation
-  const studentLoginBtn = document.getElementById("studentLoginBtn");
-  if (studentLoginBtn) {
-    studentLoginBtn.onclick = () => showScreen("student");
-  }
-
-  const adminLoginBtn = document.getElementById("adminLoginBtn");
-  if (adminLoginBtn) {
-    adminLoginBtn.onclick = () => showScreen("admin");
-  }
+  const loginBtn = document.getElementById("loginBtn");
+  if (loginBtn) loginBtn.onclick = () => showScreen("login");
 
   const createAccountBtn = document.getElementById("goToCreateAccountBtn");
   if (createAccountBtn) {
-    createAccountBtn.onclick = () => showScreen("create");
+    createAccountBtn.onclick = (e) => {
+      e.preventDefault();
+      showScreen("create");
+    };
   }
 
   const backBtns = document.querySelectorAll("[id$='BackToWelcomeBtn']");
@@ -70,276 +76,104 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.onclick = () => showScreen("welcome");
   });
 
-  // Reusable Login Logic
-  async function handleLogin(e, emailId, passId, expectedRole) {
+    async function handleLogin(e) {
     e.preventDefault();
+    const emailVal = document.getElementById("loginEmail").value;
+    const passVal = document.getElementById("loginPassword").value;
 
-    const emailVal = document.getElementById(emailId).value;
-    const passVal = document.getElementById(passId).value;
-
-    // hello! CHANGE: fixed validation to use min length not exact length
-    if (emailVal.length < 5) {
-      return alert("Username must be at least 5 characters long.");
-    }
-    if (passVal.length < 7) {
-      return alert("Password must be at least 7 characters long.");
-    }
+    if (emailVal.length < 5) return alert("Username must be at least 5 characters long.");
+    if (passVal.length < 7) return alert("Password must be at least 7 characters long.");
 
     try {
       const user = await ButterflyAPI.login(emailVal, passVal);
-
       console.log("BACKEND LOGIN RESPONSE:", user);
       const role = user.userType || user.utype || user.uType;
 
-      if (role !== expectedRole) {
-        alert(
-          `Access Denied: You are a ${role}. Please use the correct login screen.`
-        );
-        return;
-      }
-
       if (user && role) {
-        showScreen("home");
-        initHome(role, user.email);
-        toggleLogoutButtons(role);
         localStorage.setItem("butterflyUser", JSON.stringify(user));
 
-        const uploadBtn = document.getElementById("uploadBtn");
-        const deleteSpeciesBtn = document.getElementById("deleteSpeciesBtn");
+        showScreen("home");
+        initHome(role, user.email);
+        toggleLogoutButtons(role, user);
 
+        const uploadBtn = document.getElementById("uploadBtn");
         if (role === "ADMIN") {
           if (uploadBtn) uploadBtn.classList.remove("d-none");
-          if (deleteSpeciesBtn) deleteSpeciesBtn.classList.remove("d-none");
         } else {
           if (uploadBtn) uploadBtn.classList.add("d-none");
         }
       } else {
-        alert("Login failed: The backend didn't send back the user role!");
+        alert("Login failed: couldn't get user role from server");
       }
     } catch (error) {
       console.error("Login Error:", error);
-      if (
-        confirm(
-          `Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`
-        )
-      ) {
+      if (confirm(`Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`)) {
         showScreen("create");
       }
     }
   }
 
-  // Student Login Form (Pass expected role "STUDENT")
-  const studentLoginForm = document.getElementById("studentLoginForm");
-  if (studentLoginForm) {
-    studentLoginForm.onsubmit = (e) =>
-      handleLogin(e, "studentEmail", "studentPassword", "STUDENT");
-  }
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) loginForm.onsubmit = (e) => handleLogin(e);
 
-  // Admin Login Form (Pass expected role "ADMIN")
-  const adminLoginForm = document.getElementById("adminLoginForm");
-  if (adminLoginForm) {
-    adminLoginForm.onsubmit = (e) =>
-      handleLogin(e, "adminEmail", "adminPassword", "ADMIN");
-  }
-
-  // Handle Account Creation Submit
   const createAccountForm = document.getElementById("createAccountForm");
   if (createAccountForm) {
     createAccountForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const usernameVal = document.getElementById("createUsername").value;
       const emailVal = document.getElementById("createEmail").value;
       const passVal = document.getElementById("createPassword").value;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailVal)) {
-        return alert("Please enter a valid email address.");
-      }
-
-      // CHANGE HERE: fixed validation to use min length not exact length
-      if (usernameVal.length < 5) {
-        return alert("Username must be at least 5 characters long.");
-      }
-      if (passVal.length < 7) {
-        return alert("Password must be at least 7 characters long.");
-      }
+      if (!emailRegex.test(emailVal)) return alert("Please enter a valid email address.");
+      if (usernameVal.length < 5) return alert("Username must be at least 5 characters long.");
+      if (passVal.length < 7) return alert("Password must be at least 7 characters long.");
 
       try {
         const allUsers = await ButterflyAPI.getAllUsers();
-        const usernameExists = allUsers.some(
-          (u) => u.username.toLowerCase() === usernameVal.toLowerCase()
-        );
-
-        if (usernameExists) {
-          return alert(
-            "This username already exists. Please choose a different one."
-          );
+        if (allUsers.some((u) => u.username.toLowerCase() === usernameVal.toLowerCase())) {
+          return alert("This username already exists. Please choose a different one.");
         }
-
-        const newUser = {
-          username: usernameVal,
-          email: emailVal,
-          password: passVal,
-          utype: "STUDENT",
-        };
-
-        await ButterflyAPI.createAccount(newUser);
+        await ButterflyAPI.createAccount({ username: usernameVal, email: emailVal, password: passVal, utype: "STUDENT" });
         alert("Account created successfully! Please log in.");
         e.target.reset();
         showScreen("welcome");
       } catch (error) {
-        console.error("Account Creation Error:", error);
         alert(`Could not create account: ${error.message}`);
       }
     });
   }
 
-  // CHANGE HERE AGAIN: logout now calls backend to invalidate session instead of just reloading
   const handleLogout = async (e) => {
     e.preventDefault();
+    await ButterflyAPI.logout();
+    localStorage.removeItem("butterflyUser");
     location.reload();
   };
 
-  const studentLogoutLink = document.getElementById("studentLogoutLink");
-  if (studentLogoutLink) {
-    studentLogoutLink.addEventListener("click", handleLogout);
-  }
+  const logoutLink = document.getElementById("logoutLink");
+  if (logoutLink) logoutLink.addEventListener("click", handleLogout);
 
-  const adminLogoutLink = document.getElementById("adminLogoutLink");
-  if (adminLogoutLink) {
-    adminLogoutLink.addEventListener("click", handleLogout);
-  }
-
-  //ADD butterfly
-  const addButterflyModal = document.getElementById("addButterflyModal");
-
-  if (addButterflyModal) {
-    // Inside your router.js event listener
-    // inside your form submission listener in router.js
-    addButterflyModal.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      try {
-        const name = document.getElementById("newName").value;
-        const scientific = document.getElementById("newScientific").value;
-        const description = document.getElementById("newDescription").value;
-
-        // 1. CREATE SPECIES
-        // Note: Backend returns a STRING, not an object with an ID
-        await ButterflyAPI.create({
-          name: name,
-          scientificName: scientific,
-          description: description,
-        });
-
-        // 2. GET THE ID
-        // Since the backend only returns a success string, we fetch the list to find the ID
-        const allSpecies = await ButterflyAPI.getAll();
-        const createdSpecies = allSpecies.find((s) => s.name === name);
-
-        if (!createdSpecies) {
-          throw new Error("Could not retrieve ID for the new species.");
-        }
-
-        const speciesId = createdSpecies.id;
-        console.log("Species ID linked for upload:", speciesId);
-
-        // 3. UPLOAD IMAGE
-        const fileInput = document.getElementById("newImageFile");
-        const formData = new FormData();
-
-        // Mapped exactly to ImageController @RequestParam names
-        formData.append("file", fileInput.files[0]);
-        formData.append("species_id", speciesId); // REQUIRED: must be int
-        formData.append(
-          "life_cycle",
-          document.getElementById("lifecycleStage").value || "Adult"
-        );
-        formData.append("description", description || "No description");
-        formData.append(
-          "nathansNotes",
-          document.getElementById("nathanNotes").value || ""
-        );
-
-        const imageResult = await ButterflyAPI.uploadImage(formData);
-        console.log("Upload Success! Image Data:", imageResult);
-
-        const newImageId = imageResult.id; // Get the ID from the upload response
-        console.log("LINKING SPECIES:", speciesId, "TO IMAGE:", newImageId);
-        await ButterflyAPI.setThumbnail(speciesId, newImageId); // Link it to the species
-        console.log("Handshake Complete: Image linked to Species!");
-
-        const modalElem = document.getElementById("addButterflyModal"); // Use your actual modal ID
-        const modalInstance = bootstrap.Modal.getInstance(modalElem);
-        if (modalInstance) modalInstance.hide();
-
-        // 2. Clear the form
-        e.target.reset();
-
-        alert("Butterfly and Image successfully created!");
-        location.reload();
-      } catch (error) {
-        console.error("Workflow failed:", error);
-        alert(`Error: ${error.message}`);
-      }
-    });
-  }
-
-  // Add these towards the bottom of router.js
-
-// 1. DELETE ENTIRE SPECIES
-const deleteSpeciesBtn = document.getElementById("deleteSpeciesFullBtn");
-if (deleteSpeciesBtn) {
-  deleteSpeciesBtn.onclick = async () => {
-    const id = deleteSpeciesBtn.dataset.speciesId;
-    if (confirm("Are you sure? This deletes the species and ALL its images!")) {
-      try {
-        await ButterflyAPI.delete(id); // Make sure this is in api.js
-        alert("Species Deleted");
-        location.reload(); 
-      } catch (err) {
-        alert("Delete failed: " + err.message);
-      }
-    }
-  };
-}
-
-// 2. DELETE SINGLE IMAGE (Inside the gallery)
-// This will be called via a global function since items are dynamic
-window.handleDeleteSingleImage = async (imageId) => {
-  if (confirm("Delete this specific photo?")) {
-    try {
-      await ButterflyAPI.deleteImage(imageId); // Make sure this is in api.js
-      alert("Image Deleted");
-      // You'd ideally refresh the gallery here
-    } catch (err) {
-      alert("Error: " + err.message);
-    }
-  }
-};
-
-
-  //added this 
   const savedUser = localStorage.getItem("butterflyUser");
   if (savedUser) {
     try {
       const user = JSON.parse(savedUser);
       const role = user.userType || user.utype || user.uType;
-      
       showScreen("home");
       initHome(role, user.email);
-      toggleLogoutButtons(role);
-      
-      // Keep admin buttons visible if applicable
-      if (role === "ADMIN") {
-        document.getElementById("uploadBtn")?.classList.remove("d-none");
-        // document.getElementById("deleteSpeciesBtn")?.classList.remove("d-none");
-      }
+      toggleLogoutButtons(role, user);
+      const uploadBtn = document.getElementById("uploadBtn");
+      if (role === "ADMIN" && uploadBtn) uploadBtn.classList.remove("d-none");
     } catch (e) {
       console.error("Error loading saved user", e);
       localStorage.removeItem("butterflyUser");
+      localStorage.removeItem("jwt");
     }
   }
-  // til here
+
+  document.addEventListener("show.bs.modal", function (event) {
+    if (event.target.id === "addButterflyModal") {
+      TagManager.initTagContainer();
+    }
+  });
 });

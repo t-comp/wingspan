@@ -3,15 +3,33 @@ const API_BASE_URL = "http://159.203.134.226:8080";
 
 // const API_BASE_URL = "http://localhost:8080";
 
-const jsonHeaders = {
-  "Content-Type": "application/json",
-  Accept: "application/json",
-};
+function getHeaders() {
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  const token = localStorage.getItem("jwt");
+  if (token) headers["Authorization"] = "Bearer " + token;
+  return headers;
+}
 
-// hi! it's taylor and i added this: default fetch options to send session cookie
-const defaultOpts = {
-  credentials: "include",
-};
+function getAuthOnlyHeaders() {
+  const headers = { Accept: "application/json" };
+  const token = localStorage.getItem("jwt");
+  if (token) headers["Authorization"] = "Bearer " + token;
+  return headers;
+}
+
+async function checkResponse(response) {
+  const text = await response.text();
+  if (!response.ok) {
+    let msg = text;
+    try { msg = JSON.parse(text).message || text; } catch {}
+    throw new Error(msg || "Request failed with status " + response.status);
+  }
+  if (!text) return null;
+  try { return JSON.parse(text); } catch { return text; }
+}
 
 export const ButterflyAPI = {
   // ==========================
@@ -19,10 +37,7 @@ export const ButterflyAPI = {
   // ==========================
   async getAll() {
     try {
-      const response = await fetch(`${API_BASE_URL}/species/all`, {
-        ...defaultOpts,
-        headers: { Accept: "application/json" },
-      });
+      const response = await fetch(`${API_BASE_URL}/species/all`, { headers: getHeaders() });
       return await response.json();
     } catch (error) {
       console.error("Error fetching species. Is the server running?", error);
@@ -31,19 +46,15 @@ export const ButterflyAPI = {
   },
 
   async getSpeciesById(speciesId) {
-    const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async create(data) {
     const response = await fetch(`${API_BASE_URL}/species/create`, {
       ...defaultOpts,
       method: "POST",
-      headers: jsonHeaders,
-      // hi! i changed this: removed butterfly field type
+      headers: getHeaders(),
       body: JSON.stringify({
         name: data.name,
         scientificName: data.scientificName,
@@ -53,29 +64,25 @@ export const ButterflyAPI = {
         genus: data.genus,
       }),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async updateSpecies(speciesId, data) {
-    const response = await fetch(
-      `${API_BASE_URL}/species/${speciesId}/update`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: jsonHeaders,
-        body: JSON.stringify(data),
-      },
-    );
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/species/${speciesId}/update`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return checkResponse(response);
   },
 
   async delete(speciesId) {
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
       ...defaultOpts,
       method: "DELETE",
-      headers: { Accept: "application/json" },
+      headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async filterSpecies(orderName, family, genus) {
@@ -83,58 +90,28 @@ export const ButterflyAPI = {
     if (orderName) params.append("orderName", orderName);
     if (family) params.append("family", family);
     if (genus) params.append("genus", genus);
-
-    const response = await fetch(
-      `${API_BASE_URL}/species/filter?${params.toString()}`,
-      {
-        ...defaultOpts,
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/species/filter?${params.toString()}`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async getFilterOptions() {
-    const response = await fetch(`${API_BASE_URL}/species/filter-options`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/species/filter-options`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async setThumbnail(speciesId, imageId) {
     const response = await fetch(
       `${API_BASE_URL}/species/${speciesId}/set-thumbnail?imageId=${imageId}`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: { "Accept": "application/json" },
-      }
+      { method: "PUT", headers: getHeaders() }
     );
-
-    if (!response.ok) {
-        throw new Error("Failed to set thumbnail");
-    }
-
-    // Check the content type header to decide how to parse
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-        return await response.json();
-    } else {
-        return await response.text(); // Return as plain string if it's not JSON
-    }
-},
+    return checkResponse(response);
+  },
 
   async removeThumbnail(speciesId) {
-    const response = await fetch(
-      `${API_BASE_URL}/species/${speciesId}/remove-thumbnail`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/species/${speciesId}/remove-thumbnail`, {
+      method: "PUT", headers: getHeaders(),
+    });
+    return checkResponse(response);
   },
 
   // ==========================
@@ -144,37 +121,27 @@ export const ButterflyAPI = {
     const response = await fetch(`${API_BASE_URL}/user/login`, {
       ...defaultOpts,
       method: "POST",
-      headers: jsonHeaders,
-      body: JSON.stringify({
-        usernameOrEmail: usernameVal,
-        password: passwordVal,
-      }),
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ usernameOrEmail: usernameVal, password: passwordVal }),
     });
-
     if (!response.ok) {
       const errorMsg = await response.text();
-      throw new Error(
-        errorMsg || `Server responded with status ${response.status}`,
-      );
+      throw new Error(errorMsg || "Login failed");
     }
-    return await response.json();
+    const data = await response.json();
+    localStorage.setItem("jwt", data.token);
+    return data.user;
   },
 
-  // hi, i added this: logout endpoint to invalidate session on the server
   async logout() {
-    const response = await fetch(`${API_BASE_URL}/user/logout`, {
-      ...defaultOpts,
-      method: "POST",
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    localStorage.removeItem("jwt");
   },
 
   async createAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/create-account`, {
       ...defaultOpts,
       method: "POST",
-      headers: jsonHeaders,
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
         username: userData.username,
         email: userData.email,
@@ -182,44 +149,27 @@ export const ButterflyAPI = {
         utype: "STUDENT",
       }),
     });
-
-    if (!response.ok) {
-      const errorMsg = await response.text();
-      throw new Error(
-        errorMsg || `Server responded with status ${response.status}`,
-      );
-    }
-
-    return await response.json();
+    return checkResponse(response);
   },
 
   async adminCreateAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/admin/create-account`, {
       ...defaultOpts,
       method: "POST",
-      headers: jsonHeaders,
+      headers: getHeaders(),
       body: JSON.stringify(userData),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async getStudentDashboard(email) {
-    const response = await fetch(
-      `${API_BASE_URL}/user/dashboard?email=${email}`,
-      {
-        ...defaultOpts,
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/user/dashboard?email=${email}`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async getAllUsers() {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/all`, {
-        ...defaultOpts,
-        headers: { Accept: "application/json" },
-      });
+      const response = await fetch(`${API_BASE_URL}/user/all`, { headers: getHeaders() });
       return await response.json();
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -229,74 +179,53 @@ export const ButterflyAPI = {
 
   async deleteUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}`, {
-      ...defaultOpts,
-      method: "DELETE",
-      headers: { Accept: "application/json" },
+      method: "DELETE", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async updateUsername(userId, newUsername) {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-username?newUsername=${newUsername}`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
+      { method: "PUT", headers: getHeaders() }
     );
-    return await response.json();
+    return checkResponse(response);
   },
 
   async updateEmail(userId, newEmail) {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-email?newEmail=${newEmail}`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
+      { method: "PUT", headers: getHeaders() }
     );
-    return await response.json();
+    return checkResponse(response);
   },
 
   async makeAdmin(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/make-admin`, {
-      ...defaultOpts,
-      method: "PUT",
-      headers: { Accept: "application/json" },
+      method: "PUT", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async makeStudent(userId) {
-    const response = await fetch(
-      `${API_BASE_URL}/user/${userId}/make-student`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/user/${userId}/make-student`, {
+      method: "PUT", headers: getHeaders(),
+    });
+    return checkResponse(response);
   },
 
   async activateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/activate`, {
-      ...defaultOpts,
-      method: "PUT",
-      headers: { Accept: "application/json" },
+      method: "PUT", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async deactivateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/deactivate`, {
-      ...defaultOpts,
-      method: "PUT",
-      headers: { Accept: "application/json" },
+      method: "PUT", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   // ==========================
@@ -304,10 +233,7 @@ export const ButterflyAPI = {
   // ==========================
   async getAllApiKeys() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api-key/all`, {
-        ...defaultOpts,
-        headers: { Accept: "application/json" },
-      });
+      const response = await fetch(`${API_BASE_URL}/api-key/all`, { headers: getHeaders() });
       return await response.json();
     } catch (error) {
       console.error("Error fetching API keys:", error);
@@ -316,67 +242,51 @@ export const ButterflyAPI = {
   },
 
   async getActiveApiKeys() {
-    const response = await fetch(`${API_BASE_URL}/api-key/active`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/api-key/active`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async generateApiKey(data) {
     const response = await fetch(`${API_BASE_URL}/api-key/keygen`, {
       ...defaultOpts,
       method: "POST",
-      headers: jsonHeaders,
+      headers: getHeaders(),
       body: JSON.stringify({
         teamName: data.teamName,
         projectName: data.projectName,
         semester: data.semester,
       }),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async deactivateApiKey(keyId) {
-    const response = await fetch(
-      `${API_BASE_URL}/api-key/${keyId}/deactivate`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/api-key/${keyId}/deactivate`, {
+      method: "PUT", headers: getHeaders(),
+    });
+    return checkResponse(response);
   },
 
   async activateApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}/activate`, {
-      ...defaultOpts,
-      method: "PUT",
-      headers: { Accept: "application/json" },
+      method: "PUT", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async extendApiKey(keyId, months) {
     const response = await fetch(
       `${API_BASE_URL}/api-key/${keyId}/extra-time?months=${months}`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: { Accept: "application/json" },
-      },
+      { method: "PUT", headers: getHeaders() }
     );
-    return await response.json();
+    return checkResponse(response);
   },
 
   async deleteApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}`, {
-      ...defaultOpts,
-      method: "DELETE",
-      headers: { Accept: "application/json" },
+      method: "DELETE", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   // ==========================
@@ -386,138 +296,133 @@ export const ButterflyAPI = {
     const response = await fetch(`${API_BASE_URL}/teams/create`, {
       ...defaultOpts,
       method: "POST",
-      headers: jsonHeaders,
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async getAllTeams() {
-    const response = await fetch(`${API_BASE_URL}/teams/all`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/teams/all`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async getTeamById(teamId) {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async getUnassignedStudents() {
-    const response = await fetch(`${API_BASE_URL}/teams/unassigned-students`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/teams/unassigned-students`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async getTeamMembers(teamId) {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
-    });
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async addTeamMember(teamId, userId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/add-member`, {
       ...defaultOpts,
       method: "PUT",
-      headers: jsonHeaders,
+      headers: getHeaders(),
       body: JSON.stringify({ userId: parseInt(userId) }),
     });
-
-    if (!response.ok) {
-      const errorMsg = await response.text();
-      throw new Error(
-        errorMsg || `Server responded with status ${response.status}`,
-      );
-    }
-    return await response.json();
+    return checkResponse(response);
   },
 
   async removeTeamMember(teamId, userId) {
-    const response = await fetch(
-      `${API_BASE_URL}/teams/${teamId}/remove-member`,
-      {
-        ...defaultOpts,
-        method: "PUT",
-        headers: jsonHeaders,
-        body: JSON.stringify({ userId: parseInt(userId) }),
-      },
-    );
-
-    if (!response.ok) {
-      const errorMsg = await response.text();
-      throw new Error(
-        errorMsg || `Server responded with status ${response.status}`,
-      );
-    }
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/teams/${teamId}/remove-member`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify({ userId: parseInt(userId) }),
+    });
+    return checkResponse(response);
   },
 
   async updateTeam(teamId, data) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/update`, {
       ...defaultOpts,
       method: "PUT",
-      headers: jsonHeaders,
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async deleteTeam(teamId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
-      ...defaultOpts,
-      method: "DELETE",
-      headers: { Accept: "application/json" },
+      method: "DELETE", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   // ==========================
-  // TAG / IMAGE ENDPOINTS
+  // IMAGE ENDPOINTS
   // ==========================
-  // js/api.js
-async uploadImage(formData) {
-  const response = await fetch(`${API_BASE_URL}/images/admin/upload`, {
+  async uploadImage(formData) {
+    const response = await fetch(`${API_BASE_URL}/images/admin/upload`, {
       method: "POST",
-      headers: {
-          "Accept": "application/json"
-          // Let the browser handle Content-Type for FormData
-      },
+      headers: getAuthOnlyHeaders(),
       body: formData,
-  });
-  
-
-  if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Upload failed");
-  }
-  return await response.json();
-},
-
-  async getAllTags() {
-    const response = await fetch(`${API_BASE_URL}/tags`, {
-      ...defaultOpts,
-      headers: { Accept: "application/json" },
     });
-    return await response.json();
+    return checkResponse(response);
+  },
+
+  async getImagesBySpecies(speciesId) {
+    const response = await fetch(`${API_BASE_URL}/images/species/${speciesId}`, { headers: getHeaders() });
+    return checkResponse(response);
+  },
+
+  async deleteImage(id) {
+    const response = await fetch(`${API_BASE_URL}/images/admin/${id}`, {
+      method: "DELETE", headers: getHeaders(),
+    });
+    return checkResponse(response);
+  },
+
+  async updateImageDescription(imageId, description, nathansNotes) {
+    const params = new URLSearchParams();
+    if (description) params.append("description", description);
+    if (nathansNotes) params.append("nathansNotes", nathansNotes);
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}/description?${params.toString()}`,
+      { method: "PATCH", headers: getHeaders() }
+    );
+    return checkResponse(response);
+  },
+
+  async addTagToImage(tagId, imageId) {
+    const response = await fetch(`${API_BASE_URL}/tags/${tagId}/images/${imageId}`, {
+      method: "POST", headers: getHeaders(),
+    });
+    return checkResponse(response);
+  },
+
+  async removeTagFromImage(tagId, imageId) {
+    const response = await fetch(`${API_BASE_URL}/tags/${tagId}/images/${imageId}`, {
+      method: "DELETE", headers: getHeaders(),
+    });
+    return checkResponse(response);
+  },
+
+  // ==========================
+  // TAG ENDPOINTS
+  // ==========================
+  async getAllTags() {
+    const response = await fetch(`${API_BASE_URL}/tags`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 
   async createTag(tagData) {
     const response = await fetch(`${API_BASE_URL}/tags/admin`, {
       ...defaultOpts,
       method: "POST",
-      headers: jsonHeaders,
+      headers: getHeaders(),
       body: JSON.stringify(tagData),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async deleteImage(id) {
@@ -526,32 +431,24 @@ async uploadImage(formData) {
 
   async deleteTag(tagId) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
-      ...defaultOpts,
-      method: "DELETE",
-      headers: { Accept: "application/json" },
+      method: "DELETE", headers: getHeaders(),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async updateTag(tagId, tagData) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
       ...defaultOpts,
       method: "PUT",
-      headers: jsonHeaders,
+      headers: getHeaders(),
       body: JSON.stringify(tagData),
     });
-    return await response.json();
+    return checkResponse(response);
   },
 
   async filterImagesByTags(tagIds) {
-    const queryString = tagIds.map((id) => `tagIds=${id}`).join("&");
-    const response = await fetch(
-      `${API_BASE_URL}/images/filter?${queryString}`,
-      {
-        ...defaultOpts,
-        headers: { Accept: "application/json" },
-      },
-    );
-    return await response.json();
+    const queryString = tagIds.map((id) => "tagIds=" + id).join("&");
+    const response = await fetch(`${API_BASE_URL}/images/filter?${queryString}`, { headers: getHeaders() });
+    return checkResponse(response);
   },
 };
