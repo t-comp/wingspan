@@ -46,7 +46,7 @@ export const ButterflyAPI = {
       // hi! i changed this: removed butterfly field type
       body: JSON.stringify({
         name: data.name,
-        scientificName: data.scientific,
+        scientificName: data.scientificName,
         description: data.description,
         orderName: data.orderName,
         family: data.family,
@@ -108,11 +108,22 @@ export const ButterflyAPI = {
       {
         ...defaultOpts,
         method: "PUT",
-        headers: { Accept: "application/json" },
-      },
+        headers: { "Accept": "application/json" },
+      }
     );
-    return await response.json();
-  },
+
+    if (!response.ok) {
+        throw new Error("Failed to set thumbnail");
+    }
+
+    // Check the content type header to decide how to parse
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+        return await response.json();
+    } else {
+        return await response.text(); // Return as plain string if it's not JSON
+    }
+},
 
   async removeThumbnail(speciesId) {
     const response = await fetch(
@@ -472,15 +483,24 @@ export const ButterflyAPI = {
   // ==========================
   // TAG / IMAGE ENDPOINTS
   // ==========================
-  async uploadImage(formData) {
-    const response = await fetch(`${API_BASE_URL}/images/admin/upload`, {
-      ...defaultOpts,
+  // js/api.js
+async uploadImage(formData) {
+  const response = await fetch(`${API_BASE_URL}/images/admin/upload`, {
       method: "POST",
-      headers: { Accept: "application/json" },
+      headers: {
+          "Accept": "application/json"
+          // Let the browser handle Content-Type for FormData
+      },
       body: formData,
-    });
-    return await response.json();
-  },
+  });
+  
+
+  if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Upload failed");
+  }
+  return await response.json();
+},
 
   async getAllTags() {
     const response = await fetch(`${API_BASE_URL}/tags`, {
@@ -498,6 +518,10 @@ export const ButterflyAPI = {
       body: JSON.stringify(tagData),
     });
     return await response.json();
+  },
+
+  async deleteImage(id) {
+    return await fetch(`${API_BASE_URL}/images/admin/${id}`, { method: "DELETE" });
   },
 
   async deleteTag(tagId) {

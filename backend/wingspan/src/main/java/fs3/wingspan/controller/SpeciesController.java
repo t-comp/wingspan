@@ -1,10 +1,21 @@
 package fs3.wingspan.controller;
+
+import fs3.wingspan.dto.MessageResponse;
+import fs3.wingspan.dto.SpeciesDTO;
+import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
-import fs3.wingspan.model.SpeciesType;
+import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/species")
@@ -13,23 +24,30 @@ public class SpeciesController {
     @Autowired
     private SpeciesRepository speciesRepository;
 
+    @Autowired
+    private ImageRepository imageRepository;
+
     /**
      * create new species
      * POST /species/create
      */
     @PostMapping("/create")
-    public String createSpecies(@RequestBody Species s) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> createSpecies(@RequestBody Species s) {
 
         if (s.getName() == null || s.getName().isEmpty()) {
-            return "Please enter a name for the species.";
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Please enter a name for the species."));
         }
 
         if (speciesRepository.existsByName(s.getName())) {
-            return s.getName() + " already exists.";
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse(s.getName() + " already exists."));
         }
 
-        speciesRepository.save(s);
-        return s.getName() + " has been created successfully!";
+        Species saved = speciesRepository.save(s);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(SpeciesDTO.fromSpecies(saved, thumbnailFallback(saved)));
     }
 
     /**
@@ -37,8 +55,11 @@ public class SpeciesController {
      * GET /species/all
      */
     @GetMapping("/all")
-    public List<Species> getAllSpecies() {
-        return speciesRepository.findAll();
+    public ResponseEntity<List<SpeciesDTO>> getAllSpecies() {
+        List<SpeciesDTO> dtos = speciesRepository.findAll().stream()
+                .map(s -> SpeciesDTO.fromSpecies(s, thumbnailFallback(s)))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
@@ -46,8 +67,13 @@ public class SpeciesController {
      * GET /species/{speciesId}
      */
     @GetMapping("/{speciesId}")
-    public Species getSpeciesById(@PathVariable int speciesId) {
-        return speciesRepository.findById(speciesId).orElse(null);
+    public ResponseEntity<?> getSpeciesById(@PathVariable int speciesId) {
+        Species s = speciesRepository.findById(speciesId).orElse(null);
+        if (s == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
+        }
+        return ResponseEntity.ok(SpeciesDTO.fromSpecies(s, thumbnailFallback(s)));
     }
 
     /**
@@ -55,26 +81,83 @@ public class SpeciesController {
      * GET /species/name/{name}
      */
     @GetMapping("/name/{name}")
-    public Species getSpeciesByName(@PathVariable String name) {
-        return speciesRepository.findByName(name);
+    public ResponseEntity<?> getSpeciesByName(@PathVariable String name) {
+        Species species = speciesRepository.findByName(name);
+        if (species == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
+        }
+        return ResponseEntity.ok(SpeciesDTO.fromSpecies(species, thumbnailFallback(species)));
     }
 
     /**
-     * get all butterflies
-     * GET /species/butterflies
+     * filter species by taxonomy (all params optional)
+     * GET /species/filter?orderName=Lepidoptera&family=Nymphalidae&genus=Danaus
      */
-    @GetMapping("/butterflies")
-    public List<Species> getAllButterflies() {
-        return speciesRepository.findByType(SpeciesType.BUTTERFLY);
+    @GetMapping("/filter")
+    public ResponseEntity<List<SpeciesDTO>> filterSpecies(@RequestParam(required = false) String orderName, @RequestParam(required = false) String family, @RequestParam(required = false) String genus) {
+        List<SpeciesDTO> dtos = speciesRepository.filterByTaxonomy(orderName, family, genus).stream()
+                .map(s -> SpeciesDTO.fromSpecies(s, thumbnailFallback(s)))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
-     * get all insects
-     * GET /species/insects
+     * get all distinct values for filter dropdowns
+     * populated from whatever is actually in the database
+     * GET /species/filter-options
      */
-    @GetMapping("/insects")
-    public List<Species> getAllInsects() {
-        return speciesRepository.findByType(SpeciesType.INSECT);
+    @GetMapping("/filter-options")
+    public ResponseEntity<?> getFilterOptions() {
+        Map<String, Object> options = new HashMap<>();
+        options.put("orders", speciesRepository.findAllOrders());
+        options.put("families", speciesRepository.findAllFamilies());
+        options.put("genera", speciesRepository.findAllGenesus());
+        return ResponseEntity.ok(options);
+    }
+
+    /**
+     * set thumbnail image for species card
+     * PUT /species/{speciesId}/set-thumbnail?imageId=5
+     */
+    @PutMapping("/{speciesId}/set-thumbnail")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> setThumbnail(@PathVariable int speciesId, @RequestParam int imageId) {
+        Species s = speciesRepository.findById(speciesId).orElse(null);
+        if (s == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
+        }
+
+        Image image = imageRepository.findById(imageId).orElse(null);
+        if (image == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Image not found"));
+        }
+
+        s.setThumbnail(image);
+        speciesRepository.save(s);
+
+        return ResponseEntity.ok(new MessageResponse("Thumbnail set for " + s.getName() + "!"));
+    }
+
+    /**
+     * remove thumbnail from species (falls back to first image or null)
+     * PUT /species/{speciesId}/remove-thumbnail
+     */
+    @PutMapping("/{speciesId}/remove-thumbnail")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> removeThumbnail(@PathVariable int speciesId) {
+        Species s = speciesRepository.findById(speciesId).orElse(null);
+        if (s == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
+        }
+
+        s.setThumbnail(null);
+        speciesRepository.save(s);
+
+        return ResponseEntity.ok(new MessageResponse("Thumbnail removed from " + s.getName() + "!"));
     }
 
     /**
@@ -82,10 +165,12 @@ public class SpeciesController {
      * PUT /species/{speciesId}/update
      */
     @PutMapping("/{speciesId}/update")
-    public String updateSpecies(@PathVariable int speciesId, @RequestBody Species updatedSpecies) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> updateSpecies(@PathVariable int speciesId, @RequestBody Species updatedSpecies) {
         Species s = speciesRepository.findById(speciesId).orElse(null);
         if (s == null) {
-            return "Species was not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
         }
 
         if (updatedSpecies.getName() != null && !updatedSpecies.getName().isEmpty()) {
@@ -97,12 +182,18 @@ public class SpeciesController {
         if (updatedSpecies.getDescription() != null) {
             s.setDescription(updatedSpecies.getDescription());
         }
-        if (updatedSpecies.getType() != null) {
-            s.setType(updatedSpecies.getType());
+        if (updatedSpecies.getOrderName() != null) {
+            s.setOrderName(updatedSpecies.getOrderName());
+        }
+        if (updatedSpecies.getFamily() != null) {
+            s.setFamily(updatedSpecies.getFamily());
+        }
+        if (updatedSpecies.getGenus() != null) {
+            s.setGenus(updatedSpecies.getGenus());
         }
 
         speciesRepository.save(s);
-        return s.getName() + " has been updated!";
+        return ResponseEntity.ok(new MessageResponse(s.getName() + " has been updated!"));
     }
 
     /**
@@ -110,13 +201,34 @@ public class SpeciesController {
      * DELETE /species/{speciesId}
      */
     @DeleteMapping("/{speciesId}")
-    public String deleteSpecies(@PathVariable int speciesId) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<MessageResponse> deleteSpecies(@PathVariable int speciesId) {
         Species s = speciesRepository.findById(speciesId).orElse(null);
         if (s == null) {
-            return "Species was not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
         }
         String name = s.getName();
         speciesRepository.delete(s);
-        return name + "has been deleted.";
+        return ResponseEntity.ok(new MessageResponse(name + " has been deleted."));
+    }
+
+
+    /** helper - thumbnail url with fallback
+     * if thumbnail set -> use it
+     * if no thumbnail but has images -> use first image
+     * if no images at all -> null (fe handle placeholder)
+     */
+    private String thumbnailFallback(Species s) {
+        if (s.getThumbnail() != null) {
+            return s.getThumbnail().getFpath();
+        }
+
+        List<Image> images = imageRepository.findBySpeciesId(s.getId());
+        if (!images.isEmpty()) {
+            return images.get(0).getFpath();
+        }
+
+        return null;
     }
 }

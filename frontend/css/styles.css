@@ -104,6 +104,33 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+.gallery-item-wrapper {
+  position: relative;
+}
+
+.delete-img-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s;
+}
+
+.gallery-item-wrapper:hover .delete-img-btn {
+  opacity: 1; /* Show on hover */
+}
+
 hr {
   margin: 1rem 0;
   color: inherit;

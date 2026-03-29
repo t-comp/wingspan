@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (role !== expectedRole) {
         alert(
-          `Access Denied: You are a ${role}. Please use the correct login screen.`,
+          `Access Denied: You are a ${role}. Please use the correct login screen.`
         );
         return;
       }
@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showScreen("home");
         initHome(role, user.email);
         toggleLogoutButtons(role);
+        localStorage.setItem("butterflyUser", JSON.stringify(user));
 
         const uploadBtn = document.getElementById("uploadBtn");
         const deleteSpeciesBtn = document.getElementById("deleteSpeciesBtn");
@@ -119,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Login Error:", error);
       if (
         confirm(
-          `Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`,
+          `Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`
         )
       ) {
         showScreen("create");
@@ -167,12 +168,12 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const allUsers = await ButterflyAPI.getAllUsers();
         const usernameExists = allUsers.some(
-          (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
+          (u) => u.username.toLowerCase() === usernameVal.toLowerCase()
         );
 
         if (usernameExists) {
           return alert(
-            "This username already exists. Please choose a different one.",
+            "This username already exists. Please choose a different one."
           );
         }
 
@@ -197,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // CHANGE HERE AGAIN: logout now calls backend to invalidate session instead of just reloading
   const handleLogout = async (e) => {
     e.preventDefault();
-    await ButterflyAPI.logout();
     location.reload();
   };
 
@@ -210,4 +210,136 @@ document.addEventListener("DOMContentLoaded", () => {
   if (adminLogoutLink) {
     adminLogoutLink.addEventListener("click", handleLogout);
   }
+
+  //ADD butterfly
+  const addButterflyModal = document.getElementById("addButterflyModal");
+
+  if (addButterflyModal) {
+    // Inside your router.js event listener
+    // inside your form submission listener in router.js
+    addButterflyModal.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      try {
+        const name = document.getElementById("newName").value;
+        const scientific = document.getElementById("newScientific").value;
+        const description = document.getElementById("newDescription").value;
+
+        // 1. CREATE SPECIES
+        // Note: Backend returns a STRING, not an object with an ID
+        await ButterflyAPI.create({
+          name: name,
+          scientificName: scientific,
+          description: description,
+        });
+
+        // 2. GET THE ID
+        // Since the backend only returns a success string, we fetch the list to find the ID
+        const allSpecies = await ButterflyAPI.getAll();
+        const createdSpecies = allSpecies.find((s) => s.name === name);
+
+        if (!createdSpecies) {
+          throw new Error("Could not retrieve ID for the new species.");
+        }
+
+        const speciesId = createdSpecies.id;
+        console.log("Species ID linked for upload:", speciesId);
+
+        // 3. UPLOAD IMAGE
+        const fileInput = document.getElementById("newImageFile");
+        const formData = new FormData();
+
+        // Mapped exactly to ImageController @RequestParam names
+        formData.append("file", fileInput.files[0]);
+        formData.append("species_id", speciesId); // REQUIRED: must be int
+        formData.append(
+          "life_cycle",
+          document.getElementById("lifecycleStage").value || "Adult"
+        );
+        formData.append("description", description || "No description");
+        formData.append(
+          "nathansNotes",
+          document.getElementById("nathanNotes").value || ""
+        );
+
+        const imageResult = await ButterflyAPI.uploadImage(formData);
+        console.log("Upload Success! Image Data:", imageResult);
+
+        const newImageId = imageResult.id; // Get the ID from the upload response
+        console.log("LINKING SPECIES:", speciesId, "TO IMAGE:", newImageId);
+        await ButterflyAPI.setThumbnail(speciesId, newImageId); // Link it to the species
+        console.log("Handshake Complete: Image linked to Species!");
+
+        const modalElem = document.getElementById("addButterflyModal"); // Use your actual modal ID
+        const modalInstance = bootstrap.Modal.getInstance(modalElem);
+        if (modalInstance) modalInstance.hide();
+
+        // 2. Clear the form
+        e.target.reset();
+
+        alert("Butterfly and Image successfully created!");
+        location.reload();
+      } catch (error) {
+        console.error("Workflow failed:", error);
+        alert(`Error: ${error.message}`);
+      }
+    });
+  }
+
+  // Add these towards the bottom of router.js
+
+// 1. DELETE ENTIRE SPECIES
+const deleteSpeciesBtn = document.getElementById("deleteSpeciesFullBtn");
+if (deleteSpeciesBtn) {
+  deleteSpeciesBtn.onclick = async () => {
+    const id = deleteSpeciesBtn.dataset.speciesId;
+    if (confirm("Are you sure? This deletes the species and ALL its images!")) {
+      try {
+        await ButterflyAPI.delete(id); // Make sure this is in api.js
+        alert("Species Deleted");
+        location.reload(); 
+      } catch (err) {
+        alert("Delete failed: " + err.message);
+      }
+    }
+  };
+}
+
+// 2. DELETE SINGLE IMAGE (Inside the gallery)
+// This will be called via a global function since items are dynamic
+window.handleDeleteSingleImage = async (imageId) => {
+  if (confirm("Delete this specific photo?")) {
+    try {
+      await ButterflyAPI.deleteImage(imageId); // Make sure this is in api.js
+      alert("Image Deleted");
+      // You'd ideally refresh the gallery here
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+};
+
+
+  //added this 
+  const savedUser = localStorage.getItem("butterflyUser");
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser);
+      const role = user.userType || user.utype || user.uType;
+      
+      showScreen("home");
+      initHome(role, user.email);
+      toggleLogoutButtons(role);
+      
+      // Keep admin buttons visible if applicable
+      if (role === "ADMIN") {
+        document.getElementById("uploadBtn")?.classList.remove("d-none");
+        // document.getElementById("deleteSpeciesBtn")?.classList.remove("d-none");
+      }
+    } catch (e) {
+      console.error("Error loading saved user", e);
+      localStorage.removeItem("butterflyUser");
+    }
+  }
+  // til here
 });

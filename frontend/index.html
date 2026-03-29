@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -390,12 +390,6 @@
             >
               <i class="fas fa-plus"></i> Upload
             </button>
-            <button
-              id="deleteSpeciesBtn"
-              class="btn btn-danger btn-custom d-none"
-            >
-              <i class="fas fa-trash"></i> Delete
-            </button>
           </div>
         </div>
       </nav>
@@ -494,7 +488,21 @@
                 </div>
               </div>
             </div>
+
             <div class="col-lg-6 d-flex flex-column">
+              <div id="adminDeleteSection" class="p-3 mb-4 rounded border border-danger bg-light d-none">
+                <h6 class="fw-bold text-danger mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Admin ONLY</h6>
+                <button
+                  id="deleteSpeciesFullBtn"
+                  class="btn btn-danger rounded-pill fw-bold w-100 shadow-sm"
+                  data-species-id=""
+                >
+                  <i class="fas fa-trash-alt me-2"></i>Delete Species
+                </button>
+                <p class="text-muted small mt-2 mb-0 text-center">
+                  Warning: This removes the species and <strong>all</strong> associated images from the database.
+                </p>
+              </div>
               <div
                 class="p-3 rounded border mb-4"
                 style="background-color: #f1f8f9"
@@ -1020,75 +1028,97 @@
           </div>
         </div>
       </div>
-
+      <form id="addButterflyForm"></form>
       <div
-        class="modal fade"
-        id="addButterflyModal"
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Add Butterfly</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <form id="addButterflyForm">
-                <div class="mb-3">
-                  <label class="form-label">Common Name</label
-                  ><input
-                    type="text"
-                    class="form-control"
-                    id="newName"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Scientific Name</label
-                  ><input type="text" class="form-control" id="newScientific" />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Sex</label>
-                  <select class="form-select" id="newSex">
-                    <option>Male</option>
-                    <option>Female</option>
-                    <option>Unknown</option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Description</label
-                  ><textarea
-                    class="form-control"
-                    id="newDescription"
-                    rows="3"
-                  ></textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Tags (comma separated)</label
-                  ><input type="text" class="form-control" id="newTags" />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Image URL</label
-                  ><input
-                    type="text"
-                    class="form-control"
-                    id="newImage"
-                    placeholder="e.g., assets/img/placeholder1.jpg"
-                  />
-                </div>
-                <button type="submit" class="btn btn-primary">
-                  Add Butterfly
-                </button>
-              </form>
-            </div>
+      class="modal fade"
+      id="addButterflyModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Butterfly</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+    
+          <div class="modal-body">
+            <form id="addButterflyModal">
+    
+              <div class="mb-3">
+                <label class="form-label">Common Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newName"
+                  required
+                />
+              </div>
+    
+              <div class="mb-3">
+                <label class="form-label">Scientific Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newScientific"
+                />
+              </div>
+    
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea
+                  class="form-control"
+                  id="newDescription"
+                  rows="3"
+                ></textarea>
+              </div>
+    
+              <div class="mb-3">
+                <label class="form-label">Lifecycle Stage</label>
+                <select class="form-select" id="lifecycleStage">
+                  <option value="Adult">Adult</option>
+                  <option value="Larva">Larva</option>
+                  <option value="Pupa">Pupa</option>
+                  <option value="Egg">Egg</option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </div>
+    
+              <div class="mb-3">
+                <label class="form-label">Nathan's Notes</label>
+                <textarea
+                  class="form-control"
+                  id="nathanNotes"
+                  rows="2"
+                  placeholder="Optional admin notes"
+                ></textarea>
+              </div>
+    
+              <div class="mb-3">
+                <label class="form-label">Upload Image</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="newImageFile"
+                  accept="image/*"
+                  required
+                />
+              </div>
+    
+              <button type="submit" class="btn btn-primary">
+                Add Butterfly
+              </button>
+    
+            </form>
           </div>
         </div>
       </div>
+    </div>
+  </form>
 
       <div
         class="modal fade modal-image"
