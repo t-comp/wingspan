@@ -101,14 +101,18 @@ public class ImageController {
      */
     @PatchMapping("/admin/{imageId}/description")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ImageDTO> updateDescription(@PathVariable int imageId,
-                                                      @RequestParam String description,
-                                                      @RequestParam(required = false) String nathansNotes) {
+    public ResponseEntity<?> editImage(@PathVariable int imageId,
+                                       @RequestParam(required = false) String description,
+                                       @RequestParam(required = false) String nathansNotes,
+                                       @RequestParam(required = false) String life_cycle,
+                                       @RequestParam(required = false) Integer species_id,
+                                       @RequestParam(required = false) List<Integer> tagIds) {
         try{
-            Image updated = imageStorageService.updateImage(imageId, description, nathansNotes);
+            Image updated = imageStorageService.updateImage(imageId, description, nathansNotes, life_cycle, species_id, tagIds);
+
             return ResponseEntity.ok(ImageDTO.fromImage(updated));
         }catch(RuntimeException e){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 

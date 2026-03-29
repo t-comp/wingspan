@@ -127,13 +127,36 @@ public class ImageStorageService {
      * update image metadata
      */
     @Transactional
-    public Image updateImage(Integer imageId, String description, String nathansNotes) {
+    public Image updateImage(int imageId, String description, String nathansNotes, String life_cycle, Integer species_id, List<Integer> tagIds) {
         Image image = imageRepository.findById(imageId)
-                .orElseThrow(() -> new RuntimeException("Image not found"));
+                .orElseThrow(() -> new RuntimeException("Image not found with id: " + imageId));
 
-        image.setDescription(description);
-        image.setNathansnotes(nathansNotes);
-        return imageRepository.save(image);
+        if(description != null){
+            image.setDescription(description);
+        }
+        if(nathansNotes != null){
+            image.setNathansnotes(nathansNotes);
+        }
+        if(life_cycle != null){
+            image.setLifecyclestage(life_cycle);
+        }
+        if(species_id != null){
+            Species species = speciesRepository.findById(species_id).orElseThrow(() -> new RuntimeException("Species not found with id: " + species_id));
+            image.setSpecies(species);
+        }
+        if(tagIds != null && !tagIds.isEmpty()){
+            image.getTags().forEach(tag -> tag.getImages().remove(image));
+            image.getTags().clear();
+
+            List<Tags> newTags = tagRepository.findAllById(tagIds);
+            if(newTags.size() != tagIds.size()){
+                throw new RuntimeException("One or more tag IDs not found.");
+            }
+            newTags.forEach(image::addTag);
+        }
+        Image updated = imageRepository.save(image);
+        log.info("Image updated successfully: id={}", imageId);
+        return updated;
     }
 
     /**
