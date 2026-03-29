@@ -208,14 +208,16 @@ public class SpeciesController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Species not found"));
         }
-
+        s.setThumbnail(null);
+        speciesRepository.save(s);
         List<Image> images = imageRepository.findBySpeciesId(speciesId);
         imageRepository.deleteAll(images);
-
         String name = s.getName();
         speciesRepository.delete(s);
+
         return ResponseEntity.ok(new MessageResponse(name + " has been deleted."));
     }
+
 
 
     /** helper - thumbnail url with fallback
