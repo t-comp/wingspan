@@ -53,6 +53,7 @@ export const UI = {
             document.getElementById("deleteSpeciesFullBtn").dataset.speciesId = b.id;
         }
 
+  
         const addImageBtn = document.getElementById("openAddImageModalBtn");
         if (addImageBtn) {
             if (isAdmin) {

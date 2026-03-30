@@ -31,13 +31,19 @@ export async function initHome(userRole, userEmail) {
     let activeTagFilters = new Set();
     const filterTagCloud = document.getElementById("filterTagCloud");
 
-
     const showView = (view) => {
         [portfolio, speciesView, teamView].forEach((v) => {
             if (v) v.style.display = "none";
         });
         if (view) view.style.display = "block";
         window.scrollTo(0, 0);
+    };
+
+    const goToGallery = () => {
+        showView(portfolio);
+        if (searchNavBar) searchNavBar.style.display = "flex";
+        if (viewGalleryBtn) viewGalleryBtn.classList.add("active");
+        if (viewTeamBtn) viewTeamBtn.classList.remove("active");
     };
 
     const openImageDetailsModal = (img) => {
@@ -58,7 +64,7 @@ export async function initHome(userRole, userEmail) {
         if (sizeElem) sizeElem.innerText = img.size || "Unknown";
 
         const noteText = img.nathansNotes || img.nathansnotes || img.nathan_notes || img.notes || "";
-        notesDisplay.innerText = (noteText && noteText !== "undefined") ? noteText : "No researcher notes available.";
+        notesDisplay.innerText = (noteText && noteText !== "undefined") ? noteText : "No notes available.";
 
         tagsDisplay.innerHTML = "";
         if (img.tags && img.tags.length > 0) {
@@ -98,7 +104,7 @@ export async function initHome(userRole, userEmail) {
             if (tagsDisplay) tagsDisplay.classList.add("d-none");
             if (editTagsContainer) editTagsContainer.classList.remove("d-none");
 
-            const currentNotes = (notesDisplay.innerText === "No researcher notes available.") ? "" : notesDisplay.innerText;
+            const currentNotes = (notesDisplay.innerText === "No notes available.") ? "" : notesDisplay.innerText;
             notesDisplay.innerHTML = `<textarea id="editNotesInput" class="form-control" rows="3">${currentNotes}</textarea>`;
 
             try {
@@ -161,7 +167,7 @@ export async function initHome(userRole, userEmail) {
             const selectedCheckboxes = document.querySelectorAll('.edit-tag-checkbox:checked');
             const newTagIds = Array.from(selectedCheckboxes).map(cb => String(cb.value));
 
-            const oldTagIds = (img.tags || []).map(t => String(t.id || t.tagId || t));
+            const oldTagIds = (img.tags || []).map(t => String(t.tagId || t.id || t));
 
             const toAdd = newTagIds.filter(tagId => !oldTagIds.includes(tagId));
             const toRemove = oldTagIds.filter(tagId => !newTagIds.includes(tagId));
@@ -182,6 +188,7 @@ export async function initHome(userRole, userEmail) {
                 if (modalInstance) modalInstance.hide();
 
                 if (currentSpeciesId) {
+                    butterflies = await ButterflyAPI.getAll();
                     const freshButterfly = await ButterflyAPI.getSpeciesById(currentSpeciesId);
                     await showSpeciesView(freshButterfly);
                     alert("Changes saved successfully!");
@@ -196,7 +203,7 @@ export async function initHome(userRole, userEmail) {
         };
     };
 
-    // SPECIES VIEW
+
     const showSpeciesView = async (b) => {
         showView(speciesView);
         if (searchNavBar) searchNavBar.style.display = "none";
@@ -205,6 +212,24 @@ export async function initHome(userRole, userEmail) {
 
         const isAdmin = (userRole === "ADMIN");
         UI.populateSpeciesView(b, isAdmin);
+
+        const editSpeciesBtn = document.getElementById("editSpeciesBtn");
+        if (editSpeciesBtn) {
+            if (isAdmin) {
+                editSpeciesBtn.classList.remove("d-none");
+                editSpeciesBtn.onclick = () => {
+                    document.getElementById("editSpeciesId").value = b.id;
+                    document.getElementById("editSpeciesName").value = b.name || "";
+                    document.getElementById("editSpeciesScientific").value = b.scientificName || "";
+                    document.getElementById("editSpeciesDescription").value = b.description || "";
+                    document.getElementById("editSpeciesOrder").value = b.orderName || "";
+                    document.getElementById("editSpeciesFamily").value = b.family || "";
+                    document.getElementById("editSpeciesGenus").value = b.genus || "";
+                };
+            } else {
+                editSpeciesBtn.classList.add("d-none");
+            }
+        }
 
         const setMainImage = (img) => {
             const url = img.url || "assets/img/noimage.jpg";
@@ -218,7 +243,7 @@ export async function initHome(userRole, userEmail) {
             const notesElem = document.getElementById("speciesNotes");
             if (notesElem) {
                 const noteText = img.nathansNotes || img.nathan_notes || img.notes;
-                notesElem.innerText = (noteText && noteText !== "undefined") ? noteText : "No researcher notes available.";
+                notesElem.innerText = (noteText && noteText !== "undefined") ? noteText : "No notes available.";
             }
 
             const viewMoreBtn = document.getElementById("viewMoreDetails");
@@ -263,18 +288,41 @@ export async function initHome(userRole, userEmail) {
 
             filtered.forEach((imgObj) => {
                 const col = document.createElement("div");
-                col.className = "col-4 mb-2 gallery-thumb-wrapper";
+                col.className = "col-4 mb-2 gallery-thumb-wrapper position-relative";
                 col.innerHTML = `
                     <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
                         <img src="${imgObj.url || "assets/img/noimage.jpg"}"
                              style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
                     </div>
+                    ${isAdmin ? `
+                        <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle delete-single-img-btn"
+                                style="width:24px; height:24px; padding:0; font-size:10px; z-index:5; opacity:0; transition: opacity 0.2s;"
+                                title="Delete this image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    ` : ''}
                 `;
                 col.querySelector("img").onclick = (e) => {
                     document.querySelectorAll(".gallery-thumb-wrapper img").forEach(el => el.classList.remove("border-primary", "border-3"));
                     e.currentTarget.classList.add("border-primary", "border-3");
                     setMainImage(imgObj);
                 };
+
+                const deleteBtn = col.querySelector(".delete-single-img-btn");
+                if (deleteBtn) {
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        window.handleDeleteSingleImage(imgObj.id);
+                    };
+                }
+
+                col.addEventListener("mouseenter", () => {
+                    if (deleteBtn) deleteBtn.style.opacity = "0.85";
+                });
+                col.addEventListener("mouseleave", () => {
+                    if (deleteBtn) deleteBtn.style.opacity = "0";
+                });
+
                 gridContainer.appendChild(col);
             });
 
@@ -330,7 +378,6 @@ export async function initHome(userRole, userEmail) {
         UI.renderGrid(data, (b) => showSpeciesView(b));
     };
 
-    // STUDENT DASHBOARD
     async function loadStudentData(email) {
         if (!email) return;
         try {
@@ -394,23 +441,24 @@ export async function initHome(userRole, userEmail) {
         }
     }
 
-    // ADMIN DATA
     let allCachedUsers = [];
     let globalUserTeamMap = {};
 
     async function loadAdminData() {
-        let users = await ButterflyAPI.getAllUsers();
+        const [users, teams] = await Promise.all([
+            ButterflyAPI.getAllUsers(),
+            ButterflyAPI.getAllTeams()
+        ]);
         users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
         allCachedUsers = users;
 
         globalUserTeamMap = {};
-        const teams = await ButterflyAPI.getAllTeams();
-        for (const t of teams) {
-            const members = await ButterflyAPI.getTeamMembers(t.id);
-            for (const m of members) {
+        const memberResults = await Promise.all(teams.map(t => ButterflyAPI.getTeamMembers(t.id)));
+        teams.forEach((t, i) => {
+            for (const m of memberResults[i]) {
                 globalUserTeamMap[m.userId] = t.name;
             }
-        }
+        });
 
         renderAllUsersTable(allCachedUsers);
         await loadTeams();
@@ -451,9 +499,11 @@ export async function initHome(userRole, userEmail) {
     }
 
     async function loadTeams() {
-        const teams = await ButterflyAPI.getAllTeams();
-        const unassigned = await ButterflyAPI.getUnassignedStudents();
-        const allKeys = await ButterflyAPI.getAllApiKeys();
+        const [teams, unassigned, allKeys] = await Promise.all([
+            ButterflyAPI.getAllTeams(),
+            ButterflyAPI.getUnassignedStudents(),
+            ButterflyAPI.getAllApiKeys()
+        ]);
         const container = document.getElementById("teamsContainer");
         if (!container) return;
 
@@ -469,8 +519,11 @@ export async function initHome(userRole, userEmail) {
             studentOptions += `<option value="${u.userId}">${u.username} — ${u.email}</option>`;
         });
 
-        for (const team of teams) {
-            const members = await ButterflyAPI.getTeamMembers(team.id);
+        const membersByTeam = await Promise.all(teams.map(t => ButterflyAPI.getTeamMembers(t.id)));
+
+        for (let idx = 0; idx < teams.length; idx++) {
+            const team = teams[idx];
+            const members = membersByTeam[idx];
             const teamKey = allKeys.find((k) => k.teamName === team.name);
             const isActive = teamKey && teamKey.active !== false && teamKey.status !== "INACTIVE";
 
@@ -699,7 +752,6 @@ export async function initHome(userRole, userEmail) {
         new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
     };
 
-    // FORM LISTENERS
     const adminCreateTeamForm = document.getElementById("adminCreateTeamForm");
     if (adminCreateTeamForm) {
         adminCreateTeamForm.addEventListener("submit", async (e) => {
@@ -715,6 +767,8 @@ export async function initHome(userRole, userEmail) {
             bootstrap.Modal.getInstance(document.getElementById("adminCreateTeamModal")).hide();
         });
     }
+
+  
 
     const adminAddUserForm = document.getElementById("adminAddUserForm");
     if (adminAddUserForm) {
@@ -801,6 +855,7 @@ export async function initHome(userRole, userEmail) {
             if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
         });
     }
+
     const universalUploadForm = document.getElementById("universalUploadForm");
     if (universalUploadForm) {
         const uploadModal = document.getElementById("addButterflyModal");
@@ -859,7 +914,6 @@ export async function initHome(userRole, userEmail) {
 
             const checkedBoxes = universalUploadForm.querySelectorAll('input[name="tagIds"]:checked');
             const tagIds = Array.from(checkedBoxes).map(cb => cb.value);
-            const lifecycle = document.getElementById("lifecycleStage").value;
             const nathansNotes = document.getElementById("nathanNotes").value;
 
             const files = Array.from(fileInput.files);
@@ -870,7 +924,6 @@ export async function initHome(userRole, userEmail) {
                 const formData = new FormData();
                 formData.append("file", file);
                 formData.append("species_id", speciesId);
-                formData.append("life_cycle", lifecycle);
                 formData.append("nathansNotes", nathansNotes);
                 if (tagIds.length > 0) {
                     tagIds.forEach(id => formData.append("tagId", id));
@@ -891,9 +944,82 @@ export async function initHome(userRole, userEmail) {
             }
 
             e.target.reset();
+            const selectorAfterReset = document.getElementById("speciesSelector");
+            if (selectorAfterReset) selectorAfterReset.value = "NEW";
+            const newSpeciesFields = document.getElementById("newSpeciesFields");
+            if (newSpeciesFields) newSpeciesFields.style.display = "block";
+
             bootstrap.Modal.getInstance(document.getElementById("addButterflyModal")).hide();
             butterflies = await ButterflyAPI.getAll();
             refreshGallery();
+        });
+    }
+
+    const addImageToSpeciesForm = document.getElementById("addImageToSpeciesForm");
+    if (addImageToSpeciesForm) {
+        addImageToSpeciesForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const speciesId = document.getElementById("targetSpeciesId").value;
+            const fileInput = document.getElementById("speciesImageFiles");
+            const notes = document.getElementById("speciesImageNotes").value;
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                return alert("Please select at least one image.");
+            }
+
+            const files = Array.from(fileInput.files);
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("species_id", speciesId);
+                formData.append("nathansNotes", notes);
+                try {
+                    await ButterflyAPI.uploadImage(formData);
+                    successCount++;
+                } catch (err) {
+                    console.error("Upload failed for " + file.name, err);
+                    failCount++;
+                }
+            }
+
+            alert(`${successCount} image(s) uploaded${failCount > 0 ? `, ${failCount} failed` : ""}!`);
+            e.target.reset();
+            bootstrap.Modal.getInstance(document.getElementById("addImageToSpeciesModal")).hide();
+
+            const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
+            await showSpeciesView(freshSpecies);
+            butterflies = await ButterflyAPI.getAll();
+        });
+    }
+
+
+    const editSpeciesForm = document.getElementById("editSpeciesForm");
+    if (editSpeciesForm) {
+        editSpeciesForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const speciesId = document.getElementById("editSpeciesId").value;
+            const data = {
+                name: document.getElementById("editSpeciesName").value,
+                scientificName: document.getElementById("editSpeciesScientific").value,
+                description: document.getElementById("editSpeciesDescription").value,
+                orderName: document.getElementById("editSpeciesOrder").value,
+                family: document.getElementById("editSpeciesFamily").value,
+                genus: document.getElementById("editSpeciesGenus").value,
+            };
+            try {
+                await ButterflyAPI.updateSpecies(speciesId, data);
+                bootstrap.Modal.getInstance(document.getElementById("editSpeciesModal")).hide();
+                butterflies = await ButterflyAPI.getAll();
+                const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
+                await showSpeciesView(freshSpecies);
+                refreshGallery();
+                alert("Species updated!");
+            } catch (err) {
+                alert("Update failed: " + err.message);
+            }
         });
     }
 
@@ -907,17 +1033,20 @@ export async function initHome(userRole, userEmail) {
 
     if (backBtn) {
         backBtn.addEventListener("click", () => {
-            showView(portfolio);
-            if (searchNavBar) searchNavBar.style.display = "flex";
+            goToGallery();
+        });
+    }
+
+    const navBrand = document.getElementById("navBrandLink");
+    if (navBrand) {
+        navBrand.addEventListener("click", () => {
+            goToGallery();
         });
     }
 
     if (viewGalleryBtn) {
         viewGalleryBtn.addEventListener("click", () => {
-            showView(portfolio);
-            if (searchNavBar) searchNavBar.style.display = "flex";
-            viewGalleryBtn.classList.add("active");
-            if (viewTeamBtn) viewTeamBtn.classList.remove("active");
+            goToGallery();
         });
     }
 
@@ -940,14 +1069,75 @@ export async function initHome(userRole, userEmail) {
         });
     }
 
+    let searchTimeout;
+
+    const applyAllFilters = async () => {
+        const orderSelect = document.getElementById("filterOrder");
+        const familySelect = document.getElementById("filterFamily");
+        const genusSelect = document.getElementById("filterGenus");
+
+        const order = orderSelect ? orderSelect.value : "";
+        const family = familySelect ? familySelect.value : "";
+        const genus = genusSelect ? genusSelect.value : "";
+        const query = searchInput ? searchInput.value.toLowerCase() : "";
+
+        if (order || family || genus) {
+            try {
+                let filtered = await ButterflyAPI.filterSpecies(order, family, genus);
+                if (query) {
+                    filtered = filtered.filter(b => b.name.toLowerCase().includes(query));
+                }
+                refreshGallery(filtered);
+            } catch (err) {
+                console.error("Filter failed:", err);
+            }
+        } else {
+            const filtered = query
+                ? butterflies.filter(b => b.name.toLowerCase().includes(query))
+                : butterflies;
+            refreshGallery(filtered);
+        }
+    };
+
     if (searchInput) {
         searchInput.addEventListener("input", () => {
-            const query = searchInput.value.toLowerCase();
-            const filtered = butterflies.filter(b => b.name.toLowerCase().includes(query));
-            refreshGallery(filtered);
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(applyAllFilters, 250);
         });
     }
 
+    async function initFilters() {
+        try {
+            const options = await ButterflyAPI.getFilterOptions();
+            const orderSelect = document.getElementById("filterOrder");
+            const familySelect = document.getElementById("filterFamily");
+            const genusSelect = document.getElementById("filterGenus");
+
+            if (options.orders) {
+                options.orders.forEach(o => {
+                    if (o) orderSelect.innerHTML += `<option value="${o}">${o}</option>`;
+                });
+            }
+            if (options.families) {
+                options.families.forEach(f => {
+                    if (f) familySelect.innerHTML += `<option value="${f}">${f}</option>`;
+                });
+            }
+            if (options.genera) {
+                options.genera.forEach(g => {
+                    if (g) genusSelect.innerHTML += `<option value="${g}">${g}</option>`;
+                });
+            }
+
+            if (orderSelect) orderSelect.addEventListener("change", applyAllFilters);
+            if (familySelect) familySelect.addEventListener("change", applyAllFilters);
+            if (genusSelect) genusSelect.addEventListener("change", applyAllFilters);
+        } catch (err) {
+            console.error("Could not load filter options:", err);
+        }
+    }
+
+    await initFilters();
     const deleteSpeciesFullBtn = document.getElementById("deleteSpeciesFullBtn");
     if (deleteSpeciesFullBtn) {
         deleteSpeciesFullBtn.addEventListener("click", async () => {
@@ -965,6 +1155,7 @@ export async function initHome(userRole, userEmail) {
         });
     }
 
+
     if (themeToggle) {
         themeToggle.addEventListener("click", () => {
             const body = document.body;
@@ -975,7 +1166,6 @@ export async function initHome(userRole, userEmail) {
             document.querySelectorAll(".modal-content").forEach(m => m.classList.toggle("bg-dark"));
         });
     }
-
     showView(portfolio);
     refreshGallery();
 }

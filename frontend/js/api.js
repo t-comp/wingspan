@@ -52,7 +52,6 @@ export const ButterflyAPI = {
 
   async create(data) {
     const response = await fetch(`${API_BASE_URL}/species/create`, {
-      ...defaultOpts,
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({
@@ -78,7 +77,6 @@ export const ButterflyAPI = {
 
   async delete(speciesId) {
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
-      ...defaultOpts,
       method: "DELETE",
       headers: getHeaders(),
     });
@@ -119,7 +117,6 @@ export const ButterflyAPI = {
   // ==========================
   async login(usernameVal, passwordVal) {
     const response = await fetch(`${API_BASE_URL}/user/login`, {
-      ...defaultOpts,
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ usernameOrEmail: usernameVal, password: passwordVal }),
@@ -139,7 +136,6 @@ export const ButterflyAPI = {
 
   async createAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/create-account`, {
-      ...defaultOpts,
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
@@ -154,7 +150,6 @@ export const ButterflyAPI = {
 
   async adminCreateAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/admin/create-account`, {
-      ...defaultOpts,
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(userData),
@@ -248,7 +243,6 @@ export const ButterflyAPI = {
 
   async generateApiKey(data) {
     const response = await fetch(`${API_BASE_URL}/api-key/keygen`, {
-      ...defaultOpts,
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({
@@ -294,7 +288,6 @@ export const ButterflyAPI = {
   // ==========================
   async createTeam(data) {
     const response = await fetch(`${API_BASE_URL}/teams/create`, {
-      ...defaultOpts,
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(data),
@@ -324,7 +317,6 @@ export const ButterflyAPI = {
 
   async addTeamMember(teamId, userId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/add-member`, {
-      ...defaultOpts,
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify({ userId: parseInt(userId) }),
@@ -343,7 +335,6 @@ export const ButterflyAPI = {
 
   async updateTeam(teamId, data) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}/update`, {
-      ...defaultOpts,
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(data),
@@ -417,16 +408,11 @@ export const ButterflyAPI = {
 
   async createTag(tagData) {
     const response = await fetch(`${API_BASE_URL}/tags/admin`, {
-      ...defaultOpts,
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(tagData),
     });
     return checkResponse(response);
-  },
-
-  async deleteImage(id) {
-    return await fetch(`${API_BASE_URL}/images/admin/${id}`, { method: "DELETE" });
   },
 
   async deleteTag(tagId) {
@@ -438,7 +424,6 @@ export const ButterflyAPI = {
 
   async updateTag(tagId, tagData) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
-      ...defaultOpts,
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(tagData),
