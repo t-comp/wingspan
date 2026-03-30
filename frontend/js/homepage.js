@@ -175,7 +175,7 @@ export async function initHome(userRole, userEmail) {
             console.log("SYNCING DATA:", { imageId: id, adding: toAdd, removing: toRemove, notes: newNotes });
 
             try {
-                await ButterflyAPI.updateImageDescription(id, img.description || "", newNotes);
+                // await ButterflyAPI.updateImageDescription(id, img.description || "", newNotes);
 
                 const tagPromises = [
                     ...toAdd.map(tagId => ButterflyAPI.addTagToImage(tagId, id)),
