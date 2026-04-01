@@ -26,7 +26,7 @@ public class ImageController {
     private ImageRepository imageRepository;
 
     @Autowired
-    private ImageStorageService imageStorageService;  //-> something for later: Separate service layer
+    private ImageStorageService imageStorageService;
 
     /**
      * Upload a new image

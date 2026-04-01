@@ -1,5 +1,6 @@
 package fs3.wingspan.services;
 
+import fs3.wingspan.dto.RoboflowPrediction;
 import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
 import fs3.wingspan.model.Tags;
@@ -92,6 +93,19 @@ public class ImageStorageService {
         image.setLifecyclestage(lifecycle_stage);
         image.setNathansnotes(nathansNotes);
 
+        RoboflowPrediction prediction = RoboflowService.classifyImage(file);
+
+        if(prediction != null && prediction.getPredictions() != null){
+            String topClass = prediction.getPredicted_classes();
+            double confidence = prediction.getPredictions().get(0).getConfidence();
+            log.info("Classified as: {} with {}% confidence", topClass, confidence * 100);
+
+            if(lifecycle_stage == null && topClass.contains("adult")){
+                image.setLifecyclestage("adult");
+            }else if(lifecycle_stage == null && topClass.contains("juvenile")){
+                image.setLifecyclestage("juvenile");
+            }
+        }
 
         log.info("About to save - lifecycle: {}, nathansNotes: {}, description: {}",
                 image.getLifecyclestage(), image.getNathansnotes(), image.getDescription());
