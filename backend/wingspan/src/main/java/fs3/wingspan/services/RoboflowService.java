@@ -20,12 +20,12 @@ import java.util.Map;
 public class RoboflowService {
 
     @Value("${roboflow.api.key}")
-    private String apiKey;
+    private static String apiKey;
 
     @Value("${roboflow.model.id}")
-    private String modelId;
+    private static String modelId;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private static final RestTemplate restTemplate = new RestTemplate();
 
     public static RoboflowPrediction classifyImage(MultipartFile file) throws IOException{
         String url = "https://classify.roboflow.com/" + modelId + "?api_key=" + apiKey;
