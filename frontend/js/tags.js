@@ -1,5 +1,4 @@
 import { ButterflyAPI } from "./api.js";
-
 export const TagManager = {
     tagData: {
         "Life Stage": ["Egg", "Larva", "Nymph", "Pupa", "Adult", "Multiple Stages", "Unknown"],
@@ -15,23 +14,18 @@ export const TagManager = {
         "Biological Moments": ["Predation Event", "Parasitoid Emergence", "Deformity", "Disease", "Injury", "Seasonal Morph", "Gynandromorph"],
         "Layout": ["Vertical", "Horizontal"]
     },
-
     async initTagContainer() {
         const container = document.getElementById("tagCheckboxContainer");
-        if (!container) return;
+        if (!container)
+            return;
         try {
             const dbTags = await ButterflyAPI.getAllTags();
-
             let finalHtml = '';
             for (const [categoryName, tagNames] of Object.entries(this.tagData)) {
                 let categoryGroupHtml = '';
                 let hasFoundAnyInThisCategory = false;
-
                 tagNames.forEach(name => {
-                    const match = dbTags.find(t =>
-                        t && t.tagName && t.tagName.toString().trim().toLowerCase() === name.trim().toLowerCase()
-                    );
-
+                    const match = dbTags.find(t => t && t.tagName && t.tagName.toString().trim().toLowerCase() === name.trim().toLowerCase());
                     if (match) {
                         hasFoundAnyInThisCategory = true;
                         categoryGroupHtml += `
@@ -44,7 +38,6 @@ export const TagManager = {
                             </div>`;
                     }
                 });
-
                 if (hasFoundAnyInThisCategory) {
                     finalHtml += `
                         <div class="tag-category-block mb-4 w-100">
@@ -58,10 +51,9 @@ export const TagManager = {
                         </div>`;
                 }
             }
-
             container.innerHTML = finalHtml || '<p class="text-muted small">No matching tags found.</p>';
-
-        } catch (err) {
+        }
+        catch (err) {
             console.error("Tag UI Error:", err);
             container.innerHTML = '<p class="text-danger small">Error loading tags.</p>';
         }
