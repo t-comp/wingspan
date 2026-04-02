@@ -58,6 +58,40 @@ export const UI = {
     const genusElem = document.getElementById("speciesGenus");
     if (genusElem) genusElem.innerText = b.genus || "—";
 
+    // Inside populateSpeciesView(b, isAdmin)
+let rawDesc = b.description || "";
+let cleanDesc = rawDesc;
+const extraAttributes = {};
+
+// Regex to find [[Label: Value]]
+const regex = /\[\[(.*?):\s*(.*?)\]\]/g;
+let match;
+while ((match = regex.exec(rawDesc)) !== null) {
+    extraAttributes[match[1]] = match[2];
+    // Remove the bracketed text so the user doesn't see it in the description box
+    cleanDesc = cleanDesc.replace(match[0], "");
+}
+
+// 1. Show only the clean text in the description area
+document.getElementById("speciesDescription").innerText = cleanDesc.trim() || "No description.";
+
+// 2. Show the attributes in your blue-labeled rows
+const container = document.getElementById("customAttributesDisplay");
+if (container) {
+    container.innerHTML = "";
+    Object.entries(extraAttributes).forEach(([label, value]) => {
+        container.insertAdjacentHTML('beforeend', `
+            <div class="row mb-2">
+                <div class="col-4 fw-bold" style="color: #0399b0">${label}:</div>
+                <div class="col-8 text-muted">${value}</div>
+            </div>
+        `);
+    });
+}
+
+// 3. Attach back to 'b' so the Edit Modal can see them
+b.extraAttributes = extraAttributes;
+
     const thumbModalImg = document.getElementById("thumbnailModalImage");
     if (thumbModalImg)
       thumbModalImg.src = b.thumbnailUrl || "assets/img/noimage.jpg";
@@ -79,7 +113,7 @@ export const UI = {
         const targetIdInput = document.getElementById("targetSpeciesId");
         if (targetIdInput) targetIdInput.value = b.id;
         const targetNameDisplay = document.getElementById(
-          "targetSpeciesNameDisplay",
+          "targetSpeciesNameDisplay"
         );
         if (targetNameDisplay) targetNameDisplay.innerText = b.name;
       } else {

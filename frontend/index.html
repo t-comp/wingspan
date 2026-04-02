@@ -533,6 +533,7 @@
                     </div>
                     <div class="col-8 text-muted" id="speciesGenus"></div>
                   </div>
+                  <div id="customAttributesDisplay" class="border-top pt-2 mt-2"></div>
                 </div>
 
                 <div
@@ -604,30 +605,15 @@
                     </div>
                   </div>
                 </div>
-              </div>
+               </div>
 
-              <div
-                class="p-3 rounded border mb-4"
-                style="background-color: #f1f8f9"
-              >
-                <div
-                  class="d-flex justify-content-between align-items-center mb-2"
-                >
-                  <h6 class="fw-bold mb-0" style="color: #0399b0">
-                    Filter Image Results
-                  </h6>
-                  <button
-                    id="clearFiltersBtn"
-                    class="btn btn-sm btn-link text-decoration-none p-0"
-                    style="color: #0399b0; font-size: 0.8rem"
-                  >
-                    Clear All
-                  </button>
+              <div class="p-3 rounded border mb-4" style="background-color: #f1f8f9">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold mb-0" style="color: #0399b0">Filter Tags</h6>
+                  <button id="clearFiltersBtn" class="btn btn-sm btn-link text-decoration-none p-0"
+                    style="color: #0399b0; font-size: 0.8rem">Clear All</button>
                 </div>
-                <div
-                  id="filterTagCloud"
-                  class="d-flex flex-wrap align-items-center gap-2"
-                ></div>
+                <div id="filterTagCloud" class="d-flex flex-wrap align-items-center gap-2"></div>
               </div>
 
               <div
@@ -1276,10 +1262,9 @@
               <hr />
               <h6>Notes</h6>
               <p id="modalNotes" class="text-muted"></p>
-              <hr />
-              <h6>Tags</h6>
-              <div id="modalTags" class="d-flex flex-wrap gap-1"></div>
-
+              
+              
+              <textarea id="editNotesInput" class="form-control d-none mb-3" rows="3"></textarea>
               <div id="studentDevTools">
                 <hr />
                 <h6 class="fw-bold text-primary">Developer Tools</h6>
@@ -1307,6 +1292,9 @@
                   </button>
                 </div>
               </div>
+              <hr>
+              <h6>Tags</h6>
+              <div id="modalTags" class="d-flex flex-wrap gap-1"></div>
 
               <div id="editTagsContainer" class="d-none">
                 <hr />
@@ -1466,10 +1454,18 @@
                     />
                   </div>
                 </div>
-                <button
-                  type="submit"
-                  class="btn btn-primary w-100 rounded-pill fw-bold"
-                >
+                <div class="row">
+                </div>
+            
+            <div id="dynamicSpeciesFields" class="mt-2">
+                </div>
+            
+            <div class="mb-3">
+                <button type="button" id="addNewSpeciesFieldBtn" class="btn btn-sm btn-outline-secondary border-dashed w-100">
+                    <i class="fas fa-plus-circle me-1"></i> Add Another Attribute
+                </button>
+            </div>
+                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">
                   Save Changes
                 </button>
               </form>
