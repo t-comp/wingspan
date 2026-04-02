@@ -63,7 +63,8 @@ public class Security {
                 "http://localhost:5173",
                 "http://127.0.0.1:5500",
                 "http://localhost:8080",
-                "http://159.203.134.226:8080"
+                "http://159.203.134.226:8080",
+                "http://159.203.134.226"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

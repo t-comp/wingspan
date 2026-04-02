@@ -41,19 +41,23 @@ public class Image {
     @Column(name="filename", nullable=false)
     private String filename;
 
-    // large (1920px)
-    @Column(name="fpath", nullable=false)
-    private String fpath;
-
     // thumbnail (300px)
     @Column(name="thumbnail_url")
     private String thumbnailUrl;
 
-    // medium (1024px)
-    @Column(name="medium_url")
-    private String mediumUrl;
+    // small (800px)
+    @Column(name="small_url")
+    private String smallUrl;
 
-    // original version URL
+    // medium/display (1024px)
+    @Column(name="display_url", nullable=false)
+    private String displayUrl;
+
+    // large (2048px)
+    @Column(name="large_url")
+    private String largeUrl;
+
+    // original
     @Column(name="original_url")
     private String originalUrl;
 

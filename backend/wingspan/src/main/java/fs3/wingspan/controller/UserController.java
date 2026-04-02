@@ -55,6 +55,7 @@ public class UserController {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("Please make sure username is at least 5 characters."));
         }
+
         if (userRepository.existsByUsername(u.getUsername())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new MessageResponse("Account with this username already exists."));

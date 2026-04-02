@@ -227,12 +227,12 @@ public class SpeciesController {
      */
     private String thumbnailFallback(Species s) {
         if (s.getThumbnail() != null) {
-            return s.getThumbnail().getFpath();
+            return s.getThumbnail().getDisplayUrl();
         }
 
         List<Image> images = imageRepository.findBySpeciesId(s.getId());
         if (!images.isEmpty()) {
-            return images.get(0).getFpath();
+            return images.get(0).getDisplayUrl();
         }
 
         return null;
