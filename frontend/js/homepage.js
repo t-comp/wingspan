@@ -12,13 +12,42 @@ export async function initHome(userRole, userEmail) {
     userEmail
   );
 
+  let currentDisplayMode = "common";
+
   let butterflies = await ButterflyAPI.getAll();
   console.log("DATABASES SPECIES LIST:", butterflies);
+
+  let studentApiKey = "";
+  if (userRole !== "ADMIN") {
+    try {
+      const dashboardData = await ButterflyAPI.getStudentDashboard(userEmail);
+      if (dashboardData && dashboardData.apiKey) {
+        studentApiKey = dashboardData.apiKey;
+      } else {
+        // Fallback: Check teams if not on dashboard
+        const allTeams = await ButterflyAPI.getAllTeams();
+        for (const t of allTeams) {
+          const members = await ButterflyAPI.getTeamMembers(t.id);
+          if (members.some((m) => m.email === userEmail)) {
+            const keys = await ButterflyAPI.getAllApiKeys();
+            const teamKey = keys.find(
+              (k) => k.teamName === t.name && k.active !== false
+            );
+            if (teamKey) studentApiKey = teamKey.keyVal;
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Could not fetch API key for modal", e);
+    }
+  }
 
   const portfolio = document.getElementById("portfolio");
   const teamView = document.getElementById("teamView");
   const speciesView = document.getElementById("speciesView");
   const searchNavBar = document.getElementById("searchNavBar");
+  const filterPanel = document.getElementById("filterPanel");
 
   const viewGalleryBtn = document.getElementById("viewGalleryBtn");
   const viewTeamBtn = document.getElementById("viewTeamBtn");
@@ -33,8 +62,48 @@ export async function initHome(userRole, userEmail) {
   const adminGenerateKeyForm = document.getElementById("adminGenerateKeyForm");
   const adminExtendKeyForm = document.getElementById("adminExtendKeyForm");
 
+  const openChangePasswordBtn = document.getElementById(
+    "openChangePasswordBtn"
+  );
+  const changePasswordForm = document.getElementById("changePasswordForm");
+
   let activeTagFilters = new Set();
   const filterTagCloud = document.getElementById("filterTagCloud");
+
+  if (openChangePasswordBtn) {
+    openChangePasswordBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      new bootstrap.Modal(
+        document.getElementById("changePasswordModal")
+      ).show();
+    });
+  }
+
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pass1 = document.getElementById("newPersonalPassword").value;
+      const pass2 = document.getElementById("confirmPersonalPassword").value;
+
+      if (pass1 !== pass2) {
+        return alert("Passwords do not match! Please try again.");
+      }
+      if (pass1.length < 7) {
+        return alert("Password must be at least 7 characters long.");
+      }
+
+      try {
+        await ButterflyAPI.resetPassword(userEmail, pass1);
+        alert("Password successfully updated!");
+        e.target.reset();
+        bootstrap.Modal.getInstance(
+          document.getElementById("changePasswordModal")
+        ).hide();
+      } catch (err) {
+        alert("Failed to update password: " + err.message);
+      }
+    });
+  }
 
   const showView = (view) => {
     [portfolio, speciesView, teamView].forEach((v) => {
@@ -47,6 +116,8 @@ export async function initHome(userRole, userEmail) {
   const goToGallery = () => {
     showView(portfolio);
     if (searchNavBar) searchNavBar.style.display = "flex";
+    if (filterPanel) filterPanel.style.display = "";
+
     if (viewGalleryBtn) viewGalleryBtn.classList.add("active");
     if (viewTeamBtn) viewTeamBtn.classList.remove("active");
   };
@@ -61,7 +132,12 @@ export async function initHome(userRole, userEmail) {
 
     if (!editBtn || !saveBtn || !notesDisplay || !tagsDisplay) return;
 
-    editBtn.classList.remove("d-none");
+    if (userRole === "ADMIN") {
+      editBtn.classList.remove("d-none");
+    } else {
+      editBtn.classList.add("d-none");
+    }
+
     saveBtn.classList.add("d-none");
     notesDisplay.classList.remove("d-none");
     notesInput.classList.add("d-none");
@@ -71,10 +147,15 @@ export async function initHome(userRole, userEmail) {
     const sizeElem = document.getElementById("modalSize");
     if (sizeElem) sizeElem.innerText = img.size || "Unknown";
 
-    const text = img.nathansNotes;
+    const noteText =
+      img.nathansNotes ||
+      img.nathansnotes ||
+      img.nathan_notes ||
+      img.notes ||
+      "";
+
     notesDisplay.innerText =
-      text && text.trim() !== "" ? text : "No notes available.";
-    notesInput.value = text && text.trim() !== "" ? text : "";
+      noteText && noteText !== "undefined" ? noteText : "No notes available.";
 
     tagsDisplay.innerHTML = "";
     if (img.tags && img.tags.length > 0) {
@@ -91,6 +172,45 @@ export async function initHome(userRole, userEmail) {
     }
 
     setupImageEditing(img);
+    const copyIdBtn = document.getElementById("copyIdBtn");
+    const copyUrlBtn = document.getElementById("copyUrlBtn");
+    const copyApiKeyBtn = document.getElementById("copyApiKeyBtn");
+
+    if (copyUrlBtn) {
+      copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`;
+      copyUrlBtn.onclick = () => {
+        let urlToCopy = img.url || img.fpath;
+
+        if (studentApiKey) {
+          const separator = urlToCopy.includes("?") ? "&" : "?";
+          urlToCopy += `${separator}apiKey=${studentApiKey}`;
+        }
+
+        navigator.clipboard.writeText(urlToCopy);
+        copyUrlBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+        setTimeout(
+          () =>
+            (copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`),
+          2000
+        );
+      };
+    }
+
+    if (studentApiKey && copyApiKeyBtn) {
+      copyApiKeyBtn.classList.remove("d-none"); 
+      copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`;
+      copyApiKeyBtn.onclick = () => {
+        navigator.clipboard.writeText(studentApiKey);
+        copyApiKeyBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+        setTimeout(
+          () =>
+            (copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`),
+          2000
+        );
+      };
+    } else if (copyApiKeyBtn) {
+      copyApiKeyBtn.classList.add("d-none"); 
+    }
 
     const modalElement = document.getElementById("imageDetailsModal");
     if (modalElement) {
@@ -197,6 +317,13 @@ export async function initHome(userRole, userEmail) {
 
     saveBtn.onclick = async () => {
       const id = img.id || img.imageId;
+      if (!id) {
+        alert("Error: Could not find the ID for this image.");
+        return;
+      }
+
+      const editInput = document.getElementById("editNotesInput");
+      const newNotes = editInput ? editInput.value : "";
 
       const selectedCheckboxes = document.querySelectorAll(
         ".edit-tag-checkbox:checked"
@@ -250,6 +377,10 @@ export async function initHome(userRole, userEmail) {
   const showSpeciesView = async (b) => {
     showView(speciesView);
     if (searchNavBar) searchNavBar.style.display = "none";
+    if (filterPanel) {
+      filterPanel.style.display = "none";
+      filterPanel.classList.remove("show");
+    }
 
     currentSpeciesId = b.id;
 
@@ -259,31 +390,33 @@ export async function initHome(userRole, userEmail) {
     const editSpeciesBtn = document.getElementById("editSpeciesBtn");
     if (editSpeciesBtn && isAdmin) {
       editSpeciesBtn.classList.remove("d-none");
+
+      //workaround for attributes
       editSpeciesBtn.onclick = () => {
         const dynamicContainer = document.getElementById(
           "dynamicSpeciesFields"
         );
         if (dynamicContainer) dynamicContainer.innerHTML = "";
-        const rawDesc = b.description || "";
-    document.getElementById("editSpeciesDescription").value = rawDesc.replace(/\[\[.*?\]\]/g, "").trim();
-
-    if (b.extraAttributes) {
-        Object.entries(b.extraAttributes).forEach(([label, value]) => {
-            addDynamicField(label, value); 
-        });
-    }
 
         document.getElementById("editSpeciesId").value = b.id;
         document.getElementById("editSpeciesName").value = b.name || "";
         document.getElementById("editSpeciesScientific").value =
           b.scientificName || "";
-        document.getElementById("editSpeciesDescription").value =
-          b.description || "";
         document.getElementById("editSpeciesOrder").value = b.orderName || "";
         document.getElementById("editSpeciesFamily").value = b.family || "";
         document.getElementById("editSpeciesGenus").value = b.genus || "";
+        const fullDesc = b.description || "";
 
-       
+        const attributeRegex = /\[\[(.*?):\s*(.*?)\]\]/g;
+        let match;
+
+        while ((match = attributeRegex.exec(fullDesc)) !== null) {
+          addDynamicField(match[1].trim(), match[2].trim());
+        }
+
+        document.getElementById("editSpeciesDescription").value = fullDesc
+          .replace(/\[\[.*?\]\]/g, "")
+          .trim();
       };
     }
 
@@ -474,7 +607,7 @@ export async function initHome(userRole, userEmail) {
   };
 
   const refreshGallery = (data = butterflies) => {
-    UI.renderGrid(data, (b) => showSpeciesView(b));
+    UI.renderGrid(data, (b) => showSpeciesView(b), currentDisplayMode);
   };
 
   async function loadStudentData(email) {
@@ -900,6 +1033,7 @@ export async function initHome(userRole, userEmail) {
     document.getElementById("editUserId").value = userId;
     document.getElementById("editUsername").value = currentUsername;
     document.getElementById("editEmail").value = currentEmail;
+    document.getElementById("editPassword").value = ""; 
     new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
   };
 
@@ -992,6 +1126,15 @@ export async function initHome(userRole, userEmail) {
         }
         await ButterflyAPI.updateUsername(userId, newUsername);
         await ButterflyAPI.updateEmail(userId, newEmail);
+
+        const newPassword = document
+          .getElementById("editPassword")
+          .value.trim();
+        if (newPassword !== "") {
+          if (newPassword.length < 7)
+            return alert("Password must be at least 7 characters long.");
+          await ButterflyAPI.resetPassword(newEmail, newPassword);
+        }
         await loadAdminData();
         bootstrap.Modal.getInstance(
           document.getElementById("adminEditUserModal")
@@ -1205,52 +1348,52 @@ export async function initHome(userRole, userEmail) {
   if (editSpeciesForm) {
     editSpeciesForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-    const speciesId = document.getElementById("editSpeciesId").value;
-    
-    //workaround for dynamic attributes
-    let currentDescValue = document.getElementById("editSpeciesDescription").value || "";
-    let cleanBaseDescription = currentDescValue.replace(/\[\[.*?\]\]/g, "").trim();
-    
-    const customInputs = document.querySelectorAll(".custom-species-input");
-    let extraString = "";
+      const speciesId = document.getElementById("editSpeciesId").value;
+      let currentDescValue =
+        document.getElementById("editSpeciesDescription").value || "";
+      let cleanBaseDescription = currentDescValue
+        .replace(/\[\[.*?\]\]/g, "")
+        .trim();
+      const customInputs = document.querySelectorAll(".custom-species-input");
+      let extraString = "";
 
-    customInputs.forEach(input => {
+      customInputs.forEach((input) => {
         const label = input.getAttribute("data-label");
         const value = input.value;
         if (label && value && value.trim() !== "") {
-            extraString += ` [[${label}: ${value.trim()}]]`;
+          extraString += ` [[${label}: ${value.trim()}]]`;
         }
-    });
+      });
+      const finalDescription = (cleanBaseDescription + extraString).trim();
+      console.log("Total Description Length:", finalDescription.length);
 
-    const finalDescription = (cleanBaseDescription + extraString).trim();
-
-    console.log("Total Description Length:", finalDescription.length);
-
-    const data = {
+      const data = {
         name: document.getElementById("editSpeciesName").value,
-        scientificName: document.getElementById("editSpeciesScientific").value || "",
-        description: finalDescription, 
+        scientificName:
+          document.getElementById("editSpeciesScientific").value || "",
+        description: finalDescription,
         orderName: document.getElementById("editSpeciesOrder").value || "",
         family: document.getElementById("editSpeciesFamily").value || "",
-        genus: document.getElementById("editSpeciesGenus").value || ""
-    };
+        genus: document.getElementById("editSpeciesGenus").value || "",
+      };
 
       try {
         await ButterflyAPI.updateSpecies(speciesId, data);
-
-        bootstrap.Modal.getInstance(
-          document.getElementById("editSpeciesModal")
-        ).hide();
-
-        butterflies = await ButterflyAPI.getAll();
+            const editModal = document.getElementById("editSpeciesModal");
+        const modalInstance = bootstrap.Modal.getInstance(editModal);
+        if (modalInstance) modalInstance.hide();
+        butterflies = await ButterflyAPI.getAll(); 
+        
         const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
         await showSpeciesView(freshSpecies);
-
+    
         if (typeof refreshGallery === "function") refreshGallery();
+    
         alert("Species updated successfully!");
-      } catch (err) {
+    } catch (err) {
+        console.error("Update failed:", err);
         alert("Update failed: " + err.message);
-      }
+    }
     });
   }
 
@@ -1290,6 +1433,11 @@ export async function initHome(userRole, userEmail) {
       viewTeamBtn.classList.add("active");
       if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
 
+      if (filterPanel) {
+        filterPanel.style.display = "none";
+        filterPanel.classList.remove("show");
+      }
+
       if (userRole === "ADMIN") {
         if (adminTeamContent) adminTeamContent.style.display = "block";
         if (studentTeamContent) studentTeamContent.style.display = "none";
@@ -1305,34 +1453,103 @@ export async function initHome(userRole, userEmail) {
   let searchTimeout;
 
   const applyAllFilters = async () => {
-    const orderSelect = document.getElementById("filterOrder");
-    const familySelect = document.getElementById("filterFamily");
-    const genusSelect = document.getElementById("filterGenus");
+    const checkedOrders = Array.from(
+      document.querySelectorAll("#filterOrderContainer input:checked")
+    ).map((cb) => cb.value);
+    const checkedFamilies = Array.from(
+      document.querySelectorAll("#filterFamilyContainer input:checked")
+    ).map((cb) => cb.value);
 
-    const order = orderSelect ? orderSelect.value : "";
-    const family = familySelect ? familySelect.value : "";
-    const genus = genusSelect ? genusSelect.value : "";
+    document.getElementById("orderBtnText").innerText =
+      checkedOrders.length > 0
+        ? `${checkedOrders.length} Selected`
+        : "All Orders";
+    document.getElementById("familyBtnText").innerText =
+      checkedFamilies.length > 0
+        ? `${checkedFamilies.length} Selected`
+        : "All Families";
+
     const query = searchInput ? searchInput.value.toLowerCase() : "";
 
-    if (order || family || genus) {
-      try {
-        let filtered = await ButterflyAPI.filterSpecies(order, family, genus);
-        if (query) {
-          filtered = filtered.filter((b) =>
-            b.name.toLowerCase().includes(query)
-          );
-        }
-        refreshGallery(filtered);
-      } catch (err) {
-        console.error("Filter failed:", err);
-      }
-    } else {
-      const filtered = query
-        ? butterflies.filter((b) => b.name.toLowerCase().includes(query))
-        : butterflies;
-      refreshGallery(filtered);
+    let filtered = butterflies;
+
+    if (checkedOrders.length > 0) {
+      filtered = filtered.filter((b) => checkedOrders.includes(b.orderName));
     }
+    if (checkedFamilies.length > 0) {
+      filtered = filtered.filter((b) => checkedFamilies.includes(b.family));
+    }
+    if (query) {
+      filtered = filtered.filter((b) => {
+        if (currentDisplayMode === "scientific") {
+          return (b.scientificName || "").toLowerCase().includes(query);
+        } else {
+          return (b.name || "").toLowerCase().includes(query);
+        }
+      });
+    }
+
+    refreshGallery(filtered);
   };
+
+  async function initFilters() {
+    try {
+      const options = await ButterflyAPI.getFilterOptions();
+      const orderContainer = document.getElementById("filterOrderContainer");
+      const familyContainer = document.getElementById("filterFamilyContainer");
+
+      const populateCheckboxes = (container, items, type) => {
+        if (!container || !items) return;
+        container.innerHTML = "";
+        items.forEach((item, index) => {
+          if (item) {
+            const id = `cb-${type}-${index}`;
+            container.innerHTML += `
+                <div class="form-check filter-item mb-2 ms-2 mt-1">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="${item}" id="${id}">
+                    <label class="form-check-label w-100 user-select-none" for="${id}" style="cursor: pointer; font-size: 0.9rem;">
+                        ${item}
+                    </label>
+                </div>
+            `;
+          }
+        });
+      };
+
+      const uniqueOrders = [...new Set(options.orders)].filter(Boolean);
+      const uniqueFamilies = [...new Set(options.families)].filter(Boolean);
+
+      populateCheckboxes(orderContainer, uniqueOrders, "order");
+      populateCheckboxes(familyContainer, uniqueFamilies, "family");
+
+      console.log("HEY POOKIE! The new code is running!");
+
+      document.querySelectorAll(".filter-checkbox").forEach((cb) => {
+        cb.addEventListener("change", applyAllFilters);
+      });
+
+      const setupSearch = (inputId, containerId) => {
+        const searchBox = document.getElementById(inputId);
+        if (searchBox) {
+          searchBox.addEventListener("input", (e) => {
+            const term = e.target.value.toLowerCase();
+            const items = document.querySelectorAll(
+              `#${containerId} .filter-item`
+            );
+            items.forEach((item) => {
+              const label = item.querySelector("label").innerText.toLowerCase();
+              item.style.display = label.includes(term) ? "block" : "none";
+            });
+          });
+        }
+      };
+
+      setupSearch("searchOrder", "filterOrderContainer");
+      setupSearch("searchFamily", "filterFamilyContainer");
+    } catch (err) {
+      console.error("Could not load filter options:", err);
+    }
+  }
 
   if (searchInput) {
     searchInput.addEventListener("input", () => {
@@ -1341,49 +1558,44 @@ export async function initHome(userRole, userEmail) {
     });
   }
 
-  async function initFilters() {
-    try {
-      const options = await ButterflyAPI.getFilterOptions();
-      const orderSelect = document.getElementById("filterOrder");
-      const familySelect = document.getElementById("filterFamily");
-      const genusSelect = document.getElementById("filterGenus");
+  const nameToggleBtn = document.getElementById("nameToggleBtn");
 
-      if (options.orders) {
-        options.orders.forEach((o) => {
-          if (o) orderSelect.innerHTML += `<option value="${o}">${o}</option>`;
-        });
+
+  if (nameToggleBtn) {
+    nameToggleBtn.addEventListener("click", () => {
+      if (currentDisplayMode === "common") {
+        currentDisplayMode = "scientific";
+        searchInput.placeholder = "Search by scientific name...";
+
+        nameToggleBtn.style.backgroundColor = "white";
+        nameToggleBtn.style.color = "#1abc9c";
+        nameToggleBtn.style.borderColor = "#1abc9c";
+
+        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-1"></i><span class="fw-bold small">Scientific</span>`;
+      } else {
+        currentDisplayMode = "common";
+        searchInput.placeholder = "Search by common name...";
+
+        nameToggleBtn.style.backgroundColor = "#1abc9c";
+        nameToggleBtn.style.color = "white";
+        nameToggleBtn.style.borderColor = "#1abc9c";
+
+        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-1"></i><span class="fw-bold small">Common</span>`;
       }
-      if (options.families) {
-        options.families.forEach((f) => {
-          if (f) familySelect.innerHTML += `<option value="${f}">${f}</option>`;
-        });
-      }
-      if (options.genera) {
-        options.genera.forEach((g) => {
-          if (g) genusSelect.innerHTML += `<option value="${g}">${g}</option>`;
-        });
-      }
+      applyAllFilters();
+    });
 
-      if (orderSelect) orderSelect.addEventListener("change", applyAllFilters);
-      if (familySelect)
-        familySelect.addEventListener("change", applyAllFilters);
-      if (genusSelect) genusSelect.addEventListener("change", applyAllFilters);
-    } catch (err) {
-      console.error("Could not load filter options:", err);
-    }
-  }
+    //for adding a base category
+    document.getElementById("addNewSpeciesFieldBtn").onclick = () => {
+      const fieldName = prompt(
+        "What is the name of the new category? (e.g. Host Plant, Habitat)"
+      );
+      if (!fieldName) return;
 
-  //for adding a base category
-  document.getElementById("addNewSpeciesFieldBtn").onclick = () => {
-    const fieldName = prompt(
-      "What is the name of the new category? (e.g. Host Plant, Habitat)"
-    );
-    if (!fieldName) return;
+      const container = document.getElementById("dynamicSpeciesFields");
+      const safeName = fieldName.replace(/\s+/g, "_").toLowerCase();
 
-    const container = document.getElementById("dynamicSpeciesFields");
-    const safeName = fieldName.replace(/\s+/g, "_").toLowerCase();
-
-    const html = `
+      const html = `
         <div class="mb-3 dynamic-field-wrapper">
             <label class="form-label fw-bold d-flex justify-content-between">
                 ${fieldName}
@@ -1394,64 +1606,75 @@ export async function initHome(userRole, userEmail) {
                    placeholder="Enter ${fieldName}...">
         </div>
     `;
-    container.insertAdjacentHTML("beforeend", html);
-  };
+      container.insertAdjacentHTML("beforeend", html);
+    };
 
-  //for the base category but i dont think backend is updated
+    //for the base category but i dont think backend is updated
+    const addFieldBtn = document.getElementById("addNewSpeciesFieldBtn");
+    if (addFieldBtn) {
+      addFieldBtn.onclick = () => {
+        const fieldName = prompt(
+          "What is the name of the new category? (e.g. Host Plant, Habitat)"
+        );
+        if (fieldName && fieldName.trim() !== "") {
+          addDynamicField(fieldName.trim());
+        }
+      };
+    }
+
+    await initFilters();
+    const deleteSpeciesFullBtn = document.getElementById(
+      "deleteSpeciesFullBtn"
+    );
+    if (deleteSpeciesFullBtn) {
+      deleteSpeciesFullBtn.addEventListener("click", async () => {
+        const id = deleteSpeciesFullBtn.dataset.speciesId;
+        if (!id) return;
+        if (
+          confirm("Are you sure? This deletes the species and ALL its images!")
+        ) {
+          try {
+            await ButterflyAPI.delete(id);
+            alert("Species deleted successfully.");
+            location.reload();
+          } catch (err) {
+            alert("Delete failed: " + err.message);
+          }
+        }
+      });
+    }
+
+    if (themeToggle) {
+      themeToggle.addEventListener("click", () => {
+        const body = document.body;
+        const isDark = body.getAttribute("data-bs-theme") === "dark";
+        body.setAttribute("data-bs-theme", isDark ? "light" : "dark");
+        body.classList.toggle("bg-dark");
+        body.classList.toggle("text-white");
+        document
+          .querySelectorAll(".modal-content")
+          .forEach((m) => m.classList.toggle("bg-dark"));
+      });
+    }
+    showView(portfolio);
+    refreshGallery();
+  }
+
   function addDynamicField(label = "", value = "") {
     const container = document.getElementById("dynamicSpeciesFields");
+    if (!container) return;
+
     const div = document.createElement("div");
     div.className = "mb-3 dynamic-field-wrapper";
     div.innerHTML = `
-        <label class="form-label fw-bold d-flex justify-content-between small text-muted">
-            ${label}
-            <button type="button" class="btn-close" style="font-size: 0.5rem;" 
-                    onclick="this.closest('.dynamic-field-wrapper').remove()"></button>
-        </label>
-        <input type="text" class="form-control custom-species-input" 
-               data-label="${label}" value="${value}">
-    `;
+    <label class="form-label fw-bold d-flex justify-content-between small text-muted">
+        ${label}
+        <button type="button" class="btn-close" style="font-size: 0.5rem;" 
+                onclick="this.closest('.dynamic-field-wrapper').remove()"></button>
+    </label>
+    <input type="text" class="form-control custom-species-input" 
+           data-label="${label}" value="${value}">
+`;
     container.appendChild(div);
-}
-
-  document.getElementById("addNewSpeciesFieldBtn").onclick = () => {
-    const fieldName = prompt("Field Name (e.g. Host Plant):");
-    if (fieldName) addDynamicField(fieldName);
-  };
-
-  //@LEXI I COMMENTED THIS OUT UNTIL WE BUILD THE FILTERS THING MAKE SURE TO UNCOMMENT
-  //await initFilters();
-  const deleteSpeciesFullBtn = document.getElementById("deleteSpeciesFullBtn");
-  if (deleteSpeciesFullBtn) {
-    deleteSpeciesFullBtn.addEventListener("click", async () => {
-      const id = deleteSpeciesFullBtn.dataset.speciesId;
-      if (!id) return;
-      if (
-        confirm("Are you sure? This deletes the species and ALL its images!")
-      ) {
-        try {
-          await ButterflyAPI.delete(id);
-          alert("Species deleted successfully.");
-          location.reload();
-        } catch (err) {
-          alert("Delete failed: " + err.message);
-        }
-      }
-    });
   }
-
-  if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-      const body = document.body;
-      const isDark = body.getAttribute("data-bs-theme") === "dark";
-      body.setAttribute("data-bs-theme", isDark ? "light" : "dark");
-      body.classList.toggle("bg-dark");
-      body.classList.toggle("text-white");
-      document
-        .querySelectorAll(".modal-content")
-        .forEach((m) => m.classList.toggle("bg-dark"));
-    });
-  }
-  showView(portfolio);
-  refreshGallery();
 }

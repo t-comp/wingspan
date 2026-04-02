@@ -1,10 +1,9 @@
 // js/ui.js
 export const UI = {
-  renderGrid(list, onCardClick) {
+  renderGrid(list, onCardClick, displayMode = "common") {
     const grid = document.getElementById("butterflyGrid");
     grid.innerHTML = "";
     list.forEach((b, idx) => {
-      console.log(`Species: ${b.name} | URL: ${b.thumbnailUrl}`);
       const col = document.createElement("div");
       col.className = "col-md-6 col-lg-4 mb-5";
       const imageUrl = b.thumbnailUrl
@@ -14,17 +13,24 @@ export const UI = {
         ? b.tags
             .map(
               (t) =>
-                `<span class="badge rounded-pill bg-light text-dark border me-1">${t.name}</span>`
+                `<span class="badge rounded-pill bg-light text-dark border me-1">${t.name}</span>`,
             )
             .join("")
         : "";
+
+      // Magic Check: Which name should we show? (And italicize if it's scientific!)
+      const displayName =
+        displayMode === "scientific" && b.scientificName
+          ? `<i>${b.scientificName}</i>`
+          : b.name;
+
       col.innerHTML = `
                 <div class="card h-100 butterfly-card border-0 shadow-sm">
                     <div class="butterfly-img-wrapper">
                         <img src="${imageUrl}" alt="${b.name}" style="width:100%; height:200px; object-fit:cover;">
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title fw-bold mb-2">${b.name}</h5>
+                        <h5 class="card-title fw-bold mb-2">${displayName}</h5>
                         <div class="mb-2">${tagsHtml}</div>
                     </div>
                 </div>`;
@@ -52,36 +58,39 @@ export const UI = {
     const genusElem = document.getElementById("speciesGenus");
     if (genusElem) genusElem.innerText = b.genus || "—";
 
-    let rawDesc = b.description || "";
-    let cleanDesc = rawDesc;
-    const extraAttributes = {};
+    // Inside populateSpeciesView(b, isAdmin)
+let rawDesc = b.description || "";
+let cleanDesc = rawDesc;
+const extraAttributes = {};
 
-    const regex = /\[\[(.*?):\s*(.*?)\]\]/g;
-    let match;
-    while ((match = regex.exec(rawDesc)) !== null) {
-      extraAttributes[match[1]] = match[2];
-      cleanDesc = cleanDesc.replace(match[0], "");
-    }
+// Regex to find [[Label: Value]]
+const regex = /\[\[(.*?):\s*(.*?)\]\]/g;
+let match;
+while ((match = regex.exec(rawDesc)) !== null) {
+    extraAttributes[match[1]] = match[2];
+    // Remove the bracketed text so the user doesn't see it in the description box
+    cleanDesc = cleanDesc.replace(match[0], "");
+}
 
-    document.getElementById("speciesDescription").innerText =
-      cleanDesc.trim() || "No description.";
+// 1. Show only the clean text in the description area
+document.getElementById("speciesDescription").innerText = cleanDesc.trim() || "No description.";
 
-    const container = document.getElementById("customAttributesDisplay");
-    if (container) {
-      container.innerHTML = "";
-      Object.entries(extraAttributes).forEach(([label, value]) => {
-        container.insertAdjacentHTML(
-          "beforeend",
-          `
+// 2. Show the attributes in your blue-labeled rows
+const container = document.getElementById("customAttributesDisplay");
+if (container) {
+    container.innerHTML = "";
+    Object.entries(extraAttributes).forEach(([label, value]) => {
+        container.insertAdjacentHTML('beforeend', `
             <div class="row mb-2">
                 <div class="col-4 fw-bold" style="color: #0399b0">${label}:</div>
                 <div class="col-8 text-muted">${value}</div>
             </div>
-        `
-        );
-      });
-    }
-    b.extraAttributes = extraAttributes;
+        `);
+    });
+}
+
+// 3. Attach back to 'b' so the Edit Modal can see them
+b.extraAttributes = extraAttributes;
 
     const thumbModalImg = document.getElementById("thumbnailModalImage");
     if (thumbModalImg)
