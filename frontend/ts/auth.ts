@@ -1,9 +1,9 @@
 export const Auth = {
-  enableAdminMode() {
+  enableAdminMode(): void {
     document.getElementById("uploadBtn")?.classList.remove("d-none");
     document.getElementById("deleteButterflyBtn")?.classList.remove("d-none");
   },
-  enableStudentMode() {
+  enableStudentMode(): void {
     document.getElementById("uploadBtn")?.classList.add("d-none");
   },
 };

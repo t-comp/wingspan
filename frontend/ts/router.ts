@@ -1,17 +1,16 @@
-// js/router.js
-import { initHome } from "./homepage.js";
-import { ButterflyAPI } from "./api.js";
-import { TagManager } from "./tags.js";
+import { initHome } from "./homepage.ts";
+import { ButterflyAPI } from "./api.ts";
+import { TagManager } from "./tags.ts";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const screens = {
+  const screens: Record<string, HTMLElement | null> = {
     welcome: document.getElementById("welcome-screen"),
     login: document.getElementById("login-screen"),
     create: document.getElementById("create-account-screen"),
     home: document.getElementById("homepage"),
   };
 
-  function toggleLogoutButtons(role, user) {
+  function toggleLogoutButtons(role: string, user: any): void {
     const logoutLink = document.getElementById("logoutLink");
     if (logoutLink) logoutLink.classList.remove("d-none");
 
@@ -19,9 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (circle && user) {
       const initials = (user.username || "?").substring(0, 2).toUpperCase();
       circle.innerText = initials;
-      circle.style.background = role === "ADMIN"
-        ? "linear-gradient(135deg, #e74c3c, #c0392b)"
-        : "linear-gradient(135deg, #0399b0, #027a8d)";
+      circle.style.background = role === "ADMIN" ? "linear-gradient(135deg, #e74c3c, #c0392b)" : "linear-gradient(135deg, #0399b0, #027a8d)";
       circle.style.color = "white";
       circle.style.fontWeight = "bold";
       circle.style.fontSize = "0.8rem";
@@ -41,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function showScreen(key) {
+  function showScreen(key: string): void {
     Object.values(screens).forEach((s) => {
       if (s) {
         s.style.display = "none";
@@ -65,21 +62,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const createAccountBtn = document.getElementById("goToCreateAccountBtn");
   if (createAccountBtn) {
-    createAccountBtn.onclick = (e) => {
+    createAccountBtn.onclick = (e: Event) => {
       e.preventDefault();
       showScreen("create");
     };
   }
 
-  const backBtns = document.querySelectorAll("[id$='BackToWelcomeBtn']");
+  const backBtns = document.querySelectorAll<HTMLElement>("[id$='BackToWelcomeBtn']");
   backBtns.forEach((btn) => {
     btn.onclick = () => showScreen("welcome");
   });
 
-    async function handleLogin(e) {
+  async function handleLogin(e: Event): Promise<void> {
     e.preventDefault();
-    const emailVal = document.getElementById("loginEmail").value;
-    const passVal = document.getElementById("loginPassword").value;
+    const emailVal = (document.getElementById("loginEmail") as HTMLInputElement).value;
+    const passVal = (document.getElementById("loginPassword") as HTMLInputElement).value;
 
     if (emailVal.length < 5) return alert("Username must be at least 5 characters long.");
     if (passVal.length < 7) return alert("Password must be at least 7 characters long.");
@@ -91,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (user && role) {
         localStorage.setItem("butterflyUser", JSON.stringify(user));
-
         showScreen("home");
         initHome(role, user.email);
         toggleLogoutButtons(role, user);
@@ -114,15 +110,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const loginForm = document.getElementById("loginForm");
-  if (loginForm) loginForm.onsubmit = (e) => handleLogin(e);
+  if (loginForm) loginForm.onsubmit = handleLogin;
 
   const createAccountForm = document.getElementById("createAccountForm");
   if (createAccountForm) {
-    createAccountForm.addEventListener("submit", async (e) => {
+    createAccountForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      const usernameVal = document.getElementById("createUsername").value;
-      const emailVal = document.getElementById("createEmail").value;
-      const passVal = document.getElementById("createPassword").value;
+      const usernameVal = (document.getElementById("createUsername") as HTMLInputElement).value;
+      const emailVal = (document.getElementById("createEmail") as HTMLInputElement).value;
+      const passVal = (document.getElementById("createPassword") as HTMLInputElement).value;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailVal)) return alert("Please enter a valid email address.");
@@ -131,20 +127,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const allUsers = await ButterflyAPI.getAllUsers();
-        if (allUsers.some((u) => u.username.toLowerCase() === usernameVal.toLowerCase())) {
+        if (allUsers.some((u: any) => u.username.toLowerCase() === usernameVal.toLowerCase())) {
           return alert("This username already exists. Please choose a different one.");
         }
         await ButterflyAPI.createAccount({ username: usernameVal, email: emailVal, password: passVal, utype: "STUDENT" });
         alert("Account created successfully! Please log in.");
-        e.target.reset();
+        (e.target as HTMLFormElement).reset();
         showScreen("welcome");
-      } catch (error) {
+      } catch (error: any) {
         alert(`Could not create account: ${error.message}`);
       }
     });
   }
 
-  const handleLogout = async (e) => {
+  const handleLogout = async (e: Event): Promise<void> => {
     e.preventDefault();
     await ButterflyAPI.logout();
     localStorage.removeItem("butterflyUser");
@@ -171,8 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  document.addEventListener("show.bs.modal", function (event) {
-    if (event.target.id === "addButterflyModal") {
+  document.addEventListener("show.bs.modal", function (event: Event) {
+    if ((event.target as HTMLElement).id === "addButterflyModal") {
       TagManager.initTagContainer();
     }
   });
