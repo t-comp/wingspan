@@ -12,6 +12,7 @@ export async function initHome(userRole, userEmail) {
     userEmail,
   );
 
+  let currentDisplayMode = "common";
   let butterflies = await ButterflyAPI.getAll();
   console.log("DATABASES SPECIES LIST:", butterflies);
 
@@ -436,7 +437,7 @@ export async function initHome(userRole, userEmail) {
   };
 
   const refreshGallery = (data = butterflies) => {
-    UI.renderGrid(data, (b) => showSpeciesView(b));
+    UI.renderGrid(data, (b) => showSpeciesView(b), currentDisplayMode);
   };
 
   async function loadStudentData(email) {
@@ -1260,7 +1261,13 @@ export async function initHome(userRole, userEmail) {
       filtered = filtered.filter((b) => checkedFamilies.includes(b.family));
     }
     if (query) {
-      filtered = filtered.filter((b) => b.name.toLowerCase().includes(query));
+      filtered = filtered.filter((b) => {
+        if (currentDisplayMode === "scientific") {
+          return (b.scientificName || "").toLowerCase().includes(query);
+        } else {
+          return (b.name || "").toLowerCase().includes(query);
+        }
+      });
     }
 
     refreshGallery(filtered);
@@ -1363,6 +1370,42 @@ export async function initHome(userRole, userEmail) {
     searchInput.addEventListener("input", () => {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(applyAllFilters, 250);
+    });
+  }
+
+  const nameToggleBtn = document.getElementById("nameToggleBtn");
+  //   const nameToggleText = document.getElementById("nameToggleText");
+  //   const nameToggleIcon = document.getElementById("nameToggleIcon");
+
+  if (nameToggleBtn) {
+    nameToggleBtn.addEventListener("click", () => {
+      // Flip the mode!
+      if (currentDisplayMode === "common") {
+        currentDisplayMode = "scientific";
+        searchInput.placeholder = "Search by scientific name...";
+
+        // Switch to Scientific (White bg, Teal text/border)
+        nameToggleBtn.style.backgroundColor = "white";
+        nameToggleBtn.style.color = "#1abc9c";
+        nameToggleBtn.style.borderColor = "#1abc9c";
+
+        // Safely rebuild the inside of the button so the arrows NEVER disappear!
+        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-1"></i><span class="fw-bold small">Scientific</span>`;
+      } else {
+        currentDisplayMode = "common";
+        searchInput.placeholder = "Search by common name...";
+
+        // Switch to Common (Teal bg, White text/border)
+        nameToggleBtn.style.backgroundColor = "#1abc9c";
+        nameToggleBtn.style.color = "white";
+        nameToggleBtn.style.borderColor = "#1abc9c";
+
+        // Safely rebuild the inside of the button
+        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-1"></i><span class="fw-bold small">Common</span>`;
+      }
+
+      // Re-run the filters to instantly update the gallery cards
+      applyAllFilters();
     });
   }
 
