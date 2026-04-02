@@ -1,6 +1,6 @@
-import { initHome } from "./homepage.js";
-import { ButterflyAPI } from "./api.js";
-import { TagManager } from "./tags.js";
+import { initHome } from "../ts/homepage.js";
+import { ButterflyAPI } from "../ts/api.js";
+import { TagManager } from "../ts/tags.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const screens: Record<string, HTMLElement | null> = {

@@ -1,6 +1,6 @@
-import { ButterflyAPI } from "./api.js";
-import { UI } from "./ui.js";
-import { TagManager } from "./tags.js";
+import { ButterflyAPI } from "../ts/api.js";
+import { UI } from "../ts/ui.js";
+import { TagManager } from "../ts/tags.js";
 
 declare global {
   interface Window {

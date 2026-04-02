@@ -1,4 +1,4 @@
-import { Species } from "./types.js";
+import { Species } from "../ts/types.js";
 
 export const UI = {
   renderGrid(
