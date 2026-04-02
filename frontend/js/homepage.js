@@ -63,7 +63,13 @@ export async function initHome(userRole, userEmail) {
 
     if (!editBtn || !saveBtn || !notesDisplay || !tagsDisplay) return;
 
-    editBtn.classList.remove("d-none");
+    // ONLY show the Edit button if the user is an ADMIN
+    if (userRole === "ADMIN") {
+      editBtn.classList.remove("d-none");
+    } else {
+      editBtn.classList.add("d-none");
+    }
+
     saveBtn.classList.add("d-none");
     tagsDisplay.classList.remove("d-none");
     if (editTagsContainer) editTagsContainer.classList.add("d-none");
@@ -95,6 +101,40 @@ export async function initHome(userRole, userEmail) {
     }
 
     setupImageEditing(img);
+
+    // Setup Copy Buttons
+    const copyIdBtn = document.getElementById("copyIdBtn");
+    const copyUrlBtn = document.getElementById("copyUrlBtn");
+
+    if (copyIdBtn) {
+      // Reset button text just in case
+      copyIdBtn.innerHTML = `<i class="fas fa-hashtag me-1"></i>Copy Image ID`;
+      copyIdBtn.onclick = () => {
+        const idToCopy = img.id || img.imageId;
+        navigator.clipboard.writeText(idToCopy);
+        copyIdBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+        setTimeout(
+          () =>
+            (copyIdBtn.innerHTML = `<i class="fas fa-hashtag me-1"></i>Copy Image ID`),
+          2000,
+        );
+      };
+    }
+
+    if (copyUrlBtn) {
+      // Reset button text just in case
+      copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`;
+      copyUrlBtn.onclick = () => {
+        const urlToCopy = img.url || img.fpath;
+        navigator.clipboard.writeText(urlToCopy);
+        copyUrlBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+        setTimeout(
+          () =>
+            (copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`),
+          2000,
+        );
+      };
+    }
 
     const modalElement = document.getElementById("imageDetailsModal");
     if (modalElement) {

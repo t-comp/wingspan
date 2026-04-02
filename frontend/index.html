@@ -1196,6 +1196,7 @@
                 aria-label="Close"
               ></button>
             </div>
+
             <div class="modal-body">
               <p><strong>Image Size:</strong> <span id="modalSize"></span></p>
               <hr />
@@ -1204,6 +1205,28 @@
               <hr />
               <h6>Tags</h6>
               <div id="modalTags" class="d-flex flex-wrap gap-1"></div>
+
+              <div id="studentDevTools">
+                <hr />
+                <h6 class="fw-bold text-primary">Developer Tools</h6>
+                <p class="small text-muted mb-2">
+                  Copy these values to use in your team's application.
+                </p>
+                <div class="d-flex gap-2">
+                  <button
+                    id="copyIdBtn"
+                    class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+                  >
+                    <i class="fas fa-hashtag me-1"></i>Copy Image ID
+                  </button>
+                  <button
+                    id="copyUrlBtn"
+                    class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+                  >
+                    <i class="fas fa-link me-1"></i>Copy Image URL
+                  </button>
+                </div>
+              </div>
               <div id="editTagsContainer" class="d-none">
                 <hr />
                 <h6 class="small fw-bold text-muted">Manage Tags:</h6>
@@ -1213,6 +1236,7 @@
                 ></div>
               </div>
             </div>
+
             <div class="modal-footer justify-content-between">
               <div>
                 <button
@@ -1235,6 +1259,60 @@
             </div>
           </div>
         </div>
+
+        <!-- <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Image Record Details</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <div class="modal-body">
+              <p><strong>Image Size:</strong> <span id="modalSize"></span></p>
+              <hr />
+              <h6>Notes</h6>
+              <p id="modalNotes" class="text-muted"></p>
+              <hr />
+              <h6>Tags</h6>
+              <div id="modalTags" class="d-flex flex-wrap gap-1"></div>
+              <div id="editTagsContainer" class="d-none">
+                <hr />
+                <h6 class="small fw-bold text-muted">Manage Tags:</h6>
+                <div
+                  id="tagCheckboxList"
+                  class="d-flex flex-wrap border p-2 rounded bg-white"
+                ></div>
+              </div>
+            </div>
+
+            <div class="modal-footer justify-content-between">
+              <div>
+                <button
+                  id="editImageBtn"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  <i class="fas fa-edit"></i> Edit Details
+                </button>
+                <button id="saveImageBtn" class="btn btn-sm btn-success d-none">
+                  <i class="fas fa-save"></i> Save Changes
+                </button>
+              </div>
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+ -->
       </div>
 
       <div
