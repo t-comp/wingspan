@@ -29,7 +29,7 @@
   </head>
 
   <body id="page-top">
-    <!-- ======================== WELCOME SCREEN hi ======================== -->
+    <!-- ======================== WELCOME SCREEN ======================== -->
     <div
       id="welcome-screen"
       class="d-flex justify-content-center align-items-center text-center text-white"
@@ -293,6 +293,19 @@
           </div>
 
           <div class="d-flex align-items-center gap-2">
+            <!-- filter button -->
+            <button
+              class="btn btn-custom btn-filter"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#filterPanel"
+              aria-expanded="false"
+              aria-controls="filterPanel"
+            >
+              <i class="fas fa-filter"></i> Filter
+            </button>
+
+            <!-- upload button -->
             <button
               id="uploadBtn"
               class="btn btn-custom btn-upload d-none"
@@ -304,6 +317,89 @@
           </div>
         </div>
       </nav>
+
+      <div class="collapse bg-light border-bottom shadow-sm" id="filterPanel">
+        <div class="container py-3">
+          <div class="row g-3 justify-content-center">
+            <div class="col-md-5">
+              <label class="form-label fw-bold text-muted small mb-1"
+                >Order</label
+              >
+              <div class="dropdown w-100">
+                <button
+                  class="btn btn-white border w-100 text-start d-flex justify-content-between align-items-center shadow-sm bg-white"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-bs-auto-close="outside"
+                  aria-expanded="false"
+                >
+                  <span id="orderBtnText">All Orders</span>
+                  <i class="fas fa-chevron-down text-muted small"></i>
+                </button>
+                <div
+                  class="dropdown-menu p-0 shadow border mt-1"
+                  style="width: 100%; z-index: 1050"
+                >
+                  <div
+                    class="p-2 border-bottom sticky-top bg-white rounded-top"
+                  >
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      id="searchOrder"
+                      placeholder="Search orders..."
+                    />
+                  </div>
+                  <div
+                    class="overflow-auto p-2"
+                    style="max-height: 250px"
+                    id="filterOrderContainer"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <label class="form-label fw-bold text-muted small mb-1"
+                >Family</label
+              >
+              <div class="dropdown w-100">
+                <button
+                  class="btn btn-white border w-100 text-start d-flex justify-content-between align-items-center shadow-sm bg-white"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-bs-auto-close="outside"
+                  data-bs-display="static"
+                  aria-expanded="false"
+                >
+                  <span id="familyBtnText">All Families</span>
+                  <i class="fas fa-chevron-down text-muted small"></i>
+                </button>
+                <div
+                  class="dropdown-menu w-100 p-0 shadow border mt-1"
+                  style="z-index: 1050"
+                >
+                  <div
+                    class="p-2 border-bottom sticky-top bg-white rounded-top"
+                  >
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      id="searchFamily"
+                      placeholder="Search families..."
+                    />
+                  </div>
+                  <div
+                    class="overflow-auto p-2"
+                    style="max-height: 250px"
+                    id="filterFamilyContainer"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <section class="page-section portfolio" id="portfolio">
         <div class="container">
