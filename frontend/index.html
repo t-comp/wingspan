@@ -1212,7 +1212,7 @@
                 <p class="small text-muted mb-2">
                   Copy these values to use in your team's application.
                 </p>
-                <div class="d-flex gap-2">
+                <div class="d-flex flex-wrap gap-2">
                   <button
                     id="copyIdBtn"
                     class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
@@ -1225,8 +1225,15 @@
                   >
                     <i class="fas fa-link me-1"></i>Copy Image URL
                   </button>
+                  <button
+                    id="copyApiKeyBtn"
+                    class="btn btn-sm btn-outline-primary shadow-sm rounded-pill d-none"
+                  >
+                    <i class="fas fa-key me-1"></i>Copy API Key
+                  </button>
                 </div>
               </div>
+
               <div id="editTagsContainer" class="d-none">
                 <hr />
                 <h6 class="small fw-bold text-muted">Manage Tags:</h6>

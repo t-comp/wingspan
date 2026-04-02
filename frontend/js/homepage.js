@@ -16,6 +16,32 @@ export async function initHome(userRole, userEmail) {
   let butterflies = await ButterflyAPI.getAll();
   console.log("DATABASES SPECIES LIST:", butterflies);
 
+  let studentApiKey = "";
+  if (userRole !== "ADMIN") {
+    try {
+      const dashboardData = await ButterflyAPI.getStudentDashboard(userEmail);
+      if (dashboardData && dashboardData.apiKey) {
+        studentApiKey = dashboardData.apiKey;
+      } else {
+        // Fallback: Check teams if not on dashboard
+        const allTeams = await ButterflyAPI.getAllTeams();
+        for (const t of allTeams) {
+          const members = await ButterflyAPI.getTeamMembers(t.id);
+          if (members.some((m) => m.email === userEmail)) {
+            const keys = await ButterflyAPI.getAllApiKeys();
+            const teamKey = keys.find(
+              (k) => k.teamName === t.name && k.active !== false,
+            );
+            if (teamKey) studentApiKey = teamKey.keyVal;
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Could not fetch API key for modal", e);
+    }
+  }
+
   const portfolio = document.getElementById("portfolio");
   const teamView = document.getElementById("teamView");
   const speciesView = document.getElementById("speciesView");
@@ -105,27 +131,19 @@ export async function initHome(userRole, userEmail) {
     // Setup Copy Buttons
     const copyIdBtn = document.getElementById("copyIdBtn");
     const copyUrlBtn = document.getElementById("copyUrlBtn");
-
-    if (copyIdBtn) {
-      // Reset button text just in case
-      copyIdBtn.innerHTML = `<i class="fas fa-hashtag me-1"></i>Copy Image ID`;
-      copyIdBtn.onclick = () => {
-        const idToCopy = img.id || img.imageId;
-        navigator.clipboard.writeText(idToCopy);
-        copyIdBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
-        setTimeout(
-          () =>
-            (copyIdBtn.innerHTML = `<i class="fas fa-hashtag me-1"></i>Copy Image ID`),
-          2000,
-        );
-      };
-    }
+    const copyApiKeyBtn = document.getElementById("copyApiKeyBtn");
 
     if (copyUrlBtn) {
-      // Reset button text just in case
       copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`;
       copyUrlBtn.onclick = () => {
-        const urlToCopy = img.url || img.fpath;
+        let urlToCopy = img.url || img.fpath;
+
+        // Automatically attach the API key to the URL if they have one!
+        if (studentApiKey) {
+          const separator = urlToCopy.includes("?") ? "&" : "?";
+          urlToCopy += `${separator}apiKey=${studentApiKey}`;
+        }
+
         navigator.clipboard.writeText(urlToCopy);
         copyUrlBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
         setTimeout(
@@ -134,6 +152,23 @@ export async function initHome(userRole, userEmail) {
           2000,
         );
       };
+    }
+
+    // Setup the new API Key Button
+    if (studentApiKey && copyApiKeyBtn) {
+      copyApiKeyBtn.classList.remove("d-none"); // Unhide it for students with keys!
+      copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`;
+      copyApiKeyBtn.onclick = () => {
+        navigator.clipboard.writeText(studentApiKey);
+        copyApiKeyBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+        setTimeout(
+          () =>
+            (copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`),
+          2000,
+        );
+      };
+    } else if (copyApiKeyBtn) {
+      copyApiKeyBtn.classList.add("d-none"); // Keep hidden if no key
     }
 
     const modalElement = document.getElementById("imageDetailsModal");
