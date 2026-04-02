@@ -251,11 +251,23 @@
               <li><hr class="dropdown-divider" /></li>
               <li><a class="dropdown-item py-2">Documentation</a></li>
               <li><hr class="dropdown-divider" /></li>
+
               <li>
-                <a class="dropdown-item py-2" href="#" id="toggleTheme"
-                  >Toggle Light/Dark Mode</a
+                <a
+                  class="dropdown-item py-2"
+                  href="#"
+                  id="openChangePasswordBtn"
+                  ><i class="fas fa-lock me-2"></i>Change Password</a
                 >
               </li>
+              <li><hr class="dropdown-divider" /></li>
+
+              <li>
+                <a class="dropdown-item py-2" href="#" id="toggleTheme"
+                  ><i class="fas fa-moon me-2"></i>Toggle Light/Dark Mode</a
+                >
+              </li>
+
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <a
@@ -808,6 +820,16 @@
                         required
                       />
                     </div>
+                    <div class="mb-3">
+                      <label class="form-label">New Password (Optional)</label>
+                      <input
+                        type="password"
+                        class="form-control"
+                        id="editPassword"
+                        placeholder="Leave blank to keep current"
+                      />
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">
                       Save Changes
                     </button>
@@ -1022,6 +1044,58 @@
                 </div>
                 <button type="submit" class="btn btn-warning w-100">
                   Extend Time
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="changePasswordModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title fw-bold">Change Password</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="changePasswordForm">
+                <div class="mb-3">
+                  <label class="form-label fw-bold small">New Password</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="newPersonalPassword"
+                    required
+                    minlength="7"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold small"
+                    >Confirm Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="confirmPersonalPassword"
+                    required
+                    minlength="7"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  class="btn btn-primary w-100 rounded-pill fw-bold"
+                >
+                  Update Password
                 </button>
               </form>
             </div>

@@ -61,8 +61,49 @@ export async function initHome(userRole, userEmail) {
   const adminGenerateKeyForm = document.getElementById("adminGenerateKeyForm");
   const adminExtendKeyForm = document.getElementById("adminExtendKeyForm");
 
+  const openChangePasswordBtn = document.getElementById(
+    "openChangePasswordBtn",
+  );
+  const changePasswordForm = document.getElementById("changePasswordForm");
+
   let activeTagFilters = new Set();
   const filterTagCloud = document.getElementById("filterTagCloud");
+
+  if (openChangePasswordBtn) {
+    openChangePasswordBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      new bootstrap.Modal(
+        document.getElementById("changePasswordModal"),
+      ).show();
+    });
+  }
+
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pass1 = document.getElementById("newPersonalPassword").value;
+      const pass2 = document.getElementById("confirmPersonalPassword").value;
+
+      if (pass1 !== pass2) {
+        return alert("Passwords do not match! Please try again.");
+      }
+      if (pass1.length < 7) {
+        return alert("Password must be at least 7 characters long.");
+      }
+
+      try {
+        // Uses the userEmail passed into initHome!
+        await ButterflyAPI.resetPassword(userEmail, pass1);
+        alert("Password successfully updated!");
+        e.target.reset();
+        bootstrap.Modal.getInstance(
+          document.getElementById("changePasswordModal"),
+        ).hide();
+      } catch (err) {
+        alert("Failed to update password: " + err.message);
+      }
+    });
+  }
 
   const showView = (view) => {
     [portfolio, speciesView, teamView].forEach((v) => {
@@ -937,6 +978,14 @@ export async function initHome(userRole, userEmail) {
     new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
   };
 
+  window.openEditUserModal = (userId, currentUsername, currentEmail) => {
+    document.getElementById("editUserId").value = userId;
+    document.getElementById("editUsername").value = currentUsername;
+    document.getElementById("editEmail").value = currentEmail;
+    document.getElementById("editPassword").value = ""; // ADD THIS LINE TO CLEAR IT!
+    new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
+  };
+
   const adminCreateTeamForm = document.getElementById("adminCreateTeamForm");
   if (adminCreateTeamForm) {
     adminCreateTeamForm.addEventListener("submit", async (e) => {
@@ -1024,8 +1073,21 @@ export async function initHome(userRole, userEmail) {
         ) {
           return alert("This username already exists.");
         }
+
         await ButterflyAPI.updateUsername(userId, newUsername);
         await ButterflyAPI.updateEmail(userId, newEmail);
+
+        // --- NEW PASSWORD RESET LOGIC ---
+        const newPassword = document
+          .getElementById("editPassword")
+          .value.trim();
+        if (newPassword !== "") {
+          if (newPassword.length < 7)
+            return alert("Password must be at least 7 characters long.");
+          await ButterflyAPI.resetPassword(newEmail, newPassword);
+        }
+        // --------------------------------
+
         await loadAdminData();
         bootstrap.Modal.getInstance(
           document.getElementById("adminEditUserModal"),
