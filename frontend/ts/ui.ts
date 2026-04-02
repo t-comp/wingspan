@@ -1,19 +1,33 @@
 import { Species } from "./types.js";
 
 export const UI = {
-  renderGrid(list: Species[], onCardClick: (b: Species, idx: number, tagsHtml: string) => void, displayMode: string = "common"): void {
+  renderGrid(
+    list: Species[],
+    onCardClick: (b: Species, idx: number, tagsHtml: string) => void,
+    displayMode: string = "common",
+  ): void {
     const grid = document.getElementById("butterflyGrid");
     if (!grid) return;
     grid.innerHTML = "";
     list.forEach((b, idx) => {
       const col = document.createElement("div");
       col.className = "col-md-6 col-lg-4 mb-5";
-      const imageUrl = b.thumbnailUrl ? b.thumbnailUrl : "assets/img/noimage.jpg";
+      const imageUrl = b.thumbnailUrl
+        ? b.thumbnailUrl
+        : "assets/img/noimage.jpg";
       const tagsHtml = Array.isArray(b.tags)
-        ? b.tags.map((t: any) => `<span class="badge rounded-pill bg-light text-dark border me-1">${t.name}</span>`).join("")
+        ? b.tags
+            .map(
+              (t: any) =>
+                `<span class="badge rounded-pill bg-light text-dark border me-1">${t.name}</span>`,
+            )
+            .join("")
         : "";
 
-      const displayName = displayMode === "scientific" && b.scientificName ? `<i>${b.scientificName}</i>` : b.name;
+      const displayName =
+        displayMode === "scientific" && b.scientificName
+          ? `<i>${b.scientificName}</i>`
+          : b.name;
 
       col.innerHTML = `
           <div class="card h-100 butterfly-card border-0 shadow-sm">
@@ -25,7 +39,9 @@ export const UI = {
                   <div class="mb-2">${tagsHtml}</div>
               </div>
           </div>`;
-      col.querySelector(".butterfly-card")?.addEventListener("click", () => onCardClick(b, idx, tagsHtml));
+      col
+        .querySelector(".butterfly-card")
+        ?.addEventListener("click", () => onCardClick(b, idx, tagsHtml));
       grid.appendChild(col);
     });
   },
@@ -33,8 +49,9 @@ export const UI = {
   populateSpeciesView(b: Species, isAdmin: boolean): void {
     console.log("Populating View. Is Admin?", isAdmin);
     (document.getElementById("speciesName") as HTMLElement).innerText = b.name;
-    (document.getElementById("speciesScientific") as HTMLElement).innerText = b.scientificName || "N/A";
-    
+    (document.getElementById("speciesScientific") as HTMLElement).innerText =
+      b.scientificName || "N/A";
+
     let rawDesc = b.description || "";
     let cleanDesc = rawDesc;
     const extraAttributes: Record<string, string> = {};
@@ -42,11 +59,12 @@ export const UI = {
     const regex = /\[\[(.*?):\s*(.*?)\]\]/g;
     let match;
     while ((match = regex.exec(rawDesc)) !== null) {
-      extraAttributes[match[1]] = match[2];
+      extraAttributes[match[1]!] = match[2]!;
       cleanDesc = cleanDesc.replace(match[0], "");
     }
 
-    (document.getElementById("speciesDescription") as HTMLElement).innerText = cleanDesc.trim() || "No description.";
+    (document.getElementById("speciesDescription") as HTMLElement).innerText =
+      cleanDesc.trim() || "No description.";
 
     const container = document.getElementById("customAttributesDisplay");
     if (container) {
@@ -59,14 +77,15 @@ export const UI = {
                 <div class="col-4 fw-bold" style="color: #0399b0">${label}:</div>
                 <div class="col-8 text-muted">${value}</div>
             </div>
-        `
+        `,
         );
       });
     }
 
     b.extraAttributes = extraAttributes;
 
-    (document.getElementById("speciesImage") as HTMLImageElement).src = b.thumbnailUrl || "assets/img/noimage.jpg";
+    (document.getElementById("speciesImage") as HTMLImageElement).src =
+      b.thumbnailUrl || "assets/img/noimage.jpg";
 
     const orderElem = document.getElementById("speciesOrder");
     if (orderElem) orderElem.innerText = b.orderName || "—";
@@ -75,8 +94,11 @@ export const UI = {
     const genusElem = document.getElementById("speciesGenus");
     if (genusElem) genusElem.innerText = b.genus || "—";
 
-    const thumbModalImg = document.getElementById("thumbnailModalImage") as HTMLImageElement | null;
-    if (thumbModalImg) thumbModalImg.src = b.thumbnailUrl || "assets/img/noimage.jpg";
+    const thumbModalImg = document.getElementById(
+      "thumbnailModalImage",
+    ) as HTMLImageElement | null;
+    if (thumbModalImg)
+      thumbModalImg.src = b.thumbnailUrl || "assets/img/noimage.jpg";
 
     const deleteSection = document.getElementById("adminDeleteSection");
     if (deleteSection) {
@@ -93,9 +115,13 @@ export const UI = {
     if (addImageBtn) {
       if (isAdmin) {
         addImageBtn.classList.remove("d-none");
-        const targetIdInput = document.getElementById("targetSpeciesId") as HTMLInputElement | null;
+        const targetIdInput = document.getElementById(
+          "targetSpeciesId",
+        ) as HTMLInputElement | null;
         if (targetIdInput) targetIdInput.value = String(b.id);
-        const targetNameDisplay = document.getElementById("targetSpeciesNameDisplay");
+        const targetNameDisplay = document.getElementById(
+          "targetSpeciesNameDisplay",
+        );
         if (targetNameDisplay) targetNameDisplay.innerText = b.name;
       } else {
         addImageBtn.classList.add("d-none");
