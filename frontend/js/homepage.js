@@ -20,6 +20,7 @@ export async function initHome(userRole, userEmail) {
   const teamView = document.getElementById("teamView");
   const speciesView = document.getElementById("speciesView");
   const searchNavBar = document.getElementById("searchNavBar");
+  const filterPanel = document.getElementById("filterPanel");
 
   const viewGalleryBtn = document.getElementById("viewGalleryBtn");
   const viewTeamBtn = document.getElementById("viewTeamBtn");
@@ -48,6 +49,7 @@ export async function initHome(userRole, userEmail) {
   const goToGallery = () => {
     showView(portfolio);
     if (searchNavBar) searchNavBar.style.display = "flex";
+    if (filterPanel) filterPanel.style.display = "";
     if (viewGalleryBtn) viewGalleryBtn.classList.add("active");
     if (viewTeamBtn) viewTeamBtn.classList.remove("active");
   };
@@ -250,6 +252,11 @@ export async function initHome(userRole, userEmail) {
   const showSpeciesView = async (b) => {
     showView(speciesView);
     if (searchNavBar) searchNavBar.style.display = "none";
+
+    if (filterPanel) {
+      filterPanel.style.display = "none";
+      filterPanel.classList.remove("show");
+    }
 
     currentSpeciesId = b.id;
 
@@ -1215,6 +1222,11 @@ export async function initHome(userRole, userEmail) {
       if (searchNavBar) searchNavBar.style.display = "none";
       viewTeamBtn.classList.add("active");
       if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
+
+      if (filterPanel) {
+        filterPanel.style.display = "none";
+        filterPanel.classList.remove("show");
+      }
 
       if (userRole === "ADMIN") {
         if (adminTeamContent) adminTeamContent.style.display = "block";
