@@ -4,7 +4,6 @@ export const TagManager = {
     tagData: {
         "Life Stage": ["Egg", "Larva", "Nymph", "Pupa", "Adult", "Multiple Stages", "Unknown"],
         "Sex": ["Male", "Female", "Both", "Unknown"],
-        "Taxonomy": ["Order", "Family", "Genus", "Species", "Common Name"],
         "Behavior": ["Feeding", "Nectar Feeding", "Herbivory", "Predation", "Scavenging", "Movement", "Flying", "Walking", "Resting", "Mating Flight", "Reproduction", "Mating", "Oviposition", "Courtship", "Guarding Mate", "Social", "Aggregation", "Colony Activity", "Nest Building"],
         "Ecological Interaction": ["Pollination", "Parasitoid Interaction", "Predation Event", "Camouflage", "Mimicry", "Mutualism", "Parasitism"],
         "View / Anatomy": ["Dorsal", "Lateral", "Ventral", "Head Close-up", "Wing Detail", "Genitalia", "Whole Organism", "Habitat Shot", "In Hand / Handling"],

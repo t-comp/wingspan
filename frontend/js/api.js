@@ -384,6 +384,23 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
+  async updateImageDetails(imageId, data) {
+    const response = await fetch(`${API_BASE_URL}/images/admin/${imageId}`, {
+        method: "PATCH",
+        headers: {
+            ...getHeaders(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            description: data.description || "",
+            nathansNotes: data.nathansNotes || "",
+            //life_cycle: data.life_cycle || "",
+            tagIds: data.tagIds || [] 
+        })
+    });
+    return checkResponse(response);
+},
+
   async addTagToImage(tagId, imageId) {
     const response = await fetch(`${API_BASE_URL}/tags/${tagId}/images/${imageId}`, {
       method: "POST", headers: getHeaders(),
