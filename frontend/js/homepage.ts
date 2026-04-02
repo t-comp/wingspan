@@ -9,7 +9,7 @@ export async function initHome(userRole, userEmail) {
     "Home Initializing with role:",
     userRole,
     "and email:",
-    userEmail
+    userEmail,
   );
 
   let currentDisplayMode = "common";
@@ -31,7 +31,7 @@ export async function initHome(userRole, userEmail) {
           if (members.some((m) => m.email === userEmail)) {
             const keys = await ButterflyAPI.getAllApiKeys();
             const teamKey = keys.find(
-              (k) => k.teamName === t.name && k.active !== false
+              (k) => k.teamName === t.name && k.active !== false,
             );
             if (teamKey) studentApiKey = teamKey.keyVal;
             break;
@@ -63,7 +63,7 @@ export async function initHome(userRole, userEmail) {
   const adminExtendKeyForm = document.getElementById("adminExtendKeyForm");
 
   const openChangePasswordBtn = document.getElementById(
-    "openChangePasswordBtn"
+    "openChangePasswordBtn",
   );
   const changePasswordForm = document.getElementById("changePasswordForm");
 
@@ -74,16 +74,20 @@ export async function initHome(userRole, userEmail) {
     openChangePasswordBtn.addEventListener("click", (e) => {
       e.preventDefault();
       new bootstrap.Modal(
-        document.getElementById("changePasswordModal")
+        document.getElementById("changePasswordModal"),
       ).show();
     });
   }
 
   if (changePasswordForm) {
-    changePasswordForm.addEventListener("submit", async (e) => {
+    changePasswordForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      const pass1 = document.getElementById("newPersonalPassword").value;
-      const pass2 = document.getElementById("confirmPersonalPassword").value;
+      const pass1 = (
+        document.getElementById("newPersonalPassword") as HTMLInputElement
+      ).value;
+      const pass2 = (
+        document.getElementById("confirmPersonalPassword") as HTMLInputElement
+      ).value;
 
       if (pass1 !== pass2) {
         return alert("Passwords do not match! Please try again.");
@@ -97,7 +101,7 @@ export async function initHome(userRole, userEmail) {
         alert("Password successfully updated!");
         e.target.reset();
         bootstrap.Modal.getInstance(
-          document.getElementById("changePasswordModal")
+          document.getElementById("changePasswordModal"),
         ).hide();
       } catch (err) {
         alert("Failed to update password: " + err.message);
@@ -191,13 +195,13 @@ export async function initHome(userRole, userEmail) {
         setTimeout(
           () =>
             (copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`),
-          2000
+          2000,
         );
       };
     }
 
     if (studentApiKey && copyApiKeyBtn) {
-      copyApiKeyBtn.classList.remove("d-none"); 
+      copyApiKeyBtn.classList.remove("d-none");
       copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`;
       copyApiKeyBtn.onclick = () => {
         navigator.clipboard.writeText(studentApiKey);
@@ -205,11 +209,11 @@ export async function initHome(userRole, userEmail) {
         setTimeout(
           () =>
             (copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`),
-          2000
+          2000,
         );
       };
     } else if (copyApiKeyBtn) {
-      copyApiKeyBtn.classList.add("d-none"); 
+      copyApiKeyBtn.classList.add("d-none");
     }
 
     const modalElement = document.getElementById("imageDetailsModal");
@@ -255,13 +259,13 @@ export async function initHome(userRole, userEmail) {
       try {
         const dbTags = await ButterflyAPI.getAllTags();
         const currentTagIds = (img.tags || []).map((t) =>
-          String(t.tagId || t.id || t)
+          String(t.tagId || t.id || t),
         );
 
         let finalHtml = "";
 
         for (const [categoryName, tagNames] of Object.entries(
-          TagManager.tagData
+          TagManager.tagData,
         )) {
           let categoryGroupHtml = "";
           let hasFoundAny = false;
@@ -272,7 +276,7 @@ export async function initHome(userRole, userEmail) {
                 t &&
                 t.tagName &&
                 t.tagName.toString().trim().toLowerCase() ===
-                  name.trim().toLowerCase()
+                  name.trim().toLowerCase(),
             );
 
             if (match) {
@@ -284,8 +288,8 @@ export async function initHome(userRole, userEmail) {
                                            value="${
                                              match.tagId
                                            }" id="edit-tag-${match.tagId}" ${
-                isChecked ? "checked" : ""
-              }>
+                                             isChecked ? "checked" : ""
+                                           }>
                                     <label class="form-check-label small text-dark" for="edit-tag-${
                                       match.tagId
                                     }">
@@ -322,24 +326,28 @@ export async function initHome(userRole, userEmail) {
         return;
       }
 
-      const editInput = document.getElementById("editNotesInput");
+      const editInput = document.getElementById(
+        "editNotesInput",
+      ) as HTMLTextAreaElement | null;
       const newNotes = editInput ? editInput.value : "";
 
       const selectedCheckboxes = document.querySelectorAll(
-        ".edit-tag-checkbox:checked"
+        ".edit-tag-checkbox:checked",
       );
       const newTagIds = Array.from(selectedCheckboxes).map((cb) =>
-        String(cb.value)
+        String((cb as HTMLInputElement).value),
       );
 
-      const oldTagIds = (img.tags || []).map((t) => String(t.id || t.tagId));
+      const oldTagIds = (img.tags || []).map((t: any) =>
+        String(t.id || t.tagId),
+      );
       const toAdd = newTagIds.filter((tagId) => !oldTagIds.includes(tagId));
       const toRemove = oldTagIds.filter((tagId) => !newTagIds.includes(tagId));
-      const noteInput =
-        document.getElementById("editNotesInput") ||
-        document.getElementById("modalNotes");
-      const updatedNotes = noteInput ? noteInput.value : "";
 
+      const modalNotesElem = document.getElementById(
+        "modalNotes",
+      ) as HTMLElement | null;
+      const updatedNotes = editInput?.value || modalNotesElem?.innerText || "";
       console.log("Notes being sent to server:", updatedNotes);
 
       try {
@@ -353,19 +361,18 @@ export async function initHome(userRole, userEmail) {
         const tagPromises = [
           ...toAdd.map((tagId) => ButterflyAPI.addTagToImage(tagId, id)),
           ...toRemove.map((tagId) =>
-            ButterflyAPI.removeTagFromImage(tagId, id)
+            ButterflyAPI.removeTagFromImage(tagId, id),
           ),
         ];
 
         await Promise.all(tagPromises);
         alert("Update Successful!");
-        const freshSpecies = await ButterflyAPI.getSpeciesById(
-          currentSpeciesId
-        );
+        const freshSpecies =
+          await ButterflyAPI.getSpeciesById(currentSpeciesId);
         await showSpeciesView(freshSpecies);
 
         bootstrap.Modal.getInstance(
-          document.getElementById("imageDetailsModal")
+          document.getElementById("imageDetailsModal"),
         ).hide();
       } catch (err) {
         console.error("Save failed:", err);
@@ -394,7 +401,7 @@ export async function initHome(userRole, userEmail) {
       //workaround for attributes
       editSpeciesBtn.onclick = () => {
         const dynamicContainer = document.getElementById(
-          "dynamicSpeciesFields"
+          "dynamicSpeciesFields",
         );
         if (dynamicContainer) dynamicContainer.innerHTML = "";
 
@@ -550,8 +557,8 @@ export async function initHome(userRole, userEmail) {
         new Map(
           allImgs
             .flatMap((img) => img.tags || [])
-            .map((t) => [t.tagId || t.id, t])
-        ).values()
+            .map((t) => [t.tagId || t.id, t]),
+        ).values(),
       );
       let html = `<button class="btn btn-sm btn-primary filter-pill active" data-tag="all">All</button>`;
 
@@ -587,7 +594,7 @@ export async function initHome(userRole, userEmail) {
 
           const activePills = filterBar.querySelectorAll(".filter-pill.active");
           const selectedIds = Array.from(activePills).map((p) =>
-            p.getAttribute("data-tag")
+            p.getAttribute("data-tag"),
           );
 
           if (selectedIds.length === 0) {
@@ -628,7 +635,7 @@ export async function initHome(userRole, userEmail) {
             myTeam = t;
             const keys = await ButterflyAPI.getAllApiKeys();
             const teamKey = keys.find(
-              (k) => k.teamName === t.name && k.active !== false
+              (k) => k.teamName === t.name && k.active !== false,
             );
             if (teamKey) myApiKey = teamKey.keyVal;
             break;
@@ -656,7 +663,7 @@ export async function initHome(userRole, userEmail) {
       const membersHtml = members
         .map(
           (m) =>
-            `<span class="badge bg-primary fs-6 me-2 mb-2">${m.username}</span>`
+            `<span class="badge bg-primary fs-6 me-2 mb-2">${m.username}</span>`,
         )
         .join("");
 
@@ -690,13 +697,13 @@ export async function initHome(userRole, userEmail) {
       ButterflyAPI.getAllTeams(),
     ]);
     users.sort((a, b) =>
-      a.username.toLowerCase().localeCompare(b.username.toLowerCase())
+      a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
     );
     allCachedUsers = users;
 
     globalUserTeamMap = {};
     const memberResults = await Promise.all(
-      teams.map((t) => ButterflyAPI.getTeamMembers(t.id))
+      teams.map((t) => ButterflyAPI.getTeamMembers(t.id)),
     );
     teams.forEach((t, i) => {
       for (const m of memberResults[i]) {
@@ -740,7 +747,7 @@ export async function initHome(userRole, userEmail) {
     adminUserSearch.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase();
       const filtered = allCachedUsers.filter((u) =>
-        u.username.toLowerCase().includes(query)
+        u.username.toLowerCase().includes(query),
       );
       renderAllUsersTable(filtered);
     });
@@ -768,7 +775,7 @@ export async function initHome(userRole, userEmail) {
     });
 
     const membersByTeam = await Promise.all(
-      teams.map((t) => ButterflyAPI.getTeamMembers(t.id))
+      teams.map((t) => ButterflyAPI.getTeamMembers(t.id)),
     );
 
     for (let idx = 0; idx < teams.length; idx++) {
@@ -845,8 +852,8 @@ export async function initHome(userRole, userEmail) {
                                     onclick="window.regenerateTeamKey('${
                                       team.name
                                     }', '${team.projectName}', '${
-          team.semester
-        }')">
+                                      team.semester
+                                    }')">
                                 Regenerate
                             </button>
                             <button class="btn btn-sm btn-outline-danger" style="font-size:0.72rem;"
@@ -901,19 +908,19 @@ export async function initHome(userRole, userEmail) {
 
   window.toggleUserRole = async (userId, currentRole) => {
     const targetUser = allCachedUsers.find(
-      (u) => u.userId.toString() === userId.toString()
+      (u) => u.userId.toString() === userId.toString(),
     );
     if (currentRole === "ADMIN") {
       const adminCount = allCachedUsers.filter(
-        (u) => (u.uType || u.userType || u.utype) === "ADMIN"
+        (u) => (u.uType || u.userType || u.utype) === "ADMIN",
       ).length;
       if (adminCount <= 1)
         return alert(
-          "Action Denied: The system must always have at least one administrator."
+          "Action Denied: The system must always have at least one administrator.",
         );
       if (targetUser && targetUser.email === userEmail) {
         const proceed = confirm(
-          "WARNING: You are about to remove your own admin privileges! You will be logged out immediately if you proceed. Do you want to continue?"
+          "WARNING: You are about to remove your own admin privileges! You will be logged out immediately if you proceed. Do you want to continue?",
         );
         if (!proceed) return;
         try {
@@ -976,7 +983,7 @@ export async function initHome(userRole, userEmail) {
       confirm(
         "Regenerate the API key for " +
           teamName +
-          "? The old key will stop working immediately."
+          "? The old key will stop working immediately.",
       )
     ) {
       try {
@@ -991,7 +998,7 @@ export async function initHome(userRole, userEmail) {
   window.deleteApiKey = async (keyId) => {
     if (
       confirm(
-        "Delete this API key permanently? Students using it will lose access."
+        "Delete this API key permanently? Students using it will lose access.",
       )
     ) {
       try {
@@ -1009,9 +1016,8 @@ export async function initHome(userRole, userEmail) {
         await ButterflyAPI.deleteImage(imageId);
         alert("Image Deleted");
         if (currentSpeciesId) {
-          const freshButterfly = await ButterflyAPI.getSpeciesById(
-            currentSpeciesId
-          );
+          const freshButterfly =
+            await ButterflyAPI.getSpeciesById(currentSpeciesId);
           await showSpeciesView(freshButterfly);
         } else {
           location.reload();
@@ -1033,7 +1039,7 @@ export async function initHome(userRole, userEmail) {
     document.getElementById("editUserId").value = userId;
     document.getElementById("editUsername").value = currentUsername;
     document.getElementById("editEmail").value = currentEmail;
-    document.getElementById("editPassword").value = ""; 
+    document.getElementById("editPassword").value = "";
     new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
   };
 
@@ -1042,15 +1048,20 @@ export async function initHome(userRole, userEmail) {
     adminCreateTeamForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const teamData = {
-        name: document.getElementById("newCreateTeamName").value,
-        projectName: document.getElementById("newCreateProjectName").value,
-        semester: document.getElementById("newCreateSemester").value,
+        name: (document.getElementById("newCreateTeamName") as HTMLInputElement)
+          .value,
+        projectName: (
+          document.getElementById("newCreateProjectName") as HTMLInputElement
+        ).value,
+        semester: (
+          document.getElementById("newCreateSemester") as HTMLInputElement
+        ).value,
       };
       await ButterflyAPI.createTeam(teamData);
       await loadAdminData();
       e.target.reset();
       bootstrap.Modal.getInstance(
-        document.getElementById("adminCreateTeamModal")
+        document.getElementById("adminCreateTeamModal"),
       ).hide();
     });
   }
@@ -1059,10 +1070,18 @@ export async function initHome(userRole, userEmail) {
   if (adminAddUserForm) {
     adminAddUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const usernameVal = document.getElementById("adminNewUsername").value;
-      const emailVal = document.getElementById("adminNewEmail").value;
-      const passVal = document.getElementById("adminNewPassword").value;
-      const roleVal = document.getElementById("adminNewRole").value;
+      const usernameVal = (
+        document.getElementById("adminNewUsername") as HTMLInputElement
+      ).value;
+      const emailVal = (
+        document.getElementById("adminNewEmail") as HTMLInputElement
+      ).value;
+      const passVal = (
+        document.getElementById("adminNewPassword") as HTMLInputElement
+      ).value;
+      const roleVal = (
+        document.getElementById("adminNewRole") as HTMLSelectElement
+      ).value;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailVal))
@@ -1076,7 +1095,7 @@ export async function initHome(userRole, userEmail) {
         const allUsers = await ButterflyAPI.getAllUsers();
         if (
           allUsers.some(
-            (u) => u.username.toLowerCase() === usernameVal.toLowerCase()
+            (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
           )
         ) {
           return alert("This username already exists.");
@@ -1090,7 +1109,7 @@ export async function initHome(userRole, userEmail) {
         await loadAdminData();
         e.target.reset();
         bootstrap.Modal.getInstance(
-          document.getElementById("adminAddUserModal")
+          document.getElementById("adminAddUserModal"),
         ).hide();
         alert("User successfully created!");
       } catch (error) {
@@ -1103,9 +1122,17 @@ export async function initHome(userRole, userEmail) {
   if (adminEditUserForm) {
     adminEditUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const userId = document.getElementById("editUserId").value;
-      const newUsername = document.getElementById("editUsername").value;
-      const newEmail = document.getElementById("editEmail").value;
+      const userId = (document.getElementById("editUserId") as HTMLInputElement)
+        .value;
+      const newUsername = (
+        document.getElementById("editUsername") as HTMLInputElement
+      ).value;
+      const newEmail = (
+        document.getElementById("editEmail") as HTMLInputElement
+      ).value;
+      const newPassword = (
+        document.getElementById("editPassword") as HTMLInputElement
+      ).value.trim();
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(newEmail))
@@ -1119,7 +1146,7 @@ export async function initHome(userRole, userEmail) {
           allUsers.some(
             (u) =>
               u.username.toLowerCase() === newUsername.toLowerCase() &&
-              u.userId.toString() !== userId.toString()
+              u.userId.toString() !== userId.toString(),
           )
         ) {
           return alert("This username already exists.");
@@ -1127,17 +1154,9 @@ export async function initHome(userRole, userEmail) {
         await ButterflyAPI.updateUsername(userId, newUsername);
         await ButterflyAPI.updateEmail(userId, newEmail);
 
-        const newPassword = document
-          .getElementById("editPassword")
-          .value.trim();
-        if (newPassword !== "") {
-          if (newPassword.length < 7)
-            return alert("Password must be at least 7 characters long.");
-          await ButterflyAPI.resetPassword(newEmail, newPassword);
-        }
         await loadAdminData();
         bootstrap.Modal.getInstance(
-          document.getElementById("adminEditUserModal")
+          document.getElementById("adminEditUserModal"),
         ).hide();
         alert("User successfully updated!");
       } catch (error) {
@@ -1150,9 +1169,13 @@ export async function initHome(userRole, userEmail) {
     adminGenerateKeyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       await ButterflyAPI.generateApiKey({
-        teamName: document.getElementById("newTeamName").value,
-        projectName: document.getElementById("newProjectName").value,
-        semester: document.getElementById("newSemester").value,
+        teamName: (document.getElementById("newTeamName") as HTMLInputElement)
+          .value,
+        projectName: (
+          document.getElementById("newProjectName") as HTMLInputElement
+        ).value,
+        semester: (document.getElementById("newSemester") as HTMLInputElement)
+          .value,
       });
       await loadAdminData();
       e.target.reset();
@@ -1164,8 +1187,11 @@ export async function initHome(userRole, userEmail) {
   if (adminExtendKeyForm) {
     adminExtendKeyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const keyId = document.getElementById("extendKeyId").value;
-      const months = document.getElementById("extendMonths").value;
+      const keyId = (document.getElementById("extendKeyId") as HTMLInputElement)
+        .value;
+      const months = (
+        document.getElementById("extendMonths") as HTMLInputElement
+      ).value;
       await ButterflyAPI.extendApiKey(keyId, months);
       await loadAdminData();
       e.target.reset();
@@ -1240,7 +1266,7 @@ export async function initHome(userRole, userEmail) {
       }
 
       const checkedBoxes = universalUploadForm.querySelectorAll(
-        'input[name="tagIds"]:checked'
+        'input[name="tagIds"]:checked',
       );
       const tagIds = Array.from(checkedBoxes).map((cb) => cb.value);
       const nathansNotes = document.getElementById("nathanNotes").value;
@@ -1271,14 +1297,14 @@ export async function initHome(userRole, userEmail) {
           successCount +
             " image" +
             (successCount > 1 ? "s" : "") +
-            " uploaded successfully!"
+            " uploaded successfully!",
         );
       } else {
         alert(
           successCount +
             " uploaded, " +
             failCount +
-            " failed. Check console for details."
+            " failed. Check console for details.",
         );
       }
 
@@ -1289,7 +1315,7 @@ export async function initHome(userRole, userEmail) {
       if (newSpeciesFields) newSpeciesFields.style.display = "block";
 
       bootstrap.Modal.getInstance(
-        document.getElementById("addButterflyModal")
+        document.getElementById("addButterflyModal"),
       ).hide();
       butterflies = await ButterflyAPI.getAll();
       refreshGallery();
@@ -1297,7 +1323,7 @@ export async function initHome(userRole, userEmail) {
   }
 
   const addImageToSpeciesForm = document.getElementById(
-    "addImageToSpeciesForm"
+    "addImageToSpeciesForm",
   );
   if (addImageToSpeciesForm) {
     addImageToSpeciesForm.addEventListener("submit", async (e) => {
@@ -1331,11 +1357,11 @@ export async function initHome(userRole, userEmail) {
       alert(
         `${successCount} image(s) uploaded${
           failCount > 0 ? `, ${failCount} failed` : ""
-        }!`
+        }!`,
       );
       e.target.reset();
       bootstrap.Modal.getInstance(
-        document.getElementById("addImageToSpeciesModal")
+        document.getElementById("addImageToSpeciesModal"),
       ).hide();
 
       const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
@@ -1379,21 +1405,21 @@ export async function initHome(userRole, userEmail) {
 
       try {
         await ButterflyAPI.updateSpecies(speciesId, data);
-            const editModal = document.getElementById("editSpeciesModal");
+        const editModal = document.getElementById("editSpeciesModal");
         const modalInstance = bootstrap.Modal.getInstance(editModal);
         if (modalInstance) modalInstance.hide();
-        butterflies = await ButterflyAPI.getAll(); 
-        
+        butterflies = await ButterflyAPI.getAll();
+
         const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
         await showSpeciesView(freshSpecies);
-    
+
         if (typeof refreshGallery === "function") refreshGallery();
-    
+
         alert("Species updated successfully!");
-    } catch (err) {
+      } catch (err) {
         console.error("Update failed:", err);
         alert("Update failed: " + err.message);
-    }
+      }
     });
   }
 
@@ -1401,7 +1427,7 @@ export async function initHome(userRole, userEmail) {
   if (clearFiltersBtn) {
     clearFiltersBtn.addEventListener("click", () => {
       const currentSpecies = butterflies.find(
-        (b) => b.name === document.getElementById("speciesName").innerText
+        (b) => b.name === document.getElementById("speciesName").innerText,
       );
       if (currentSpecies) showSpeciesView(currentSpecies);
     });
@@ -1454,10 +1480,10 @@ export async function initHome(userRole, userEmail) {
 
   const applyAllFilters = async () => {
     const checkedOrders = Array.from(
-      document.querySelectorAll("#filterOrderContainer input:checked")
+      document.querySelectorAll("#filterOrderContainer input:checked"),
     ).map((cb) => cb.value);
     const checkedFamilies = Array.from(
-      document.querySelectorAll("#filterFamilyContainer input:checked")
+      document.querySelectorAll("#filterFamilyContainer input:checked"),
     ).map((cb) => cb.value);
 
     document.getElementById("orderBtnText").innerText =
@@ -1534,7 +1560,7 @@ export async function initHome(userRole, userEmail) {
           searchBox.addEventListener("input", (e) => {
             const term = e.target.value.toLowerCase();
             const items = document.querySelectorAll(
-              `#${containerId} .filter-item`
+              `#${containerId} .filter-item`,
             );
             items.forEach((item) => {
               const label = item.querySelector("label").innerText.toLowerCase();
@@ -1559,7 +1585,6 @@ export async function initHome(userRole, userEmail) {
   }
 
   const nameToggleBtn = document.getElementById("nameToggleBtn");
-
 
   if (nameToggleBtn) {
     nameToggleBtn.addEventListener("click", () => {
@@ -1588,7 +1613,7 @@ export async function initHome(userRole, userEmail) {
     //for adding a base category
     document.getElementById("addNewSpeciesFieldBtn").onclick = () => {
       const fieldName = prompt(
-        "What is the name of the new category? (e.g. Host Plant, Habitat)"
+        "What is the name of the new category? (e.g. Host Plant, Habitat)",
       );
       if (!fieldName) return;
 
@@ -1614,7 +1639,7 @@ export async function initHome(userRole, userEmail) {
     if (addFieldBtn) {
       addFieldBtn.onclick = () => {
         const fieldName = prompt(
-          "What is the name of the new category? (e.g. Host Plant, Habitat)"
+          "What is the name of the new category? (e.g. Host Plant, Habitat)",
         );
         if (fieldName && fieldName.trim() !== "") {
           addDynamicField(fieldName.trim());
@@ -1624,7 +1649,7 @@ export async function initHome(userRole, userEmail) {
 
     await initFilters();
     const deleteSpeciesFullBtn = document.getElementById(
-      "deleteSpeciesFullBtn"
+      "deleteSpeciesFullBtn",
     );
     if (deleteSpeciesFullBtn) {
       deleteSpeciesFullBtn.addEventListener("click", async () => {
