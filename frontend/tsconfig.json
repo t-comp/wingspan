@@ -8,5 +8,5 @@
     "noImplicitAny": false,
     "skipLibCheck": true
   },
-  "include": ["js/**/*.ts", "global.d.ts"]
+  "include": ["src/**/*.ts", "global.d.ts"]
 }
