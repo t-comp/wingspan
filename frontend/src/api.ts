@@ -1,8 +1,6 @@
 // js/api.js
 const API_BASE_URL = "http://159.203.134.226:8080";
 
-// const API_BASE_URL = "http://localhost:8080";
-
 function getHeaders() {
   const headers = {
     "Content-Type": "application/json",
@@ -464,20 +462,20 @@ export const ButterflyAPI = {
 
   async updateImageDetails(imageId, data) {
     const response = await fetch(`${API_BASE_URL}/images/admin/${imageId}`, {
-        method: "PATCH",
-        headers: {
-            ...getHeaders(),
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            description: data.description || "",
-            nathansNotes: data.nathansNotes || "",
-            //life_cycle: data.life_cycle || "",
-            tagIds: data.tagIds || [] 
-        })
+      method: "PATCH",
+      headers: {
+        ...getHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        description: data.description || "",
+        nathansNotes: data.nathansNotes || "",
+        //life_cycle: data.life_cycle || "",
+        tagIds: data.tagIds || [],
+      }),
     });
     return checkResponse(response);
-},
+  },
 
   async addTagToImage(tagId, imageId) {
     const response = await fetch(
