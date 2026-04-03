@@ -9,7 +9,7 @@ export async function initHome(userRole, userEmail) {
     "Home Initializing with role:",
     userRole,
     "and email:",
-    userEmail
+    userEmail,
   );
 
   let currentDisplayMode = "common";
@@ -31,7 +31,7 @@ export async function initHome(userRole, userEmail) {
           if (members.some((m) => m.email === userEmail)) {
             const keys = await ButterflyAPI.getAllApiKeys();
             const teamKey = keys.find(
-              (k) => k.teamName === t.name && k.active !== false
+              (k) => k.teamName === t.name && k.active !== false,
             );
             if (teamKey) studentApiKey = teamKey.keyVal;
             break;
@@ -53,7 +53,9 @@ export async function initHome(userRole, userEmail) {
   const viewTeamBtn = document.getElementById("viewTeamBtn");
   const backBtn = document.getElementById("backToGalleryBtn");
 
-  const searchInput = document.getElementById("searchInput");
+  const searchInput = document.getElementById(
+    "searchInput",
+  ) as HTMLInputElement | null;
   const themeToggle = document.getElementById("toggleTheme");
 
   const adminTeamContent = document.getElementById("adminTeamContent");
@@ -63,7 +65,7 @@ export async function initHome(userRole, userEmail) {
   const adminExtendKeyForm = document.getElementById("adminExtendKeyForm");
 
   const openChangePasswordBtn = document.getElementById(
-    "openChangePasswordBtn"
+    "openChangePasswordBtn",
   );
   const changePasswordForm = document.getElementById("changePasswordForm");
 
@@ -74,16 +76,20 @@ export async function initHome(userRole, userEmail) {
     openChangePasswordBtn.addEventListener("click", (e) => {
       e.preventDefault();
       new bootstrap.Modal(
-        document.getElementById("changePasswordModal")
+        document.getElementById("changePasswordModal"),
       ).show();
     });
   }
 
   if (changePasswordForm) {
-    changePasswordForm.addEventListener("submit", async (e) => {
+    changePasswordForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      const pass1 = document.getElementById("newPersonalPassword").value;
-      const pass2 = document.getElementById("confirmPersonalPassword").value;
+      const pass1 = (
+        document.getElementById("newPersonalPassword") as HTMLInputElement
+      ).value;
+      const pass2 = (
+        document.getElementById("confirmPersonalPassword") as HTMLInputElement
+      ).value;
 
       if (pass1 !== pass2) {
         return alert("Passwords do not match! Please try again.");
@@ -95,11 +101,11 @@ export async function initHome(userRole, userEmail) {
       try {
         await ButterflyAPI.resetPassword(userEmail, pass1);
         alert("Password successfully updated!");
-        e.target.reset();
+        (e.target as HTMLFormElement).reset();
         bootstrap.Modal.getInstance(
-          document.getElementById("changePasswordModal")
+          document.getElementById("changePasswordModal"),
         ).hide();
-      } catch (err) {
+      } catch (err: any) {
         alert("Failed to update password: " + err.message);
       }
     });
@@ -130,7 +136,8 @@ export async function initHome(userRole, userEmail) {
     const tagsDisplay = document.getElementById("modalTags");
     const editTagsContainer = document.getElementById("editTagsContainer");
 
-    if (!editBtn || !saveBtn || !notesDisplay || !tagsDisplay) return;
+    if (!editBtn || !saveBtn || !notesDisplay || !tagsDisplay || !notesInput)
+      return;
 
     if (userRole === "ADMIN") {
       editBtn.classList.remove("d-none");
@@ -191,13 +198,13 @@ export async function initHome(userRole, userEmail) {
         setTimeout(
           () =>
             (copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`),
-          2000
+          2000,
         );
       };
     }
 
     if (studentApiKey && copyApiKeyBtn) {
-      copyApiKeyBtn.classList.remove("d-none"); 
+      copyApiKeyBtn.classList.remove("d-none");
       copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`;
       copyApiKeyBtn.onclick = () => {
         navigator.clipboard.writeText(studentApiKey);
@@ -205,11 +212,11 @@ export async function initHome(userRole, userEmail) {
         setTimeout(
           () =>
             (copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`),
-          2000
+          2000,
         );
       };
     } else if (copyApiKeyBtn) {
-      copyApiKeyBtn.classList.add("d-none"); 
+      copyApiKeyBtn.classList.add("d-none");
     }
 
     const modalElement = document.getElementById("imageDetailsModal");
@@ -241,27 +248,27 @@ export async function initHome(userRole, userEmail) {
       const notesInput = document.getElementById("editNotesInput");
 
       const currentNotes =
-        notesDisplay.innerText === "No notes available."
+        notesDisplay && notesDisplay.innerText === "No notes available."
           ? ""
-          : notesDisplay.innerText;
+          : notesDisplay?.innerText || "";
 
-      notesDisplay.classList.add("d-none");
-      notesInput.classList.remove("d-none");
+      if (notesDisplay) notesDisplay.classList.add("d-none");
+      if (notesInput) notesInput.classList.remove("d-none");
 
-      notesInput.value = currentNotes;
+      (notesInput as HTMLTextAreaElement).value = currentNotes;
 
       if (tagsDisplay) tagsDisplay.classList.add("d-none");
       if (editTagsContainer) editTagsContainer.classList.remove("d-none");
       try {
         const dbTags = await ButterflyAPI.getAllTags();
         const currentTagIds = (img.tags || []).map((t) =>
-          String(t.tagId || t.id || t)
+          String(t.tagId || t.id || t),
         );
 
         let finalHtml = "";
 
         for (const [categoryName, tagNames] of Object.entries(
-          TagManager.tagData
+          TagManager.tagData,
         )) {
           let categoryGroupHtml = "";
           let hasFoundAny = false;
@@ -272,7 +279,7 @@ export async function initHome(userRole, userEmail) {
                 t &&
                 t.tagName &&
                 t.tagName.toString().trim().toLowerCase() ===
-                  name.trim().toLowerCase()
+                  name.trim().toLowerCase(),
             );
 
             if (match) {
@@ -284,8 +291,8 @@ export async function initHome(userRole, userEmail) {
                                            value="${
                                              match.tagId
                                            }" id="edit-tag-${match.tagId}" ${
-                isChecked ? "checked" : ""
-              }>
+                                             isChecked ? "checked" : ""
+                                           }>
                                     <label class="form-check-label small text-dark" for="edit-tag-${
                                       match.tagId
                                     }">
@@ -322,23 +329,28 @@ export async function initHome(userRole, userEmail) {
         return;
       }
 
-      const editInput = document.getElementById("editNotesInput");
+      const editInput = document.getElementById(
+        "editNotesInput",
+      ) as HTMLTextAreaElement | null;
       const newNotes = editInput ? editInput.value : "";
 
       const selectedCheckboxes = document.querySelectorAll(
-        ".edit-tag-checkbox:checked"
+        ".edit-tag-checkbox:checked",
       );
       const newTagIds = Array.from(selectedCheckboxes).map((cb) =>
-        String(cb.value)
+        String((cb as HTMLInputElement).value),
       );
 
-      const oldTagIds = (img.tags || []).map((t) => String(t.id || t.tagId));
+      const oldTagIds = (img.tags || []).map((t: any) =>
+        String(t.id || t.tagId),
+      );
       const toAdd = newTagIds.filter((tagId) => !oldTagIds.includes(tagId));
       const toRemove = oldTagIds.filter((tagId) => !newTagIds.includes(tagId));
-      const noteInput =
-        document.getElementById("editNotesInput") ||
-        document.getElementById("modalNotes");
-      const updatedNotes = noteInput ? noteInput.value : "";
+
+      const modalNotesElem = document.getElementById(
+        "modalNotes",
+      ) as HTMLElement | null;
+      const updatedNotes = editInput?.value || modalNotesElem?.innerText || "";
 
       console.log("Notes being sent to server:", updatedNotes);
 
@@ -347,27 +359,30 @@ export async function initHome(userRole, userEmail) {
           //description: img.description || "",
           nathansNotes: updatedNotes,
           life_cycle:
-            document.getElementById("editLifecycleInput")?.value || "Adult",
+            (
+              document.getElementById(
+                "editLifecycleInput",
+              ) as HTMLTextAreaElement
+            )?.value || "Adult",
         });
 
         const tagPromises = [
           ...toAdd.map((tagId) => ButterflyAPI.addTagToImage(tagId, id)),
           ...toRemove.map((tagId) =>
-            ButterflyAPI.removeTagFromImage(tagId, id)
+            ButterflyAPI.removeTagFromImage(tagId, id),
           ),
         ];
 
         await Promise.all(tagPromises);
         alert("Update Successful!");
-        const freshSpecies = await ButterflyAPI.getSpeciesById(
-          currentSpeciesId
-        );
+        const freshSpecies =
+          await ButterflyAPI.getSpeciesById(currentSpeciesId);
         await showSpeciesView(freshSpecies);
 
         bootstrap.Modal.getInstance(
-          document.getElementById("imageDetailsModal")
+          document.getElementById("imageDetailsModal"),
         ).hide();
-      } catch (err) {
+      } catch (err: any) {
         console.error("Save failed:", err);
         alert("Error saving: " + err.message);
       }
@@ -394,17 +409,26 @@ export async function initHome(userRole, userEmail) {
       //workaround for attributes
       editSpeciesBtn.onclick = () => {
         const dynamicContainer = document.getElementById(
-          "dynamicSpeciesFields"
+          "dynamicSpeciesFields",
         );
         if (dynamicContainer) dynamicContainer.innerHTML = "";
 
-        document.getElementById("editSpeciesId").value = b.id;
-        document.getElementById("editSpeciesName").value = b.name || "";
-        document.getElementById("editSpeciesScientific").value =
-          b.scientificName || "";
-        document.getElementById("editSpeciesOrder").value = b.orderName || "";
-        document.getElementById("editSpeciesFamily").value = b.family || "";
-        document.getElementById("editSpeciesGenus").value = b.genus || "";
+        (document.getElementById("editSpeciesId") as HTMLInputElement).value =
+          b.id;
+        (document.getElementById("editSpeciesName") as HTMLInputElement).value =
+          b.name || "";
+        (
+          document.getElementById("editSpeciesScientific") as HTMLInputElement
+        ).value = b.scientificName || "";
+        (
+          document.getElementById("editSpeciesOrder") as HTMLInputElement
+        ).value = b.orderName || "";
+        (
+          document.getElementById("editSpeciesFamily") as HTMLInputElement
+        ).value = b.family || "";
+        (
+          document.getElementById("editSpeciesGenus") as HTMLInputElement
+        ).value = b.genus || "";
         const fullDesc = b.description || "";
 
         const attributeRegex = /\[\[(.*?):\s*(.*?)\]\]/g;
@@ -414,19 +438,28 @@ export async function initHome(userRole, userEmail) {
           addDynamicField(match[1].trim(), match[2].trim());
         }
 
-        document.getElementById("editSpeciesDescription").value = fullDesc
-          .replace(/\[\[.*?\]\]/g, "")
-          .trim();
+        (
+          document.getElementById("editSpeciesDescription") as HTMLInputElement
+        ).value = fullDesc.replace(/\[\[.*?\]\]/g, "").trim();
       };
     }
 
-    const setMainImage = (img) => {
+    const setMainImage = (img: any) => {
       const url = img.url || "assets/img/noimage.jpg";
-      document.getElementById("speciesImage").src = url;
-      const modalImg = document.getElementById("butterflyModalImage");
+
+      const speciesImg = document.getElementById(
+        "speciesImage",
+      ) as HTMLImageElement | null;
+      if (speciesImg) speciesImg.src = url;
+
+      const modalImg = document.getElementById(
+        "butterflyModalImage",
+      ) as HTMLImageElement | null;
       if (modalImg) modalImg.src = url;
+
       const sizeElem = document.getElementById("currentImgSize");
       if (sizeElem) sizeElem.innerText = img.size || "Unknown";
+
       const lifecycleElem = document.getElementById("speciesLifecycle");
       if (lifecycleElem) lifecycleElem.innerText = img.lifecycle || "Adult";
 
@@ -454,26 +487,23 @@ export async function initHome(userRole, userEmail) {
       console.error("Could not load images for species:", err);
     }
 
-    const allImgs = fetchedImages.map((img) => {
+    const allImgs = fetchedImages.map((img: any) => {
       const noteFromBackend =
-        img.nathansNotes ||
-        img.nathan_notes ||
-        img.notes ||
-        img.nathansnotes ||
-        "";
+        img.nathansNotes || img.nathan_notes || img.notes || "";
 
       return {
         id: img.id,
         url: img.fpath,
         size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
-        lifecycle: img.lifecyclestage || "Unknown",
+        lifecycle: img.lifecycle || "Unknown",
         nathansNotes: noteFromBackend,
         tags: img.tags || [],
       };
     });
     const gridContainer = document.getElementById("speciesImages");
 
-    const renderInnerGrid = (selectedTags = "all") => {
+    const renderInnerGrid = (selectedTags: string[] | string = "all") => {
+      if (!gridContainer) return;
       gridContainer.innerHTML = "";
 
       const isShowingAll =
@@ -484,61 +514,86 @@ export async function initHome(userRole, userEmail) {
       const filtered = allImgs.filter((img) => {
         if (isShowingAll) return true;
 
-        const imageTagIds = img.tags.map((t) => String(t.tagId || t.id));
-        return selectedTags.every((id) => imageTagIds.includes(String(id)));
+        const imageTagIds = img.tags.map((t: any) => String(t.tagId || t.id));
+        const tagsArray = Array.isArray(selectedTags)
+          ? selectedTags
+          : [selectedTags];
+        return tagsArray.every((id) => imageTagIds.includes(String(id)));
       });
+
       if (filtered.length === 0) {
         gridContainer.innerHTML =
           '<p class="text-muted p-3">No images match this filter.</p>';
         return;
       }
 
-      filtered.forEach((imgObj) => {
+      filtered.forEach((imgObj: any) => {
+        // Use : any to avoid the 'never' error from before
         const col = document.createElement("div");
         col.className = "col-4 mb-2 gallery-thumb-wrapper position-relative";
         col.innerHTML = `
-                    <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
-                        <img src="${imgObj.url || "assets/img/noimage.jpg"}"
-                             style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
-                    </div>
-                    ${
-                      isAdmin
-                        ? `
-                        <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle delete-single-img-btn"
-                                style="width:24px; height:24px; padding:0; font-size:10px; z-index:5; opacity:0; transition: opacity 0.2s;"
-                                title="Delete this image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `
-                        : ""
-                    }
-                `;
-        col.querySelector("img").onclick = (e) => {
-          document
-            .querySelectorAll(".gallery-thumb-wrapper img")
-            .forEach((el) => el.classList.remove("border-primary", "border-3"));
-          e.currentTarget.classList.add("border-primary", "border-3");
-          setMainImage(imgObj);
-        };
+            <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
+                <img src="${imgObj.url || "assets/img/noimage.jpg"}"
+                     style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
+            </div>
+            ${
+              isAdmin
+                ? `
+                <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle delete-single-img-btn"
+                        style="width:24px; height:24px; padding:0; font-size:10px; z-index:5; opacity:0; transition: opacity 0.2s;"
+                        title="Delete this image">
+                    <i class="fas fa-times"></i>
+                </button>
+            `
+                : ""
+            }
+        `;
 
-        const deleteBtn = col.querySelector(".delete-single-img-btn");
-        if (deleteBtn) {
-          deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            window.handleDeleteSingleImage(imgObj.id);
+        // 1. Safe Image Selection
+        const thumbnail = col.querySelector("img") as HTMLImageElement | null;
+        if (thumbnail) {
+          thumbnail.onclick = (e: MouseEvent) => {
+            document
+              .querySelectorAll(".gallery-thumb-wrapper img")
+              .forEach((el) =>
+                (el as HTMLElement).classList.remove(
+                  "border-primary",
+                  "border-3",
+                ),
+              );
+
+            (e.currentTarget as HTMLElement).classList.add(
+              "border-primary",
+              "border-3",
+            );
+            setMainImage(imgObj);
           };
         }
 
-        col.addEventListener("mouseenter", () => {
-          if (deleteBtn) deleteBtn.style.opacity = "0.85";
-        });
-        col.addEventListener("mouseleave", () => {
-          if (deleteBtn) deleteBtn.style.opacity = "0";
-        });
+        // 2. Safe Delete Button (Your logic was good, just kept it clean!)
+        const deleteBtn = col.querySelector(
+          ".delete-single-img-btn",
+        ) as HTMLElement | null;
+        if (deleteBtn) {
+          deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            // Casting window to any is a quick fix for global functions
+            (window as any).handleDeleteSingleImage(imgObj.id);
+          };
 
-        gridContainer.appendChild(col);
+          col.addEventListener("mouseenter", () => {
+            deleteBtn.style.opacity = "0.85";
+          });
+          col.addEventListener("mouseleave", () => {
+            deleteBtn.style.opacity = "0";
+          });
+        }
+
+        // 3. Safe Append
+        if (gridContainer) {
+          gridContainer.appendChild(col);
+        }
       });
-
       if (filtered.length > 0) setMainImage(filtered[0]);
     };
 
@@ -550,8 +605,8 @@ export async function initHome(userRole, userEmail) {
         new Map(
           allImgs
             .flatMap((img) => img.tags || [])
-            .map((t) => [t.tagId || t.id, t])
-        ).values()
+            .map((t) => [t.tagId || t.id, t]),
+        ).values(),
       );
       let html = `<button class="btn btn-sm btn-primary filter-pill active" data-tag="all">All</button>`;
 
@@ -563,15 +618,18 @@ export async function initHome(userRole, userEmail) {
         }
       });
       filterBar.innerHTML = html;
-
-      filterBar.querySelectorAll(".filter-pill").forEach((btn) => {
+      filterBar.querySelectorAll(".filter-pill").forEach((el) => {
+        const btn = el as HTMLElement; // Cast the element to an HTMLElement
         btn.onclick = () => {
           const tagId = btn.getAttribute("data-tag");
 
           if (tagId === "all") {
             filterBar.querySelectorAll(".filter-pill").forEach((b) => {
-              b.classList.replace("btn-primary", "btn-outline-secondary");
-              b.classList.remove("active");
+              (b as HTMLElement).classList.replace(
+                "btn-primary",
+                "btn-outline-secondary",
+              );
+              (b as HTMLElement).classList.remove("active");
             });
             btn.classList.replace("btn-outline-secondary", "btn-primary");
             btn.classList.add("active");
@@ -580,20 +638,28 @@ export async function initHome(userRole, userEmail) {
             btn.classList.toggle("btn-primary");
             btn.classList.toggle("btn-outline-secondary");
 
-            const allBtn = filterBar.querySelector('[data-tag="all"]');
-            allBtn.classList.replace("btn-primary", "btn-outline-secondary");
-            allBtn.classList.remove("active");
+            const allBtn = filterBar.querySelector(
+              '[data-tag="all"]',
+            ) as HTMLElement; // Cast here too
+            if (allBtn) {
+              allBtn.classList.replace("btn-primary", "btn-outline-secondary");
+              allBtn.classList.remove("active");
+            }
           }
 
           const activePills = filterBar.querySelectorAll(".filter-pill.active");
-          const selectedIds = Array.from(activePills).map((p) =>
-            p.getAttribute("data-tag")
+          const selectedIds = Array.from(activePills).map(
+            (p) => p.getAttribute("data-tag") as string,
           );
 
           if (selectedIds.length === 0) {
-            const allBtn = filterBar.querySelector('[data-tag="all"]');
-            allBtn.classList.replace("btn-outline-secondary", "btn-primary");
-            allBtn.classList.add("active");
+            const allBtn = filterBar.querySelector(
+              '[data-tag="all"]',
+            ) as HTMLElement;
+            if (allBtn) {
+              allBtn.classList.replace("btn-outline-secondary", "btn-primary");
+              allBtn.classList.add("active");
+            }
             renderInnerGrid("all");
           } else {
             renderInnerGrid(selectedIds);
@@ -628,7 +694,7 @@ export async function initHome(userRole, userEmail) {
             myTeam = t;
             const keys = await ButterflyAPI.getAllApiKeys();
             const teamKey = keys.find(
-              (k) => k.teamName === t.name && k.active !== false
+              (k) => k.teamName === t.name && k.active !== false,
             );
             if (teamKey) myApiKey = teamKey.keyVal;
             break;
@@ -656,7 +722,7 @@ export async function initHome(userRole, userEmail) {
       const membersHtml = members
         .map(
           (m) =>
-            `<span class="badge bg-primary fs-6 me-2 mb-2">${m.username}</span>`
+            `<span class="badge bg-primary fs-6 me-2 mb-2">${m.username}</span>`,
         )
         .join("");
 
@@ -690,13 +756,13 @@ export async function initHome(userRole, userEmail) {
       ButterflyAPI.getAllTeams(),
     ]);
     users.sort((a, b) =>
-      a.username.toLowerCase().localeCompare(b.username.toLowerCase())
+      a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
     );
     allCachedUsers = users;
 
     globalUserTeamMap = {};
     const memberResults = await Promise.all(
-      teams.map((t) => ButterflyAPI.getTeamMembers(t.id))
+      teams.map((t) => ButterflyAPI.getTeamMembers(t.id)),
     );
     teams.forEach((t, i) => {
       for (const m of memberResults[i]) {
@@ -738,9 +804,10 @@ export async function initHome(userRole, userEmail) {
   const adminUserSearch = document.getElementById("adminUserSearch");
   if (adminUserSearch) {
     adminUserSearch.addEventListener("input", (e) => {
-      const query = e.target.value.toLowerCase();
-      const filtered = allCachedUsers.filter((u) =>
-        u.username.toLowerCase().includes(query)
+      const query = (e.target as HTMLInputElement).value.toLowerCase();
+
+      const filtered = allCachedUsers.filter((u: any) =>
+        u.username.toLowerCase().includes(query),
       );
       renderAllUsersTable(filtered);
     });
@@ -768,7 +835,7 @@ export async function initHome(userRole, userEmail) {
     });
 
     const membersByTeam = await Promise.all(
-      teams.map((t) => ButterflyAPI.getTeamMembers(t.id))
+      teams.map((t) => ButterflyAPI.getTeamMembers(t.id)),
     );
 
     for (let idx = 0; idx < teams.length; idx++) {
@@ -845,8 +912,8 @@ export async function initHome(userRole, userEmail) {
                                     onclick="window.regenerateTeamKey('${
                                       team.name
                                     }', '${team.projectName}', '${
-          team.semester
-        }')">
+                                      team.semester
+                                    }')">
                                 Regenerate
                             </button>
                             <button class="btn btn-sm btn-outline-danger" style="font-size:0.72rem;"
@@ -901,19 +968,23 @@ export async function initHome(userRole, userEmail) {
 
   window.toggleUserRole = async (userId, currentRole) => {
     const targetUser = allCachedUsers.find(
-      (u) => u.userId.toString() === userId.toString()
-    );
+      (u: any) => u.userId.toString() === userId.toString(),
+    ) as any; // Cast the result to any here too!
+
     if (currentRole === "ADMIN") {
       const adminCount = allCachedUsers.filter(
-        (u) => (u.uType || u.userType || u.utype) === "ADMIN"
+        (u: any) => (u.uType || u.userType || u.utype) === "ADMIN",
       ).length;
-      if (adminCount <= 1)
+
+      if (adminCount <= 1) {
         return alert(
-          "Action Denied: The system must always have at least one administrator."
+          "Action Denied: The system must always have at least one administrator.",
         );
+      }
+
       if (targetUser && targetUser.email === userEmail) {
         const proceed = confirm(
-          "WARNING: You are about to remove your own admin privileges! You will be logged out immediately if you proceed. Do you want to continue?"
+          "WARNING: You are about to remove your own admin privileges! You will be logged out immediately if you proceed. Do you want to continue?",
         );
         if (!proceed) return;
         try {
@@ -941,12 +1012,12 @@ export async function initHome(userRole, userEmail) {
 
   window.addStudentToTeam = async (teamId) => {
     const select = document.getElementById(`assignStudentSelect-${teamId}`);
-    const userId = select.value;
+    const userId = (select as HTMLInputElement).value;
     if (!userId) return alert("Please select a student first.");
     try {
       await ButterflyAPI.addTeamMember(teamId, userId);
       await loadAdminData();
-    } catch (error) {
+    } catch (error: any) {
       alert("Could not add student: " + error.message);
     }
   };
@@ -956,7 +1027,7 @@ export async function initHome(userRole, userEmail) {
       try {
         await ButterflyAPI.removeTeamMember(teamId, userId);
         await loadAdminData();
-      } catch (error) {
+      } catch (error: any) {
         alert("Could not remove student: " + error.message);
       }
     }
@@ -976,13 +1047,13 @@ export async function initHome(userRole, userEmail) {
       confirm(
         "Regenerate the API key for " +
           teamName +
-          "? The old key will stop working immediately."
+          "? The old key will stop working immediately.",
       )
     ) {
       try {
         await ButterflyAPI.generateApiKey({ teamName, projectName, semester });
         await loadAdminData();
-      } catch (err) {
+      } catch (err: any) {
         alert("Failed to regenerate key: " + err.message);
       }
     }
@@ -991,13 +1062,13 @@ export async function initHome(userRole, userEmail) {
   window.deleteApiKey = async (keyId) => {
     if (
       confirm(
-        "Delete this API key permanently? Students using it will lose access."
+        "Delete this API key permanently? Students using it will lose access.",
       )
     ) {
       try {
         await ButterflyAPI.deleteApiKey(keyId);
         await loadAdminData();
-      } catch (err) {
+      } catch (err: any) {
         alert("Failed to delete key: " + err.message);
       }
     }
@@ -1009,31 +1080,32 @@ export async function initHome(userRole, userEmail) {
         await ButterflyAPI.deleteImage(imageId);
         alert("Image Deleted");
         if (currentSpeciesId) {
-          const freshButterfly = await ButterflyAPI.getSpeciesById(
-            currentSpeciesId
-          );
+          const freshButterfly =
+            await ButterflyAPI.getSpeciesById(currentSpeciesId);
           await showSpeciesView(freshButterfly);
         } else {
           location.reload();
         }
-      } catch (err) {
+      } catch (err: any) {
         alert("Error: " + err.message);
       }
     }
   };
 
-  window.openExtendModal = (keyId) => {
+  window.openExtendModal = (keyId: string | number) => {
     const extendInput = document.getElementById("extendKeyId");
-    if (extendInput) extendInput.value = keyId;
+    if (extendInput) (extendInput as HTMLInputElement).value = String(keyId);
     const modalElem = document.getElementById("adminExtendKeyModal");
     if (modalElem) new bootstrap.Modal(modalElem).show();
   };
 
   window.openEditUserModal = (userId, currentUsername, currentEmail) => {
-    document.getElementById("editUserId").value = userId;
-    document.getElementById("editUsername").value = currentUsername;
-    document.getElementById("editEmail").value = currentEmail;
-    document.getElementById("editPassword").value = ""; 
+    (document.getElementById("editUserId") as HTMLInputElement).value = userId;
+    (document.getElementById("editUsername") as HTMLInputElement).value =
+      currentUsername;
+    (document.getElementById("editEmail") as HTMLInputElement).value =
+      currentEmail;
+    (document.getElementById("editPassword") as HTMLInputElement).value = "";
     new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
   };
 
@@ -1042,15 +1114,20 @@ export async function initHome(userRole, userEmail) {
     adminCreateTeamForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const teamData = {
-        name: document.getElementById("newCreateTeamName").value,
-        projectName: document.getElementById("newCreateProjectName").value,
-        semester: document.getElementById("newCreateSemester").value,
+        name: (document.getElementById("newCreateTeamName") as HTMLInputElement)
+          .value,
+        projectName: (
+          document.getElementById("newCreateProjectName") as HTMLInputElement
+        ).value,
+        semester: (
+          document.getElementById("newCreateSemester") as HTMLInputElement
+        ).value,
       };
       await ButterflyAPI.createTeam(teamData);
       await loadAdminData();
-      e.target.reset();
+      (e.target as HTMLFormElement).reset();
       bootstrap.Modal.getInstance(
-        document.getElementById("adminCreateTeamModal")
+        document.getElementById("adminCreateTeamModal"),
       ).hide();
     });
   }
@@ -1059,10 +1136,18 @@ export async function initHome(userRole, userEmail) {
   if (adminAddUserForm) {
     adminAddUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const usernameVal = document.getElementById("adminNewUsername").value;
-      const emailVal = document.getElementById("adminNewEmail").value;
-      const passVal = document.getElementById("adminNewPassword").value;
-      const roleVal = document.getElementById("adminNewRole").value;
+      const usernameVal = (
+        document.getElementById("adminNewUsername") as HTMLInputElement
+      ).value;
+      const emailVal = (
+        document.getElementById("adminNewEmail") as HTMLInputElement
+      ).value;
+      const passVal = (
+        document.getElementById("adminNewPassword") as HTMLInputElement
+      ).value;
+      const roleVal = (
+        document.getElementById("adminNewRole") as HTMLInputElement
+      ).value;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailVal))
@@ -1076,7 +1161,7 @@ export async function initHome(userRole, userEmail) {
         const allUsers = await ButterflyAPI.getAllUsers();
         if (
           allUsers.some(
-            (u) => u.username.toLowerCase() === usernameVal.toLowerCase()
+            (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
           )
         ) {
           return alert("This username already exists.");
@@ -1088,12 +1173,12 @@ export async function initHome(userRole, userEmail) {
           utype: roleVal,
         });
         await loadAdminData();
-        e.target.reset();
+        (e.target as HTMLFormElement).reset();
         bootstrap.Modal.getInstance(
-          document.getElementById("adminAddUserModal")
+          document.getElementById("adminAddUserModal"),
         ).hide();
         alert("User successfully created!");
-      } catch (error) {
+      } catch (error: any) {
         alert("Could not create user: " + error.message);
       }
     });
@@ -1103,9 +1188,14 @@ export async function initHome(userRole, userEmail) {
   if (adminEditUserForm) {
     adminEditUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const userId = document.getElementById("editUserId").value;
-      const newUsername = document.getElementById("editUsername").value;
-      const newEmail = document.getElementById("editEmail").value;
+      const userId = (document.getElementById("editUserId") as HTMLInputElement)
+        .value;
+      const newUsername = (
+        document.getElementById("editUsername") as HTMLInputElement
+      ).value;
+      const newEmail = (
+        document.getElementById("editEmail") as HTMLInputElement
+      ).value;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(newEmail))
@@ -1119,7 +1209,7 @@ export async function initHome(userRole, userEmail) {
           allUsers.some(
             (u) =>
               u.username.toLowerCase() === newUsername.toLowerCase() &&
-              u.userId.toString() !== userId.toString()
+              u.userId.toString() !== userId.toString(),
           )
         ) {
           return alert("This username already exists.");
@@ -1127,9 +1217,9 @@ export async function initHome(userRole, userEmail) {
         await ButterflyAPI.updateUsername(userId, newUsername);
         await ButterflyAPI.updateEmail(userId, newEmail);
 
-        const newPassword = document
-          .getElementById("editPassword")
-          .value.trim();
+        const newPassword = (
+          document.getElementById("editPassword") as HTMLInputElement
+        ).value.trim();
         if (newPassword !== "") {
           if (newPassword.length < 7)
             return alert("Password must be at least 7 characters long.");
@@ -1137,7 +1227,7 @@ export async function initHome(userRole, userEmail) {
         }
         await loadAdminData();
         bootstrap.Modal.getInstance(
-          document.getElementById("adminEditUserModal")
+          document.getElementById("adminEditUserModal"),
         ).hide();
         alert("User successfully updated!");
       } catch (error) {
@@ -1150,12 +1240,16 @@ export async function initHome(userRole, userEmail) {
     adminGenerateKeyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       await ButterflyAPI.generateApiKey({
-        teamName: document.getElementById("newTeamName").value,
-        projectName: document.getElementById("newProjectName").value,
-        semester: document.getElementById("newSemester").value,
+        teamName: (document.getElementById("newTeamName") as HTMLInputElement)
+          .value,
+        projectName: (
+          document.getElementById("newProjectName") as HTMLInputElement
+        ).value,
+        semester: (document.getElementById("newSemester") as HTMLInputElement)
+          .value,
       });
       await loadAdminData();
-      e.target.reset();
+      (e.target as HTMLFormElement).reset();
       const modalElem = document.getElementById("adminGenerateKeyModal");
       if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
     });
@@ -1164,11 +1258,14 @@ export async function initHome(userRole, userEmail) {
   if (adminExtendKeyForm) {
     adminExtendKeyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const keyId = document.getElementById("extendKeyId").value;
-      const months = document.getElementById("extendMonths").value;
+      const keyId = (document.getElementById("extendKeyId") as HTMLInputElement)
+        .value;
+      const months = (
+        document.getElementById("extendMonths") as HTMLInputElement
+      ).value;
       await ButterflyAPI.extendApiKey(keyId, months);
       await loadAdminData();
-      e.target.reset();
+      (e.target as HTMLFormElement).reset();
       const modalElem = document.getElementById("adminExtendKeyModal");
       if (modalElem) bootstrap.Modal.getInstance(modalElem).hide();
     });
@@ -1189,22 +1286,28 @@ export async function initHome(userRole, userEmail) {
           const newSpeciesFields = document.getElementById("newSpeciesFields");
           if (newSpeciesFields) {
             newSpeciesFields.style.display =
-              selector.value === "NEW" ? "block" : "none";
+              (selector as HTMLInputElement).value === "NEW" ? "block" : "none";
           }
           selector.onchange = () => {
             if (newSpeciesFields) {
               newSpeciesFields.style.display =
-                selector.value === "NEW" ? "block" : "none";
+                (selector as HTMLInputElement).value === "NEW"
+                  ? "block"
+                  : "none";
             }
           };
         }
       });
     }
 
-    universalUploadForm.addEventListener("submit", async (e) => {
+    universalUploadForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      const selector = document.getElementById("speciesSelector");
-      const fileInput = document.getElementById("newImageFile");
+      const selector = document.getElementById(
+        "speciesSelector",
+      ) as HTMLSelectElement;
+      const fileInput = document.getElementById(
+        "newImageFile",
+      ) as HTMLInputElement;
 
       if (!fileInput.files || fileInput.files.length === 0) {
         return alert("Please select at least one image file.");
@@ -1213,37 +1316,48 @@ export async function initHome(userRole, userEmail) {
       let speciesId = selector.value;
 
       if (speciesId === "NEW") {
-        const name = document.getElementById("newName").value.trim();
+        const name = (
+          document.getElementById("newName") as HTMLInputElement
+        ).value.trim();
         if (!name)
           return alert("Please enter a common name for the new species.");
         try {
           const newSpecies = await ButterflyAPI.create({
             name: name,
-            scientificName: document.getElementById("newScientific").value,
-            description: document.getElementById("newDescription").value,
+            scientificName: (
+              document.getElementById("newScientific") as HTMLInputElement
+            ).value,
+            description: (
+              document.getElementById("newDescription") as HTMLTextAreaElement
+            ).value,
             orderName: document.getElementById("newOrderName")
-              ? document.getElementById("newOrderName").value
+              ? (document.getElementById("newOrderName") as HTMLInputElement)
+                  .value
               : "",
             family: document.getElementById("newFamily")
-              ? document.getElementById("newFamily").value
+              ? (document.getElementById("newFamily") as HTMLInputElement).value
               : "",
             genus: document.getElementById("newGenus")
-              ? document.getElementById("newGenus").value
+              ? (document.getElementById("newGenus") as HTMLInputElement).value
               : "",
           });
           speciesId = newSpecies.id;
           butterflies = await ButterflyAPI.getAll();
           refreshGallery();
-        } catch (err) {
+        } catch (err: any) {
           return alert("Failed to create species: " + err.message);
         }
       }
 
       const checkedBoxes = universalUploadForm.querySelectorAll(
-        'input[name="tagIds"]:checked'
+        'input[name="tagIds"]:checked',
       );
-      const tagIds = Array.from(checkedBoxes).map((cb) => cb.value);
-      const nathansNotes = document.getElementById("nathanNotes").value;
+      const tagIds = Array.from(checkedBoxes).map(
+        (cb) => (cb as HTMLInputElement).value,
+      );
+      const nathansNotes = (
+        document.getElementById("nathanNotes") as HTMLTextAreaElement
+      ).value;
 
       const files = Array.from(fileInput.files);
       let successCount = 0;
@@ -1271,25 +1385,26 @@ export async function initHome(userRole, userEmail) {
           successCount +
             " image" +
             (successCount > 1 ? "s" : "") +
-            " uploaded successfully!"
+            " uploaded successfully!",
         );
       } else {
         alert(
           successCount +
             " uploaded, " +
             failCount +
-            " failed. Check console for details."
+            " failed. Check console for details.",
         );
       }
 
-      e.target.reset();
+      (e.target as HTMLFormElement).reset();
       const selectorAfterReset = document.getElementById("speciesSelector");
-      if (selectorAfterReset) selectorAfterReset.value = "NEW";
+      if (selectorAfterReset)
+        (selectorAfterReset as HTMLInputElement).value = "NEW";
       const newSpeciesFields = document.getElementById("newSpeciesFields");
       if (newSpeciesFields) newSpeciesFields.style.display = "block";
 
       bootstrap.Modal.getInstance(
-        document.getElementById("addButterflyModal")
+        document.getElementById("addButterflyModal"),
       ).hide();
       butterflies = await ButterflyAPI.getAll();
       refreshGallery();
@@ -1297,20 +1412,27 @@ export async function initHome(userRole, userEmail) {
   }
 
   const addImageToSpeciesForm = document.getElementById(
-    "addImageToSpeciesForm"
+    "addImageToSpeciesForm",
   );
   if (addImageToSpeciesForm) {
     addImageToSpeciesForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const speciesId = document.getElementById("targetSpeciesId").value;
-      const fileInput = document.getElementById("speciesImageFiles");
-      const notes = document.getElementById("speciesImageNotes").value;
+      const speciesId = (
+        document.getElementById("targetSpeciesId") as HTMLInputElement
+      ).value;
+      const fileInput = document.getElementById(
+        "speciesImageFiles",
+      ) as HTMLInputElement;
+      const notes = (
+        document.getElementById("speciesImageNotes") as HTMLInputElement
+      ).value;
 
       if (!fileInput.files || fileInput.files.length === 0) {
         return alert("Please select at least one image.");
       }
 
-      const files = Array.from(fileInput.files);
+      const files: File[] = Array.from(fileInput.files as FileList);
+
       let successCount = 0;
       let failCount = 0;
 
@@ -1331,11 +1453,11 @@ export async function initHome(userRole, userEmail) {
       alert(
         `${successCount} image(s) uploaded${
           failCount > 0 ? `, ${failCount} failed` : ""
-        }!`
+        }!`,
       );
-      e.target.reset();
+      (e.target as HTMLFormElement).reset();
       bootstrap.Modal.getInstance(
-        document.getElementById("addImageToSpeciesModal")
+        document.getElementById("addImageToSpeciesModal"),
       ).hide();
 
       const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
@@ -1348,9 +1470,12 @@ export async function initHome(userRole, userEmail) {
   if (editSpeciesForm) {
     editSpeciesForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const speciesId = document.getElementById("editSpeciesId").value;
+      const speciesId = (
+        document.getElementById("editSpeciesId") as HTMLInputElement
+      ).value;
       let currentDescValue =
-        document.getElementById("editSpeciesDescription").value || "";
+        (document.getElementById("editSpeciesDescription") as HTMLInputElement)
+          .value || "";
       let cleanBaseDescription = currentDescValue
         .replace(/\[\[.*?\]\]/g, "")
         .trim();
@@ -1359,7 +1484,7 @@ export async function initHome(userRole, userEmail) {
 
       customInputs.forEach((input) => {
         const label = input.getAttribute("data-label");
-        const value = input.value;
+        const value = (input as HTMLInputElement).value;
         if (label && value && value.trim() !== "") {
           extraString += ` [[${label}: ${value.trim()}]]`;
         }
@@ -1368,32 +1493,40 @@ export async function initHome(userRole, userEmail) {
       console.log("Total Description Length:", finalDescription.length);
 
       const data = {
-        name: document.getElementById("editSpeciesName").value,
+        name: (document.getElementById("editSpeciesName") as HTMLInputElement)
+          .value,
         scientificName:
-          document.getElementById("editSpeciesScientific").value || "",
+          (document.getElementById("editSpeciesScientific") as HTMLInputElement)
+            .value || "",
         description: finalDescription,
-        orderName: document.getElementById("editSpeciesOrder").value || "",
-        family: document.getElementById("editSpeciesFamily").value || "",
-        genus: document.getElementById("editSpeciesGenus").value || "",
+        orderName:
+          (document.getElementById("editSpeciesOrder") as HTMLInputElement)
+            .value || "",
+        family:
+          (document.getElementById("editSpeciesFamily") as HTMLInputElement)
+            .value || "",
+        genus:
+          (document.getElementById("editSpeciesGenus") as HTMLInputElement)
+            .value || "",
       };
 
       try {
         await ButterflyAPI.updateSpecies(speciesId, data);
-            const editModal = document.getElementById("editSpeciesModal");
+        const editModal = document.getElementById("editSpeciesModal");
         const modalInstance = bootstrap.Modal.getInstance(editModal);
         if (modalInstance) modalInstance.hide();
-        butterflies = await ButterflyAPI.getAll(); 
-        
+        butterflies = await ButterflyAPI.getAll();
+
         const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
         await showSpeciesView(freshSpecies);
-    
+
         if (typeof refreshGallery === "function") refreshGallery();
-    
+
         alert("Species updated successfully!");
-    } catch (err) {
+      } catch (err: any) {
         console.error("Update failed:", err);
         alert("Update failed: " + err.message);
-    }
+      }
     });
   }
 
@@ -1401,7 +1534,9 @@ export async function initHome(userRole, userEmail) {
   if (clearFiltersBtn) {
     clearFiltersBtn.addEventListener("click", () => {
       const currentSpecies = butterflies.find(
-        (b) => b.name === document.getElementById("speciesName").innerText
+        (b) =>
+          b.name ===
+          (document.getElementById("speciesName") as HTMLElement).innerText,
       );
       if (currentSpecies) showSpeciesView(currentSpecies);
     });
@@ -1454,22 +1589,30 @@ export async function initHome(userRole, userEmail) {
 
   const applyAllFilters = async () => {
     const checkedOrders = Array.from(
-      document.querySelectorAll("#filterOrderContainer input:checked")
-    ).map((cb) => cb.value);
+      document.querySelectorAll("#filterOrderContainer input:checked"),
+    ).map((cb) => (cb as HTMLInputElement).value);
     const checkedFamilies = Array.from(
-      document.querySelectorAll("#filterFamilyContainer input:checked")
-    ).map((cb) => cb.value);
+      document.querySelectorAll("#filterFamilyContainer input:checked"),
+    ).map((cb) => (cb as HTMLInputElement).value);
 
-    document.getElementById("orderBtnText").innerText =
-      checkedOrders.length > 0
-        ? `${checkedOrders.length} Selected`
-        : "All Orders";
-    document.getElementById("familyBtnText").innerText =
-      checkedFamilies.length > 0
-        ? `${checkedFamilies.length} Selected`
-        : "All Families";
+    const orderTextElem = document.getElementById("orderBtnText");
+    if (orderTextElem) {
+      orderTextElem.innerText =
+        checkedOrders.length > 0
+          ? `${checkedOrders.length} Selected`
+          : "All Orders";
+    }
+    const familyTextElem = document.getElementById("familyBtnText");
+    if (familyTextElem) {
+      familyTextElem.innerText =
+        checkedFamilies.length > 0
+          ? `${checkedFamilies.length} Selected`
+          : "All Families";
+    }
 
-    const query = searchInput ? searchInput.value.toLowerCase() : "";
+    const query = searchInput
+      ? (searchInput as HTMLInputElement).value.toLowerCase()
+      : "";
 
     let filtered = butterflies;
 
@@ -1532,13 +1675,17 @@ export async function initHome(userRole, userEmail) {
         const searchBox = document.getElementById(inputId);
         if (searchBox) {
           searchBox.addEventListener("input", (e) => {
-            const term = e.target.value.toLowerCase();
+            const term = (e.target as HTMLInputElement).value.toLowerCase();
             const items = document.querySelectorAll(
-              `#${containerId} .filter-item`
+              `#${containerId} .filter-item`,
             );
             items.forEach((item) => {
-              const label = item.querySelector("label").innerText.toLowerCase();
-              item.style.display = label.includes(term) ? "block" : "none";
+              const label = (
+                item.querySelector("label") as HTMLLabelElement
+              ).innerText.toLowerCase();
+              (item as HTMLElement).style.display = label.includes(term)
+                ? "block"
+                : "none";
             });
           });
         }
@@ -1560,12 +1707,13 @@ export async function initHome(userRole, userEmail) {
 
   const nameToggleBtn = document.getElementById("nameToggleBtn");
 
-
   if (nameToggleBtn) {
     nameToggleBtn.addEventListener("click", () => {
       if (currentDisplayMode === "common") {
         currentDisplayMode = "scientific";
-        searchInput.placeholder = "Search by scientific name...";
+
+        if (searchInput)
+          searchInput.placeholder = "Search by scientific name...";
 
         nameToggleBtn.style.backgroundColor = "white";
         nameToggleBtn.style.color = "#1abc9c";
@@ -1574,7 +1722,8 @@ export async function initHome(userRole, userEmail) {
         nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-1"></i><span class="fw-bold small">Scientific</span>`;
       } else {
         currentDisplayMode = "common";
-        searchInput.placeholder = "Search by common name...";
+
+        if (searchInput) searchInput.placeholder = "Search by common name...";
 
         nameToggleBtn.style.backgroundColor = "#1abc9c";
         nameToggleBtn.style.color = "white";
@@ -1585,46 +1734,38 @@ export async function initHome(userRole, userEmail) {
       applyAllFilters();
     });
 
-    //for adding a base category
-    document.getElementById("addNewSpeciesFieldBtn").onclick = () => {
-      const fieldName = prompt(
-        "What is the name of the new category? (e.g. Host Plant, Habitat)"
-      );
-      if (!fieldName) return;
-
-      const container = document.getElementById("dynamicSpeciesFields");
-      const safeName = fieldName.replace(/\s+/g, "_").toLowerCase();
-
-      const html = `
-        <div class="mb-3 dynamic-field-wrapper">
-            <label class="form-label fw-bold d-flex justify-content-between">
-                ${fieldName}
-                <button type="button" class="btn-close small" style="font-size: 0.6rem;" onclick="this.parentElement.parentElement.remove()"></button>
-            </label>
-            <input type="text" class="form-control custom-species-input" 
-                   data-label="${fieldName}" 
-                   placeholder="Enter ${fieldName}...">
-        </div>
-    `;
-      container.insertAdjacentHTML("beforeend", html);
-    };
-
-    //for the base category but i dont think backend is updated
-    const addFieldBtn = document.getElementById("addNewSpeciesFieldBtn");
+    // Logic for adding a custom attribute field in the Edit Species modal
+    const addFieldBtn = document.getElementById(
+      "addNewSpeciesFieldBtn",
+    ) as HTMLElement | null;
     if (addFieldBtn) {
       addFieldBtn.onclick = () => {
         const fieldName = prompt(
-          "What is the name of the new category? (e.g. Host Plant, Habitat)"
+          "What is the name of the new category? (e.g. Host Plant, Habitat)",
         );
+
         if (fieldName && fieldName.trim() !== "") {
-          addDynamicField(fieldName.trim());
+          const container = document.getElementById("dynamicSpeciesFields");
+          if (container) {
+            const html = `
+              <div class="mb-3 dynamic-field-wrapper">
+                  <label class="form-label fw-bold d-flex justify-content-between">
+                      ${fieldName.trim()}
+                      <button type="button" class="btn-close small" style="font-size: 0.6rem;" 
+                              onclick="this.parentElement.parentElement.remove()"></button>
+                  </label>
+                  <input type="text" class="form-control custom-species-input" 
+                         data-label="${fieldName.trim()}" 
+                         placeholder="Enter ${fieldName.trim()}...">
+              </div>`;
+            container.insertAdjacentHTML("beforeend", html);
+          }
         }
       };
     }
-
     await initFilters();
     const deleteSpeciesFullBtn = document.getElementById(
-      "deleteSpeciesFullBtn"
+      "deleteSpeciesFullBtn",
     );
     if (deleteSpeciesFullBtn) {
       deleteSpeciesFullBtn.addEventListener("click", async () => {
@@ -1637,7 +1778,7 @@ export async function initHome(userRole, userEmail) {
             await ButterflyAPI.delete(id);
             alert("Species deleted successfully.");
             location.reload();
-          } catch (err) {
+          } catch (err: any) {
             alert("Delete failed: " + err.message);
           }
         }
