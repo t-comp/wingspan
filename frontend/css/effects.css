@@ -430,3 +430,15 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+.drag-drop-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+.drag-drop-transition.drag-active {
+  background-color: #f1f8f9 !important; /* Very light teal */
+  border-color: #0399b0 !important; /* WingSpan Teal */
+  border-width: 2px !important;
+  transform: scale(1.02); /* Slight pop effect */
+  box-shadow: 0 0 15px rgba(3, 153, 176, 0.3) !important;
+}

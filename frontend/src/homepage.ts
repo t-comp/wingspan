@@ -16,8 +16,14 @@ export async function initHome(userRole, userEmail) {
   let currentFilteredData = [];
   let currentPage = 1;
   const itemsPerPage = 40;
-  let selectedUploadFiles: File[] = [];
-
+  interface UploadFileData {
+    file: File;
+    url: string;
+    notes: string;
+    tags: string[];
+  }
+  let selectedUploadFiles: UploadFileData[] = [];
+  let currentSelectedFileIndex = -1;
   let butterflies = await ButterflyAPI.getAll();
   console.log("DATABASES SPECIES LIST:", butterflies);
 
@@ -1376,40 +1382,58 @@ export async function initHome(userRole, userEmail) {
 
   const universalUploadForm = document.getElementById("universalUploadForm");
 
-  const autoCapFields = [
-    "newName",
-    "newScientific",
-    "newOrderName",
-    "newFamily",
-    "newGenus",
-  ];
+  // Removed "newScientific" from the general capitalize-everything list
+  const autoCapFields = ["newName", "newOrderName", "newFamily", "newGenus"];
   autoCapFields.forEach((id) => {
     const input = document.getElementById(id) as HTMLInputElement;
     if (input) {
       input.addEventListener("input", function (e) {
         const target = e.target as HTMLInputElement;
-        // Save the cursor position so it doesn't jump to the end of the line while typing
         const start = target.selectionStart;
         const end = target.selectionEnd;
-
-        // Capitalize the first letter of every word
         target.value = target.value.replace(/\b\w/g, (char) =>
           char.toUpperCase(),
         );
-
-        // Restore cursor position
         target.setSelectionRange(start, end);
       });
     }
   });
 
+  // Custom Scientific Name Formatting & Genus Auto-fill
   const sciInput = document.getElementById("newScientific") as HTMLInputElement;
   const genusInput = document.getElementById("newGenus") as HTMLInputElement;
-  if (sciInput && genusInput) {
-    sciInput.addEventListener("input", (e) => {
-      // Grab the first word typed and dump it into the Genus field
-      const words = (e.target as HTMLInputElement).value.trim().split(/\s+/);
-      genusInput.value = words[0] ? words[0] : "";
+
+  if (sciInput) {
+    sciInput.addEventListener("input", function (e) {
+      const target = e.target as HTMLInputElement;
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+
+      // Split by spaces to handle individual words as they type
+      let words = target.value.split(" ");
+
+      if (words.length > 0 && words[0].length > 0) {
+        // Capitalize first letter of first word, lowercase the rest of it
+        words[0] =
+          words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+      }
+
+      // Force lowercase on the second word (and any accidental subsequent words)
+      for (let i = 1; i < words.length; i++) {
+        words[i] = words[i].toLowerCase();
+      }
+
+      // Rejoin and set value
+      target.value = words.join(" ");
+
+      // Restore cursor position so it doesn't jump to the end of the input
+      target.setSelectionRange(start, end);
+
+      // Handle the Genus auto-fill
+      if (genusInput) {
+        const trimmedWords = target.value.trim().split(/\s+/);
+        genusInput.value = trimmedWords[0] ? trimmedWords[0] : "";
+      }
     });
   }
 
@@ -1430,22 +1454,28 @@ export async function initHome(userRole, userEmail) {
           "searchSpeciesInput",
         ) as HTMLInputElement;
 
+        // --- Phase Elements ---
+        const phase1 = document.getElementById("uploadPhase1");
+        const phase2 = document.getElementById("uploadPhase2");
+        const btnNext = document.getElementById("btnNextToPhase2");
+        const btnBack = document.getElementById("btnBackToPhase1");
+
+        // --- Reset Wizard to Phase 1 ---
+        if (phase1 && phase2) {
+          phase1.classList.remove("d-none");
+          phase2.classList.add("d-none");
+        }
+
         if (!listContainer || !hiddenInput || !btnText) return;
 
-        // Reset everything to default when modal opens
+        // Reset species defaults
         hiddenInput.value = "NEW";
         btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
         if (newSpeciesFields) newSpeciesFields.style.display = "block";
         if (searchInput) searchInput.value = "";
 
-        // Populate the list
-        let html = `
-              <button type="button" class="dropdown-item species-option border-bottom py-2" data-value="NEW">
-                  <span class="text-primary fw-bold">Create New Species</span>
-              </button>
-          `;
-
-        // Create a copy of the butterflies array and sort it based on the active display mode
+        // Build dropdown list
+        let html = `<button type="button" class="dropdown-item species-option border-bottom py-2" data-value="NEW"><span class="text-primary fw-bold">Create New Species</span></button>`;
         const sortedForDropdown = [...butterflies].sort((a, b) => {
           const nameA =
             currentDisplayMode === "scientific" && a.scientificName
@@ -1460,35 +1490,25 @@ export async function initHome(userRole, userEmail) {
             .localeCompare((nameB || "").toLowerCase());
         });
 
-        // Loop through the sorted array to build the dropdown options
         sortedForDropdown.forEach((s) => {
-          // Pick the correct name to display on the button
           const displayName =
             currentDisplayMode === "scientific" && s.scientificName
               ? s.scientificName
               : s.name;
-
           html += `<button type="button" class="dropdown-item species-option py-2" data-value="${s.id}">${displayName}</button>`;
         });
-
         listContainer.innerHTML = html;
 
-        // Handle Selecting an Item
+        // Dropdown selection
         listContainer.querySelectorAll(".species-option").forEach((item) => {
           item.addEventListener("click", (e) => {
             const btn = e.currentTarget as HTMLElement;
             const val = btn.getAttribute("data-value") || "NEW";
-
-            // Update hidden input and button text
             hiddenInput.value = val;
             btnText.innerHTML = btn.innerHTML;
-
-            // Toggle "New Species" form fields
             if (newSpeciesFields) {
               newSpeciesFields.style.display = val === "NEW" ? "block" : "none";
             }
-
-            // Close the dropdown manually
             const bsDropdown = bootstrap.Dropdown.getInstance(
               document.getElementById("speciesDropdownBtn"),
             );
@@ -1496,17 +1516,14 @@ export async function initHome(userRole, userEmail) {
           });
         });
 
-        // Handle Searching/Filtering
+        // Dropdown Search
         if (searchInput) {
           searchInput.addEventListener("input", (e) => {
             const term = (e.target as HTMLInputElement).value.toLowerCase();
             const options = listContainer.querySelectorAll(".species-option");
-
             options.forEach((opt) => {
               const val = opt.getAttribute("data-value");
               const text = opt.textContent?.toLowerCase() || "";
-
-              // Always show "NEW" option, filter the rest
               if (val === "NEW" || text.includes(term)) {
                 (opt as HTMLElement).style.display = "block";
               } else {
@@ -1516,101 +1533,263 @@ export async function initHome(userRole, userEmail) {
           });
         }
 
-        // --- IMAGE DROP ZONE LOGIC ---
-        // --- NEW IMAGE DROP ZONE LOGIC ---
-        // Reset the array and list when the modal opens
+        // --- Wizard Navigation Logic ---
+        if (btnNext && phase1 && phase2) {
+          btnNext.onclick = () => {
+            // Validate Phase 1 before allowing next
+            const speciesId = hiddenInput.value;
+            if (speciesId === "NEW") {
+              const name = (
+                document.getElementById("newName") as HTMLInputElement
+              ).value.trim();
+              const sci = (
+                document.getElementById("newScientific") as HTMLInputElement
+              ).value.trim();
+              if (!name) return alert("Please enter a common name.");
+              if (!sci) return alert("Please enter a scientific name.");
+              if (sci.split(/\s+/).length !== 2)
+                return alert("The Scientific Name must be exactly two words.");
+            }
+            phase1.classList.add("d-none");
+            phase2.classList.remove("d-none");
+          };
+        }
+
+        if (btnBack && phase1 && phase2) {
+          btnBack.onclick = () => {
+            phase2.classList.add("d-none");
+            phase1.classList.remove("d-none");
+          };
+        }
+
+        // --- NEW IMAGE METADATA & PREVIEW LOGIC ---
+
+        // Clean up old URLs
+        selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
         selectedUploadFiles = [];
-        const fileListContainer = document.getElementById("selectedFilesList");
-        if (fileListContainer) fileListContainer.innerHTML = "";
+        currentSelectedFileIndex = -1;
 
         const dropZone = document.getElementById("imageDropZone");
         const fileInput = document.getElementById(
           "newImageFile",
         ) as HTMLInputElement;
+        const fileListContainer = document.getElementById("selectedFilesList");
+        const fileCounter = document.getElementById("uploadFileCounter");
+
+        const previewSection = document.getElementById("imagePreviewSection");
+        const noImagePrompt = document.getElementById("noImageSelectedPrompt");
+        const previewImg = document.getElementById(
+          "uploadImagePreview",
+        ) as HTMLImageElement;
+        const notesInput = document.getElementById(
+          "nathanNotes",
+        ) as HTMLTextAreaElement;
+        const tagCheckboxes = () =>
+          document.querySelectorAll(
+            '#tagCheckboxContainer input[type="checkbox"]',
+          ) as NodeListOf<HTMLInputElement>;
+
+        const saveCurrentMetadata = () => {
+          if (
+            currentSelectedFileIndex >= 0 &&
+            currentSelectedFileIndex < selectedUploadFiles.length
+          ) {
+            if (notesInput)
+              selectedUploadFiles[currentSelectedFileIndex].notes =
+                notesInput.value;
+            const selectedTags = Array.from(tagCheckboxes())
+              .filter((cb) => cb.checked)
+              .map((cb) => cb.value);
+            selectedUploadFiles[currentSelectedFileIndex].tags = selectedTags;
+          }
+        };
+
+        const updatePreviewPanel = () => {
+          if (
+            currentSelectedFileIndex >= 0 &&
+            currentSelectedFileIndex < selectedUploadFiles.length
+          ) {
+            const data = selectedUploadFiles[currentSelectedFileIndex];
+            if (previewSection && noImagePrompt && previewImg) {
+              previewSection.classList.remove("d-none");
+              noImagePrompt.classList.add("d-none");
+              previewImg.src = data.url;
+            }
+            if (notesInput) notesInput.value = data.notes;
+
+            // Set the checkboxes for this specific image
+            tagCheckboxes().forEach((cb) => {
+              cb.checked = data.tags.includes(cb.value);
+            });
+          } else {
+            if (previewSection && noImagePrompt) {
+              previewSection.classList.add("d-none");
+              noImagePrompt.classList.remove("d-none");
+            }
+          }
+        };
 
         const renderFileList = () => {
           if (!fileListContainer) return;
+
+          if (fileCounter) {
+            fileCounter.innerText = `${selectedUploadFiles.length} file${selectedUploadFiles.length === 1 ? "" : "s"} selected`;
+          }
+
           fileListContainer.innerHTML = "";
-          selectedUploadFiles.forEach((file, index) => {
+
+          selectedUploadFiles.forEach((data, index) => {
             const li = document.createElement("li");
-            li.className =
-              "list-group-item d-flex justify-content-between align-items-center py-1 px-2 small text-muted border-primary border-opacity-25 mb-1 rounded";
+            const isActive =
+              index === currentSelectedFileIndex
+                ? "bg-primary text-white border-primary"
+                : "bg-white text-dark border-secondary border-opacity-25";
+
+            li.className = `list-group-item d-flex justify-content-between align-items-center py-2 px-3 small mb-1 rounded cursor-pointer border ${isActive}`;
             li.innerHTML = `
-                    <span class="text-truncate" style="max-width: 85%;"><i class="fas fa-image me-2 text-primary"></i>${file.name}</span>
-                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-file-btn" data-index="${index}">
+                    <span class="text-truncate" style="max-width: 85%;">
+                        <i class="fas fa-image me-2 ${index === currentSelectedFileIndex ? "text-white" : "text-primary"}"></i>${data.file.name}
+                    </span>
+                    <button type="button" class="btn btn-sm btn-link p-0 remove-file-btn ${index === currentSelectedFileIndex ? "text-white" : "text-danger"}" data-index="${index}">
                         <i class="fas fa-times"></i>
                     </button>
                 `;
+
+            // Click a row to preview/edit that specific image
+            li.addEventListener("click", () => {
+              saveCurrentMetadata();
+              currentSelectedFileIndex = index;
+              renderFileList();
+              updatePreviewPanel();
+            });
+
             fileListContainer.appendChild(li);
           });
 
-          // Add click listeners to the "X" buttons
+          // X Button logic
           fileListContainer
             .querySelectorAll(".remove-file-btn")
             .forEach((btn) => {
               btn.addEventListener("click", (e) => {
-                e.stopPropagation(); // Prevents triggering the dropzone upload click
+                e.stopPropagation();
+                saveCurrentMetadata();
                 const idx = parseInt(
                   (e.currentTarget as HTMLElement).getAttribute("data-index") ||
                     "0",
                 );
-                selectedUploadFiles.splice(idx, 1); // Remove from array
-                renderFileList(); // Re-render the list
+
+                URL.revokeObjectURL(selectedUploadFiles[idx].url);
+                selectedUploadFiles.splice(idx, 1);
+
+                if (currentSelectedFileIndex === idx) {
+                  currentSelectedFileIndex =
+                    selectedUploadFiles.length > 0 ? 0 : -1;
+                } else if (currentSelectedFileIndex > idx) {
+                  currentSelectedFileIndex--;
+                }
+
+                renderFileList();
+                updatePreviewPanel();
               });
             });
         };
 
+        const addFiles = (files: FileList | File[]) => {
+          saveCurrentMetadata();
+          Array.from(files).forEach((file) => {
+            selectedUploadFiles.push({
+              file: file,
+              url: URL.createObjectURL(file),
+              notes: "",
+              tags: [],
+            });
+          });
+          // Auto select the first newly added image if nothing was selected
+          if (
+            currentSelectedFileIndex === -1 &&
+            selectedUploadFiles.length > 0
+          ) {
+            currentSelectedFileIndex = 0;
+          }
+          renderFileList();
+          updatePreviewPanel();
+        };
+
         if (dropZone && fileInput && fileListContainer) {
           dropZone.onclick = () => fileInput.click();
-
           dropZone.ondragover = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.add("bg-light", "border-primary");
+            dropZone.classList.add("drag-active");
           };
-
           dropZone.ondragleave = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.remove("bg-light", "border-primary");
+            dropZone.classList.remove("drag-active");
           };
-
           dropZone.ondrop = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.remove("bg-light", "border-primary");
-            if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
-              selectedUploadFiles.push(...Array.from(e.dataTransfer.files));
-              renderFileList();
-            }
+            dropZone.classList.remove("drag-active");
+            if (e.dataTransfer?.files) addFiles(e.dataTransfer.files);
           };
-
           fileInput.onchange = () => {
-            if (fileInput.files && fileInput.files.length > 0) {
-              selectedUploadFiles.push(...Array.from(fileInput.files));
-              renderFileList();
-              fileInput.value = ""; // Reset the input so you can select the same file again if needed
+            if (fileInput.files) {
+              addFiles(fileInput.files);
+              fileInput.value = "";
             }
           };
         }
+
+        // Listen to changes in inputs to auto-save to memory array
+        if (notesInput) {
+          notesInput.addEventListener("input", saveCurrentMetadata);
+        }
+        tagCheckboxes().forEach((cb) => {
+          cb.addEventListener("change", saveCurrentMetadata);
+        });
+
+        // initial clear
+        renderFileList();
+        updatePreviewPanel();
       });
     }
 
     universalUploadForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      const hiddenInput = document.getElementById(
-        "speciesSelectorValue",
-      ) as HTMLInputElement;
-      const fileInput = document.getElementById(
-        "newImageFile",
-      ) as HTMLInputElement;
+
+      // Force save metadata of the currently previewed image before submitting
+      const notesInput = document.getElementById(
+        "nathanNotes",
+      ) as HTMLTextAreaElement;
+      const tagCheckboxes = () =>
+        document.querySelectorAll(
+          '#tagCheckboxContainer input[type="checkbox"]',
+        ) as NodeListOf<HTMLInputElement>;
+      if (
+        currentSelectedFileIndex >= 0 &&
+        currentSelectedFileIndex < selectedUploadFiles.length
+      ) {
+        if (notesInput)
+          selectedUploadFiles[currentSelectedFileIndex].notes =
+            notesInput.value;
+        selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(
+          tagCheckboxes(),
+        )
+          .filter((cb) => cb.checked)
+          .map((cb) => cb.value);
+      }
 
       if (selectedUploadFiles.length === 0) {
         return alert("Please select at least one image file.");
       }
 
+      const hiddenInput = document.getElementById(
+        "speciesSelectorValue",
+      ) as HTMLInputElement;
       let speciesId = hiddenInput.value;
 
+      // 1. Create Species if NEW
       if (speciesId === "NEW") {
         const name = (
           document.getElementById("newName") as HTMLInputElement
@@ -1618,17 +1797,6 @@ export async function initHome(userRole, userEmail) {
         const scientificName = (
           document.getElementById("newScientific") as HTMLInputElement
         ).value.trim();
-
-        if (!name)
-          return alert("Please enter a common name for the new species.");
-
-        if (!scientificName) return alert("Please enter a scientific name.");
-
-        // Ensure scientific name is exactly two words
-        const sciWords = scientificName.split(/\s+/);
-        if (sciWords.length !== 2) {
-          return alert("The Scientific Name must be exactly two words.");
-        }
 
         try {
           const newSpecies = await ButterflyAPI.create({
@@ -1649,40 +1817,29 @@ export async function initHome(userRole, userEmail) {
               : "",
           });
           speciesId = newSpecies.id;
-          butterflies = await ButterflyAPI.getAll();
-          refreshGallery();
         } catch (err: any) {
           return alert("Failed to create species: " + err.message);
         }
       }
 
-      const checkedBoxes = universalUploadForm.querySelectorAll(
-        'input[name="tagIds"]:checked',
-      );
-      const tagIds = Array.from(checkedBoxes).map(
-        (cb) => (cb as HTMLInputElement).value,
-      );
-      const nathansNotes = (
-        document.getElementById("nathanNotes") as HTMLTextAreaElement
-      ).value;
-
-      const files = selectedUploadFiles;
+      // 2. Upload Images individually with their specific metadata
       let successCount = 0;
       let failCount = 0;
 
-      for (const file of files) {
+      for (const data of selectedUploadFiles) {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", data.file);
         formData.append("species_id", speciesId);
-        formData.append("nathansNotes", nathansNotes);
-        if (tagIds.length > 0) {
-          tagIds.forEach((id) => formData.append("tagId", id));
+        formData.append("nathansNotes", data.notes); // Specific notes!
+        if (data.tags.length > 0) {
+          data.tags.forEach((id) => formData.append("tagId", id)); // Specific tags!
         }
+
         try {
           await ButterflyAPI.uploadImage(formData);
           successCount++;
         } catch (err) {
-          console.error("Failed to upload " + file.name + ":", err);
+          console.error("Failed to upload " + data.file.name + ":", err);
           failCount++;
         }
       }
@@ -1703,22 +1860,23 @@ export async function initHome(userRole, userEmail) {
         );
       }
 
+      // Cleanup & Reset
+      selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
+      selectedUploadFiles = [];
+      const fileListContainer = document.getElementById("selectedFilesList");
+      if (fileListContainer) fileListContainer.innerHTML = "";
+
       (e.target as HTMLFormElement).reset();
       const selectorAfterReset = document.getElementById("speciesSelector");
       if (selectorAfterReset)
         (selectorAfterReset as HTMLInputElement).value = "NEW";
       const newSpeciesFields = document.getElementById("newSpeciesFields");
       if (newSpeciesFields) newSpeciesFields.style.display = "block";
-      selectedUploadFiles = [];
-      const fileListContainer = document.getElementById("selectedFilesList");
-      if (fileListContainer) fileListContainer.innerHTML = "";
 
       bootstrap.Modal.getInstance(
         document.getElementById("addButterflyModal"),
       ).hide();
       butterflies = await ButterflyAPI.getAll();
-      // refreshGallery();
-
       applyAllFilters();
     });
   }
