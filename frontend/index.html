@@ -1419,33 +1419,40 @@
                 class="form-control d-none mb-3"
                 rows="3"
               ></textarea>
-              <div id="studentDevTools">
+              <div id="getImageSection">
                 <hr />
-                <h6 class="fw-bold text-primary">Developer Tools</h6>
+                <h6 class="fw-bold text-primary">Get Image</h6>
                 <p class="small text-muted mb-2">
-                  Copy these values to use in your team's application.
+                  Copy links to use in your team's application.
                 </p>
                 <div class="d-flex flex-wrap gap-2">
                   <button
-                    id="copyIdBtn"
+                    id="copyOriginalUrlBtn"
                     class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
                   >
-                    <i class="fas fa-hashtag me-1"></i>Copy Image ID
+                    <i class="fas fa-link me-1"></i>Original
                   </button>
                   <button
-                    id="copyUrlBtn"
+                    id="copyLargeUrlBtn"
                     class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
                   >
-                    <i class="fas fa-link me-1"></i>Copy Image URL
+                    <i class="fas fa-link me-1"></i>Large
                   </button>
                   <button
-                    id="copyApiKeyBtn"
-                    class="btn btn-sm btn-outline-primary shadow-sm rounded-pill d-none"
+                    id="copyMediumUrlBtn"
+                    class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
                   >
-                    <i class="fas fa-key me-1"></i>Copy API Key
+                    <i class="fas fa-link me-1"></i>Medium
+                  </button>
+                  <button
+                    id="copySmallUrlBtn"
+                    class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+                  >
+                    <i class="fas fa-link me-1"></i>Small
                   </button>
                 </div>
               </div>
+
               <hr />
               <h6>Tags</h6>
               <div id="modalTags" class="d-flex flex-wrap gap-1"></div>

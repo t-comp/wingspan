@@ -189,45 +189,43 @@ export async function initHome(userRole, userEmail) {
     }
 
     setupImageEditing(img);
-    const copyIdBtn = document.getElementById("copyIdBtn");
-    const copyUrlBtn = document.getElementById("copyUrlBtn");
-    const copyApiKeyBtn = document.getElementById("copyApiKeyBtn");
+    const setupCopyButton = (btnId, sizeParam) => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
 
-    if (copyUrlBtn) {
-      copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`;
-      copyUrlBtn.onclick = () => {
-        let urlToCopy = img.url || img.fpath;
+      const sizeLabel = btnId.replace("copy", "").replace("UrlBtn", "");
+      btn.innerHTML = `<i class="fas fa-link me-1"></i>${sizeLabel}`;
 
+      btn.onclick = () => {
+        let baseImgUrl = img.url || img.fpath;
+        let urlToCopy = baseImgUrl;
+
+        // Append a size parameter to the URL if the button requests a specific size.
+        if (sizeParam) {
+          const separator = urlToCopy.includes("?") ? "&" : "?";
+          urlToCopy += `${separator}size=${sizeParam.toLowerCase()}`;
+        }
+
+        // Always append the API key so students can load the image!
         if (studentApiKey) {
           const separator = urlToCopy.includes("?") ? "&" : "?";
           urlToCopy += `${separator}apiKey=${studentApiKey}`;
         }
 
         navigator.clipboard.writeText(urlToCopy);
-        copyUrlBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+        btn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
         setTimeout(
           () =>
-            (copyUrlBtn.innerHTML = `<i class="fas fa-link me-1"></i>Copy Image URL`),
+            (btn.innerHTML = `<i class="fas fa-link me-1"></i>${sizeLabel}`),
           2000,
         );
       };
-    }
+    };
 
-    if (studentApiKey && copyApiKeyBtn) {
-      copyApiKeyBtn.classList.remove("d-none");
-      copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`;
-      copyApiKeyBtn.onclick = () => {
-        navigator.clipboard.writeText(studentApiKey);
-        copyApiKeyBtn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
-        setTimeout(
-          () =>
-            (copyApiKeyBtn.innerHTML = `<i class="fas fa-key me-1"></i>Copy API Key`),
-          2000,
-        );
-      };
-    } else if (copyApiKeyBtn) {
-      copyApiKeyBtn.classList.add("d-none");
-    }
+    setupCopyButton("copyOriginalUrlBtn", null);
+    setupCopyButton("copyLargeUrlBtn", "Large");
+    setupCopyButton("copyMediumUrlBtn", "Medium");
+    setupCopyButton("copySmallUrlBtn", "Small");
 
     const modalElement = document.getElementById("imageDetailsModal");
     if (modalElement) {
