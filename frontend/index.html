@@ -436,9 +436,14 @@
         </div>
       </div>
 
-      <section class="page-section portfolio" id="portfolio">
+      <section class="portfolio pt-4 pb-5" id="portfolio">
         <div class="container">
           <div class="row justify-content-center" id="butterflyGrid"></div>
+
+          <div
+            id="paginationContainer"
+            class="d-flex justify-content-center mt-5 mb-3"
+          ></div>
         </div>
       </section>
 
@@ -1130,12 +1135,45 @@
                   <label class="form-label fw-bold text-primary"
                     >Target Species</label
                   >
-                  <select
-                    id="speciesSelector"
-                    class="form-select shadow-sm border-primary"
-                  >
-                    <option value="NEW">-- Create New Species --</option>
-                  </select>
+
+                  <input type="hidden" id="speciesSelectorValue" value="NEW" />
+
+                  <div class="dropdown w-100">
+                    <button
+                      class="btn btn-white border w-100 text-start d-flex justify-content-between align-items-center shadow-sm bg-white form-control border-primary"
+                      type="button"
+                      id="speciesDropdownBtn"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      aria-expanded="false"
+                    >
+                      <span id="speciesDropdownText"
+                        ><span class="text-primary fw-bold"
+                          >Create New Species</span
+                        ></span
+                      >
+                      <i class="fas fa-chevron-down text-muted small"></i>
+                    </button>
+
+                    <div
+                      class="dropdown-menu p-0 shadow border mt-1 w-100"
+                      style="z-index: 1050; overflow: hidden"
+                    >
+                      <div class="p-2 border-bottom bg-light">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          id="searchSpeciesInput"
+                          placeholder="Search species..."
+                        />
+                      </div>
+                      <div
+                        class="overflow-auto p-0"
+                        style="max-height: 200px"
+                        id="speciesDropdownList"
+                      ></div>
+                    </div>
+                  </div>
                 </div>
 
                 <div id="newSpeciesFields">

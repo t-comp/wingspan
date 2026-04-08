@@ -6,7 +6,7 @@ export const UI = {
       grid.innerHTML = "";
       list.forEach((b: any, idx: number) => {
         const col = document.createElement("div");
-        col.className = "col-md-6 col-lg-4 mb-5";
+        col.className = "col-md-6 col-lg-3 mb-5";
         const imageUrl = b.thumbnailUrl
           ? b.thumbnailUrl
           : "assets/img/noimage.jpg";
@@ -28,8 +28,7 @@ export const UI = {
         col.innerHTML = `
             <div class="card h-100 butterfly-card border-0 shadow-sm">
                 <div class="butterfly-img-wrapper">
-                    <img src="${imageUrl}" alt="${b.name}" style="width:100%; height:200px; object-fit:cover;">
-                </div>
+                  <img src="${imageUrl}" alt="${b.name}" style="width:100%; height:100%; object-fit:cover;">                </div>
                 <div class="card-body">
                     <h5 class="card-title fw-bold mb-2">${displayName}</h5>
                     <div class="mb-2">${tagsHtml}</div>
@@ -44,48 +43,6 @@ export const UI = {
       });
     }
   },
-  // renderGrid(list, onCardClick, displayMode = "common") {
-  //   const grid = document.getElementById("butterflyGrid");
-  //   grid.innerHTML = "";
-  //   list.forEach((b, idx) => {
-  //     const col = document.createElement("div");
-  //     col.className = "col-md-6 col-lg-4 mb-5";
-  //     const imageUrl = b.thumbnailUrl
-  //       ? b.thumbnailUrl
-  //       : "assets/img/noimage.jpg";
-  //     const tagsHtml = Array.isArray(b.tags)
-  //       ? b.tags
-  //           .map(
-  //             (t) =>
-  //               `<span class="badge rounded-pill bg-light text-dark border me-1">${t.name}</span>`,
-  //           )
-  //           .join("")
-  //       : "";
-
-  //     // Magic Check: Which name should we show? (And italicize if it's scientific!)
-  //     const displayName =
-  //       displayMode === "scientific" && b.scientificName
-  //         ? `<i>${b.scientificName}</i>`
-  //         : b.name;
-
-  //     col.innerHTML = `
-  //               <div class="card h-100 butterfly-card border-0 shadow-sm">
-  //                   <div class="butterfly-img-wrapper">
-  //                       <img src="${imageUrl}" alt="${b.name}" style="width:100%; height:200px; object-fit:cover;">
-  //                   </div>
-  //                   <div class="card-body">
-  //                       <h5 class="card-title fw-bold mb-2">${displayName}</h5>
-  //                       <div class="mb-2">${tagsHtml}</div>
-  //                   </div>
-  //               </div>`;
-  //     col
-  //       .querySelector(".butterfly-card")
-  //       .addEventListener("click", () => onCardClick(b, idx, tagsHtml));
-  //     grid.appendChild(col);
-  //   });
-  // },
-
-  //   console.log("Populating View. Is Admin?", isAdmin);
 
   populateSpeciesView(b: any, isAdmin: boolean) {
     const nameElem = document.getElementById("speciesName");

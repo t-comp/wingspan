@@ -13,6 +13,9 @@ export async function initHome(userRole, userEmail) {
   );
 
   let currentDisplayMode = "common";
+  let currentFilteredData = [];
+  let currentPage = 1;
+  const itemsPerPage = 40;
 
   let butterflies = await ButterflyAPI.getAll();
   console.log("DATABASES SPECIES LIST:", butterflies);
@@ -671,9 +674,108 @@ export async function initHome(userRole, userEmail) {
     renderFilterPills();
     renderInnerGrid("all");
   };
+  const refreshGallery = (data = butterflies, page = 1) => {
+    currentPage = page;
+    const totalPages = Math.ceil(data.length / itemsPerPage);
 
-  const refreshGallery = (data = butterflies) => {
-    UI.renderGrid(data, (b) => showSpeciesView(b), currentDisplayMode);
+    // Safety check to keep pages in bounds
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+    // Slice the data to only show the 40 items for the current page
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const slicedData = data.slice(startIndex, endIndex);
+
+    UI.renderGrid(slicedData, (b) => showSpeciesView(b), currentDisplayMode);
+    renderPagination(data.length, totalPages);
+  };
+
+  const renderPagination = (totalItems, totalPages) => {
+    const container = document.getElementById("paginationContainer");
+    if (!container) return;
+
+    // Hide pagination if everything fits on one page
+    if (totalPages <= 1) {
+      container.innerHTML = "";
+      return;
+    }
+
+    let html = `<ul class="pagination mb-0 align-items-center" style="gap: 5px; font-size: 1.1rem;">`;
+
+    // "Previous" Button
+    const prevDisabled = currentPage === 1 ? "disabled opacity-50" : "";
+    html += `
+      <li class="page-item ${prevDisabled}">
+        <a class="page-link border-0 fw-bold bg-transparent" href="#" data-page="${currentPage - 1}" style="color: #0399b0;">&lt; Previous</a>
+      </li>
+    `;
+
+    // Google-style sliding window for page numbers
+    let startPage = Math.max(1, currentPage - 4);
+    let endPage = Math.min(totalPages, startPage + 9);
+    if (endPage - startPage < 9) {
+      startPage = Math.max(1, endPage - 9);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      if (i === currentPage) {
+        // Active page styling (Light blue circle, dark blue text)
+        html += `
+          <li class="page-item active">
+            <a class="page-link rounded-circle d-flex justify-content-center align-items-center" href="#" data-page="${i}" style="width: 35px; height: 35px; background-color: #e8f0fe; color: #1a73e8; border: none; font-weight: bold;">${i}</a>
+          </li>
+        `;
+      } else {
+        // Inactive page styling
+        html += `
+          <li class="page-item">
+            <a class="page-link rounded-circle d-flex justify-content-center align-items-center border-0 text-muted bg-transparent" href="#" data-page="${i}" style="width: 35px; height: 35px;">${i}</a>
+          </li>
+        `;
+      }
+    }
+
+    // "Next" Button
+    const nextDisabled =
+      currentPage === totalPages ? "disabled opacity-50" : "";
+    html += `
+      <li class="page-item ${nextDisabled}">
+        <a class="page-link border-0 fw-bold bg-transparent" href="#" data-page="${currentPage + 1}" style="color: #0399b0;">Next &gt;</a>
+      </li>
+    `;
+
+    html += `</ul>`;
+    container.innerHTML = html;
+
+    // Add Click Listeners to the buttons
+    container.querySelectorAll(".page-link").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetBtn = e.currentTarget as HTMLElement;
+
+        // Ignore clicks if the button is disabled or already active
+        if (
+          targetBtn.parentElement?.classList.contains("disabled") ||
+          targetBtn.parentElement?.classList.contains("active")
+        )
+          return;
+
+        const targetPage = parseInt(targetBtn.getAttribute("data-page") || "1");
+
+        // Refresh with the new page!
+        refreshGallery(currentFilteredData, targetPage);
+
+        // Smoothly scroll back up to the top of the gallery so the user sees the new top row
+        const portfolioSection = document.getElementById("portfolio");
+        if (portfolioSection) {
+          window.scrollTo({
+            top: portfolioSection.offsetTop - 80,
+            behavior: "smooth",
+          });
+        }
+      });
+    });
   };
 
   async function loadStudentData(email) {
@@ -1274,37 +1376,114 @@ export async function initHome(userRole, userEmail) {
   const universalUploadForm = document.getElementById("universalUploadForm");
   if (universalUploadForm) {
     const uploadModal = document.getElementById("addButterflyModal");
+
     if (uploadModal) {
       uploadModal.addEventListener("show.bs.modal", async () => {
         await TagManager.initTagContainer();
-        const selector = document.getElementById("speciesSelector");
-        if (selector) {
-          selector.innerHTML = `<option value="NEW">-- Create New Species --</option>`;
-          butterflies.forEach((s) => {
-            selector.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-          });
-          const newSpeciesFields = document.getElementById("newSpeciesFields");
-          if (newSpeciesFields) {
-            newSpeciesFields.style.display =
-              (selector as HTMLInputElement).value === "NEW" ? "block" : "none";
-          }
-          selector.onchange = () => {
+
+        const listContainer = document.getElementById("speciesDropdownList");
+        const btnText = document.getElementById("speciesDropdownText");
+        const hiddenInput = document.getElementById(
+          "speciesSelectorValue",
+        ) as HTMLInputElement;
+        const newSpeciesFields = document.getElementById("newSpeciesFields");
+        const searchInput = document.getElementById(
+          "searchSpeciesInput",
+        ) as HTMLInputElement;
+
+        if (!listContainer || !hiddenInput || !btnText) return;
+
+        // 1. Reset everything to default when modal opens
+        hiddenInput.value = "NEW";
+        btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
+        if (newSpeciesFields) newSpeciesFields.style.display = "block";
+        if (searchInput) searchInput.value = "";
+
+        // 2. Populate the list
+        let html = `
+              <button type="button" class="dropdown-item species-option border-bottom py-2" data-value="NEW">
+                  <span class="text-primary fw-bold">Create New Species</span>
+              </button>
+          `;
+
+        // Create a copy of the butterflies array and sort it based on the active display mode
+        const sortedForDropdown = [...butterflies].sort((a, b) => {
+          const nameA =
+            currentDisplayMode === "scientific" && a.scientificName
+              ? a.scientificName
+              : a.name;
+          const nameB =
+            currentDisplayMode === "scientific" && b.scientificName
+              ? b.scientificName
+              : b.name;
+          return (nameA || "")
+            .toLowerCase()
+            .localeCompare((nameB || "").toLowerCase());
+        });
+
+        // Loop through the sorted array to build the dropdown options
+        sortedForDropdown.forEach((s) => {
+          // Pick the correct name to display on the button
+          const displayName =
+            currentDisplayMode === "scientific" && s.scientificName
+              ? s.scientificName
+              : s.name;
+
+          html += `<button type="button" class="dropdown-item species-option py-2" data-value="${s.id}">${displayName}</button>`;
+        });
+
+        listContainer.innerHTML = html;
+
+        // 3. Handle Selecting an Item
+        listContainer.querySelectorAll(".species-option").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            const btn = e.currentTarget as HTMLElement;
+            const val = btn.getAttribute("data-value") || "NEW";
+
+            // Update hidden input and button text
+            hiddenInput.value = val;
+            btnText.innerHTML = btn.innerHTML;
+
+            // Toggle "New Species" form fields
             if (newSpeciesFields) {
-              newSpeciesFields.style.display =
-                (selector as HTMLInputElement).value === "NEW"
-                  ? "block"
-                  : "none";
+              newSpeciesFields.style.display = val === "NEW" ? "block" : "none";
             }
-          };
+
+            // Close the dropdown manually
+            const bsDropdown = bootstrap.Dropdown.getInstance(
+              document.getElementById("speciesDropdownBtn"),
+            );
+            if (bsDropdown) bsDropdown.hide();
+          });
+        });
+
+        // 4. Handle Searching/Filtering
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            const term = (e.target as HTMLInputElement).value.toLowerCase();
+            const options = listContainer.querySelectorAll(".species-option");
+
+            options.forEach((opt) => {
+              const val = opt.getAttribute("data-value");
+              const text = opt.textContent?.toLowerCase() || "";
+
+              // Always show "NEW" option, filter the rest
+              if (val === "NEW" || text.includes(term)) {
+                (opt as HTMLElement).style.display = "block";
+              } else {
+                (opt as HTMLElement).style.display = "none";
+              }
+            });
+          });
         }
       });
     }
 
     universalUploadForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      const selector = document.getElementById(
-        "speciesSelector",
-      ) as HTMLSelectElement;
+      const hiddenInput = document.getElementById(
+        "speciesSelectorValue",
+      ) as HTMLInputElement;
       const fileInput = document.getElementById(
         "newImageFile",
       ) as HTMLInputElement;
@@ -1313,7 +1492,7 @@ export async function initHome(userRole, userEmail) {
         return alert("Please select at least one image file.");
       }
 
-      let speciesId = selector.value;
+      let speciesId = hiddenInput.value;
 
       if (speciesId === "NEW") {
         const name = (
@@ -1407,7 +1586,9 @@ export async function initHome(userRole, userEmail) {
         document.getElementById("addButterflyModal"),
       ).hide();
       butterflies = await ButterflyAPI.getAll();
-      refreshGallery();
+      // refreshGallery();
+
+      applyAllFilters();
     });
   }
 
@@ -1632,7 +1813,28 @@ export async function initHome(userRole, userEmail) {
       });
     }
 
-    refreshGallery(filtered);
+    filtered.sort((a, b) => {
+      // Determine which name to sort by based on the current toggle state
+      const nameA =
+        currentDisplayMode === "scientific" && a.scientificName
+          ? a.scientificName
+          : a.name;
+      const nameB =
+        currentDisplayMode === "scientific" && b.scientificName
+          ? b.scientificName
+          : b.name;
+
+      // Compare alphabetically, handling any undefined values gracefully
+      return (nameA || "")
+        .toLowerCase()
+        .localeCompare((nameB || "").toLowerCase());
+    });
+
+    // Save the fully filtered/sorted list to our global variable
+    currentFilteredData = filtered;
+
+    // Render the gallery, forcing it back to page 1!
+    refreshGallery(currentFilteredData, 1);
   };
 
   async function initFilters() {
@@ -1798,7 +2000,7 @@ export async function initHome(userRole, userEmail) {
       });
     }
     showView(portfolio);
-    refreshGallery();
+    applyAllFilters();
   }
 
   function addDynamicField(label = "", value = "") {
