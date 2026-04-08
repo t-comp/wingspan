@@ -16,6 +16,7 @@ export async function initHome(userRole, userEmail) {
   let currentFilteredData = [];
   let currentPage = 1;
   const itemsPerPage = 40;
+  let selectedUploadFiles: File[] = [];
 
   let butterflies = await ButterflyAPI.getAll();
   console.log("DATABASES SPECIES LIST:", butterflies);
@@ -1374,6 +1375,44 @@ export async function initHome(userRole, userEmail) {
   }
 
   const universalUploadForm = document.getElementById("universalUploadForm");
+
+  const autoCapFields = [
+    "newName",
+    "newScientific",
+    "newOrderName",
+    "newFamily",
+    "newGenus",
+  ];
+  autoCapFields.forEach((id) => {
+    const input = document.getElementById(id) as HTMLInputElement;
+    if (input) {
+      input.addEventListener("input", function (e) {
+        const target = e.target as HTMLInputElement;
+        // Save the cursor position so it doesn't jump to the end of the line while typing
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+
+        // Capitalize the first letter of every word
+        target.value = target.value.replace(/\b\w/g, (char) =>
+          char.toUpperCase(),
+        );
+
+        // Restore cursor position
+        target.setSelectionRange(start, end);
+      });
+    }
+  });
+
+  const sciInput = document.getElementById("newScientific") as HTMLInputElement;
+  const genusInput = document.getElementById("newGenus") as HTMLInputElement;
+  if (sciInput && genusInput) {
+    sciInput.addEventListener("input", (e) => {
+      // Grab the first word typed and dump it into the Genus field
+      const words = (e.target as HTMLInputElement).value.trim().split(/\s+/);
+      genusInput.value = words[0] ? words[0] : "";
+    });
+  }
+
   if (universalUploadForm) {
     const uploadModal = document.getElementById("addButterflyModal");
 
@@ -1393,13 +1432,13 @@ export async function initHome(userRole, userEmail) {
 
         if (!listContainer || !hiddenInput || !btnText) return;
 
-        // 1. Reset everything to default when modal opens
+        // Reset everything to default when modal opens
         hiddenInput.value = "NEW";
         btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
         if (newSpeciesFields) newSpeciesFields.style.display = "block";
         if (searchInput) searchInput.value = "";
 
-        // 2. Populate the list
+        // Populate the list
         let html = `
               <button type="button" class="dropdown-item species-option border-bottom py-2" data-value="NEW">
                   <span class="text-primary fw-bold">Create New Species</span>
@@ -1434,7 +1473,7 @@ export async function initHome(userRole, userEmail) {
 
         listContainer.innerHTML = html;
 
-        // 3. Handle Selecting an Item
+        // Handle Selecting an Item
         listContainer.querySelectorAll(".species-option").forEach((item) => {
           item.addEventListener("click", (e) => {
             const btn = e.currentTarget as HTMLElement;
@@ -1457,7 +1496,7 @@ export async function initHome(userRole, userEmail) {
           });
         });
 
-        // 4. Handle Searching/Filtering
+        // Handle Searching/Filtering
         if (searchInput) {
           searchInput.addEventListener("input", (e) => {
             const term = (e.target as HTMLInputElement).value.toLowerCase();
@@ -1476,6 +1515,84 @@ export async function initHome(userRole, userEmail) {
             });
           });
         }
+
+        // --- IMAGE DROP ZONE LOGIC ---
+        // --- NEW IMAGE DROP ZONE LOGIC ---
+        // Reset the array and list when the modal opens
+        selectedUploadFiles = [];
+        const fileListContainer = document.getElementById("selectedFilesList");
+        if (fileListContainer) fileListContainer.innerHTML = "";
+
+        const dropZone = document.getElementById("imageDropZone");
+        const fileInput = document.getElementById(
+          "newImageFile",
+        ) as HTMLInputElement;
+
+        const renderFileList = () => {
+          if (!fileListContainer) return;
+          fileListContainer.innerHTML = "";
+          selectedUploadFiles.forEach((file, index) => {
+            const li = document.createElement("li");
+            li.className =
+              "list-group-item d-flex justify-content-between align-items-center py-1 px-2 small text-muted border-primary border-opacity-25 mb-1 rounded";
+            li.innerHTML = `
+                    <span class="text-truncate" style="max-width: 85%;"><i class="fas fa-image me-2 text-primary"></i>${file.name}</span>
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-file-btn" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            fileListContainer.appendChild(li);
+          });
+
+          // Add click listeners to the "X" buttons
+          fileListContainer
+            .querySelectorAll(".remove-file-btn")
+            .forEach((btn) => {
+              btn.addEventListener("click", (e) => {
+                e.stopPropagation(); // Prevents triggering the dropzone upload click
+                const idx = parseInt(
+                  (e.currentTarget as HTMLElement).getAttribute("data-index") ||
+                    "0",
+                );
+                selectedUploadFiles.splice(idx, 1); // Remove from array
+                renderFileList(); // Re-render the list
+              });
+            });
+        };
+
+        if (dropZone && fileInput && fileListContainer) {
+          dropZone.onclick = () => fileInput.click();
+
+          dropZone.ondragover = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add("bg-light", "border-primary");
+          };
+
+          dropZone.ondragleave = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove("bg-light", "border-primary");
+          };
+
+          dropZone.ondrop = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove("bg-light", "border-primary");
+            if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+              selectedUploadFiles.push(...Array.from(e.dataTransfer.files));
+              renderFileList();
+            }
+          };
+
+          fileInput.onchange = () => {
+            if (fileInput.files && fileInput.files.length > 0) {
+              selectedUploadFiles.push(...Array.from(fileInput.files));
+              renderFileList();
+              fileInput.value = ""; // Reset the input so you can select the same file again if needed
+            }
+          };
+        }
       });
     }
 
@@ -1488,7 +1605,7 @@ export async function initHome(userRole, userEmail) {
         "newImageFile",
       ) as HTMLInputElement;
 
-      if (!fileInput.files || fileInput.files.length === 0) {
+      if (selectedUploadFiles.length === 0) {
         return alert("Please select at least one image file.");
       }
 
@@ -1498,14 +1615,25 @@ export async function initHome(userRole, userEmail) {
         const name = (
           document.getElementById("newName") as HTMLInputElement
         ).value.trim();
+        const scientificName = (
+          document.getElementById("newScientific") as HTMLInputElement
+        ).value.trim();
+
         if (!name)
           return alert("Please enter a common name for the new species.");
+
+        if (!scientificName) return alert("Please enter a scientific name.");
+
+        // Ensure scientific name is exactly two words
+        const sciWords = scientificName.split(/\s+/);
+        if (sciWords.length !== 2) {
+          return alert("The Scientific Name must be exactly two words.");
+        }
+
         try {
           const newSpecies = await ButterflyAPI.create({
             name: name,
-            scientificName: (
-              document.getElementById("newScientific") as HTMLInputElement
-            ).value,
+            scientificName: scientificName,
             description: (
               document.getElementById("newDescription") as HTMLTextAreaElement
             ).value,
@@ -1538,7 +1666,7 @@ export async function initHome(userRole, userEmail) {
         document.getElementById("nathanNotes") as HTMLTextAreaElement
       ).value;
 
-      const files = Array.from(fileInput.files);
+      const files = selectedUploadFiles;
       let successCount = 0;
       let failCount = 0;
 
@@ -1581,6 +1709,9 @@ export async function initHome(userRole, userEmail) {
         (selectorAfterReset as HTMLInputElement).value = "NEW";
       const newSpeciesFields = document.getElementById("newSpeciesFields");
       if (newSpeciesFields) newSpeciesFields.style.display = "block";
+      selectedUploadFiles = [];
+      const fileListContainer = document.getElementById("selectedFilesList");
+      if (fileListContainer) fileListContainer.innerHTML = "";
 
       bootstrap.Modal.getInstance(
         document.getElementById("addButterflyModal"),

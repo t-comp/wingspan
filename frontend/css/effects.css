@@ -423,3 +423,10 @@
   background-color: #0399b0;
   border-color: #0399b0;
 }
+
+/* =========================================
+   DRAG AND DROP UPLOAD
+   ========================================= */
+.cursor-pointer {
+  cursor: pointer;
+}
