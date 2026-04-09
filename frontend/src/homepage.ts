@@ -68,6 +68,18 @@ export async function initHome(userRole, userEmail) {
   ) as HTMLInputElement | null;
   const themeToggle = document.getElementById("toggleTheme");
 
+  const butterflyModalEl = document.getElementById("butterflyModal");
+  if (butterflyModalEl) {
+    butterflyModalEl.addEventListener("click", (e) => {
+      // If the thing they clicked was NOT the image itself...
+      if ((e.target as HTMLElement).id !== "butterflyModalImage") {
+        // Hide the modal!
+        const bsModal = bootstrap.Modal.getInstance(butterflyModalEl);
+        if (bsModal) bsModal.hide();
+      }
+    });
+  }
+
   const adminTeamContent = document.getElementById("adminTeamContent");
   const studentTeamContent = document.getElementById("studentTeamContent");
 

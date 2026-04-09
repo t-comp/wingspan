@@ -442,3 +442,91 @@
   transform: scale(1.02); /* Slight pop effect */
   box-shadow: 0 0 15px rgba(3, 153, 176, 0.3) !important;
 }
+
+
+/* Clean up borders when typing in the new search pill */
+.search-input-field:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  z-index: 0 !important; /* Stops the input from jumping over the border */
+}
+
+/* Hover effect and layering for the filter symbol */
+.filter-symbol-btn {
+  z-index: 5 !important; /* Keeps the button and its border safely on top */
+}
+
+.filter-symbol-btn:hover {
+  background-color: #f8f9fa !important;
+}
+
+/* =========================================
+   FIXED UPLOAD MODAL SIZING & SCROLLING
+   ========================================= */
+/* 1. Lock the modal to a consistent, large height */
+#addButterflyModal .modal-content {
+  height: 85vh; 
+  min-height: 650px;
+}
+
+/* 2. Hide outer scrolling so the buttons never leave the screen */
+#addButterflyModal .modal-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+}
+
+/* 3. Pass the height down through the forms */
+#universalUploadForm,
+#uploadPhase1:not(.d-none),
+#uploadPhase2:not(.d-none) {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100%;
+  min-height: 0; /* Crucial for inner scrolling to work */
+}
+
+/* 4. Make ONLY the inner content areas scrollable */
+#newSpeciesFields, 
+#uploadPhase2 > .row {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding-right: 5px;
+  margin-bottom: 15px; 
+}
+
+/* 5. Lock the dividing lines and buttons securely to the bottom */
+#uploadPhase1 > .d-flex.justify-content-end.mt-4,
+#uploadPhase2 > hr,
+#uploadPhase2 > .d-flex.justify-content-between {
+  flex-shrink: 0;
+  margin-top: auto !important;
+}
+
+/* =========================================
+   MODAL CIRCLE NAVIGATION BUTTONS
+   ========================================= */
+.btn-modal-nav-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #ced4da;
+  background-color: white;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s ease-in-out;
+  padding: 0;
+}
+
+.btn-modal-nav-circle:hover {
+  background-color: #0399b0 !important;
+  border-color: #0399b0 !important;
+  color: white !important;
+  transform: scale(1.05); /* Tiny pop effect on hover */
+}

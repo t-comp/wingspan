@@ -93,7 +93,7 @@
         >
           <form id="loginForm">
             <div class="mb-3">
-              <label class="form-label fw-bold">Email or Usernameppp</label>
+              <label class="form-label fw-bold">Email or Username</label>
               <input
                 type="text"
                 class="form-control rounded-pill px-3 py-2"
@@ -292,11 +292,18 @@
           class="container d-flex flex-row align-items-center flex-wrap gap-2"
         >
           <div
-            class="input-group shadow-sm"
-            style="flex: 2; min-width: 200px; border-radius: 50px"
+            class="input-group shadow-sm search-pill-container"
+            style="
+              flex: 2;
+              min-width: 200px;
+              border-radius: 50px;
+              background-color: white;
+              border: 1px solid #ced4da;
+              overflow: hidden;
+            "
           >
             <span
-              class="input-group-text bg-white border-end-0"
+              class="input-group-text bg-white border-0"
               style="border-radius: 50px 0 0 50px"
             >
               <i class="fas fa-search text-muted"></i>
@@ -304,15 +311,31 @@
 
             <input
               id="searchInput"
-              class="form-control border-start-0 ps-0 shadow-none bg-white"
+              class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
               type="search"
               placeholder="Search by common name..."
               aria-label="Search"
-              style="
-                border-radius: 0 50px 50px 0 !important;
-                -webkit-appearance: none;
-              "
+              style="-webkit-appearance: none"
             />
+
+            <button
+              class="btn bg-white border-0 border-start filter-symbol-btn"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#filterPanel"
+              aria-expanded="false"
+              aria-controls="filterPanel"
+              style="
+                border-radius: 0 50px 50px 0;
+                color: #1abc9c;
+                border-color: #ced4da !important;
+                padding-left: 15px;
+                padding-right: 20px;
+              "
+              title="Filter"
+            >
+              <i class="fas fa-filter"></i>
+            </button>
           </div>
 
           <div class="d-flex align-items-center gap-2">
@@ -330,18 +353,6 @@
               <span class="fw-bold small">Common</span>
             </button>
 
-            <button
-              class="btn btn-custom btn-filter"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#filterPanel"
-              aria-expanded="false"
-              aria-controls="filterPanel"
-            >
-              <i class="fas fa-filter"></i> Filter
-            </button>
-
-            <!-- upload button -->
             <button
               id="uploadBtn"
               class="btn btn-custom btn-upload d-none"
@@ -586,30 +597,50 @@
                   <strong>all</strong> associated images from the database.
                 </p>
               </div>
-
               <div
                 class="modal fade modal-image"
                 id="butterflyModal"
                 tabindex="-1"
                 aria-hidden="true"
               >
-                <div class="modal-dialog modal-xl modal-dialog-centered">
+                <button
+                  type="button"
+                  class="btn btn-light rounded-circle shadow position-fixed"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  style="
+                    top: 25px;
+                    right: 25px;
+                    width: 45px;
+                    height: 45px;
+                    z-index: 1060;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <i class="fas fa-times fs-5 text-dark"></i>
+                </button>
+
+                <div
+                  class="modal-dialog modal-xl modal-dialog-centered"
+                  style="max-width: 95vw"
+                >
                   <div
                     class="modal-content bg-transparent border-0 shadow-none"
                   >
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    ></button>
                     <div
                       class="modal-body p-0 d-flex justify-content-center align-items-center"
+                      style="cursor: zoom-out"
                     >
                       <img
                         id="butterflyModalImage"
-                        class="img-fluid"
-                        style="max-height: 90vh; object-fit: contain"
+                        class="img-fluid shadow-lg rounded"
+                        style="
+                          max-height: 90vh;
+                          object-fit: contain;
+                          cursor: default;
+                        "
                       />
                     </div>
                   </div>
@@ -1235,9 +1266,10 @@
                     <button
                       type="button"
                       id="btnNextToPhase2"
-                      class="btn btn-primary fw-bold rounded-pill px-5 shadow-sm"
+                      class="btn btn-modal-nav-circle shadow-sm"
+                      title="Next Step"
                     >
-                      Next Step <i class="fas fa-arrow-right ms-2"></i>
+                      <i class="fas fa-chevron-right"></i>
                     </button>
                   </div>
                 </div>
@@ -1367,13 +1399,16 @@
                   </div>
 
                   <hr class="mt-4 mb-3" />
-                  <div class="d-flex justify-content-between">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
                     <button
                       type="button"
                       id="btnBackToPhase1"
-                      class="btn btn-outline-secondary fw-bold rounded-pill px-4 shadow-sm"
+                      class="btn btn-modal-nav-circle shadow-sm"
+                      title="Back"
                     >
-                      <i class="fas fa-arrow-left me-2"></i> Back
+                      <i class="fas fa-chevron-left"></i>
                     </button>
                     <button
                       type="submit"
