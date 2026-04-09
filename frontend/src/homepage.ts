@@ -56,7 +56,9 @@ export async function initHome(userRole, userEmail) {
   const portfolio = document.getElementById("portfolio");
   const teamView = document.getElementById("teamView");
   const speciesView = document.getElementById("speciesView");
-  const searchNavBar = document.getElementById("searchNavBar");
+  const topSearchBarContainer = document.getElementById(
+    "topSearchBarContainer",
+  );
   const filterPanel = document.getElementById("filterPanel");
 
   const viewGalleryBtn = document.getElementById("viewGalleryBtn");
@@ -143,7 +145,15 @@ export async function initHome(userRole, userEmail) {
 
   const goToGallery = () => {
     showView(portfolio);
-    if (searchNavBar) searchNavBar.style.display = "flex";
+
+    //  Show the Search, Filter, and Upload buttons!
+    const controlsWrapper = document.getElementById("galleryControlsWrapper");
+    if (controlsWrapper) {
+      controlsWrapper.classList.remove("d-none");
+      controlsWrapper.classList.add("d-flex");
+    }
+
+    // filter panel logic
     if (filterPanel) filterPanel.style.display = "";
 
     if (viewGalleryBtn) viewGalleryBtn.classList.add("active");
@@ -411,7 +421,7 @@ export async function initHome(userRole, userEmail) {
 
   const showSpeciesView = async (b) => {
     showView(speciesView);
-    if (searchNavBar) searchNavBar.style.display = "none";
+    if (topSearchBarContainer) topSearchBarContainer.style.display = "none";
     if (filterPanel) {
       filterPanel.style.display = "none";
       filterPanel.classList.remove("show");
@@ -2042,17 +2052,28 @@ export async function initHome(userRole, userEmail) {
   }
 
   if (viewTeamBtn) {
-    viewTeamBtn.addEventListener("click", async () => {
+    // Notice the "async" word added right before the ()!
+    viewTeamBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
       showView(teamView);
-      if (searchNavBar) searchNavBar.style.display = "none";
-      viewTeamBtn.classList.add("active");
-      if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
 
+      // 1. Hide the Search, Filter, and Upload buttons!
+      const controlsWrapper = document.getElementById("galleryControlsWrapper");
+      if (controlsWrapper) {
+        controlsWrapper.classList.add("d-none");
+        controlsWrapper.classList.remove("d-flex");
+      }
+
+      // 2. Hide the filter panel if it was left open
       if (filterPanel) {
-        filterPanel.style.display = "none";
         filterPanel.classList.remove("show");
       }
 
+      // 3. Update the underline on the text links
+      if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
+      if (viewTeamBtn) viewTeamBtn.classList.add("active");
+
+      // 4. Load the dashboard data safely using await!
       if (userRole === "ADMIN") {
         if (adminTeamContent) adminTeamContent.style.display = "block";
         if (studentTeamContent) studentTeamContent.style.display = "none";
@@ -2209,28 +2230,17 @@ export async function initHome(userRole, userEmail) {
   const nameToggleBtn = document.getElementById("nameToggleBtn");
 
   if (nameToggleBtn) {
-    nameToggleBtn.addEventListener("click", () => {
+    nameToggleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
       if (currentDisplayMode === "common") {
         currentDisplayMode = "scientific";
-
         if (searchInput)
           searchInput.placeholder = "Search by scientific name...";
-
-        nameToggleBtn.style.backgroundColor = "white";
-        nameToggleBtn.style.color = "#1abc9c";
-        nameToggleBtn.style.borderColor = "#1abc9c";
-
-        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-1"></i><span class="fw-bold small">Scientific</span>`;
+        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-2 text-muted"></i><span>Switch to Common</span>`;
       } else {
         currentDisplayMode = "common";
-
         if (searchInput) searchInput.placeholder = "Search by common name...";
-
-        nameToggleBtn.style.backgroundColor = "#1abc9c";
-        nameToggleBtn.style.color = "white";
-        nameToggleBtn.style.borderColor = "#1abc9c";
-
-        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-1"></i><span class="fw-bold small">Common</span>`;
+        nameToggleBtn.innerHTML = `<i class="fas fa-exchange-alt me-2 text-muted"></i><span>Switch to Scientific</span>`;
       }
       applyAllFilters();
     });

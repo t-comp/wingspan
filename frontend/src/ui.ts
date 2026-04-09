@@ -6,19 +6,11 @@ export const UI = {
       grid.innerHTML = "";
       list.forEach((b: any, idx: number) => {
         const col = document.createElement("div");
-        col.className = "col-md-6 col-lg-3 mb-5";
+        col.className = "col-6 col-md-4 col-lg-3 p-1";
+
         const imageUrl = b.thumbnailUrl
           ? b.thumbnailUrl
           : "assets/img/noimage.jpg";
-
-        const tagsHtml = Array.isArray(b.tags)
-          ? b.tags
-              .map(
-                (t: any) =>
-                  `<span class="badge rounded-pill bg-light text-dark border me-1">${t.name}</span>`,
-              )
-              .join("")
-          : "";
 
         const displayName =
           displayMode === "scientific" && b.scientificName
@@ -26,19 +18,23 @@ export const UI = {
             : b.name;
 
         col.innerHTML = `
-            <div class="card h-100 butterfly-card border-0 shadow-sm">
-                <div class="butterfly-img-wrapper">
-                  <img src="${imageUrl}" alt="${b.name}" style="width:100%; height:100%; object-fit:cover;">                </div>
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-2">${displayName}</h5>
-                    <div class="mb-2">${tagsHtml}</div>
+            <div class="position-relative w-100 species-card-wrapper" style="aspect-ratio: 1 / 1; cursor: pointer;">
+                <img src="${imageUrl}" alt="${b.name}" class="w-100 h-100" style="object-fit: cover; border-radius: 0;">
+                
+                <div class="name-gradient-overlay position-absolute bottom-0 start-0 w-100 p-3 d-flex flex-column justify-content-end">
+                    <h5 class="text-white fw-bold mb-0" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">${displayName}</h5>
                 </div>
             </div>`;
 
-        const card = col.querySelector(".butterfly-card") as HTMLElement | null;
+        const card = col.querySelector(
+          ".species-card-wrapper",
+        ) as HTMLElement | null;
+
         if (card) {
-          card.addEventListener("click", () => onCardClick(b, idx, tagsHtml));
+          // Just pass 'b' (the butterfly data)
+          card.addEventListener("click", () => onCardClick(b));
         }
+
         grid.appendChild(col);
       });
     }

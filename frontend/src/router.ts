@@ -15,25 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutLink = document.getElementById("logoutLink");
     if (logoutLink) logoutLink.classList.remove("d-none");
 
-    const circle = document.getElementById("profileDropdown");
-    if (circle && user) {
-      const initials = (user.username || "?").substring(0, 2).toUpperCase();
-      circle.innerText = initials;
-      circle.style.background =
-        role === "ADMIN"
-          ? "linear-gradient(135deg, #e74c3c, #c0392b)"
-          : "linear-gradient(135deg, #0399b0, #027a8d)";
-      circle.style.color = "white";
-      circle.style.fontWeight = "bold";
-      circle.style.fontSize = "0.8rem";
-      circle.style.display = "flex";
-      circle.style.alignItems = "center";
-      circle.style.justifyContent = "center";
-    }
-
     const dropdownUsername = document.getElementById("dropdownUsername");
     const dropdownEmail = document.getElementById("dropdownEmail");
     const dropdownRole = document.getElementById("dropdownRole");
+
     if (dropdownUsername && user)
       dropdownUsername.innerText = user.username || "";
     if (dropdownEmail && user) dropdownEmail.innerText = user.email || "";

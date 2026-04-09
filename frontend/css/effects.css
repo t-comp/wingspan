@@ -280,32 +280,42 @@
 
 
 /* =========================================
-   VIEW TOGGLE BUTTONS
+   VIEW TOGGLE TEXT LINKS
    ========================================= */
-.nav-toggle-group {
-  display: inline-flex;
-  background-color: #d9d9d9;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-left: auto; /* pushes the toggle and profile to the far right */
-  margin-right: 25px; /* adds space between the toggle and the profile pic */
-}
-
-.toggle-btn {
+.nav-text-link {
   background: transparent;
   border: none;
-  padding: 4px 12px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: #555;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 5px 0;
+  position: relative;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: color 0.2s ease;
 }
 
-.toggle-btn.active {
-  background-color: #f8f9fa;
-  color: #000;
-  box-shadow: 0 0 4px rgba(0,0,0,0.2);
+.nav-text-link:hover {
+  color: white;
+}
+
+/* The animated underline effect */
+.nav-text-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: 0;
+  left: 0;
+  background-color: white; 
+  transition: width 0.3s ease;
+}
+
+.nav-text-link.active {
+  color: white;
+}
+
+.nav-text-link.active::after {
+  width: 100%;
 }
 
 
@@ -449,6 +459,7 @@
   border-color: transparent !important;
   box-shadow: none !important;
   z-index: 0 !important; /* Stops the input from jumping over the border */
+  max-width: 1000px; /* Adjust this number until it looks right! */
 }
 
 /* Hover effect and layering for the filter symbol */
@@ -513,7 +524,7 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 2px solid #ced4da;
+  border: 1px solid #ced4da;
   background-color: white;
   color: #495057;
   display: flex;
@@ -530,3 +541,115 @@
   color: white !important;
   transform: scale(1.05); /* Tiny pop effect on hover */
 }
+
+
+/* =========================================
+   FULL-SCREEN SPECIES CARDS
+   ========================================= */
+.species-card-wrapper {
+  overflow: hidden;
+  border-radius: 0 !important; /* Forces perfectly sharp corners */
+}
+
+/* The dark fade from the bottom */
+.name-gradient-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%);
+  height: 45%; /* Controls how far up the image the fade travels */
+  pointer-events: none; /* Ensures clicking the text still clicks the card */
+}
+
+/* Tiny pop effect when you hover over an image */
+.species-card-wrapper img {
+  transition: transform 0.3s ease;
+}
+.species-card-wrapper:hover img {
+  transform: scale(1.06); 
+}
+
+
+/* =========================================
+   CUSTOM NAVBAR STYLING
+   ========================================= */
+/* 1. Upload Button (Invisible normal, visible circle on hover) */
+.btn-clean-upload {
+  background: transparent !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important; /* Removes the resting drop-shadow circle */
+  font-size: 1.1rem; 
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-clean-upload:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important; /* Visible white-transparent circle on hover */
+  color: white !important;
+}
+
+/* 2. Static Labels below icons - Dark pill background, show on hover */
+.navbar-static-label {
+  background-color: rgba(0, 0, 0, 0.75); /* Dark semi-transparent background */
+  color: #ffffff !important; /* White text */
+  padding: 4px 10px; /* Pill shape padding */
+  border-radius: 12px; /* Rounded pill edges */
+  font-size: 0.70rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition-delay: 0.2s; /* 0.2 second hover delay */
+  white-space: nowrap;
+  z-index: 1060; /* Keeps it above everything else */
+  bottom: -32px !important; /* Pushed down slightly to account for the new padding */
+}
+
+/* Make the label fade in when hovering over the container */
+.nav-action-container:hover .navbar-static-label {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Target the label in the dark settings menu */
+.text-white-70 {
+  color: rgba(255, 255, 255, 0.7) !important;
+  background-color: transparent; /* Removes the pill background for the settings dropdown */
+}
+
+/* 3. Slimmer Search Bar */
+.search-pill-container {
+  height: 38px; /* Noticeably less tall! */
+}
+
+/* Make sure the insides fit the new shorter height */
+.search-pill-container .input-group-text,
+.search-pill-container .search-input-field,
+.search-pill-container .filter-symbol-btn {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+
+/* Make the search bar container wider so text isn't cut off */
+.search-pill-container {
+    min-width: 400px; /* You can increase this number if you need it even longer */
+}
+
+/* Hide the label by default and set up the 0.2s delay */
+.nav-action-container .navbar-static-label.custom-tooltip {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition-delay: 0.2s; /* Here is your 0.2 second delay! */
+}
+
+/* Show the label when hovering over the button area */
+.nav-action-container:hover .navbar-static-label.custom-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
