@@ -509,11 +509,11 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
-  async createTag(tagData) {
+  async createTag(tagData: { name: string; category: string }) {
     const response = await fetch(`${API_BASE_URL}/tags/admin`, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify(tagData),
+      body: JSON.stringify(tagData), 
     });
     return checkResponse(response);
   },

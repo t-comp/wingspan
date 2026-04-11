@@ -290,66 +290,93 @@ export async function initHome(userRole, userEmail) {
       if (tagsDisplay) tagsDisplay.classList.add("d-none");
       if (editTagsContainer) editTagsContainer.classList.remove("d-none");
       try {
-        const dbTags = await ButterflyAPI.getAllTags();
-        const currentTagIds = (img.tags || []).map((t) =>
-          String(t.tagId || t.id || t),
-        );
+        // 1. Fill the #tagCheckboxList with HTML from the database
+        await TagManager.initTagContainer(); 
 
-        let finalHtml = "";
-
-        for (const [categoryName, tagNames] of Object.entries(
-          TagManager.tagData,
-        )) {
-          let categoryGroupHtml = "";
-          let hasFoundAny = false;
-
-          tagNames.forEach((name) => {
-            const match = dbTags.find(
-              (t) =>
-                t &&
-                t.tagName &&
-                t.tagName.toString().trim().toLowerCase() ===
-                  name.trim().toLowerCase(),
+        // 2. Now find that container we just filled
+        const checkboxList = document.getElementById("tagCheckboxList");
+        if (checkboxList) {
+            // Get current tag IDs from the image object
+            const currentTagIds = (img.tags || []).map((t: any) =>
+                String(t.tagId || t.id || t)
             );
 
-            if (match) {
-              hasFoundAny = true;
-              const isChecked = currentTagIds.includes(String(match.tagId));
-              categoryGroupHtml += `
-                                <div class="form-check" style="width: 180px; margin-bottom: 5px;">
-                                    <input class="form-check-input edit-tag-checkbox" type="checkbox"
-                                           value="${
-                                             match.tagId
-                                           }" id="edit-tag-${match.tagId}" ${
-                                             isChecked ? "checked" : ""
-                                           }>
-                                    <label class="form-check-label small text-dark" for="edit-tag-${
-                                      match.tagId
-                                    }">
-                                        ${match.tagName}
-                                    </label>
-                                </div>`;
-            }
-          });
-
-          if (hasFoundAny) {
-            finalHtml += `
-                            <div class="tag-category-block mb-3 w-100">
-                                <h6 class="fw-bold text-primary mb-1" style="font-size: 0.85rem;">${categoryName}</h6>
-                                <div class="d-flex flex-wrap border-bottom pb-2 mb-2">
-                                    ${categoryGroupHtml}
-                                </div>
-                            </div>`;
-          }
-        }
-        if (checkboxList) {
-          checkboxList.innerHTML =
-            finalHtml ||
-            '<p class="text-muted small">No matching tags found.</p>';
+            // 3. Find all checkboxes INSIDE the container and check the ones that match
+            const allCheckboxes = Array.from(checkboxList.querySelectorAll('input[type="checkbox"]'));
+            
+            allCheckboxes.forEach((node) => {
+                const cb = node as HTMLInputElement;
+                if (currentTagIds.includes(cb.value)) {
+                    cb.checked = true;
+                }
+                // Important: adding the class your save logic likely uses
+                cb.classList.add("edit-tag-checkbox");
+            });
         }
       } catch (err) {
         console.error("Edit Tag UI Error:", err);
       }
+      // try {
+      //   const dbTags = await ButterflyAPI.getAllTags();
+      //   const currentTagIds = (img.tags || []).map((t) =>
+      //     String(t.tagId || t.id || t),
+      //   );
+
+      //   let finalHtml = "";
+
+      //   for (const [categoryName, tagNames] of Object.entries(
+      //     TagManager.tagData,
+      //   )) {
+      //     let categoryGroupHtml = "";
+      //     let hasFoundAny = false;
+
+      //     tagNames.forEach((name) => {
+      //       const match = dbTags.find(
+      //         (t) =>
+      //           t &&
+      //           t.tagName &&
+      //           t.tagName.toString().trim().toLowerCase() ===
+      //             name.trim().toLowerCase(),
+      //       );
+
+      //       if (match) {
+      //         hasFoundAny = true;
+      //         const isChecked = currentTagIds.includes(String(match.tagId));
+      //         categoryGroupHtml += `
+      //                           <div class="form-check" style="width: 180px; margin-bottom: 5px;">
+      //                               <input class="form-check-input edit-tag-checkbox" type="checkbox"
+      //                                      value="${
+      //                                        match.tagId
+      //                                      }" id="edit-tag-${match.tagId}" ${
+      //                                        isChecked ? "checked" : ""
+      //                                      }>
+      //                               <label class="form-check-label small text-dark" for="edit-tag-${
+      //                                 match.tagId
+      //                               }">
+      //                                   ${match.tagName}
+      //                               </label>
+      //                           </div>`;
+      //       }
+      //     });
+
+      //     if (hasFoundAny) {
+      //       finalHtml += `
+      //                       <div class="tag-category-block mb-3 w-100">
+      //                           <h6 class="fw-bold text-primary mb-1" style="font-size: 0.85rem;">${categoryName}</h6>
+      //                           <div class="d-flex flex-wrap border-bottom pb-2 mb-2">
+      //                               ${categoryGroupHtml}
+      //                           </div>
+      //                       </div>`;
+      //     }
+      //   }
+      //   if (checkboxList) {
+      //     checkboxList.innerHTML =
+      //       finalHtml ||
+      //       '<p class="text-muted small">No matching tags found.</p>';
+      //   }
+      // } catch (err) {
+      //   console.error("Edit Tag UI Error:", err);
+      // }
     };
 
     saveBtn.onclick = async () => {
@@ -431,6 +458,47 @@ export async function initHome(userRole, userEmail) {
 
     const isAdmin = userRole === "ADMIN";
     UI.populateSpeciesView(b, isAdmin);
+
+    //new upload and delete 
+    const actionSection = document.getElementById("speciesActionButtons");
+const openUploadBtn = document.getElementById("openSpeciesUploadBtn");
+const deleteBtn = document.getElementById("deleteSpeciesFullBtn") as HTMLButtonElement;
+
+if (actionSection && isAdmin) {
+    actionSection.classList.remove("d-none");
+    
+    // Setup Delete Button
+    if (deleteBtn) deleteBtn.setAttribute("data-species-id", b.id.toString());
+
+    // Setup Upload Button
+    if (openUploadBtn) {
+        openUploadBtn.onclick = () => {
+            // 1. Force the hidden inputs to this species
+            const hiddenInput = document.getElementById("speciesSelectorValue") as HTMLInputElement;
+            const btnText = document.getElementById("speciesDropdownText");
+            
+            if (hiddenInput && btnText) {
+                hiddenInput.value = b.id.toString();
+                btnText.innerHTML = `<span class="text-dark fw-bold">${b.name}</span>`;
+            }
+
+            // 2. Hide Phase 1 and Show Phase 2 immediately
+            document.getElementById("uploadPhase1")?.classList.add("d-none");
+            document.getElementById("uploadPhase2")?.classList.remove("d-none");
+
+            // 3. Hide the "Back" button so they don't accidentally return to phase 1
+            const backBtn = document.getElementById("btnBackToPhase1");
+            if (backBtn) backBtn.style.display = "none";
+
+            // 4. Trigger the modal manually
+            const uploadModalEl = document.getElementById("addButterflyModal");
+            if (uploadModalEl) {
+                const modal = new bootstrap.Modal(uploadModalEl);
+                modal.show();
+            }
+        };
+    }
+}
 
     const editSpeciesBtn = document.getElementById("editSpeciesBtn");
     if (editSpeciesBtn && isAdmin) {
@@ -880,9 +948,10 @@ export async function initHome(userRole, userEmail) {
   let globalUserTeamMap = {};
 
   async function loadAdminData() {
-    const [users, teams] = await Promise.all([
+    const [users, teams, tags] = await Promise.all([
       ButterflyAPI.getAllUsers(),
       ButterflyAPI.getAllTeams(),
+      ButterflyAPI.getAllTags()
     ]);
     users.sort((a, b) =>
       a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
@@ -901,6 +970,8 @@ export async function initHome(userRole, userEmail) {
 
     renderAllUsersTable(allCachedUsers);
     await loadTeams();
+
+    await TagManager.refreshAdminTagsView();
   }
 
   function renderAllUsersTable(usersList) {
@@ -1087,6 +1158,22 @@ export async function initHome(userRole, userEmail) {
       container.appendChild(card);
     }
   }
+
+
+const tagsTabBtn = document.getElementById('tags-tab');
+if (tagsTabBtn) {
+    tagsTabBtn.addEventListener('shown.bs.tab', () => {
+        TagManager.refreshAdminTagsView();
+    });
+}
+
+document.getElementById('teams-tab')?.addEventListener('shown.bs.tab', () => {
+    loadTeams();
+});
+
+document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
+    renderAllUsersTable(allCachedUsers);
+});
 
   window.deleteSystemUser = async (userId) => {
     if (confirm("Delete this user permanently?")) {
@@ -1461,7 +1548,13 @@ export async function initHome(userRole, userEmail) {
     const uploadModal = document.getElementById("addButterflyModal");
 
     if (uploadModal) {
+      uploadModal.addEventListener("hidden.bs.modal", () => {
+        const hiddenInput = document.getElementById("speciesSelectorValue") as HTMLInputElement;
+        if (hiddenInput) hiddenInput.value = "NEW";
+    });
+    
       uploadModal.addEventListener("show.bs.modal", async () => {
+
         await TagManager.initTagContainer();
 
         const listContainer = document.getElementById("speciesDropdownList");
@@ -1480,16 +1573,33 @@ export async function initHome(userRole, userEmail) {
         const btnNext = document.getElementById("btnNextToPhase2");
         const btnBack = document.getElementById("btnBackToPhase1");
 
-        // --- Reset Wizard to Phase 1 ---
-        if (phase1 && phase2) {
-          phase1.classList.remove("d-none");
-          phase2.classList.add("d-none");
+        if (hiddenInput.value === "NEW") {
+          if (phase1) phase1.classList.remove("d-none");
+          if (phase2) phase2.classList.add("d-none");
+          if (btnBack) btnBack.style.display = "block";
+          
+          // Reset species defaults ONLY for the 'NEW' mode
+          const btnText = document.getElementById("speciesDropdownText");
+          const newSpeciesFields = document.getElementById("newSpeciesFields");
+          if (btnText) btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
+          if (newSpeciesFields) newSpeciesFields.style.display = "block";
+        } else {
+          // We are in "Direct Mode" (Phase 2)
+          // Don't force phase 1 here, because openUploadBtn.onclick already handled it!
+          if (btnBack) btnBack.style.display = "none";
         }
+
+        // --- Reset Wizard to Phase 1 ---
+        // if (phase1 && phase2) {
+        //   phase1.classList.remove("d-none");
+        //   phase2.classList.add("d-none");
+        // }
 
         if (!listContainer || !hiddenInput || !btnText) return;
 
+
         // Reset species defaults
-        hiddenInput.value = "NEW";
+        // hiddenInput.value = "NEW";
         btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
         if (newSpeciesFields) newSpeciesFields.style.display = "block";
         if (searchInput) searchInput.value = "";
@@ -1774,7 +1884,7 @@ export async function initHome(userRole, userEmail) {
         updatePreviewPanel();
       });
     }
-
+    
     universalUploadForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
 
@@ -1887,17 +1997,24 @@ export async function initHome(userRole, userEmail) {
       if (fileListContainer) fileListContainer.innerHTML = "";
 
       (e.target as HTMLFormElement).reset();
-      const selectorAfterReset = document.getElementById("speciesSelector");
-      if (selectorAfterReset)
-        (selectorAfterReset as HTMLInputElement).value = "NEW";
-      const newSpeciesFields = document.getElementById("newSpeciesFields");
-      if (newSpeciesFields) newSpeciesFields.style.display = "block";
+      
+      const hiddenSelector = document.getElementById("speciesSelectorValue") as HTMLInputElement;
+      if (hiddenSelector) hiddenSelector.value = "NEW";
 
-      bootstrap.Modal.getInstance(
-        document.getElementById("addButterflyModal"),
-      ).hide();
+      const modalEl = document.getElementById("addButterflyModal");
+      if (modalEl) {
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        modalInstance?.hide();
+      }
       butterflies = await ButterflyAPI.getAll();
-      applyAllFilters();
+
+      const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
+      
+      if (freshSpecies) {
+          await showSpeciesView(freshSpecies);
+      } else {
+          applyAllFilters();
+      }
     });
   }
 
