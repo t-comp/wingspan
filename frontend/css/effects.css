@@ -748,3 +748,13 @@
   padding: 10px 15px; /* Add padding directly to the items */
   border-radius: 0; /* Ensure items don't have their own rounded corners */
 }
+
+.btn-white {
+  background-color: #ffffff;
+  color: #495057;
+  border-color: #dee2e6;
+}
+.btn-white:hover {
+  background-color: #f8f9fa;
+  color: #212529;
+}

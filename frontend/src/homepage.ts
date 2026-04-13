@@ -911,6 +911,8 @@ export async function initHome(userRole, userEmail) {
 
     renderAllUsersTable(allCachedUsers);
     await loadTeams();
+
+    await TagManager.refreshAdminTagsView();
   }
 
   function renderAllUsersTable(usersList) {
@@ -2128,12 +2130,13 @@ export async function initHome(userRole, userEmail) {
       // 1. UPDATE THE UI INSTANTLY FIRST
       const tabTeams = document.getElementById("tab-teams");
       const tabUsers = document.getElementById("tab-users");
+      const tabTags = document.getElementById("tab-tags"); // <--- Added this
 
-      if (tab === "teams" && tabTeams && tabUsers) {
+      if (tab === "teams" && tabTeams && tabUsers && tabTags) {
         tabTeams.classList.add("show", "active");
         tabUsers.classList.remove("show", "active");
+        tabTags.classList.remove("show", "active");
 
-        // Show Teams Search, Hide Users Search
         if (teamsControls) {
           teamsControls.classList.remove("d-none");
           teamsControls.classList.add("d-flex");
@@ -2142,11 +2145,15 @@ export async function initHome(userRole, userEmail) {
           usersControls.classList.add("d-none");
           usersControls.classList.remove("d-flex");
         }
-      } else if (tab === "users" && tabTeams && tabUsers) {
+
+        updateClearBtnVisibility("adminTeamSearch", "clearAdminTeamSearchBtn");
+        const clearUserBtn = document.getElementById("clearAdminUserSearchBtn");
+        if (clearUserBtn) clearUserBtn.style.opacity = "0";
+      } else if (tab === "users" && tabTeams && tabUsers && tabTags) {
         tabUsers.classList.add("show", "active");
         tabTeams.classList.remove("show", "active");
+        tabTags.classList.remove("show", "active");
 
-        // Show Users Search, Hide Teams Search
         if (usersControls) {
           usersControls.classList.remove("d-none");
           usersControls.classList.add("d-flex");
@@ -2155,9 +2162,27 @@ export async function initHome(userRole, userEmail) {
           teamsControls.classList.add("d-none");
           teamsControls.classList.remove("d-flex");
         }
-      }
 
-      // 2. FETCH THE DATA IN THE BACKGROUND
+        updateClearBtnVisibility("adminUserSearch", "clearAdminUserSearchBtn");
+        const clearTeamBtn = document.getElementById("clearAdminTeamSearchBtn");
+        if (clearTeamBtn) clearTeamBtn.style.opacity = "0";
+
+        // NEW TAGS LOGIC
+      } else if (tab === "tags" && tabTeams && tabUsers && tabTags) {
+        tabTags.classList.add("show", "active");
+        tabTeams.classList.remove("show", "active");
+        tabUsers.classList.remove("show", "active");
+
+        // Hide both search bars since Tags doesn't use the top navbar search!
+        if (teamsControls) {
+          teamsControls.classList.add("d-none");
+          teamsControls.classList.remove("d-flex");
+        }
+        if (usersControls) {
+          usersControls.classList.add("d-none");
+          usersControls.classList.remove("d-flex");
+        }
+      } // 2. FETCH THE DATA IN THE BACKGROUND
       await loadAdminData();
     } else {
       if (adminTeamContent) adminTeamContent.style.display = "none";
@@ -2167,24 +2192,24 @@ export async function initHome(userRole, userEmail) {
   };
 
   // Wire up the new dropdown buttons
-  if (navAdminTeams) {
+  const navAdminTags = document.getElementById("navAdminTags"); // Add this to your constants
+
+  if (navAdminTeams)
     navAdminTeams.addEventListener("click", (e) => {
       e.preventDefault();
       openDashboard("teams");
     });
-  }
-  if (navAdminUsers) {
+  if (navAdminUsers)
     navAdminUsers.addEventListener("click", (e) => {
       e.preventDefault();
       openDashboard("users");
     });
-  }
-  if (navStudentTeam) {
-    navStudentTeam.addEventListener("click", (e) => {
+
+  if (navAdminTags)
+    navAdminTags.addEventListener("click", (e) => {
       e.preventDefault();
-      openDashboard("student");
+      openDashboard("tags");
     });
-  }
 
   // Dynamically show/hide dropdown options based on the user role
   if (userRole === "ADMIN") {
