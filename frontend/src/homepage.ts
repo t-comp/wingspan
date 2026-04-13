@@ -301,27 +301,29 @@ export async function initHome(userRole, userEmail) {
       if (editTagsContainer) editTagsContainer.classList.remove("d-none");
       try {
         // 1. Fill the #tagCheckboxList with HTML from the database
-        await TagManager.initTagContainer(); 
+        await TagManager.initTagContainer();
 
         // 2. Now find that container we just filled
         const checkboxList = document.getElementById("tagCheckboxList");
         if (checkboxList) {
-            // Get current tag IDs from the image object
-            const currentTagIds = (img.tags || []).map((t: any) =>
-                String(t.tagId || t.id || t)
-            );
+          // Get current tag IDs from the image object
+          const currentTagIds = (img.tags || []).map((t: any) =>
+            String(t.tagId || t.id || t),
+          );
 
-            // 3. Find all checkboxes INSIDE the container and check the ones that match
-            const allCheckboxes = Array.from(checkboxList.querySelectorAll('input[type="checkbox"]'));
-            
-            allCheckboxes.forEach((node) => {
-                const cb = node as HTMLInputElement;
-                if (currentTagIds.includes(cb.value)) {
-                    cb.checked = true;
-                }
-                // Important: adding the class your save logic likely uses
-                cb.classList.add("edit-tag-checkbox");
-            });
+          // 3. Find all checkboxes INSIDE the container and check the ones that match
+          const allCheckboxes = Array.from(
+            checkboxList.querySelectorAll('input[type="checkbox"]'),
+          );
+
+          allCheckboxes.forEach((node) => {
+            const cb = node as HTMLInputElement;
+            if (currentTagIds.includes(cb.value)) {
+              cb.checked = true;
+            }
+            // Important: adding the class your save logic likely uses
+            cb.classList.add("edit-tag-checkbox");
+          });
         }
       } catch (err) {
         console.error("Edit Tag UI Error:", err);
@@ -469,46 +471,50 @@ export async function initHome(userRole, userEmail) {
     const isAdmin = userRole === "ADMIN";
     UI.populateSpeciesView(b, isAdmin);
 
-    //new upload and delete 
+    //new upload and delete
     const actionSection = document.getElementById("speciesActionButtons");
-const openUploadBtn = document.getElementById("openSpeciesUploadBtn");
-const deleteBtn = document.getElementById("deleteSpeciesFullBtn") as HTMLButtonElement;
+    const openUploadBtn = document.getElementById("openSpeciesUploadBtn");
+    const deleteBtn = document.getElementById(
+      "deleteSpeciesFullBtn",
+    ) as HTMLButtonElement;
 
-if (actionSection && isAdmin) {
-    actionSection.classList.remove("d-none");
-    
-    // Setup Delete Button
-    if (deleteBtn) deleteBtn.setAttribute("data-species-id", b.id.toString());
+    if (actionSection && isAdmin) {
+      actionSection.classList.remove("d-none");
 
-    // Setup Upload Button
-    if (openUploadBtn) {
+      // Setup Delete Button
+      if (deleteBtn) deleteBtn.setAttribute("data-species-id", b.id.toString());
+
+      // Setup Upload Button
+      if (openUploadBtn) {
         openUploadBtn.onclick = () => {
-            // 1. Force the hidden inputs to this species
-            const hiddenInput = document.getElementById("speciesSelectorValue") as HTMLInputElement;
-            const btnText = document.getElementById("speciesDropdownText");
-            
-            if (hiddenInput && btnText) {
-                hiddenInput.value = b.id.toString();
-                btnText.innerHTML = `<span class="text-dark fw-bold">${b.name}</span>`;
-            }
+          // 1. Force the hidden inputs to this species
+          const hiddenInput = document.getElementById(
+            "speciesSelectorValue",
+          ) as HTMLInputElement;
+          const btnText = document.getElementById("speciesDropdownText");
 
-            // 2. Hide Phase 1 and Show Phase 2 immediately
-            document.getElementById("uploadPhase1")?.classList.add("d-none");
-            document.getElementById("uploadPhase2")?.classList.remove("d-none");
+          if (hiddenInput && btnText) {
+            hiddenInput.value = b.id.toString();
+            btnText.innerHTML = `<span class="text-dark fw-bold">${b.name}</span>`;
+          }
 
-            // 3. Hide the "Back" button so they don't accidentally return to phase 1
-            const backBtn = document.getElementById("btnBackToPhase1");
-            if (backBtn) backBtn.style.display = "none";
+          // 2. Hide Phase 1 and Show Phase 2 immediately
+          document.getElementById("uploadPhase1")?.classList.add("d-none");
+          document.getElementById("uploadPhase2")?.classList.remove("d-none");
 
-            // 4. Trigger the modal manually
-            const uploadModalEl = document.getElementById("addButterflyModal");
-            if (uploadModalEl) {
-                const modal = new bootstrap.Modal(uploadModalEl);
-                modal.show();
-            }
+          // 3. Hide the "Back" button so they don't accidentally return to phase 1
+          const backBtn = document.getElementById("btnBackToPhase1");
+          if (backBtn) backBtn.style.display = "none";
+
+          // 4. Trigger the modal manually
+          const uploadModalEl = document.getElementById("addButterflyModal");
+          if (uploadModalEl) {
+            const modal = new bootstrap.Modal(uploadModalEl);
+            modal.show();
+          }
         };
+      }
     }
-}
 
     const editSpeciesBtn = document.getElementById("editSpeciesBtn");
     if (editSpeciesBtn && isAdmin) {
@@ -954,25 +960,28 @@ if (actionSection && isAdmin) {
     }
   }
 
-  let allCachedUsers = [];
-  let globalUserTeamMap = {};
+  let allCachedUsers: any[] = [];
+  let globalUserTeamMap: any = {};
 
   async function loadAdminData() {
-    const [users, teams, tags] = await Promise.all([
-      ButterflyAPI.getAllUsers(),
-      ButterflyAPI.getAllTeams(),
-      ButterflyAPI.getAllTags()
-    ]);
-    users.sort((a, b) =>
-      a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
-    );
-    allCachedUsers = users;
+    try {
+      const [users, teams, tags] = await Promise.all([
+        ButterflyAPI.getAllUsers(),
+        ButterflyAPI.getAllTeams(),
+        ButterflyAPI.getAllTags(),
+      ]);
+
+      users.sort((a: any, b: any) =>
+        a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
+      );
+      allCachedUsers = users;
 
       globalUserTeamMap = {};
       const memberResults = await Promise.all(
-        teams.map((t) => ButterflyAPI.getTeamMembers(t.id)),
+        teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id)),
       );
-      teams.forEach((t, i) => {
+
+      teams.forEach((t: any, i: number) => {
         for (const m of memberResults[i]) {
           globalUserTeamMap[m.userId] = t.name;
         }
@@ -1201,21 +1210,20 @@ if (actionSection && isAdmin) {
     }
   }
 
-
-const tagsTabBtn = document.getElementById('tags-tab');
-if (tagsTabBtn) {
-    tagsTabBtn.addEventListener('shown.bs.tab', () => {
-        TagManager.refreshAdminTagsView();
+  const tagsTabBtn = document.getElementById("tags-tab");
+  if (tagsTabBtn) {
+    tagsTabBtn.addEventListener("shown.bs.tab", () => {
+      TagManager.refreshAdminTagsView();
     });
-}
+  }
 
-document.getElementById('teams-tab')?.addEventListener('shown.bs.tab', () => {
+  document.getElementById("teams-tab")?.addEventListener("shown.bs.tab", () => {
     loadTeams();
-});
+  });
 
-document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
+  document.getElementById("users-tab")?.addEventListener("shown.bs.tab", () => {
     renderAllUsersTable(allCachedUsers);
-});
+  });
 
   window.deleteSystemUser = async (userId) => {
     if (confirm("Delete this user permanently?")) {
@@ -1595,12 +1603,13 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
 
     if (uploadModal) {
       uploadModal.addEventListener("hidden.bs.modal", () => {
-        const hiddenInput = document.getElementById("speciesSelectorValue") as HTMLInputElement;
+        const hiddenInput = document.getElementById(
+          "speciesSelectorValue",
+        ) as HTMLInputElement;
         if (hiddenInput) hiddenInput.value = "NEW";
-    });
-    
-      uploadModal.addEventListener("show.bs.modal", async () => {
+      });
 
+      uploadModal.addEventListener("show.bs.modal", async () => {
         await TagManager.initTagContainer();
 
         const listContainer = document.getElementById("speciesDropdownList");
@@ -1623,11 +1632,12 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
           if (phase1) phase1.classList.remove("d-none");
           if (phase2) phase2.classList.add("d-none");
           if (btnBack) btnBack.style.display = "block";
-          
+
           // Reset species defaults ONLY for the 'NEW' mode
           const btnText = document.getElementById("speciesDropdownText");
           const newSpeciesFields = document.getElementById("newSpeciesFields");
-          if (btnText) btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
+          if (btnText)
+            btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
           if (newSpeciesFields) newSpeciesFields.style.display = "block";
         } else {
           // We are in "Direct Mode" (Phase 2)
@@ -1642,7 +1652,6 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
         // }
 
         if (!listContainer || !hiddenInput || !btnText) return;
-
 
         // Reset species defaults
         // hiddenInput.value = "NEW";
@@ -1930,7 +1939,7 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
         updatePreviewPanel();
       });
     }
-    
+
     universalUploadForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
 
@@ -2043,8 +2052,10 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
       if (fileListContainer) fileListContainer.innerHTML = "";
 
       (e.target as HTMLFormElement).reset();
-      
-      const hiddenSelector = document.getElementById("speciesSelectorValue") as HTMLInputElement;
+
+      const hiddenSelector = document.getElementById(
+        "speciesSelectorValue",
+      ) as HTMLInputElement;
       if (hiddenSelector) hiddenSelector.value = "NEW";
 
       const modalEl = document.getElementById("addButterflyModal");
@@ -2055,11 +2066,11 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
       butterflies = await ButterflyAPI.getAll();
 
       const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
-      
+
       if (freshSpecies) {
-          await showSpeciesView(freshSpecies);
+        await showSpeciesView(freshSpecies);
       } else {
-          applyAllFilters();
+        applyAllFilters();
       }
     });
   }
@@ -2213,87 +2224,118 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
       goToGallery();
     });
   }
-  // --- CLEANED UP DASHBOARD DROPDOWN LOGIC ---
+
+  // --- DASHBOARD DROPDOWN LOGIC ---
   const navAdminTeams = document.getElementById("navAdminTeams");
   const navAdminUsers = document.getElementById("navAdminUsers");
-  const navAdminTags = document.getElementById("navAdminTags");
+  const navAdminTags = document.getElementById("navAdminTags"); // Teammate's feature
   const navStudentTeam = document.getElementById("navStudentTeam");
 
-  const openDashboard = async (tab) => {
+  // --- DESTROY GHOST LISTENERS ON THE DASHBOARD BUTTON ---
+  const dashboardToggleBtn = document.getElementById("viewTeamBtn");
+  if (dashboardToggleBtn) {
+    const freshBtn = dashboardToggleBtn.cloneNode(true);
+    dashboardToggleBtn.parentNode?.replaceChild(freshBtn, dashboardToggleBtn);
+  }
+
+  // FIX 1: Added ': string' so TS knows 'tab' is a text value
+  const openDashboard = async (tab: string) => {
     showView(teamView);
 
-    // 1. Hide Gallery & Filter Controls
+    // Get all our wrappers
     const galleryControls = document.getElementById("galleryControlsWrapper");
+    const teamsControls = document.getElementById("teamsControlsWrapper");
+    const usersControls = document.getElementById("usersControlsWrapper");
+
+    // Hide the Gallery controls and filter panel
     if (galleryControls) {
       galleryControls.classList.add("d-none");
       galleryControls.classList.remove("d-flex");
     }
     if (filterPanel) filterPanel.classList.remove("show");
 
-    // 2. Toggle active underlines for the main navbar
+    // Toggle active underlines
     if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
     if (viewTeamBtn) viewTeamBtn.classList.add("active");
 
-    // 3. Handle Dashboard Content
     if (userRole === "ADMIN") {
       if (adminTeamContent) adminTeamContent.style.display = "block";
       if (studentTeamContent) studentTeamContent.style.display = "none";
 
-      // --- ELEGANT TAB SWITCHING ---
+      // 1. UPDATE THE UI INSTANTLY FIRST
+      const tabTeams = document.getElementById("tab-teams");
+      const tabUsers = document.getElementById("tab-users");
+      const tabTags = document.getElementById("tab-tags");
 
-      // A. Loop through all tabs and show only the active one
-      const allTabs = ["teams", "users", "tags"];
-      allTabs.forEach((t) => {
-        const el = document.getElementById(`tab-${t}`);
-        if (el) {
-          t === tab
-            ? el.classList.add("show", "active")
-            : el.classList.remove("show", "active");
+      if (tab === "teams" && tabTeams) {
+        tabTeams.classList.add("show", "active");
+        if (tabUsers) tabUsers.classList.remove("show", "active");
+        if (tabTags) tabTags.classList.remove("show", "active");
+
+        if (teamsControls) {
+          teamsControls.classList.remove("d-none");
+          teamsControls.classList.add("d-flex");
         }
-      });
-
-      // B. Helper to toggle Search Controls cleanly
-      const toggleSearch = (elId, shouldShow) => {
-        const el = document.getElementById(elId);
-        if (!el) return;
-        if (shouldShow) {
-          el.classList.remove("d-none");
-          el.classList.add("d-flex");
-        } else {
-          el.classList.remove("d-flex");
-          el.classList.add("d-none");
+        if (usersControls) {
+          usersControls.classList.add("d-none");
+          usersControls.classList.remove("d-flex");
         }
-      };
+      } else if (tab === "users" && tabUsers) {
+        tabUsers.classList.add("show", "active");
+        if (tabTeams) tabTeams.classList.remove("show", "active");
+        if (tabTags) tabTags.classList.remove("show", "active");
 
-      // Show the correct search bar based on the tab
-      toggleSearch("teamsControlsWrapper", tab === "teams");
-      toggleSearch("usersControlsWrapper", tab === "users");
+        if (usersControls) {
+          usersControls.classList.remove("d-none");
+          usersControls.classList.add("d-flex");
+        }
+        if (teamsControls) {
+          teamsControls.classList.add("d-none");
+          teamsControls.classList.remove("d-flex");
+        }
+      } else if (tab === "tags" && tabTags) {
+        tabTags.classList.add("show", "active");
+        if (tabTeams) tabTeams.classList.remove("show", "active");
+        if (tabUsers) tabUsers.classList.remove("show", "active");
 
-      // 4. Load the data in the background
+        if (teamsControls) {
+          teamsControls.classList.add("d-none");
+          teamsControls.classList.remove("d-flex");
+        }
+        if (usersControls) {
+          usersControls.classList.add("d-none");
+          usersControls.classList.remove("d-flex");
+        }
+      }
+
+      // 2. FETCH THE DATA IN THE BACKGROUND
       await loadAdminData();
     } else {
-      // --- STUDENT LOGIC ---
       if (adminTeamContent) adminTeamContent.style.display = "none";
       if (studentTeamContent) studentTeamContent.style.display = "block";
       await loadStudentData(userEmail);
     }
   };
 
-  // --- HELPER FOR CLICK LISTENERS ---
-  const setupNavButton = (element, tabName) => {
-    if (element) {
-      element.addEventListener("click", (e) => {
-        e.preventDefault();
-        openDashboard(tabName);
-      });
-    }
-  };
-
-  // Wire up all buttons cleanly!
-  setupNavButton(navAdminTeams, "teams");
-  setupNavButton(navAdminUsers, "users");
-  setupNavButton(navAdminTags, "tags");
-  setupNavButton(navStudentTeam, "student");
+  // Wire up the new dropdown buttons
+  if (navAdminTeams) {
+    navAdminTeams.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDashboard("teams");
+    });
+  }
+  if (navAdminUsers) {
+    navAdminUsers.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDashboard("users");
+    });
+  }
+  if (navAdminTags) {
+    navAdminTags.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDashboard("tags");
+    });
+  }
 
   // Dynamically show/hide dropdown options based on the user role
   if (userRole === "ADMIN") {
@@ -2332,26 +2374,30 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
   }
 
   // --- USER SEARCH LOGIC ---
-  // make sure we detach any old listeners if they existed, and attach our new search logic
-  if (adminUserSearch) {
-    // Clone node to drop old event listeners safely just in case
-    const newSearchBtn = adminUserSearch.cloneNode(true) as HTMLInputElement;
-    adminUserSearch.parentNode?.replaceChild(newSearchBtn, adminUserSearch);
+  // We use adminUserSearchEl so it doesn't clash with any old variables
+  const adminUserSearchEl = document.getElementById(
+    "adminUserSearch",
+  ) as HTMLInputElement | null;
+  if (adminUserSearchEl) {
+    const newSearchBtn = adminUserSearchEl.cloneNode(true) as HTMLInputElement;
+    adminUserSearchEl.parentNode?.replaceChild(newSearchBtn, adminUserSearchEl);
 
     newSearchBtn.addEventListener("input", (e) => {
       const query = (e.target as HTMLInputElement).value.toLowerCase();
-
-      // allCachedUsers is defined higher up in homepage.ts
-      const filtered = allCachedUsers.filter((u: any) =>
-        u.username.toLowerCase().includes(query),
-      );
-      renderAllUsersTable(filtered);
+      if (typeof allCachedUsers !== "undefined") {
+        const filtered = allCachedUsers.filter((u: any) =>
+          u.username.toLowerCase().includes(query),
+        );
+        if (typeof renderAllUsersTable === "function")
+          renderAllUsersTable(filtered);
+      }
     });
   }
 
-  let searchTimeout;
+  // --- APPLY FILTERS LOGIC ---
+  let globalSearchTimeout: ReturnType<typeof setTimeout>;
 
-  const applyAllFilters = async () => {
+  async function applyAllFilters() {
     const checkedOrders = Array.from(
       document.querySelectorAll("#filterOrderContainer input:checked"),
     ).map((cb) => (cb as HTMLInputElement).value);
@@ -2360,44 +2406,41 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
     ).map((cb) => (cb as HTMLInputElement).value);
 
     const orderTextElem = document.getElementById("orderBtnText");
-    if (orderTextElem) {
+    if (orderTextElem)
       orderTextElem.innerText =
         checkedOrders.length > 0
           ? `${checkedOrders.length} Selected`
           : "All Orders";
-    }
+
     const familyTextElem = document.getElementById("familyBtnText");
-    if (familyTextElem) {
+    if (familyTextElem)
       familyTextElem.innerText =
         checkedFamilies.length > 0
           ? `${checkedFamilies.length} Selected`
           : "All Families";
-    }
 
-    const query = searchInput
-      ? (searchInput as HTMLInputElement).value.toLowerCase()
-      : "";
+    const query = searchInput ? searchInput.value.toLowerCase() : "";
 
     let filtered = butterflies;
 
-    if (checkedOrders.length > 0) {
-      filtered = filtered.filter((b) => checkedOrders.includes(b.orderName));
-    }
-    if (checkedFamilies.length > 0) {
-      filtered = filtered.filter((b) => checkedFamilies.includes(b.family));
-    }
+    if (checkedOrders.length > 0)
+      filtered = filtered.filter((b: any) =>
+        checkedOrders.includes(b.orderName),
+      );
+    if (checkedFamilies.length > 0)
+      filtered = filtered.filter((b: any) =>
+        checkedFamilies.includes(b.family),
+      );
+
     if (query) {
-      filtered = filtered.filter((b) => {
-        if (currentDisplayMode === "scientific") {
+      filtered = filtered.filter((b: any) => {
+        if (currentDisplayMode === "scientific")
           return (b.scientificName || "").toLowerCase().includes(query);
-        } else {
-          return (b.name || "").toLowerCase().includes(query);
-        }
+        return (b.name || "").toLowerCase().includes(query);
       });
     }
 
-    filtered.sort((a, b) => {
-      // Determine which name to sort by based on the current toggle state
+    filtered.sort((a: any, b: any) => {
       const nameA =
         currentDisplayMode === "scientific" && a.scientificName
           ? a.scientificName
@@ -2406,19 +2449,16 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
         currentDisplayMode === "scientific" && b.scientificName
           ? b.scientificName
           : b.name;
-
-      // Compare alphabetically, handling any undefined values gracefully
       return (nameA || "")
         .toLowerCase()
         .localeCompare((nameB || "").toLowerCase());
     });
 
-    // Save the fully filtered/sorted list to our global variable
     currentFilteredData = filtered;
 
-    // Render the gallery, forcing it back to page 1!
-    refreshGallery(currentFilteredData, 1);
-  };
+    if (typeof refreshGallery === "function")
+      refreshGallery(currentFilteredData, 1);
+  }
 
   async function initFilters() {
     try {
@@ -2449,8 +2489,6 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
 
       populateCheckboxes(orderContainer, uniqueOrders, "order");
       populateCheckboxes(familyContainer, uniqueFamilies, "family");
-
-      console.log("HEY POOKIE! The new code is running!");
 
       document.querySelectorAll(".filter-checkbox").forEach((cb) => {
         cb.addEventListener("change", applyAllFilters);
@@ -2483,12 +2521,12 @@ document.getElementById('users-tab')?.addEventListener('shown.bs.tab', () => {
     }
   }
 
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(applyAllFilters, 250);
-    });
-  }
+  // if (searchInput) {
+  //   searchInput.addEventListener("input", () => {
+  //     clearTimeout(searchTimeout);
+  //     searchTimeout = setTimeout(applyAllFilters, 250);
+  //   });
+  // }
 
   const nameToggleBtn = document.getElementById("nameToggleBtn");
 

@@ -443,6 +443,24 @@
           </div>
 
           <div class="d-flex align-items-center gap-4">
+            <div
+              class="form-check form-switch ms-3 d-none"
+              id="deleteToggleWrapper"
+            >
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="deleteModeToggle"
+              />
+              <label
+                class="form-check-label text-danger fw-bold"
+                for="deleteModeToggle"
+                style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5)"
+                >Delete Mode</label
+              >
+            </div>
+
             <div class="d-flex gap-3 mt-1 align-items-center">
               <button id="viewGalleryBtn" class="nav-text-link active">
                 Gallery
@@ -516,7 +534,7 @@
               >
                 <i class="fas fa-ellipsis-h fs-4"></i>
               </button>
-              <span class="navbar-static-label">Settings</span>
+              <span class="navbar-static-label text-white-70">Settings</span>
               <ul
                 class="dropdown-menu dropdown-menu-end shadow border-0 mt-3"
                 aria-labelledby="settingsDropdown"
@@ -996,6 +1014,18 @@
                       <tbody id="allUsersTableBody"></tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+
+              <div
+                class="tab-pane fade"
+                id="tab-tags"
+                role="tabpanel"
+                tabindex="0"
+              >
+                <div class="bg-white rounded border p-3">
+                  <h4 class="text-muted">Tags Management</h4>
+                  <div id="tagsContainer"></div>
                 </div>
               </div>
             </div>
