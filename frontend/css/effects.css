@@ -167,7 +167,9 @@
 }
 
 /* Custom 'X' Clear Button */
-#searchInput::-webkit-search-cancel-button {
+#searchInput::-webkit-search-cancel-button,
+#adminTeamSearch::-webkit-search-cancel-button,
+#adminUserSearch::-webkit-search-cancel-button {
   -webkit-appearance: none;
   height: 18px;
   width: 18px;
@@ -178,7 +180,9 @@
   margin-right: 12px;
 }
 
-[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button {
+[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminTeamSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminUserSearch::-webkit-search-cancel-button {
   filter: brightness(1.5);
 }
 

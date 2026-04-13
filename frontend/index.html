@@ -254,7 +254,6 @@
                     placeholder="Search by common name..."
                     style="-webkit-appearance: none; min-width: 250px"
                   />
-
                   <div
                     class="d-flex flex-column align-items-center position-relative nav-action-container"
                   >
@@ -281,7 +280,6 @@
                   </div>
                 </div>
               </div>
-
               <div
                 class="d-flex flex-column align-items-center position-relative nav-action-container"
               >
@@ -308,14 +306,193 @@
                 >
               </div>
             </div>
+
+            <div
+              id="teamsControlsWrapper"
+              class="align-items-center flex-grow-1 gap-3 ms-4 d-none"
+            >
+              <div
+                class="d-flex align-items-center w-100"
+                style="max-width: 550px"
+              >
+                <div
+                  class="input-group shadow-sm search-pill-container flex-nowrap"
+                  style="
+                    border-radius: 50px;
+                    background-color: white;
+                    border: 1px solid transparent;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    class="input-group-text bg-white border-0"
+                    style="border-radius: 50px 0 0 50px"
+                  >
+                    <i class="fas fa-search text-muted"></i>
+                  </span>
+                  <input
+                    id="adminTeamSearch"
+                    class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
+                    type="search"
+                    placeholder="Search teams..."
+                    style="
+                      -webkit-appearance: none;
+                      min-width: 250px;
+                      border-radius: 0 50px 50px 0;
+                    "
+                  />
+                </div>
+              </div>
+              <div
+                class="d-flex flex-column align-items-center position-relative nav-action-container"
+              >
+                <button
+                  class="btn btn-clean-upload rounded-circle fw-bold flex-shrink-0"
+                  data-bs-toggle="modal"
+                  data-bs-target="#adminCreateTeamModal"
+                  style="
+                    width: 42px;
+                    height: 42px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                  "
+                >
+                  <div class="d-flex align-items-start">
+                    <i class="fas fa-users text-white"></i>
+                    <i
+                      class="fas fa-plus text-white"
+                      style="
+                        font-size: 0.5em;
+                        margin-left: -2px;
+                        margin-top: -2px;
+                      "
+                    ></i>
+                  </div>
+                </button>
+                <span
+                  class="navbar-static-label custom-tooltip"
+                  style="bottom: -22px"
+                  >Create Team</span
+                >
+              </div>
+            </div>
+
+            <div
+              id="usersControlsWrapper"
+              class="align-items-center flex-grow-1 gap-3 ms-4 d-none"
+            >
+              <div
+                class="d-flex align-items-center w-100"
+                style="max-width: 550px"
+              >
+                <div
+                  class="input-group shadow-sm search-pill-container flex-nowrap"
+                  style="
+                    border-radius: 50px;
+                    background-color: white;
+                    border: 1px solid transparent;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    class="input-group-text bg-white border-0"
+                    style="border-radius: 50px 0 0 50px"
+                  >
+                    <i class="fas fa-search text-muted"></i>
+                  </span>
+                  <input
+                    id="adminUserSearch"
+                    class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
+                    type="search"
+                    placeholder="Search users..."
+                    style="
+                      -webkit-appearance: none;
+                      min-width: 250px;
+                      border-radius: 0 50px 50px 0;
+                    "
+                  />
+                </div>
+              </div>
+              <div
+                class="d-flex flex-column align-items-center position-relative nav-action-container"
+              >
+                <button
+                  class="btn btn-clean-upload rounded-circle fw-bold flex-shrink-0"
+                  data-bs-toggle="modal"
+                  data-bs-target="#adminAddUserModal"
+                  style="
+                    width: 42px;
+                    height: 42px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                  "
+                >
+                  <i class="fas fa-user-plus text-white"></i>
+                </button>
+                <span
+                  class="navbar-static-label custom-tooltip"
+                  style="bottom: -22px"
+                  >Create User</span
+                >
+              </div>
+            </div>
           </div>
 
           <div class="d-flex align-items-center gap-4">
-            <div class="d-flex gap-3 mt-1">
+            <div class="d-flex gap-3 mt-1 align-items-center">
               <button id="viewGalleryBtn" class="nav-text-link active">
                 Gallery
               </button>
-              <button id="viewTeamBtn" class="nav-text-link">Dashboard</button>
+
+              <div class="dropdown">
+                <button
+                  id="viewTeamBtn"
+                  class="nav-text-link"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  style="background: transparent; border: none"
+                >
+                  Dashboard
+                </button>
+                <ul
+                  class="dropdown-menu shadow border-0 mt-3"
+                  aria-labelledby="viewTeamBtn"
+                  id="dashboardDropdownMenu"
+                >
+                  <li>
+                    <a
+                      class="dropdown-item admin-only-nav"
+                      href="#"
+                      id="navAdminTeams"
+                    >
+                      <i class="fas fa-users me-2 text-muted"></i>Teams
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item admin-only-nav"
+                      href="#"
+                      id="navAdminUsers"
+                    >
+                      <i class="fas fa-user me-2 text-muted"></i>Users
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item student-only-nav"
+                      href="#"
+                      id="navStudentTeam"
+                      style="display: none"
+                    >
+                      <i class="fas fa-users me-2 text-muted"></i>My Team
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <div
@@ -329,9 +506,7 @@
               >
                 <i class="fas fa-ellipsis-h fs-4"></i>
               </button>
-
               <span class="navbar-static-label">Settings</span>
-
               <ul
                 class="dropdown-menu dropdown-menu-end shadow border-0 mt-3"
                 aria-labelledby="settingsDropdown"
@@ -357,27 +532,26 @@
                   >
                 </li>
                 <li><hr class="dropdown-divider m-0" /></li>
-
                 <li>
-                  <a class="dropdown-item py-2" href="#" id="nameToggleBtn"
-                    ><i class="fas fa-exchange-alt me-2 text-muted"></i
-                    ><span>Switch to Scientific</span></a
-                  >
+                  <a class="dropdown-item py-2" href="#" id="nameToggleBtn">
+                    <i class="fas fa-exchange-alt me-2 text-muted"></i
+                    ><span>Switch to Scientific</span>
+                  </a>
                 </li>
                 <li>
                   <a
                     class="dropdown-item py-2"
                     href="#"
                     id="openChangePasswordBtn"
-                    ><i class="fas fa-lock me-2 text-muted"></i>Change
-                    Password</a
                   >
+                    <i class="fas fa-lock me-2 text-muted"></i>Change Password
+                  </a>
                 </li>
                 <li>
-                  <a class="dropdown-item py-2" href="#" id="toggleTheme"
-                    ><i class="fas fa-moon me-2 text-muted"></i>Toggle
-                    Light/Dark Mode</a
-                  >
+                  <a class="dropdown-item py-2" href="#" id="toggleTheme">
+                    <i class="fas fa-moon me-2 text-muted"></i>Toggle Light/Dark
+                    Mode
+                  </a>
                 </li>
                 <li><hr class="dropdown-divider m-0" /></li>
                 <li>
@@ -385,8 +559,9 @@
                     class="dropdown-item py-2 text-danger fw-bold"
                     href="#"
                     id="logoutLink"
-                    ><i class="fas fa-sign-out-alt me-2"></i>Logout</a
                   >
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                  </a>
                 </li>
               </ul>
             </div>
@@ -483,31 +658,13 @@
         </div>
       </div>
 
-      <!-- asdasd
-
-asdsada
-
-
-asd
-
-
-asd
-asd
-asd
-asd
-asd
-asd -->
-
       <section class="portfolio pt-1" id="portfolio">
         <div class="container-fluid px-1">
           <div class="row g-0" id="butterflyGrid"></div>
         </div>
       </section>
 
-      <div
-        id="speciesView"
-        style="display: none; margin-top: 100px; margin-bottom: 50px"
-      >
+      <div id="speciesView" class="py-4" style="display: none">
         <div class="container">
           <div class="row">
             <div class="col-lg-6 mb-4 d-flex flex-row align-items-start">
@@ -740,7 +897,7 @@ asd -->
       <section
         id="teamView"
         class="py-4"
-        style="display: none; margin-top: 80px; min-height: 50vh"
+        style="display: none; min-height: 50vh"
       >
         <div class="container">
           <div id="studentTeamContent" style="display: none">
@@ -758,61 +915,6 @@ asd -->
           </div>
 
           <div id="adminTeamContent" style="display: none">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h4 class="fw-bold mb-0" style="color: #0399b0">
-                Admin Dashboard
-              </h4>
-              <div class="d-flex gap-2">
-                <button
-                  class="btn btn-success btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#adminAddUserModal"
-                >
-                  <i class="fas fa-user-plus me-1"></i> Create User
-                </button>
-                <button
-                  class="btn btn-primary btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#adminCreateTeamModal"
-                >
-                  <i class="fas fa-users me-1"></i> Create Team
-                </button>
-              </div>
-            </div>
-
-            <ul
-              class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm border"
-              id="adminTeamTabs"
-              role="tablist"
-            >
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link fw-bold"
-                  id="teams-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#tab-teams"
-                  type="button"
-                  role="tab"
-                  style="color: #0399b0"
-                >
-                  Teams
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active fw-bold"
-                  id="users-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#tab-users"
-                  type="button"
-                  role="tab"
-                  style="color: #0399b0"
-                >
-                  Users
-                </button>
-              </li>
-            </ul>
-
             <div class="tab-content" id="adminTeamTabsContent">
               <div
                 class="tab-pane fade"
@@ -822,33 +924,19 @@ asd -->
               >
                 <div id="teamsContainer" class="d-flex flex-column gap-3"></div>
               </div>
+
               <div
                 class="tab-pane fade show active"
                 id="tab-users"
                 role="tabpanel"
                 tabindex="0"
               >
-                <div
-                  class="d-flex justify-content-between align-items-center mb-3"
-                >
-                  <div class="input-group" style="max-width: 300px">
-                    <span class="input-group-text bg-white border-end-0">
-                      <i class="fas fa-search text-muted"></i>
-                    </span>
-                    <input
-                      type="text"
-                      class="form-control border-start-0 ps-0"
-                      id="adminUserSearch"
-                      placeholder="Search by username..."
-                    />
-                  </div>
-                </div>
                 <div class="bg-white rounded shadow-sm p-3 border">
                   <div
                     class="table-responsive m-0"
                     style="max-height: 450px; overflow-y: auto"
                   >
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover table-sm align-middle mb-0">
                       <thead
                         class="table-light"
                         style="position: sticky; top: 0; z-index: 10"
@@ -906,6 +994,7 @@ asd -->
                         required
                       />
                     </div>
+
                     <div class="mb-3">
                       <label class="form-label">New Password (Optional)</label>
                       <input

@@ -146,14 +146,24 @@ export async function initHome(userRole, userEmail) {
   const goToGallery = () => {
     showView(portfolio);
 
-    //  Show the Search, Filter, and Upload buttons!
-    const controlsWrapper = document.getElementById("galleryControlsWrapper");
-    if (controlsWrapper) {
-      controlsWrapper.classList.remove("d-none");
-      controlsWrapper.classList.add("d-flex");
+    // Show Gallery Controls, Hide Dashboard Controls
+    const galleryControls = document.getElementById("galleryControlsWrapper");
+    const teamsControls = document.getElementById("teamsControlsWrapper");
+    const usersControls = document.getElementById("usersControlsWrapper");
+
+    if (galleryControls) {
+      galleryControls.classList.remove("d-none");
+      galleryControls.classList.add("d-flex");
+    }
+    if (teamsControls) {
+      teamsControls.classList.add("d-none");
+      teamsControls.classList.remove("d-flex");
+    }
+    if (usersControls) {
+      usersControls.classList.add("d-none");
+      usersControls.classList.remove("d-flex");
     }
 
-    // filter panel logic
     if (filterPanel) filterPanel.style.display = "";
 
     if (viewGalleryBtn) viewGalleryBtn.classList.add("active");
@@ -917,14 +927,14 @@ export async function initHome(userRole, userEmail) {
         '<span class="text-muted fst-italic">Unassigned</span>';
 
       tr.innerHTML = `
-                <td>${u.username}</td>
-                <td>${u.email}</td>
-                <td><span class="badge ${badgeClass}">${currentRole}</span></td>
-                <td><span class="fw-bold text-secondary">${teamName}</span></td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="window.openEditUserModal('${u.userId}', '${u.username}', '${u.email}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-secondary me-1" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">Toggle Role</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="window.deleteSystemUser('${u.userId}')"><i class="fas fa-trash"></i></button>
+                <td class="py-2"><span class="fw-bold" style="font-size: 0.9rem;">${u.username}</span></td>
+                <td class="py-2 text-muted" style="font-size: 0.85rem;">${u.email}</td>
+                <td class="py-2"><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
+                <td class="py-2"><span class="fw-bold text-secondary" style="font-size: 0.85rem;">${teamName}</span></td>
+                <td class="py-2 text-end">
+                    <button class="btn btn-sm btn-outline-primary px-2 py-1" title="Edit User" onclick="window.openEditUserModal('${u.userId}', '${u.username}', '${u.email}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary px-2 py-1 mx-1" title="Toggle Admin/Student" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')"><i class="fas fa-user-cog"></i></button>
+                    <button class="btn btn-sm btn-outline-danger px-2 py-1" title="Delete User" onclick="window.deleteSystemUser('${u.userId}')"><i class="fas fa-trash"></i></button>
                 </td>`;
       tbody.appendChild(tr);
     });
@@ -2051,38 +2061,146 @@ export async function initHome(userRole, userEmail) {
     });
   }
 
-  if (viewTeamBtn) {
-    // Notice the "async" word added right before the ()!
-    viewTeamBtn.addEventListener("click", async (e) => {
+  // --- DASHBOARD DROPDOWN LOGIC ---
+  const navAdminTeams = document.getElementById("navAdminTeams");
+  const navAdminUsers = document.getElementById("navAdminUsers");
+  const navStudentTeam = document.getElementById("navStudentTeam");
+
+  const openDashboard = async (tab) => {
+    showView(teamView);
+
+    // Get all our wrappers
+    const galleryControls = document.getElementById("galleryControlsWrapper");
+    const teamsControls = document.getElementById("teamsControlsWrapper");
+    const usersControls = document.getElementById("usersControlsWrapper");
+
+    // Hide the Gallery controls and filter panel
+    if (galleryControls) {
+      galleryControls.classList.add("d-none");
+      galleryControls.classList.remove("d-flex");
+    }
+    if (filterPanel) filterPanel.classList.remove("show");
+
+    // Toggle active underlines
+    if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
+    if (viewTeamBtn) viewTeamBtn.classList.add("active");
+
+    if (userRole === "ADMIN") {
+      if (adminTeamContent) adminTeamContent.style.display = "block";
+      if (studentTeamContent) studentTeamContent.style.display = "none";
+
+      // 1. UPDATE THE UI INSTANTLY FIRST
+      const tabTeams = document.getElementById("tab-teams");
+      const tabUsers = document.getElementById("tab-users");
+
+      if (tab === "teams" && tabTeams && tabUsers) {
+        tabTeams.classList.add("show", "active");
+        tabUsers.classList.remove("show", "active");
+
+        // Show Teams Search, Hide Users Search
+        if (teamsControls) {
+          teamsControls.classList.remove("d-none");
+          teamsControls.classList.add("d-flex");
+        }
+        if (usersControls) {
+          usersControls.classList.add("d-none");
+          usersControls.classList.remove("d-flex");
+        }
+      } else if (tab === "users" && tabTeams && tabUsers) {
+        tabUsers.classList.add("show", "active");
+        tabTeams.classList.remove("show", "active");
+
+        // Show Users Search, Hide Teams Search
+        if (usersControls) {
+          usersControls.classList.remove("d-none");
+          usersControls.classList.add("d-flex");
+        }
+        if (teamsControls) {
+          teamsControls.classList.add("d-none");
+          teamsControls.classList.remove("d-flex");
+        }
+      }
+
+      // 2. FETCH THE DATA IN THE BACKGROUND
+      await loadAdminData();
+    } else {
+      if (adminTeamContent) adminTeamContent.style.display = "none";
+      if (studentTeamContent) studentTeamContent.style.display = "block";
+      await loadStudentData(userEmail);
+    }
+  };
+
+  // Wire up the new dropdown buttons
+  if (navAdminTeams) {
+    navAdminTeams.addEventListener("click", (e) => {
       e.preventDefault();
-      showView(teamView);
+      openDashboard("teams");
+    });
+  }
+  if (navAdminUsers) {
+    navAdminUsers.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDashboard("users");
+    });
+  }
+  if (navStudentTeam) {
+    navStudentTeam.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDashboard("student");
+    });
+  }
 
-      // 1. Hide the Search, Filter, and Upload buttons!
-      const controlsWrapper = document.getElementById("galleryControlsWrapper");
-      if (controlsWrapper) {
-        controlsWrapper.classList.add("d-none");
-        controlsWrapper.classList.remove("d-flex");
-      }
+  // Dynamically show/hide dropdown options based on the user role
+  if (userRole === "ADMIN") {
+    document
+      .querySelectorAll(".admin-only-nav")
+      .forEach((el) => ((el as HTMLElement).style.display = "block"));
+    document
+      .querySelectorAll(".student-only-nav")
+      .forEach((el) => ((el as HTMLElement).style.display = "none"));
+  } else {
+    document
+      .querySelectorAll(".admin-only-nav")
+      .forEach((el) => ((el as HTMLElement).style.display = "none"));
+    document
+      .querySelectorAll(".student-only-nav")
+      .forEach((el) => ((el as HTMLElement).style.display = "block"));
+  }
 
-      // 2. Hide the filter panel if it was left open
-      if (filterPanel) {
-        filterPanel.classList.remove("show");
-      }
+  // --- NEW TEAM SEARCH LOGIC ---
+  const adminTeamSearch = document.getElementById("adminTeamSearch");
+  if (adminTeamSearch) {
+    adminTeamSearch.addEventListener("input", (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase();
+      const teamCards = document.querySelectorAll("#teamsContainer .card");
 
-      // 3. Update the underline on the text links
-      if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
-      if (viewTeamBtn) viewTeamBtn.classList.add("active");
+      teamCards.forEach((card) => {
+        const teamName =
+          card.querySelector("h5")?.innerText.toLowerCase() || "";
+        if (teamName.includes(query)) {
+          (card as HTMLElement).style.display = "block";
+        } else {
+          (card as HTMLElement).style.display = "none";
+        }
+      });
+    });
+  }
 
-      // 4. Load the dashboard data safely using await!
-      if (userRole === "ADMIN") {
-        if (adminTeamContent) adminTeamContent.style.display = "block";
-        if (studentTeamContent) studentTeamContent.style.display = "none";
-        await loadAdminData();
-      } else {
-        if (adminTeamContent) adminTeamContent.style.display = "none";
-        if (studentTeamContent) studentTeamContent.style.display = "block";
-        await loadStudentData(userEmail);
-      }
+  // --- USER SEARCH LOGIC ---
+  // make sure we detach any old listeners if they existed, and attach our new search logic
+  if (adminUserSearch) {
+    // Clone node to drop old event listeners safely just in case
+    const newSearchBtn = adminUserSearch.cloneNode(true) as HTMLInputElement;
+    adminUserSearch.parentNode?.replaceChild(newSearchBtn, adminUserSearch);
+
+    newSearchBtn.addEventListener("input", (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase();
+
+      // allCachedUsers is defined higher up in homepage.ts
+      const filtered = allCachedUsers.filter((u: any) =>
+        u.username.toLowerCase().includes(query),
+      );
+      renderAllUsersTable(filtered);
     });
   }
 
