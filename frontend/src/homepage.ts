@@ -166,8 +166,11 @@ export async function initHome(userRole, userEmail) {
 
     if (filterPanel) filterPanel.style.display = "";
 
-    if (viewGalleryBtn) viewGalleryBtn.classList.add("active");
-    if (viewTeamBtn) viewTeamBtn.classList.remove("active");
+    const activeGalleryBtn = document.getElementById("viewGalleryBtn");
+    const activeDashboardBtn = document.getElementById("viewTeamBtn");
+
+    if (activeGalleryBtn) activeGalleryBtn.classList.add("active");
+    if (activeDashboardBtn) activeDashboardBtn.classList.remove("active");
   };
 
   const openImageDetailsModal = (img) => {
@@ -1206,7 +1209,8 @@ export async function initHome(userRole, userEmail) {
                         ${apiKeyHtml}
                     </div>
                 </div>`;
-      container.appendChild(card);
+      col.appendChild(card);
+      container.appendChild(col);
     }
   }
 
@@ -2228,7 +2232,7 @@ export async function initHome(userRole, userEmail) {
   // --- DASHBOARD DROPDOWN LOGIC ---
   const navAdminTeams = document.getElementById("navAdminTeams");
   const navAdminUsers = document.getElementById("navAdminUsers");
-  const navAdminTags = document.getElementById("navAdminTags"); // Teammate's feature
+  const navAdminTags = document.getElementById("navAdminTags");
   const navStudentTeam = document.getElementById("navStudentTeam");
 
   // --- DESTROY GHOST LISTENERS ON THE DASHBOARD BUTTON ---
@@ -2255,8 +2259,10 @@ export async function initHome(userRole, userEmail) {
     if (filterPanel) filterPanel.classList.remove("show");
 
     // Toggle active underlines
-    if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
-    if (viewTeamBtn) viewTeamBtn.classList.add("active");
+    const activeGalleryBtn = document.getElementById("viewGalleryBtn");
+    const activeDashboardBtn = document.getElementById("viewTeamBtn");
+    if (activeGalleryBtn) activeGalleryBtn.classList.remove("active");
+    if (activeDashboardBtn) activeDashboardBtn.classList.add("active");
 
     if (userRole === "ADMIN") {
       if (adminTeamContent) adminTeamContent.style.display = "block";

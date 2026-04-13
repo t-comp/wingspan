@@ -112,209 +112,251 @@ export const TagManager = {
   },
 
   async initTagContainer() {
-    const container = document.getElementById("tagCheckboxContainer");
-    if (!container) return;
+    const containers = document.querySelectorAll(
+      "#tagCheckboxContainer, #tagCheckboxList, .tag-container-sync",
+    );
+    if (containers.length === 0) return;
+
     try {
       const dbTags = await ButterflyAPI.getAllTags();
+      const grouped: { [key: string]: any[] } = {};
+
+      // Use the same grouping logic as above
+      dbTags.forEach((t) => {
+        let cat = t.tagCategory;
+        if (!cat || cat === "Uncategorized") {
+          const cleanName = (t.tagName || "").toLowerCase().trim();
+          for (const [cName, tNames] of Object.entries(this.tagData)) {
+            if (tNames.map((n) => n.toLowerCase().trim()).includes(cleanName)) {
+              cat = cName;
+              break;
+            }
+          }
+        }
+        const finalCat = cat || "Uncategorized";
+        if (!grouped[finalCat]) grouped[finalCat] = [];
+        grouped[finalCat].push(t);
+      });
 
       let finalHtml = "";
-      for (const [categoryName, tagNames] of Object.entries(this.tagData)) {
-        let categoryGroupHtml = "";
-        let hasFoundAnyInThisCategory = false;
+      Object.keys(grouped)
+        .sort()
+        .forEach((categoryName) => {
+          const tagsInCat = grouped[categoryName];
+          const tagHtml = tagsInCat
+            .map(
+              (t) => `
+                <div class="form-check" style="width: 180px;">
+                    <input class="form-check-input" type="checkbox" name="tagIds" value="${t.tagId}">
+                    <label class="form-check-label small text-dark">${t.tagName}</label>
+                </div>
+            `,
+            )
+            .join("");
 
-        tagNames.forEach((name) => {
-          const match = dbTags.find(
-            (t) =>
-              t &&
-              t.tagName &&
-              t.tagName.toString().trim().toLowerCase() ===
-                name.trim().toLowerCase(),
-          );
-
-          if (match) {
-            hasFoundAnyInThisCategory = true;
-            categoryGroupHtml += `
-                            <div class="form-check" style="width: 180px; margin-bottom: 5px;">
-                                <input class="form-check-input" type="checkbox" name="tagIds"
-                                       value="${match.tagId}" id="tag${match.tagId}">
-                                <label class="form-check-label small text-dark" for="tag${match.tagId}">
-                                    ${match.tagName}
-                                </label>
-                            </div>`;
-          }
+          finalHtml += `
+                <div class="tag-category-block mb-3 w-100">
+                    <h6 class="fw-bold text-primary mb-1 sticky-top bg-white py-1" style="font-size: 0.85rem; top: -2px; z-index: 10;">
+                        ${categoryName}
+                    </h6>
+                    <div class="d-flex flex-wrap border-bottom pb-2 mb-2">${tagHtml}</div>
+                </div>`;
         });
 
-        if (hasFoundAnyInThisCategory) {
-          finalHtml += `
-                        <div class="tag-category-block mb-4 w-100">
-                            <div class="d-flex align-items-center mb-2">
-                                <h6 class="fw-bold text-primary mb-0 me-2" style="font-size: 0.9rem; white-space: nowrap;">${categoryName}</h6>
-                                <div class="flex-grow-1 border-bottom" style="height: 1px; opacity: 0.2;"></div>
-                            </div>
-                            <div class="d-flex flex-wrap">
-                                ${categoryGroupHtml}
-                            </div>
-                        </div>`;
-        }
-      }
-
-      container.innerHTML =
-        finalHtml || '<p class="text-muted small">No matching tags found.</p>';
+      containers.forEach((c) => (c.innerHTML = finalHtml));
     } catch (err) {
-      console.error("Tag UI Error:", err);
-      container.innerHTML =
-        '<p class="text-danger small">Error loading tags.</p>';
+      console.error(err);
     }
   },
 
   async refreshAdminTagsView() {
-    const list = document.getElementById("adminTagCategoryList");
-    if (!list) return;
-
     try {
-      // Fetch all tags from the database
-      const allTags = await ButterflyAPI.getAllTags();
+      const dbTags = await ButterflyAPI.getAllTags();
+      const grouped: { [key: string]: any[] } = {};
 
-      // Grab the categories from the top of the file
-      const categories = Object.keys(this.tagData);
-      list.innerHTML = "";
+      dbTags.forEach((tag) => {
+        // 1. Get the category directly from the backend DTO
+        let cat = tag.tagCategory;
 
-      // Create a clickable button for each category
-      categories.forEach((cat) => {
-        const btn = document.createElement("button");
-        btn.className =
-          "list-group-item list-group-item-action d-flex justify-content-between align-items-center fw-bold text-secondary py-3";
-        btn.innerHTML = `${cat} <i class="fas fa-chevron-right small opacity-50"></i>`;
+        // 2. FALLBACK ONLY: If the backend category is empty/null,
+        // check the hardcoded list to try and "guess" where it belongs.
+        if (!cat || cat === "Uncategorized" || cat.trim() === "") {
+          const cleanName = (tag.tagName || "").toLowerCase().trim();
+          for (const [categoryName, tagNames] of Object.entries(
+            TagManager.tagData,
+          )) {
+            if (
+              tagNames.map((n) => n.toLowerCase().trim()).includes(cleanName)
+            ) {
+              cat = categoryName;
+              break;
+            }
+          }
+        }
 
-        btn.onclick = (e) => {
-          e.preventDefault();
+        // 3. Final safety net
+        const finalCat = cat || "Uncategorized";
 
-          // Make the clicked button turn blue and active
-          document
-            .querySelectorAll("#adminTagCategoryList button")
-            .forEach((b) => {
-              b.classList.remove("active", "text-white");
-              b.classList.add("text-secondary");
-            });
-          btn.classList.add("active", "text-white");
-          btn.classList.remove("text-secondary");
-
-          const tagsForCat = allTags.filter(
-            (t: any) =>
-              (t.tagCategory || "").toLowerCase() === cat.toLowerCase(),
-          );
-          this.renderTagEditor(cat, tagsForCat);
-        };
-
-        list.appendChild(btn);
+        if (!grouped[finalCat]) grouped[finalCat] = [];
+        grouped[finalCat].push(tag);
       });
-    } catch (error) {
-      console.error("Failed to load tags for sidebar", error);
+
+      const listContainer = document.getElementById("adminTagCategoryList");
+      if (!listContainer) return;
+
+      // 4. Render only the categories that actually exist in your database/fallback
+      const categories = Object.keys(grouped).sort();
+      listContainer.innerHTML = categories
+        .map(
+          (cat) => `
+            <button class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" 
+                    onclick="TagManager.renderTagEditor('${cat.replace(
+                      /'/g,
+                      "\\'",
+                    )}', ${JSON.stringify(grouped[cat]).replace(
+                      /"/g,
+                      "&quot;",
+                    )})">
+                <span class="fw-bold">${cat}</span>
+                <span class="badge bg-primary rounded-pill">${
+                  grouped[cat].length
+                }</span>
+            </button>
+        `,
+        )
+        .join("");
+    } catch (err) {
+      console.error("Admin Tag Error:", err);
     }
   },
 
-  // --- THE OTHER MISSING TEAMMATE FUNCTION! ---
   renderTagEditor(categoryName: string, tags: any[]) {
-    // 1. Swap the empty state for the actual editor
-    document.getElementById("tagEditorEmptyState")?.classList.add("d-none");
-    document.getElementById("tagEditorContainer")?.classList.remove("d-none");
-
-    // 2. Update the Title and Badge
-    const titleEl = document.getElementById("currentEditingCategory");
-    if (titleEl) titleEl.innerText = categoryName;
-
-    const countEl = document.getElementById("categoryTagCount");
-    if (countEl) countEl.innerText = `${tags.length} Tags`;
-
-    // 3. Render the tags into the grid
+    const editor = document.getElementById("tagEditorContainer");
+    const emptyState = document.getElementById("tagEditorEmptyState");
+    const title = document.getElementById("currentEditingCategory");
     const grid = document.getElementById("activeTagsGrid");
+
+    emptyState?.classList.add("d-none");
+    editor?.classList.remove("d-none");
+    if (title) title.innerText = categoryName;
+
     if (grid) {
-      grid.innerHTML = "";
-      if (tags.length === 0) {
-        grid.innerHTML = `<span class="text-muted small fst-italic">No tags here yet!</span>`;
-      } else {
-        tags.forEach((t: any) => {
-          const tagBadge = document.createElement("div");
-          tagBadge.className =
-            "badge bg-light text-dark border p-2 d-flex align-items-center gap-2";
-          tagBadge.innerHTML = `
-            <span style="font-size: 0.85rem;">${t.tagName}</span>
-            <button type="button" class="btn-close" style="font-size: 0.5rem;" aria-label="Delete"></button>
-          `;
+      // MATCHING TagDTO: tagId
+      const uniqueTags = Array.from(
+        new Map(tags.map((t) => [t.tagId, t])).values(),
+      );
 
-          // Add Delete Logic to the little X
-          const closeBtn = tagBadge.querySelector(".btn-close");
-          if (closeBtn) {
-            closeBtn.addEventListener("click", async () => {
-              if (confirm(`Delete the tag '${t.tagName}'?`)) {
-                try {
-                  await ButterflyAPI.deleteTag(t.tagId);
-
-                  // Re-fetch and re-render
-                  const allTags = await ButterflyAPI.getAllTags();
-                  const updatedTags = allTags.filter(
-                    (tg: any) =>
-                      (tg.tagCategory || "").toLowerCase() ===
-                      categoryName.toLowerCase(),
-                  );
-                  this.renderTagEditor(categoryName, updatedTags);
-                } catch (e) {
-                  alert("Failed to delete tag.");
-                }
-              }
-            });
-          }
-          grid.appendChild(tagBadge);
-        });
-      }
+      grid.innerHTML = uniqueTags
+        .map(
+          (tag) => `
+                <div class="btn-group shadow-sm m-1">
+                    <span class="btn btn-sm btn-white border border-end-0 fw-medium">${
+                      tag.tagName
+                    }</span>
+                    <button class="btn btn-sm btn-white border border-start-0 text-danger" 
+        onclick="TagManager.deleteTag(${tag.tagId}, '${categoryName.replace(
+          /'/g,
+          "\\'",
+        )}')">
+    <i class="fas fa-times"></i>
+</button>
+                </div>
+            `,
+        )
+        .join("");
     }
 
-    // 4. Handle the "Add Tag" Button
-    const addInput = document.getElementById(
-      "adminNewTagName",
-    ) as HTMLInputElement | null;
-    // 4. Handle the "Add Tag" Button
     const addBtn = document.getElementById("adminAddTagSubmit");
+    const input = document.getElementById(
+      "adminNewTagName",
+    ) as HTMLInputElement;
 
     if (addBtn) {
-      // Clone to prevent duplicate listeners stacking up
-      const newAddBtn = addBtn.cloneNode(true);
-      addBtn.parentNode?.replaceChild(newAddBtn, addBtn);
-
-      newAddBtn.addEventListener("click", async () => {
-        // FIX: Grab the input exactly when clicked so it NEVER loses the reference!
-        const addInput = document.getElementById(
-          "adminNewTagName",
-        ) as HTMLInputElement | null;
-        if (!addInput) return;
-
-        const newTagName = addInput.value.trim();
-        if (!newTagName) return;
-
+      addBtn.onclick = async () => {
+        const nameValue = input.value.trim();
+        if (!nameValue) return;
         try {
           await ButterflyAPI.createTag({
-            name: newTagName,
+            name: nameValue,
             category: categoryName,
           });
-          addInput.value = ""; // Clear input
+          input.value = "";
 
-          //  await TagManager.globalRefresh();
+          // THE SYNC CALL
+          await TagManager.globalRefresh();
 
-          // Re-fetch and re-render
+          // Re-filter for the current view
           const allTags = await ButterflyAPI.getAllTags();
           const updatedTags = allTags.filter(
-            (tg: any) =>
-              (tg.tagCategory || "").toLowerCase() ===
-              categoryName.toLowerCase(),
+            (t) =>
+              (t.tagCategory || "").toLowerCase() ===
+                categoryName.toLowerCase() ||
+              (t.tagName || "").toLowerCase() === nameValue.toLowerCase(),
           );
-
           TagManager.renderTagEditor(categoryName, updatedTags);
-        } catch (e) {
-          console.error(e);
-          alert("Failed to add tag.");
+        } catch (err: any) {
+          alert(
+            "Action completed. If tag doesn't appear, check if it's a duplicate.",
+          );
         }
-      });
+      };
     }
   },
-  // ---------------------------------------------
+
+  async deleteTag(tagId: number, currentCategory: string) {
+    if (confirm("Delete this tag?")) {
+      try {
+        await ButterflyAPI.deleteTag(tagId);
+
+        // THE SYNC CALL
+        await TagManager.globalRefresh();
+
+        const allTags = await ButterflyAPI.getAllTags();
+        const updatedTags = allTags.filter(
+          (t) =>
+            (t.tagCategory || "").toLowerCase() ===
+            currentCategory.toLowerCase(),
+        );
+
+        if (updatedTags.length > 0) {
+          TagManager.renderTagEditor(currentCategory, updatedTags);
+        } else {
+          document
+            .getElementById("tagEditorContainer")
+            ?.classList.add("d-none");
+          document
+            .getElementById("tagEditorEmptyState")
+            ?.classList.remove("d-none");
+        }
+      } catch (err) {
+        console.error("Delete failed:", err);
+        alert("Failed to delete tag.");
+      }
+    }
+  },
+
+  async globalRefresh() {
+    console.log("Syncing all tag components...");
+    // Refresh the Admin Dashboard sidebar
+    await this.refreshAdminTagsView();
+    // Refresh the Checkbox containers (Upload Modal & Edit Image Modal)
+    await this.initTagContainer();
+  },
+};
+
+(window as any).TagManager = TagManager;
+
+(window as any).promptNewCategory = async () => {
+  const catName = prompt("Enter new category name:");
+  if (catName && catName.trim()) {
+    try {
+      await ButterflyAPI.createTag({
+        name: "Category Start",
+        category: catName.trim(),
+      });
+      await TagManager.refreshAdminTagsView();
+    } catch (err) {
+      console.error(err);
+    }
+  }
 };
