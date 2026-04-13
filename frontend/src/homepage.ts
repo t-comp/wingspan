@@ -890,29 +890,32 @@ export async function initHome(userRole, userEmail) {
   let globalUserTeamMap = {};
 
   async function loadAdminData() {
-    const [users, teams] = await Promise.all([
-      ButterflyAPI.getAllUsers(),
-      ButterflyAPI.getAllTeams(),
-    ]);
-    users.sort((a, b) =>
-      a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
-    );
-    allCachedUsers = users;
+    try {
+      const [users, teams] = await Promise.all([
+        ButterflyAPI.getAllUsers(),
+        ButterflyAPI.getAllTeams(),
+      ]);
+      users.sort((a, b) =>
+        a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
+      );
+      allCachedUsers = users;
 
-    globalUserTeamMap = {};
-    const memberResults = await Promise.all(
-      teams.map((t) => ButterflyAPI.getTeamMembers(t.id)),
-    );
-    teams.forEach((t, i) => {
-      for (const m of memberResults[i]) {
-        globalUserTeamMap[m.userId] = t.name;
-      }
-    });
+      globalUserTeamMap = {};
+      const memberResults = await Promise.all(
+        teams.map((t) => ButterflyAPI.getTeamMembers(t.id)),
+      );
+      teams.forEach((t, i) => {
+        for (const m of memberResults[i]) {
+          globalUserTeamMap[m.userId] = t.name;
+        }
+      });
 
-    renderAllUsersTable(allCachedUsers);
-    await loadTeams();
-
-    await TagManager.refreshAdminTagsView();
+      renderAllUsersTable(allCachedUsers);
+      await loadTeams();
+      await TagManager.refreshAdminTagsView();
+    } catch (e) {
+      console.error("Error loading admin data:", e);
+    }
   }
 
   function renderAllUsersTable(usersList) {
@@ -2098,118 +2101,87 @@ export async function initHome(userRole, userEmail) {
       goToGallery();
     });
   }
-
-  // --- DASHBOARD DROPDOWN LOGIC ---
+  // --- CLEANED UP DASHBOARD DROPDOWN LOGIC ---
   const navAdminTeams = document.getElementById("navAdminTeams");
   const navAdminUsers = document.getElementById("navAdminUsers");
+  const navAdminTags = document.getElementById("navAdminTags");
   const navStudentTeam = document.getElementById("navStudentTeam");
 
   const openDashboard = async (tab) => {
     showView(teamView);
 
-    // Get all our wrappers
+    // 1. Hide Gallery & Filter Controls
     const galleryControls = document.getElementById("galleryControlsWrapper");
-    const teamsControls = document.getElementById("teamsControlsWrapper");
-    const usersControls = document.getElementById("usersControlsWrapper");
-
-    // Hide the Gallery controls and filter panel
     if (galleryControls) {
       galleryControls.classList.add("d-none");
       galleryControls.classList.remove("d-flex");
     }
     if (filterPanel) filterPanel.classList.remove("show");
 
-    // Toggle active underlines
+    // 2. Toggle active underlines for the main navbar
     if (viewGalleryBtn) viewGalleryBtn.classList.remove("active");
     if (viewTeamBtn) viewTeamBtn.classList.add("active");
 
+    // 3. Handle Dashboard Content
     if (userRole === "ADMIN") {
       if (adminTeamContent) adminTeamContent.style.display = "block";
       if (studentTeamContent) studentTeamContent.style.display = "none";
 
-      // 1. UPDATE THE UI INSTANTLY FIRST
-      const tabTeams = document.getElementById("tab-teams");
-      const tabUsers = document.getElementById("tab-users");
-      const tabTags = document.getElementById("tab-tags"); // <--- Added this
+      // --- ELEGANT TAB SWITCHING ---
 
-      if (tab === "teams" && tabTeams && tabUsers && tabTags) {
-        tabTeams.classList.add("show", "active");
-        tabUsers.classList.remove("show", "active");
-        tabTags.classList.remove("show", "active");
-
-        if (teamsControls) {
-          teamsControls.classList.remove("d-none");
-          teamsControls.classList.add("d-flex");
+      // A. Loop through all tabs and show only the active one
+      const allTabs = ["teams", "users", "tags"];
+      allTabs.forEach((t) => {
+        const el = document.getElementById(`tab-${t}`);
+        if (el) {
+          t === tab
+            ? el.classList.add("show", "active")
+            : el.classList.remove("show", "active");
         }
-        if (usersControls) {
-          usersControls.classList.add("d-none");
-          usersControls.classList.remove("d-flex");
-        }
+      });
 
-        updateClearBtnVisibility("adminTeamSearch", "clearAdminTeamSearchBtn");
-        const clearUserBtn = document.getElementById("clearAdminUserSearchBtn");
-        if (clearUserBtn) clearUserBtn.style.opacity = "0";
-      } else if (tab === "users" && tabTeams && tabUsers && tabTags) {
-        tabUsers.classList.add("show", "active");
-        tabTeams.classList.remove("show", "active");
-        tabTags.classList.remove("show", "active");
-
-        if (usersControls) {
-          usersControls.classList.remove("d-none");
-          usersControls.classList.add("d-flex");
+      // B. Helper to toggle Search Controls cleanly
+      const toggleSearch = (elId, shouldShow) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        if (shouldShow) {
+          el.classList.remove("d-none");
+          el.classList.add("d-flex");
+        } else {
+          el.classList.remove("d-flex");
+          el.classList.add("d-none");
         }
-        if (teamsControls) {
-          teamsControls.classList.add("d-none");
-          teamsControls.classList.remove("d-flex");
-        }
+      };
 
-        updateClearBtnVisibility("adminUserSearch", "clearAdminUserSearchBtn");
-        const clearTeamBtn = document.getElementById("clearAdminTeamSearchBtn");
-        if (clearTeamBtn) clearTeamBtn.style.opacity = "0";
+      // Show the correct search bar based on the tab
+      toggleSearch("teamsControlsWrapper", tab === "teams");
+      toggleSearch("usersControlsWrapper", tab === "users");
 
-        // NEW TAGS LOGIC
-      } else if (tab === "tags" && tabTeams && tabUsers && tabTags) {
-        tabTags.classList.add("show", "active");
-        tabTeams.classList.remove("show", "active");
-        tabUsers.classList.remove("show", "active");
-
-        // Hide both search bars since Tags doesn't use the top navbar search!
-        if (teamsControls) {
-          teamsControls.classList.add("d-none");
-          teamsControls.classList.remove("d-flex");
-        }
-        if (usersControls) {
-          usersControls.classList.add("d-none");
-          usersControls.classList.remove("d-flex");
-        }
-      } // 2. FETCH THE DATA IN THE BACKGROUND
+      // 4. Load the data in the background
       await loadAdminData();
     } else {
+      // --- STUDENT LOGIC ---
       if (adminTeamContent) adminTeamContent.style.display = "none";
       if (studentTeamContent) studentTeamContent.style.display = "block";
       await loadStudentData(userEmail);
     }
   };
 
-  // Wire up the new dropdown buttons
-  const navAdminTags = document.getElementById("navAdminTags"); // Add this to your constants
+  // --- HELPER FOR CLICK LISTENERS ---
+  const setupNavButton = (element, tabName) => {
+    if (element) {
+      element.addEventListener("click", (e) => {
+        e.preventDefault();
+        openDashboard(tabName);
+      });
+    }
+  };
 
-  if (navAdminTeams)
-    navAdminTeams.addEventListener("click", (e) => {
-      e.preventDefault();
-      openDashboard("teams");
-    });
-  if (navAdminUsers)
-    navAdminUsers.addEventListener("click", (e) => {
-      e.preventDefault();
-      openDashboard("users");
-    });
-
-  if (navAdminTags)
-    navAdminTags.addEventListener("click", (e) => {
-      e.preventDefault();
-      openDashboard("tags");
-    });
+  // Wire up all buttons cleanly!
+  setupNavButton(navAdminTeams, "teams");
+  setupNavButton(navAdminUsers, "users");
+  setupNavButton(navAdminTags, "tags");
+  setupNavButton(navStudentTeam, "student");
 
   // Dynamically show/hide dropdown options based on the user role
   if (userRole === "ADMIN") {
