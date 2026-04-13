@@ -758,3 +758,15 @@
   background-color: #f8f9fa;
   color: #212529;
 }
+
+.btn-category-add {
+  background-color: #ffffff;
+  color: #51b8a5;
+  border: 2px solid #51b8a5;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-category-add:hover {
+  background-color: #51b8a5;
+  color: #ffffff;
+}
