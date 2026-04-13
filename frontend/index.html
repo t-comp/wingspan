@@ -459,9 +459,10 @@
                   Dashboard
                 </button>
                 <ul
-                  class="dropdown-menu shadow border-0 mt-3"
+                  class="dropdown-menu shadow border-0 mt-3 p-2"
                   aria-labelledby="viewTeamBtn"
                   id="dashboardDropdownMenu"
+                  style="min-width: 130px"
                 >
                   <li>
                     <a
@@ -922,7 +923,10 @@
                 role="tabpanel"
                 tabindex="0"
               >
-                <div id="teamsContainer" class="d-flex flex-column gap-3"></div>
+                <div
+                  id="teamsContainer"
+                  class="row g-3 align-items-stretch"
+                ></div>
               </div>
 
               <div
@@ -931,22 +935,29 @@
                 role="tabpanel"
                 tabindex="0"
               >
-                <div class="bg-white rounded shadow-sm p-3 border">
+                <div class="bg-white rounded border">
                   <div
                     class="table-responsive m-0"
-                    style="max-height: 450px; overflow-y: auto"
+                    style="
+                      max-height: calc(100vh - 220px);
+                      overflow-y: auto;
+                      overflow-x: hidden;
+                    "
                   >
-                    <table class="table table-hover table-sm align-middle mb-0">
+                    <table
+                      class="table table-hover align-middle mb-0"
+                      style="table-layout: fixed; width: 100%"
+                    >
                       <thead
                         class="table-light"
                         style="position: sticky; top: 0; z-index: 10"
                       >
                         <tr>
-                          <th>Username</th>
-                          <th>Email</th>
-                          <th>Role</th>
-                          <th>Team</th>
-                          <th class="text-end">Actions</th>
+                          <th style="width: 25%">Username</th>
+                          <th style="width: 30%">Email</th>
+                          <th style="width: 15%">Role</th>
+                          <th style="width: 15%">Team</th>
+                          <th class="text-end" style="width: 15%">Actions</th>
                         </tr>
                       </thead>
                       <tbody id="allUsersTableBody"></tbody>

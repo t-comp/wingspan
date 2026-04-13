@@ -927,15 +927,33 @@ export async function initHome(userRole, userEmail) {
         '<span class="text-muted fst-italic">Unassigned</span>';
 
       tr.innerHTML = `
-                <td class="py-2"><span class="fw-bold" style="font-size: 0.9rem;">${u.username}</span></td>
-                <td class="py-2 text-muted" style="font-size: 0.85rem;">${u.email}</td>
-                <td class="py-2"><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
-                <td class="py-2"><span class="fw-bold text-secondary" style="font-size: 0.85rem;">${teamName}</span></td>
-                <td class="py-2 text-end">
-                    <button class="btn btn-sm btn-outline-primary px-2 py-1" title="Edit User" onclick="window.openEditUserModal('${u.userId}', '${u.username}', '${u.email}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-secondary px-2 py-1 mx-1" title="Toggle Admin/Student" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')"><i class="fas fa-user-cog"></i></button>
-                    <button class="btn btn-sm btn-outline-danger px-2 py-1" title="Delete User" onclick="window.deleteSystemUser('${u.userId}')"><i class="fas fa-trash"></i></button>
+                <td><span class="fw-bold" style="font-size: 0.9rem;">${u.username}</span></td>
+                <td class="text-muted text-truncate" style="font-size: 0.85rem; max-width: 200px;" title="${u.email}">${u.email}</td>
+                <td><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
+                <td><span class="fw-bold text-secondary text-truncate d-inline-block" style="font-size: 0.85rem; max-width: 150px;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
+                <td class="text-end">
+                    <div class="d-flex justify-content-end gap-1">
+                        <div class="action-tooltip-container">
+                            <button class="btn-icon-only" onclick="window.openEditUserModal('${u.userId}', '${u.username}', '${u.email}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <span class="action-tooltip">Edit User</span>
+                        </div>
+                        <div class="action-tooltip-container">
+                            <button class="btn-icon-only" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">
+                                <i class="fas fa-user-cog"></i>
+                            </button>
+                            <span class="action-tooltip">Toggle Role</span>
+                        </div>
+                        <div class="action-tooltip-container">
+                            <button class="btn-icon-only delete-btn" onclick="window.deleteSystemUser('${u.userId}')">
+                                <i class="fas fa-trash text-danger"></i>
+                            </button>
+                            <span class="action-tooltip">Delete User</span>
+                        </div>
+                    </div>
                 </td>`;
+
       tbody.appendChild(tr);
     });
   }
@@ -988,19 +1006,15 @@ export async function initHome(userRole, userEmail) {
       if (members.length === 0) {
         membersHtml = `<span class="text-muted fst-italic small">No members yet</span>`;
       } else {
+        // Removed the circular initial icons, just crisp text now!
         membersHtml = members
           .map((m) => {
-            const initials = m.username.substring(0, 2).toUpperCase();
             return `
-                        <span class="d-inline-flex align-items-center gap-1 me-1 mb-1 px-2 py-1 rounded-pill border small"
-                              style="background: #f8f9fa; font-size: 0.8rem;">
-                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold"
-                                  style="width:20px; height:20px; background:#EEEDFE; color:#3C3489; font-size:9px;">
-                                ${initials}
-                            </span>
+                        <span class="d-inline-flex align-items-center gap-1 me-1 mb-1 px-3 py-1 rounded-pill border small fw-bold"
+                              style="background: #f8f9fa; font-size: 0.75rem; color: #495057;">
                             ${m.username}
-                            <span style="cursor:pointer; font-size:10px; color:#888; margin-left:2px;"
-                                  onclick="window.removeStudentFromTeam('${team.id}', '${m.userId}')">✕</span>
+                            <span style="cursor:pointer; font-size:11px; color:#adb5bd; margin-left:6px; padding: 2px;"
+                                  onclick="window.removeStudentFromTeam('${team.id}', '${m.userId}')"><i class="fas fa-times"></i></span>
                         </span>`;
           })
           .join("");
@@ -1009,92 +1023,110 @@ export async function initHome(userRole, userEmail) {
       let apiKeyHtml = "";
       if (!teamKey) {
         apiKeyHtml = `
-                    <div class="d-flex align-items-center justify-content-between p-2 rounded"
-                         style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
                         <span class="text-muted small fst-italic">No API key found</span>
-                        <button class="btn btn-sm btn-outline-secondary" style="font-size:0.75rem;"
-                                onclick="window.regenerateTeamKey('${team.name}', '${team.projectName}', '${team.semester}')">
-                            <i class="fas fa-key me-1"></i>Generate Key
-                        </button>
+                        <div class="action-tooltip-container">
+                            <button class="btn-icon-only" onclick="window.regenerateTeamKey('${team.name}', '${team.projectName}', '${team.semester}')">
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Generate Key</span>
+                        </div>
                     </div>`;
       } else {
         const expiresText = teamKey.expiration
           ? "Expires " + new Date(teamKey.expiration).toLocaleDateString()
           : "No expiry set";
+
+        // Buttons moved to the right side on the exact same line as the API key!
         apiKeyHtml = `
                     <div class="p-2 rounded" style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="badge rounded-pill px-2 py-1" style="font-size:0.7rem;
-                                background: ${isActive ? "#d1fae5" : "#fef3c7"};
-                                color: ${isActive ? "#065f46" : "#92400e"};">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="badge rounded-pill px-2 py-1" style="font-size:0.7rem; background: ${isActive ? "#d1fae5" : "#fef3c7"}; color: ${isActive ? "#065f46" : "#92400e"};">
                                 ${isActive ? "Active" : "Inactive"}
                             </span>
                             <span class="text-muted" style="font-size:0.7rem;">${expiresText}</span>
                         </div>
-                        <div class="font-monospace text-break mb-2" style="font-size:0.72rem; color:#555; word-break:break-all;">
-                            ${teamKey.keyVal}
-                        </div>
-                        <div class="d-flex flex-wrap gap-1">
-                            <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;"
-                                    onclick="window.toggleApiKeyStatus('${
-                                      teamKey.id
-                                    }', ${isActive})">
-                                ${isActive ? "Deactivate" : "Activate"}
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning" style="font-size:0.72rem;"
-                                    onclick="window.openExtendModal('${
-                                      teamKey.id
-                                    }')">
-                                Extend
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary" style="font-size:0.72rem;"
-                                    onclick="window.regenerateTeamKey('${
-                                      team.name
-                                    }', '${team.projectName}', '${
-                                      team.semester
-                                    }')">
-                                Regenerate
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" style="font-size:0.72rem;"
-                                    onclick="window.deleteApiKey('${
-                                      teamKey.id
-                                    }')">
-                                Delete Key
-                            </button>
+                        <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                            <div class="font-monospace text-break mb-0" style="font-size:0.72rem; color:#555; word-break:break-all;">
+                                ${teamKey.keyVal}
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 flex-shrink-0 ms-3">
+                                <div class="action-tooltip-container">
+                                    <button class="btn-icon-only" onclick="window.toggleApiKeyStatus('${teamKey.id}', ${isActive})">
+                                        <i class="fas fa-power-off text-${isActive ? "secondary" : "success"}"></i>
+                                    </button>
+                                    <span class="action-tooltip" style="right: 0; left: auto; transform: none;">${isActive ? "Deactivate" : "Activate"}</span>
+                                </div>
+                                <div class="action-tooltip-container">
+                                    <button class="btn-icon-only" onclick="window.openExtendModal('${teamKey.id}')">
+                                        <i class="fas fa-calendar-plus text-secondary"></i>
+                                    </button>
+                                    <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Extend Time</span>
+                                </div>
+                                <div class="action-tooltip-container">
+                                    <button class="btn-icon-only" onclick="window.regenerateTeamKey('${team.name}', '${team.projectName}', '${team.semester}')">
+                                        <i class="fas fa-sync-alt text-secondary"></i>
+                                    </button>
+                                    <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Regenerate</span>
+                                </div>
+                                <div class="action-tooltip-container">
+                                    <button class="btn-icon-only delete-btn" onclick="window.deleteApiKey('${teamKey.id}')">
+                                        <i class="fas fa-trash-alt text-danger"></i>
+                                    </button>
+                                    <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Delete Key</span>
+                                </div>
+                            </div>
                         </div>
                     </div>`;
       }
 
+      // Wrap the card in a 6-column div (2 per row on large screens)
+      const col = document.createElement("div");
+      col.className = "col-lg-6";
+
       const card = document.createElement("div");
-      card.className = "card shadow-sm border-0 mb-3";
+      card.className = "card shadow-sm border-0 h-100 d-flex flex-column"; // h-100 ensures equal heights
       card.innerHTML = `
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <div>
                             <h5 class="fw-bold mb-0" style="color: #0399b0;">${team.name}</h5>
                             <div class="text-muted small">${team.projectName} &nbsp;·&nbsp; ${team.semester}</div>
                         </div>
-                        <button class="btn btn-sm btn-outline-danger" style="font-size:0.72rem;"
-                                onclick="window.deleteTeam('${team.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="action-tooltip-container">
+                            <button class="btn-icon-only delete-btn" onclick="window.deleteTeam('${team.id}')">
+                                <i class="fas fa-trash text-danger"></i>
+                            </button>
+                            <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Delete Team</span>
+                        </div>
                     </div>
                     <hr class="my-2">
-                    <div class="mb-1 small fw-bold text-dark">Members</div>
-                    <div class="mb-2 d-flex flex-wrap">${membersHtml}</div>
-                    <div class="input-group input-group-sm mb-3">
-                        <select class="form-select" id="assignStudentSelect-${team.id}" style="font-size:0.8rem;">
-                            ${studentOptions}
-                        </select>
-                        <button class="btn btn-outline-success" style="font-size:0.8rem;"
-                                onclick="window.addStudentToTeam('${team.id}')">
-                            + Add
-                        </button>
+                    
+                    <div class="flex-grow-1">
+                        <div class="mb-1 small fw-bold text-dark">Members</div>
+                        <div class="mb-2 d-flex flex-wrap">${membersHtml}</div>
+                        
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <select class="form-select form-select-sm" id="assignStudentSelect-${team.id}" style="font-size:0.8rem; border-radius: 6px;">
+                                ${studentOptions}
+                            </select>
+                            <div class="action-tooltip-container flex-shrink-0">
+                                <button class="btn-icon-only" onclick="window.addStudentToTeam('${team.id}')">
+                                    <i class="fas fa-user-plus text-secondary"></i>
+                                </button>
+                                <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Add Student</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-1 small fw-bold text-dark">API Key</div>
-                    ${apiKeyHtml}
+
+                    <div class="mt-auto">
+                        <div class="mb-1 small fw-bold text-dark">API Key</div>
+                        ${apiKeyHtml}
+                    </div>
                 </div>`;
-      container.appendChild(card);
+
+      col.appendChild(card);
+      container.appendChild(col);
     }
   }
 
@@ -1399,9 +1431,13 @@ export async function initHome(userRole, userEmail) {
       e.preventDefault();
       const keyId = (document.getElementById("extendKeyId") as HTMLInputElement)
         .value;
-      const months = (
+
+      // make this to be a strict positive integer
+      const monthsValue = (
         document.getElementById("extendMonths") as HTMLInputElement
       ).value;
+      const months = Math.abs(parseInt(monthsValue, 10));
+
       await ButterflyAPI.extendApiKey(keyId, months);
       await loadAdminData();
       (e.target as HTMLFormElement).reset();
