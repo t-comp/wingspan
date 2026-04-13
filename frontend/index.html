@@ -540,26 +540,11 @@
                 aria-labelledby="settingsDropdown"
                 style="min-width: 220px"
               >
-                <li class="px-3 py-2 bg-light rounded-top">
-                  <div
-                    class="fw-bold"
-                    id="dropdownUsername"
-                    style="color: #0399b0"
-                  ></div>
-                  <div class="small text-muted" id="dropdownEmail"></div>
-                  <span
-                    class="badge mt-1"
-                    id="dropdownRole"
-                    style="background-color: #0399b0; font-size: 0.7rem"
-                  ></span>
-                </li>
-                <li><hr class="dropdown-divider m-0" /></li>
                 <li>
                   <a class="dropdown-item py-2" href="#"
                     ><i class="fas fa-book me-2 text-muted"></i>Documentation</a
                   >
                 </li>
-                <li><hr class="dropdown-divider m-0" /></li>
                 <li>
                   <a class="dropdown-item py-2" href="#" id="nameToggleBtn">
                     <i class="fas fa-exchange-alt me-2 text-muted"></i
@@ -581,7 +566,6 @@
                     Mode
                   </a>
                 </li>
-                <li><hr class="dropdown-divider m-0" /></li>
                 <li>
                   <a
                     class="dropdown-item py-2 text-danger fw-bold"
@@ -953,15 +937,56 @@
       >
         <div class="container">
           <div id="studentTeamContent" style="display: none">
-            <h2 class="text-muted mb-4">My Team Overview</h2>
-            <div class="card shadow-sm border-0 bg-light p-4">
-              <div class="card-body">
-                <h4 class="fw-bold text-primary">Your Team Information</h4>
-                <p class="text-muted">
-                  Currently, you are assigned as a Student user. Future updates
-                  will display your assigned team members and project API keys
-                  here.
-                </p>
+            <div class="row g-4">
+              <div class="col-lg-5">
+                <h2 class="text-muted mb-4">Account Information</h2>
+                <div class="card shadow-sm border-0 bg-light p-4 mb-5">
+                  <div class="d-flex align-items-center">
+                    <div
+                      class="profile-circle me-4 shadow-sm"
+                      style="
+                        width: 65px;
+                        height: 65px;
+                        font-size: 1.8rem;
+                        background-color: #0399b0;
+                        color: white;
+                      "
+                    >
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                      <h4
+                        class="fw-bold mb-1"
+                        id="dropdownUsername"
+                        style="color: #0399b0"
+                      ></h4>
+                      <div class="text-muted mb-2" id="dropdownEmail"></div>
+                      <span
+                        class="badge px-3 py-2 shadow-sm"
+                        id="dropdownRole"
+                        style="background-color: #0399b0; font-size: 0.75rem"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-7">
+                <div id="studentTeamDynamicContent">
+                  <h2 class="text-muted mb-4">My Team Overview</h2>
+                  <div class="card shadow-sm border-0 bg-light p-4">
+                    <div class="card-body">
+                      <h4 class="fw-bold text-primary">
+                        Your Team Information
+                      </h4>
+                      <p class="text-muted">
+                        Currently, you are assigned as a Student user. Future
+                        updates will display your assigned team members and
+                        project API keys here.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
