@@ -167,7 +167,9 @@
 }
 
 /* Custom 'X' Clear Button */
-#searchInput::-webkit-search-cancel-button {
+#searchInput::-webkit-search-cancel-button,
+#adminTeamSearch::-webkit-search-cancel-button,
+#adminUserSearch::-webkit-search-cancel-button {
   -webkit-appearance: none;
   height: 18px;
   width: 18px;
@@ -178,7 +180,9 @@
   margin-right: 12px;
 }
 
-[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button {
+[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminTeamSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminUserSearch::-webkit-search-cancel-button {
   filter: brightness(1.5);
 }
 
@@ -653,3 +657,104 @@
     visibility: visible;
 }
 
+/* =========================================
+   CLEAN ICON BUTTONS & TOOLTIPS 
+   ========================================= */
+
+/* Clean, borderless icon buttons */
+.btn-icon-only {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Prevent icons from stealing the click! (This is where it actually belongs) */
+.btn-icon-only i {
+  pointer-events: none;
+}
+
+/* Grey highlight on hover */
+.btn-icon-only:hover {
+  background-color: #e9ecef;
+  color: #343a40;
+}
+
+/* Special hover for delete buttons */
+.btn-icon-only.delete-btn:hover {
+  background-color: #ffe3e3;
+  color: #dc3545;
+}
+
+/* Settings Button Hover Effect */
+#settingsDropdown {
+  transition: background-color 0.2s ease;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#settingsDropdown:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Action Tooltips (like the nav filter) */
+.action-tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.action-tooltip-container .action-tooltip {
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition-delay: 0.2s;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.action-tooltip-container:hover .action-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dashboard Dropdown Edge-to-Edge Hover */
+#dashboardDropdownMenu.dropdown-menu {
+  padding: 0; /* Remove default padding to allow edge-to-edge items */
+  overflow: hidden; /* Ensure rounded corners clip the hover background */
+}
+
+#dashboardDropdownMenu .dropdown-item {
+  padding: 10px 15px; /* Add padding directly to the items */
+  border-radius: 0; /* Ensure items don't have their own rounded corners */
+}
+
+.btn-white {
+  background-color: #ffffff;
+  color: #495057;
+  border-color: #dee2e6;
+}
+.btn-white:hover {
+  background-color: #f8f9fa;
+  color: #212529;
+}
