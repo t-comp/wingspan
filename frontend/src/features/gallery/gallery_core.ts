@@ -1,5 +1,12 @@
 // src/features/gallery/gallery_core.ts
 
+/**
+ * This file acts as the main engine for displaying the primary butterfly grid.
+ * Does all the pagination logic so we don't crash the browser loading all the
+ * species pics at once. It also handles the main gallery navigation so you can
+ * actually see the grid.
+ */
+
 import { AppState } from "../../core/state.js";
 import { UI } from "../../shared/ui.js";
 import { showSpeciesView } from "../species/species_view.js";

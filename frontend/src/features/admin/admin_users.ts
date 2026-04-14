@@ -1,5 +1,11 @@
 // src/features/admin/admin_users.ts
 
+/**
+ * This module is responsible for the user management table in the admin dashboard.
+ * It includes the functionality to search for users, toggle their roles between student and admin,
+ * and edit their account details or reset passwords.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 

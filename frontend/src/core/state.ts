@@ -2,8 +2,13 @@
 
 /**
  * This file acts as the single source of truth for the application's global state.
- * It stores shared data like the loaded butterflies, current user role, and active display modes
- * so that isolated feature modules can access and update the same information without direct coupling.
+ * It stores shared data like the loaded butterflies, current user role, and active
+ * display modes so that isolated feature modules can access and update the same
+ * information without direct coupling.
+ *
+ * The holy grail of our refactoring that saves us from passing variables through ten
+ * different functions. It holds the global state (like the loaded butterflies) so we
+ * don't get merge conflicts every time someone touches the data.
  */
 
 export const AppState = {

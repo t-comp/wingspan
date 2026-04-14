@@ -1,5 +1,12 @@
 // src/features/species/species_editor.ts
 
+/**
+ * This module manages the "Edit Species" page, allowing admins to update a
+ * butterfly's taxonomic info. It handles parsing and saving dynamic, custom
+ * attributes (like habitat or diet) using a specialized bracket formatting
+ * system before sending updates to the API.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 

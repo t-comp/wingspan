@@ -1,3 +1,11 @@
+// src/features/admin/admin_tags.ts
+
+/**
+ * This module controls the global taxonomy and category system for the application.
+ * It provides the admin dashboard logic to create new categories, add specific tags
+ * to those categories,and delete outdated tags to keep the image filtering system clean.
+ */
+
 import { ButterflyAPI } from "../../core/api";
 
 export const TagManager = {

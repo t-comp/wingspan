@@ -1,5 +1,11 @@
 // src/features/species/image_details.ts
 
+/**
+ * This file handles the specific modal that appears when inspecting a single butterfly photo.
+ * It manages the logic for copying image URLs at various sizes, editing the administrator notes
+ * for that specific file, and attaching or removing individual tag labels.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 import { TagManager } from "../admin/admin_tags.js";

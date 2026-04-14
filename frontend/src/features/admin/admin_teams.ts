@@ -1,5 +1,11 @@
 // src/features/admin/admin_teams.ts
 
+/**
+ * This file powers the team management section of the admin dashboard.
+ * It handles rendering the team cards, assigning unassigned students to specific teams,
+ * and creating or deleting team groups for the semester.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 
 export async function loadTeams() {

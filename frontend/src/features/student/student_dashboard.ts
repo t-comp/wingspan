@@ -1,5 +1,11 @@
 // src/features/student/student_dashboard.ts
 
+/**
+ * This file renders the specific dashboard view for non-admin users.
+ * It fetches and displays the student's current team assignment, their teammates,
+ * and the active API key they need to authenticate their project.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 

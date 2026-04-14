@@ -1,4 +1,14 @@
-// js/ui.js
+// src/shared/ui.ts
+
+/**
+ * This file contains reusable DOM manipulation functions, specifically for rendering cards.
+ * By abstracting the HTML generation here, other modules can easily build grids or populate
+ * views without writing raw, repetitive HTML strings. Just a dump of reusable HTML template
+ * strings so we don't have to write `document.createElement` fifty times.
+ *
+ * If a butterfly card doesn't look how we want it to, fix the HTML in here.
+ */
+
 export const UI = {
   renderGrid(list: any[], onCardClick: Function, displayMode = "common") {
     const grid = document.getElementById("butterflyGrid");

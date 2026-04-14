@@ -1,5 +1,11 @@
 // src/features/admin/admin_api_keys.ts
 
+/**
+ * This file manages the generation, extension, and deletion of API keys for student teams.
+ * It handles the form submissions and modal interactions required to provide and revoke
+ * system access for different Senior Design projects.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 
 // pass refreshAdminData as a callback so the UI updates after making changes

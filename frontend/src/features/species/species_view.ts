@@ -1,5 +1,12 @@
 // src/features/species/species_view.ts
 
+/**
+ * This file handles the detailed view of a single butterfly species,
+ * replacing the main gallery grid. It loads the hero image, populates
+ * the taxonomic details, and renders the inner grid of all
+ * associated photos with their specific tag filters.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 import { UI } from "../../shared/ui.js";

@@ -1,5 +1,12 @@
 // src/features/upload/upload.ts
 
+/**
+ * This file manages the complex, multi-step process for adding new species
+ * and images to the database. It handles the drag-and-drop file interface,
+ * auto-capitalization of scientific names, and the sequential uploading of image
+ * files with their associated notes and tags.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 import { TagManager } from "../admin/admin_tags.js";

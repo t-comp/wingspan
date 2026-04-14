@@ -1,8 +1,17 @@
+// src/homepage.ts
+
+/**
+ * This is the main file that boots up the application after a user logs in.
+ * It acts as the traffic controller: initializing the global state, binding
+ * the primary navbar navigation, and puts together all the individual feature
+ * pages to bring into the website.
+ */
+
 import { ButterflyAPI } from "./core/api.js";
 import { AppState } from "./core/state.js";
 import { initSettings } from "./core/settings.js";
 
-// Features
+// imported features
 import { TagManager } from "./features/admin/admin_tags.js";
 import { loadStudentData } from "./features/student/student_dashboard.js";
 import { initAdminApiKeys } from "./features/admin/admin_api_keys.js";

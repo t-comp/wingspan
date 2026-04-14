@@ -1,5 +1,13 @@
 // src/features/gallery/gallery_filters.ts
 
+/**
+ * This module controls the search bar and dropdown filters above the main gallery.
+ * It listens for user input across orders, families, and text searches, sorts the
+ * global state data accordingly, and triggers the gallery to re-render with the
+ * refined results. It also handles the button that flips everything between common
+ * and scientific names because the biology majors kept complaining.
+ */
+
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 
