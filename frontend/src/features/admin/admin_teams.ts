@@ -24,6 +24,11 @@ export async function loadTeams() {
     return;
   }
 
+  // Sort teams alphabetically
+  teams.sort((a: any, b: any) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+  );
+
   let studentOptions = `<option value="">Select a student...</option>`;
   unassigned.forEach((u: any) => {
     studentOptions += `<option value="${u.userId}">${u.username} — ${u.email}</option>`;
@@ -70,9 +75,30 @@ export async function loadTeams() {
             </div>
         </div>`;
     } else {
-      const expiresText = teamKey.expiration
-        ? "Expires " + new Date(teamKey.expiration).toLocaleDateString()
-        : "No expiry set";
+      let expiresHtml = `<span class="text-muted" style="font-size:0.7rem;">No expiry set</span>`;
+
+      if (teamKey.expiration) {
+        const expDate = new Date(teamKey.expiration);
+        const now = new Date();
+
+        // Calculate the difference in days
+        const diffTime = expDate.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        const formattedDate = expDate.toLocaleDateString();
+
+        if (diffDays <= 0) {
+          expiresHtml = `<span class="text-danger fw-bold" style="font-size:0.7rem;">Expired!</span>`;
+        } else if (diffDays <= 7) {
+          expiresHtml = `<span class="text-danger fw-bold" style="font-size:0.7rem;">${diffDays} ${diffDays === 1 ? "day" : "days"} left!</span>`;
+        } else if (diffDays <= 30) {
+          const weeksLeft = Math.floor(diffDays / 7) || 1; // Fallback to 1 week if it's between 7 and 13 days
+          // Using a slightly darker yellow/orange for better readability on white backgrounds
+          expiresHtml = `<span class="fw-bold" style="font-size:0.7rem; color: #d97706;">${weeksLeft} ${weeksLeft === 1 ? "week" : "weeks"} left!</span>`;
+        } else {
+          expiresHtml = `<span class="text-muted" style="font-size:0.7rem;">Expires ${formattedDate}</span>`;
+        }
+      }
 
       apiKeyHtml = `
         <div class="p-2 rounded" style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
@@ -80,7 +106,7 @@ export async function loadTeams() {
                 <span class="badge rounded-pill px-2 py-1" style="font-size:0.7rem; background: ${isActive ? "#d1fae5" : "#fef3c7"}; color: ${isActive ? "#065f46" : "#92400e"};">
                     ${isActive ? "Active" : "Inactive"}
                 </span>
-                <span class="text-muted" style="font-size:0.7rem;">${expiresText}</span>
+                <span class="text-muted" style="font-size:0.7rem;">${expiresHtml}</span>
             </div>
             <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
                 <div class="font-monospace text-break mb-0" style="font-size:0.72rem; color:#555; word-break:break-all;">
@@ -128,7 +154,7 @@ export async function loadTeams() {
                     <div class="text-muted small">${team.projectName} &nbsp;·&nbsp; ${team.semester}</div>
                 </div>
                 <div class="action-tooltip-container">
-                    <button class="btn-icon-only delete-btn" onclick="window.deleteTeam('${team.id}')">
+                    <button class="btn-icon-only delete-btn" onclick="window.deleteTeam('${team.id}', '${team.name}')">
                         <i class="fas fa-trash text-danger"></i>
                     </button>
                     <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Delete Team</span>
@@ -160,12 +186,25 @@ export async function loadTeams() {
         </div>`;
     col.appendChild(card);
     container.appendChild(col);
+
+    // Apply year filters instantly after drawing the cards
+    if (typeof (window as any).applyTeamFilters === "function") {
+      (window as any).applyTeamFilters();
+    }
   }
 }
 
 export function initAdminTeams(refreshAdminData: () => Promise<void>) {
-  (window as any).deleteTeam = async (teamId: string) => {
+  (window as any).deleteTeam = async (teamId: string, teamName: string) => {
     if (confirm("Delete this team entirely?")) {
+      // Double-Tap: Assassinate the orphaned API key first!
+      try {
+        if (teamName) await ButterflyAPI.deleteApiKeyByTeam(teamName);
+      } catch (e) {
+        console.log("No key to delete or error:", e);
+      }
+
+      // 2. Now delete the team normally using your existing function
       await ButterflyAPI.deleteTeam(teamId);
       await refreshAdminData();
     }
@@ -185,54 +224,89 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
     }
   };
 
-  (window as any).removeStudentFromTeam = async (
-    teamId: string,
-    userId: string,
-  ) => {
-    if (confirm("Remove this student from the team?")) {
-      try {
-        await ButterflyAPI.removeTeamMember(teamId, userId);
-        await refreshAdminData();
-      } catch (error: any) {
-        alert("Could not remove student: " + error.message);
+  // --- REPLACE EVERYTHING BELOW YOUR removeStudentFromTeam FUNCTION WITH THIS ---
+
+  (window as any).applyTeamFilters = () => {
+    const searchEl = document.getElementById(
+      "adminTeamSearch",
+    ) as HTMLInputElement;
+    const yearEl = document.getElementById(
+      "teamYearFilter",
+    ) as HTMLSelectElement;
+
+    const query = searchEl ? searchEl.value.toLowerCase() : "";
+    const year = yearEl ? yearEl.value : "All";
+
+    const wrappers = document.querySelectorAll(
+      "#teamsContainer .team-card-wrapper",
+    );
+
+    wrappers.forEach((wrapper) => {
+      const teamName =
+        wrapper.querySelector("h5")?.innerText.toLowerCase() || "";
+      const detailsText =
+        wrapper.querySelector(".text-muted.small")?.innerHTML || "";
+
+      const matchesSearch = teamName.includes(query);
+      const matchesYear = year === "All" || detailsText.includes(year);
+
+      if (matchesSearch && matchesYear) {
+        (wrapper as HTMLElement).style.display = "block";
+      } else {
+        (wrapper as HTMLElement).style.display = "none";
       }
-    }
+    });
   };
 
   const adminTeamSearch = document.getElementById("adminTeamSearch");
   if (adminTeamSearch) {
-    adminTeamSearch.addEventListener("input", (e) => {
-      const query = (e.target as HTMLInputElement).value.toLowerCase();
-      const wrappers = document.querySelectorAll(
-        "#teamsContainer .team-card-wrapper",
-      );
+    adminTeamSearch.addEventListener("input", (window as any).applyTeamFilters);
+  }
 
-      wrappers.forEach((wrapper) => {
-        const teamName =
-          wrapper.querySelector("h5")?.innerText.toLowerCase() || "";
-        if (teamName.includes(query)) {
-          (wrapper as HTMLElement).style.display = "block";
-        } else {
-          (wrapper as HTMLElement).style.display = "none";
-        }
-      });
-    });
+  const teamYearFilter = document.getElementById(
+    "teamYearFilter",
+  ) as HTMLSelectElement;
+  if (teamYearFilter) {
+    if (!teamYearFilter.getAttribute("data-initialized")) {
+      const currentYear = new Date().getFullYear();
+
+      // Magically generate years from 2024 to 4 years in the future!
+      for (let y = 2024; y <= currentYear + 4; y++) {
+        const option = document.createElement("option");
+        option.value = y.toString();
+        option.innerText = y.toString();
+        teamYearFilter.appendChild(option);
+      }
+
+      // Automatically set the dropdown to the current year
+      teamYearFilter.value = currentYear.toString();
+      teamYearFilter.setAttribute("data-initialized", "true");
+    }
+
+    teamYearFilter.addEventListener("change", (window as any).applyTeamFilters);
   }
 
   const adminCreateTeamForm = document.getElementById("adminCreateTeamForm");
   if (adminCreateTeamForm) {
     adminCreateTeamForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const season = (
+        document.getElementById("newCreateSemesterSeason") as HTMLSelectElement
+      ).value;
+      const year = (
+        document.getElementById("newCreateSemesterYear") as HTMLInputElement
+      ).value;
+
       const teamData = {
         name: (document.getElementById("newCreateTeamName") as HTMLInputElement)
           .value,
         projectName: (
           document.getElementById("newCreateProjectName") as HTMLInputElement
         ).value,
-        semester: (
-          document.getElementById("newCreateSemester") as HTMLInputElement
-        ).value,
+        semester: season + " " + year,
       };
+
       await ButterflyAPI.createTeam(teamData);
       await refreshAdminData();
       (e.target as HTMLFormElement).reset();

@@ -351,6 +351,17 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
+  async deleteApiKeyByTeam(teamName) {
+    const response = await fetch(`${API_BASE_URL}/api-key/team/${teamName}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    if (!response.ok && response.status !== 404) {
+      throw new Error("Failed to delete team API keys");
+    }
+    return true;
+  },
+
   // ==========================
   // TEAM ENDPOINTS
   // ==========================

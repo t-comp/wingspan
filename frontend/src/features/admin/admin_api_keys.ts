@@ -52,50 +52,57 @@ export function initAdminApiKeys(refreshAdminData: () => Promise<void>) {
     });
   }
 
+  // THE TOGGLE (Power Button)
   (window as any).toggleApiKeyStatus = async (
     keyId: string,
-    currentlyActive: boolean,
+    isActive: boolean,
   ) => {
-    if (currentlyActive) {
-      await ButterflyAPI.deactivateApiKey(keyId);
-    } else {
-      await ButterflyAPI.activateApiKey(keyId);
+    try {
+      if (isActive) {
+        await ButterflyAPI.deactivateApiKey(keyId);
+      } else {
+        await ButterflyAPI.activateApiKey(keyId);
+      }
+      await refreshAdminData(); // Refresh the UI to show the new badge!
+    } catch (error: any) {
+      alert("Failed to change key status: " + error.message);
     }
-    await refreshAdminData();
   };
 
+  // THE REGENERATE (Sync Button)
   (window as any).regenerateTeamKey = async (
     teamName: string,
     projectName: string,
     semester: string,
   ) => {
     if (
-      confirm(
-        "Regenerate the API key for " +
-          teamName +
-          "? The old key will stop working immediately.",
-      )
+      confirm("Generate a new key? The old one will be completely destroyed!")
     ) {
+      // Wipe out any existing keys for this team first
+      try {
+        await ButterflyAPI.deleteApiKeyByTeam(teamName);
+      } catch (e) {
+        console.log("Cleanup before regen failed:", e);
+      }
+
+      // Generate the new key
       try {
         await ButterflyAPI.generateApiKey({ teamName, projectName, semester });
-        await refreshAdminData();
-      } catch (err: any) {
-        alert("Failed to regenerate key: " + err.message);
+        await refreshAdminData(); // Refresh to show the new key characters
+      } catch (error: any) {
+        alert("Failed to regenerate key: " + error.message);
       }
     }
   };
 
+  // THE DELETE (Trash Can Button)
   (window as any).deleteApiKey = async (keyId: string) => {
-    if (
-      confirm(
-        "Delete this API key permanently? Students using it will lose access.",
-      )
-    ) {
+    if (confirm("Are you sure you want to permanently delete this API key?")) {
       try {
         await ButterflyAPI.deleteApiKey(keyId);
-        await refreshAdminData();
-      } catch (err: any) {
-        alert("Failed to delete key: " + err.message);
+        await refreshAdminData(); // Refresh the UI to remove the key from the screen
+      } catch (error: any) {
+        alert("Failed to delete key: " + error.message);
       }
     }
   };

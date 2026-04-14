@@ -330,19 +330,39 @@
                   >
                     <i class="fas fa-search text-muted"></i>
                   </span>
+
                   <input
                     id="adminTeamSearch"
                     class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
                     type="search"
                     placeholder="Search teams..."
-                    style="
-                      -webkit-appearance: none;
-                      min-width: 250px;
-                      border-radius: 0 50px 50px 0;
-                    "
+                    style="-webkit-appearance: none; min-width: 250px"
                   />
+
+                  <span
+                    class="input-group-text bg-white border-0 p-0 d-flex align-items-center"
+                  >
+                    <div
+                      class="vr bg-secondary opacity-25"
+                      style="width: 2px; height: 24px"
+                    ></div>
+                  </span>
+
+                  <select
+                    id="teamYearFilter"
+                    class="form-select border-0 shadow-none bg-white text-secondary fw-bold ps-3 pe-4 text-center"
+                    style="
+                      border-radius: 0 50px 50px 0;
+                      width: 120px;
+                      cursor: pointer;
+                      outline: none;
+                    "
+                  >
+                    <option value="All">All Years</option>
+                  </select>
                 </div>
               </div>
+
               <div
                 class="d-flex flex-column align-items-center position-relative nav-action-container"
               >
@@ -379,6 +399,97 @@
               </div>
             </div>
 
+            <div
+              id="teamsControlsWrapper"
+              class="align-items-center flex-grow-1 gap-3 ms-4 d-none"
+            >
+              <div
+                class="d-flex align-items-center w-100"
+                style="max-width: 550px"
+              >
+                <div
+                  class="input-group shadow-sm search-pill-container flex-nowrap"
+                  style="
+                    border-radius: 50px;
+                    background-color: white;
+                    border: 1px solid transparent;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    class="input-group-text bg-white border-0"
+                    style="border-radius: 50px 0 0 50px"
+                  >
+                    <i class="fas fa-search text-muted"></i>
+                  </span>
+
+                  <input
+                    id="adminTeamSearch"
+                    class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
+                    type="search"
+                    placeholder="Search teams..."
+                    style="-webkit-appearance: none; min-width: 250px"
+                  />
+
+                  <span
+                    class="input-group-text bg-white border-0 p-0 d-flex align-items-center"
+                  >
+                    <div
+                      class="vr bg-secondary opacity-25"
+                      style="width: 2px; height: 24px"
+                    ></div>
+                  </span>
+
+                  <select
+                    id="teamYearFilter"
+                    class="form-select border-0 shadow-none bg-white text-secondary fw-bold ps-3 pe-4 text-center"
+                    style="
+                      border-radius: 0 50px 50px 0;
+                      width: 120px;
+                      cursor: pointer;
+                      outline: none;
+                    "
+                  >
+                    <option value="All">All Years</option>
+                  </select>
+                </div>
+              </div>
+
+              <div
+                class="d-flex flex-column align-items-center position-relative nav-action-container"
+              >
+                <button
+                  class="btn btn-clean-upload rounded-circle fw-bold flex-shrink-0"
+                  data-bs-toggle="modal"
+                  data-bs-target="#adminCreateTeamModal"
+                  style="
+                    width: 42px;
+                    height: 42px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                  "
+                >
+                  <div class="d-flex align-items-start">
+                    <i class="fas fa-users text-white"></i>
+                    <i
+                      class="fas fa-plus text-white"
+                      style="
+                        font-size: 0.5em;
+                        margin-left: -2px;
+                        margin-top: -2px;
+                      "
+                    ></i>
+                  </div>
+                </button>
+                <span
+                  class="navbar-static-label custom-tooltip"
+                  style="bottom: -22px"
+                  >Create Team</span
+                >
+              </div>
+            </div>
             <div
               id="usersControlsWrapper"
               class="align-items-center flex-grow-1 gap-3 ms-4 d-none"
