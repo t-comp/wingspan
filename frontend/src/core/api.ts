@@ -1,4 +1,12 @@
-// js/api.js
+// src/core/api.js
+
+/**
+ * This is the file that actually talks to the backend so our app isn't just a static HTML page.
+ * It holds all the fetch requests for species, users, and tags.
+ * So if the server goes down and everything breaks,
+ * talk to backend ab what happened and what the issue is.
+ */
+
 const API_BASE_URL = "http://159.203.134.226:8080";
 
 function getHeaders() {
@@ -513,7 +521,7 @@ export const ButterflyAPI = {
     const response = await fetch(`${API_BASE_URL}/tags/admin`, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify(tagData), 
+      body: JSON.stringify(tagData),
     });
     return checkResponse(response);
   },

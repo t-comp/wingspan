@@ -1,7 +1,14 @@
-// js/router.js
-import { initHome } from "./homepage.js";
+// src/core/router.js
+
+/**
+ * This file is the main navigation controller for the application's login and welcome screens.
+ * It manages user session persistence via local storage, handles the login/signup form submissions,
+ * and routes the user to the main homepage upon successful authentication.
+ */
+
+import { initHome } from "../homepage.js";
 import { ButterflyAPI } from "./api.js";
-import { TagManager } from "./tags.js";
+import { TagManager } from "../features/admin/admin_tags.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const screens = {
