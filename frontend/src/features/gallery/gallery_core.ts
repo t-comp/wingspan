@@ -117,7 +117,6 @@ export function goToGallery() {
   const speciesView = document.getElementById("speciesView");
   const teamView = document.getElementById("teamView");
 
-  // Use the correct IDs from your index.html!
   const galleryControls = document.getElementById("galleryControlsWrapper");
   const teamsControls = document.getElementById("teamsControlsWrapper");
   const usersControls = document.getElementById("usersControlsWrapper");
@@ -128,7 +127,7 @@ export function goToGallery() {
   if (speciesView) speciesView.style.display = "none";
   if (teamView) teamView.style.display = "none";
 
-  // 2. Clean Slate the Navbar: Hide dashboard controls, show gallery controls
+  // 2. Clean Slate the Navbar
   [teamsControls, usersControls].forEach((wrapper) => {
     if (wrapper) {
       wrapper.classList.add("d-none");
@@ -142,7 +141,10 @@ export function goToGallery() {
   }
 
   // 3. Manage Filter Panel and Nav Highlights
-  if (filterPanel) filterPanel.classList.remove("show");
+  if (filterPanel) {
+    filterPanel.style.display = ""; //
+    filterPanel.classList.remove("show");
+  }
 
   document
     .querySelectorAll(".nav-text-link")

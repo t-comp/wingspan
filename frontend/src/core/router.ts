@@ -98,9 +98,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const uploadBtn = document.getElementById("uploadBtn");
         if (role === "ADMIN") {
-          if (uploadBtn) uploadBtn.classList.remove("d-none");
+          if (uploadBtn) {
+            uploadBtn.classList.remove("d-none");
+            uploadBtn.parentElement?.classList.remove("d-none"); // Show the container
+          }
         } else {
-          if (uploadBtn) uploadBtn.classList.add("d-none");
+          if (uploadBtn) {
+            uploadBtn.classList.add("d-none");
+            uploadBtn.parentElement?.classList.add("d-none"); // Hide the container so it doesn't block clicks
+          }
         }
       } else {
         alert("Login failed: couldn't get user role from server");
@@ -187,7 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
       initHome(role, user.email);
       toggleLogoutButtons(role, user);
       const uploadBtn = document.getElementById("uploadBtn");
-      if (role === "ADMIN" && uploadBtn) uploadBtn.classList.remove("d-none");
+      if (role === "ADMIN" && uploadBtn) {
+        uploadBtn.classList.remove("d-none");
+        uploadBtn.parentElement?.classList.remove("d-none");
+      } else if (uploadBtn) {
+        uploadBtn.classList.add("d-none");
+        uploadBtn.parentElement?.classList.add("d-none");
+      }
     } catch (e) {
       console.error("Error loading saved user", e);
       localStorage.removeItem("butterflyUser");
