@@ -320,6 +320,6 @@ export async function initHome(userRole, userEmail) {
   initSettings(userEmail);
   initGalleryFilters(refreshGallery);
 
-  // Force the app to show the gallery screen on boot
+  // force the app to show the gallery screen on boot
   goToGallery();
 }

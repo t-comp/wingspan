@@ -1,5 +1,11 @@
 // src/core/settings.ts
 
+/**
+ * This module manages the global user preferences and account settings.
+ * It contains the logic for toggling the application between light and dark modes, as well as
+ * the functions for users to securely change their personal passwords.
+ */
+
 import { ButterflyAPI } from "./api.js";
 
 // the logic for the Scientific/Common Name Toggle is actually not in settings.ts

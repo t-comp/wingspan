@@ -111,7 +111,7 @@ export async function loadTeams() {
     }
 
     const col = document.createElement("div");
-    col.className = "col-lg-6 team-card-wrapper"; // Added class for search logic
+    col.className = "col-lg-6 team-card-wrapper"; // class for search logic
     const card = document.createElement("div");
     card.className = "card shadow-sm border-0 h-100 d-flex flex-column";
     card.innerHTML = `

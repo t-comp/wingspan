@@ -2,7 +2,7 @@
 
 import { ButterflyAPI } from "../../core/api.js";
 
-// We pass refreshAdminData as a callback so the UI updates after we make changes!
+// pass refreshAdminData as a callback so the UI updates after making changes
 export function initAdminApiKeys(refreshAdminData: () => Promise<void>) {
   const adminGenerateKeyForm = document.getElementById("adminGenerateKeyForm");
 
@@ -21,7 +21,6 @@ export function initAdminApiKeys(refreshAdminData: () => Promise<void>) {
       await refreshAdminData();
       (e.target as HTMLFormElement).reset();
       const modalElem = document.getElementById("adminGenerateKeyModal");
-      // @ts-ignore - bootstrap is loaded globally
       if (modalElem) bootstrap.Modal.getInstance(modalElem)?.hide();
     });
   }
@@ -43,7 +42,6 @@ export function initAdminApiKeys(refreshAdminData: () => Promise<void>) {
       await refreshAdminData();
       (e.target as HTMLFormElement).reset();
       const modalElem = document.getElementById("adminExtendKeyModal");
-      // @ts-ignore
       if (modalElem) bootstrap.Modal.getInstance(modalElem)?.hide();
     });
   }
@@ -100,7 +98,6 @@ export function initAdminApiKeys(refreshAdminData: () => Promise<void>) {
     const extendInput = document.getElementById("extendKeyId");
     if (extendInput) (extendInput as HTMLInputElement).value = String(keyId);
     const modalElem = document.getElementById("adminExtendKeyModal");
-    // @ts-ignore
     if (modalElem) new bootstrap.Modal(modalElem).show();
   };
 }
