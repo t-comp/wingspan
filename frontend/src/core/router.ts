@@ -1,7 +1,7 @@
 // js/router.js
-import { initHome } from "./homepage.js";
+import { initHome } from "../homepage.js";
 import { ButterflyAPI } from "./api.js";
-import { TagManager } from "./tags.js";
+import { TagManager } from "../features/admin/admin_tags.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const screens = {

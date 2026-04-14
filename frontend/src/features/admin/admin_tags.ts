@@ -1,4 +1,4 @@
-import { ButterflyAPI } from "./api.js";
+import { ButterflyAPI } from "../../core/api";
 
 export const TagManager = {
   tagData: {
