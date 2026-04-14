@@ -167,7 +167,9 @@
 }
 
 /* Custom 'X' Clear Button */
-#searchInput::-webkit-search-cancel-button {
+#searchInput::-webkit-search-cancel-button,
+#adminTeamSearch::-webkit-search-cancel-button,
+#adminUserSearch::-webkit-search-cancel-button {
   -webkit-appearance: none;
   height: 18px;
   width: 18px;
@@ -178,7 +180,9 @@
   margin-right: 12px;
 }
 
-[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button {
+[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminTeamSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminUserSearch::-webkit-search-cancel-button {
   filter: brightness(1.5);
 }
 
@@ -280,32 +284,42 @@
 
 
 /* =========================================
-   VIEW TOGGLE BUTTONS
+   VIEW TOGGLE TEXT LINKS
    ========================================= */
-.nav-toggle-group {
-  display: inline-flex;
-  background-color: #d9d9d9;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-left: auto; /* pushes the toggle and profile to the far right */
-  margin-right: 25px; /* adds space between the toggle and the profile pic */
-}
-
-.toggle-btn {
+.nav-text-link {
   background: transparent;
   border: none;
-  padding: 4px 12px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: #555;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 5px 0;
+  position: relative;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: color 0.2s ease;
 }
 
-.toggle-btn.active {
-  background-color: #f8f9fa;
-  color: #000;
-  box-shadow: 0 0 4px rgba(0,0,0,0.2);
+.nav-text-link:hover {
+  color: white;
+}
+
+/* The animated underline effect */
+.nav-text-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: 0;
+  left: 0;
+  background-color: white; 
+  transition: width 0.3s ease;
+}
+
+.nav-text-link.active {
+  color: white;
+}
+
+.nav-text-link.active::after {
+  width: 100%;
 }
 
 
@@ -422,4 +436,337 @@
 [data-bs-theme="dark"] .btn-back-circle:hover {
   background-color: #0399b0;
   border-color: #0399b0;
+}
+
+/* =========================================
+   DRAG AND DROP UPLOAD
+   ========================================= */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.drag-drop-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+.drag-drop-transition.drag-active {
+  background-color: #f1f8f9 !important; /* Very light teal */
+  border-color: #0399b0 !important; /* WingSpan Teal */
+  border-width: 2px !important;
+  transform: scale(1.02); /* Slight pop effect */
+  box-shadow: 0 0 15px rgba(3, 153, 176, 0.3) !important;
+}
+
+
+/* Clean up borders when typing in the new search pill */
+.search-input-field:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  z-index: 0 !important; /* Stops the input from jumping over the border */
+  max-width: 1000px; /* Adjust this number until it looks right! */
+}
+
+/* Hover effect and layering for the filter symbol */
+.filter-symbol-btn {
+  z-index: 5 !important; /* Keeps the button and its border safely on top */
+}
+
+.filter-symbol-btn:hover {
+  background-color: #f8f9fa !important;
+}
+
+/* =========================================
+   FIXED UPLOAD MODAL SIZING & SCROLLING
+   ========================================= */
+/* 1. Lock the modal to a consistent, large height */
+#addButterflyModal .modal-content {
+  height: 85vh; 
+  min-height: 650px;
+}
+
+/* 2. Hide outer scrolling so the buttons never leave the screen */
+#addButterflyModal .modal-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+}
+
+/* 3. Pass the height down through the forms */
+#universalUploadForm,
+#uploadPhase1:not(.d-none),
+#uploadPhase2:not(.d-none) {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100%;
+  min-height: 0; /* Crucial for inner scrolling to work */
+}
+
+/* 4. Make ONLY the inner content areas scrollable */
+#newSpeciesFields, 
+#uploadPhase2 > .row {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding-right: 5px;
+  margin-bottom: 15px; 
+}
+
+/* 5. Lock the dividing lines and buttons securely to the bottom */
+#uploadPhase1 > .d-flex.justify-content-end.mt-4,
+#uploadPhase2 > hr,
+#uploadPhase2 > .d-flex.justify-content-between {
+  flex-shrink: 0;
+  margin-top: auto !important;
+}
+
+/* =========================================
+   MODAL CIRCLE NAVIGATION BUTTONS
+   ========================================= */
+.btn-modal-nav-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #ced4da;
+  background-color: white;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s ease-in-out;
+  padding: 0;
+}
+
+.btn-modal-nav-circle:hover {
+  background-color: #0399b0 !important;
+  border-color: #0399b0 !important;
+  color: white !important;
+  transform: scale(1.05); /* Tiny pop effect on hover */
+}
+
+
+/* =========================================
+   FULL-SCREEN SPECIES CARDS
+   ========================================= */
+.species-card-wrapper {
+  overflow: hidden;
+  border-radius: 0 !important; /* Forces perfectly sharp corners */
+}
+
+/* The dark fade from the bottom */
+.name-gradient-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%);
+  height: 45%; /* Controls how far up the image the fade travels */
+  pointer-events: none; /* Ensures clicking the text still clicks the card */
+}
+
+/* Tiny pop effect when you hover over an image */
+.species-card-wrapper img {
+  transition: transform 0.3s ease;
+}
+.species-card-wrapper:hover img {
+  transform: scale(1.06); 
+}
+
+
+/* =========================================
+   CUSTOM NAVBAR STYLING
+   ========================================= */
+/* 1. Upload Button (Invisible normal, visible circle on hover) */
+.btn-clean-upload {
+  background: transparent !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important; /* Removes the resting drop-shadow circle */
+  font-size: 1.1rem; 
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-clean-upload:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important; /* Visible white-transparent circle on hover */
+  color: white !important;
+}
+
+/* 2. Static Labels below icons - Dark pill background, show on hover */
+.navbar-static-label {
+  background-color: rgba(0, 0, 0, 0.75); /* Dark semi-transparent background */
+  color: #ffffff !important; /* White text */
+  padding: 4px 10px; /* Pill shape padding */
+  border-radius: 12px; /* Rounded pill edges */
+  font-size: 0.70rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition-delay: 0.2s; /* 0.2 second hover delay */
+  white-space: nowrap;
+  z-index: 1060; /* Keeps it above everything else */
+  bottom: -32px !important; /* Pushed down slightly to account for the new padding */
+}
+
+/* Make the label fade in when hovering over the container */
+.nav-action-container:hover .navbar-static-label {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Target the label in the dark settings menu */
+.text-white-70 {
+  color: rgba(255, 255, 255, 0.7) !important;
+  background-color: transparent; /* Removes the pill background for the settings dropdown */
+}
+
+/* 3. Slimmer Search Bar */
+.search-pill-container {
+  height: 38px; /* Noticeably less tall! */
+}
+
+/* Make sure the insides fit the new shorter height */
+.search-pill-container .input-group-text,
+.search-pill-container .search-input-field,
+.search-pill-container .filter-symbol-btn {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+
+/* Make the search bar container wider so text isn't cut off */
+.search-pill-container {
+    min-width: 400px; /* You can increase this number if you need it even longer */
+}
+
+/* Hide the label by default and set up the 0.2s delay */
+.nav-action-container .navbar-static-label.custom-tooltip {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition-delay: 0.2s; /* Here is your 0.2 second delay! */
+}
+
+/* Show the label when hovering over the button area */
+.nav-action-container:hover .navbar-static-label.custom-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* =========================================
+   CLEAN ICON BUTTONS & TOOLTIPS 
+   ========================================= */
+
+/* Clean, borderless icon buttons */
+.btn-icon-only {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Prevent icons from stealing the click! (This is where it actually belongs) */
+.btn-icon-only i {
+  pointer-events: none;
+}
+
+/* Grey highlight on hover */
+.btn-icon-only:hover {
+  background-color: #e9ecef;
+  color: #343a40;
+}
+
+/* Special hover for delete buttons */
+.btn-icon-only.delete-btn:hover {
+  background-color: #ffe3e3;
+  color: #dc3545;
+}
+
+/* Settings Button Hover Effect */
+#settingsDropdown {
+  transition: background-color 0.2s ease;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#settingsDropdown:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Action Tooltips (like the nav filter) */
+.action-tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.action-tooltip-container .action-tooltip {
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition-delay: 0.2s;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.action-tooltip-container:hover .action-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dashboard Dropdown Edge-to-Edge Hover */
+#dashboardDropdownMenu.dropdown-menu {
+  padding: 0; /* Remove default padding to allow edge-to-edge items */
+  overflow: hidden; /* Ensure rounded corners clip the hover background */
+}
+
+#dashboardDropdownMenu .dropdown-item {
+  padding: 10px 15px; /* Add padding directly to the items */
+  border-radius: 0; /* Ensure items don't have their own rounded corners */
+}
+
+.btn-white {
+  background-color: #ffffff;
+  color: #495057;
+  border-color: #dee2e6;
+}
+.btn-white:hover {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+.btn-category-add {
+  background-color: #ffffff;
+  color: #51b8a5;
+  border: 2px solid #51b8a5;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-category-add:hover {
+  background-color: #51b8a5;
+  color: #ffffff;
 }

@@ -34,17 +34,17 @@ import java.util.UUID;
 @Slf4j
 public class ImageStorageService {
 
-    // MB size range thresholds in bytes
-    private static final long MAX_FILE_SIZE    = 20 * 1024 * 1024;  // 20MB - reject over this
-    private static final long LARGE_RANGE_MIN  = 10 * 1024 * 1024;  // 10MB
-    private static final long MEDIUM_RANGE_MIN =  2 * 1024 * 1024;  //  2MB
-    private static final long SMALL_RANGE_MIN  =      500 * 1024;   // 500kb
+    // mb size ranges thresholds (bytes)
+    private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;  // 20MB - reject over this
+    private static final long LARGE_RANGE_MIN = 10 * 1024 * 1024;  // 10MB
+    private static final long MEDIUM_RANGE_MIN = 2 * 1024 * 1024;  //  2MB
+    private static final long SMALL_RANGE_MIN  = 500 * 1024;   // 500kb
 
-    // target widths for each tier in px
+    // widths for each tier (px)
     private static final int THUMBNAIL_WIDTH = 300;
-    private static final int SMALL_WIDTH     = 800;
-    private static final int MEDIUM_WIDTH    = 1024;
-    private static final int LARGE_WIDTH     = 2048;
+    private static final int SMALL_WIDTH = 800;
+    private static final int MEDIUM_WIDTH = 1024;
+    private static final int LARGE_WIDTH = 2048;
 
     @Autowired
     private ImageRepository imageRepository;

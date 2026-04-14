@@ -41,20 +41,23 @@ public class ImageController {
                                          @RequestParam(required = false) String life_cycle,
                                          @RequestParam(required = false) String description,
                                          @RequestParam(required = false) String nathansNotes,
-                                         @RequestParam(required = false) List<Integer> tagId) {
-        if(file.isEmpty()){
+                                         @RequestParam(required = false) List<Integer> tagId){
+        // Validation
+        if (file.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "File is empty"));
         }
 
-        try{
+        try {
+            //let service handle all business logic
             Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes, tagId);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ImageDTO.fromImage(savedImage));
-        }catch(RuntimeException e){
+        }catch(RuntimeException e) {
+            //Catches species not found
             return ResponseEntity.badRequest()
                     .body(Map.of("message", e.getMessage()));
-        }catch(IOException e){
+        } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Upload failed"));
         }
@@ -124,7 +127,7 @@ public class ImageController {
 
     /**
      * Filter images by tags (image must have ALL specified tags)
-     * GET /images/filter?tagIds=1,2,3
+     * GET /images/filter?tagIds=
      */
     @GetMapping("/filter")
     public ResponseEntity<List<ImageDTO>> filterImagesByTags(@RequestParam List<Integer> tagIds) {
