@@ -130,9 +130,7 @@ public class TagsController {
      */
     @PostMapping("/{tagId}/images/{imageId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> addTagToImage(
-            @PathVariable Integer tagId,
-            @PathVariable Integer imageId){
+    public ResponseEntity<?> addTagToImage(@PathVariable Integer tagId, @PathVariable Integer imageId){
         try{
             tagsService.addTagToImage(tagId, imageId);
             return ResponseEntity.ok(Map.of("message", "tag added to image successfully"));
@@ -164,8 +162,7 @@ public class TagsController {
      */
     @PostMapping("/admin/bulk")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<TagDTO>> bulkCreateTags(
-            @RequestBody List<CreateTagRequest> requests){
+    public ResponseEntity<List<TagDTO>> bulkCreateTags(@RequestBody List<CreateTagRequest> requests){
         List<Tags> createdTags = tagsService.bulkCreateTags(requests);
         List<TagDTO> tagDTOS = createdTags.stream()
                 .map(TagDTO::from)
