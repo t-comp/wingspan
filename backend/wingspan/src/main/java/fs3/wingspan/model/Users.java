@@ -30,6 +30,12 @@ public class Users implements UserDetails {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "firstname")
+    private String firstName;
+
+    @Column(name = "lastname")
+    private String lastName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "utype")
     private UType utype;

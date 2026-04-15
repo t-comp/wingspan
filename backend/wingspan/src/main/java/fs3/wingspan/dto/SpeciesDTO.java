@@ -4,6 +4,8 @@ import fs3.wingspan.model.Species;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 @Builder
 public class SpeciesDTO {
@@ -16,6 +18,7 @@ public class SpeciesDTO {
     private String family;
     private String genus;
     private String thumbnailUrl;
+    private Map<String, String> attributeDef;
 
     public static SpeciesDTO fromSpecies(Species s, String url) {
         return SpeciesDTO.builder()
@@ -27,6 +30,7 @@ public class SpeciesDTO {
                 .family(s.getFamily())
                 .genus(s.getGenus())
                 .thumbnailUrl(url)
+                .attributeDef(s.getAttributeDefs())
                 .build();
     }
 }

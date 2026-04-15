@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -34,8 +40,17 @@ public class Species {
     private String genus;
 
     // thumbnail image
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "thumbnail_id")
     private Image thumbnail;
+
+
+    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> attributeDefs;
+
+    @OneToMany(mappedBy = "species", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Image> images = new HashSet<>();
+
 }

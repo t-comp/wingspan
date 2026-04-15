@@ -1,4 +1,4 @@
-package fs3.wingspan.config;
+package fs3.wingspan.services;
 
 
 import fs3.wingspan.model.Users;

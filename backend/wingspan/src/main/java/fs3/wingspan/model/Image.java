@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -38,15 +41,25 @@ public class Image {
     @Column(name="filename", nullable=false)
     private String filename;
 
-    @Column(name="fpath", nullable=false)
-    private String fpath;
+    // thumbnail (300px)
+    @Column(name="thumbnail_url")
+    private String thumbnailUrl;
 
-    // If using cloud storage, add these:
-//    @Column(name = "storage_url", length = 500)
-//    private String storageUrl;
-//
-//    @Column(name = "storage_key", length = 500)
-//    private String storageKey;
+    // small (800px)
+    @Column(name="small_url")
+    private String smallUrl;
+
+    // medium/display (1024px)
+    @Column(name="display_url", nullable=false)
+    private String displayUrl;
+
+    // large (2048px)
+    @Column(name="large_url")
+    private String largeUrl;
+
+    // original
+    @Column(name="original_url")
+    private String originalUrl;
 
     @Column(name="fsize")
     private BigInteger fsize;
@@ -65,6 +78,10 @@ public class Image {
 
     @Column(name="nathansnotes", columnDefinition = "TEXT")
     private String nathansnotes;
+
+    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> attributes;
 
     public Image(){
 
