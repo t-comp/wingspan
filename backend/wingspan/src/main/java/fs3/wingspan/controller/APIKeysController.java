@@ -204,8 +204,7 @@ public class APIKeysController {
     public ResponseEntity<MessageResponse> extendApiKey(@PathVariable int keyId, @RequestParam int months) {
         APIKeys k = apiKeyRepository.findById(keyId).orElse(null);
         if (k == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("API key not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("API key not found"));
         }
 
         LocalDateTime time = LocalDateTime.now().plusMonths(months);
