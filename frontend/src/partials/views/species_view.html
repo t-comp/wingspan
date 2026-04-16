@@ -1,0 +1,212 @@
+<div id="speciesView" class="py-4" style="display: none">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 mb-4 d-flex flex-row align-items-start">
+        <button
+          id="backToGalleryBtn"
+          class="btn btn-back-circle flex-shrink-0 me-3 mt-2 shadow-sm"
+          aria-label="Back to Main Gallery"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="flex-grow-1 d-flex flex-column">
+          <div
+            class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center position-relative image-hover-container mb-4"
+            style="aspect-ratio: 4/3; overflow: hidden; cursor: pointer"
+            data-bs-toggle="modal"
+            data-bs-target="#butterflyModal"
+          >
+            <img
+              id="speciesImage"
+              class="img-fluid"
+              style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.3s ease;
+              "
+            />
+            <div
+              class="image-overlay d-flex justify-content-center align-items-center"
+            >
+              <span
+                class="text-white fw-bold px-4 py-2 rounded-pill shadow"
+                style="background-color: rgba(3, 153, 176, 0.9)"
+              >
+                <i class="fas fa-expand me-2"></i>Click to see full image
+              </span>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center mb-3">
+            <h2 id="speciesName" class="fw-bold mb-0 text-dark"></h2>
+            <button
+              id="editSpeciesBtn"
+              class="btn btn-sm btn-outline-secondary ms-2 d-none"
+              title="Edit species info"
+              data-bs-toggle="modal"
+              data-bs-target="#editSpeciesModal"
+            >
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+          </div>
+
+          <div class="container-fluid px-0 mb-4 fs-6">
+            <div class="row mb-2">
+              <div class="col-4 fw-bold" style="color: #0399b0">
+                Scientific Name:
+              </div>
+              <div
+                class="col-8 fst-italic text-muted"
+                id="speciesScientific"
+              ></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-4 fw-bold" style="color: #0399b0">
+                Description:
+              </div>
+              <div class="col-8 text-muted" id="speciesDescription"></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-4 fw-bold" style="color: #0399b0">Order:</div>
+              <div class="col-8 text-muted" id="speciesOrder"></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-4 fw-bold" style="color: #0399b0">Family:</div>
+              <div class="col-8 text-muted" id="speciesFamily"></div>
+            </div>
+            <div class="row">
+              <div class="col-4 fw-bold" style="color: #0399b0">Genus:</div>
+              <div class="col-8 text-muted" id="speciesGenus"></div>
+            </div>
+            <div
+              id="customAttributesDisplay"
+              class="border-top pt-2 mt-2"
+            ></div>
+          </div>
+
+          <div
+            class="p-3 bg-light rounded border-start border-4 shadow-sm mt-auto"
+            style="border-color: #0399b0 !important"
+          >
+            <h6 class="fw-bold mb-2" style="color: #0399b0">
+              Specific Image Information
+            </h6>
+            <p class="mb-0 fs-6">
+              <a
+                href="#"
+                id="viewMoreDetails"
+                class="text-decoration-none fw-bold"
+                style="color: #027a8d"
+              >
+                <i class="fas fa-info-circle me-1"></i> View More Details
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 d-flex flex-column">
+        <div id="speciesActionButtons" class="mb-4 d-none">
+          <div class="row g-2">
+            <div class="col-6">
+              <button
+                id="openSpeciesUploadBtn"
+                class="btn btn-outline-primary fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center py-2"
+                style="border-radius: 12px; border-width: 2px"
+              >
+                <i class="fas fa-plus-circle me-2"></i> Add Images
+              </button>
+            </div>
+            <div class="col-6">
+              <button
+                id="deleteSpeciesFullBtn"
+                class="btn btn-outline-danger fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center py-2"
+                style="border-radius: 12px; border-width: 2px"
+                data-species-id=""
+              >
+                <i class="fas fa-trash-alt me-2"></i> Delete Species
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="modal fade modal-image"
+          id="butterflyModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <button
+            type="button"
+            class="btn btn-light rounded-circle shadow position-fixed"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            style="
+              top: 25px;
+              right: 25px;
+              width: 45px;
+              height: 45px;
+              z-index: 1060;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i class="fas fa-times fs-5 text-dark"></i>
+          </button>
+
+          <div
+            class="modal-dialog modal-xl modal-dialog-centered"
+            style="max-width: 95vw"
+          >
+            <div class="modal-content bg-transparent border-0 shadow-none">
+              <div
+                class="modal-body p-0 d-flex justify-content-center align-items-center"
+                style="cursor: zoom-out"
+              >
+                <img
+                  id="butterflyModalImage"
+                  class="img-fluid shadow-lg rounded"
+                  style="max-height: 90vh; object-fit: contain; cursor: default"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded border mb-4" style="background-color: #f1f8f9">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0" style="color: #0399b0">Filter Tags</h6>
+            <button
+              id="clearFiltersBtn"
+              class="btn btn-sm btn-link text-decoration-none p-0"
+              style="color: #0399b0; font-size: 0.8rem"
+            >
+              Clear All
+            </button>
+          </div>
+          <div
+            id="filterTagCloud"
+            class="d-flex flex-wrap align-items-center gap-2"
+          ></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-bold mb-0">Image Gallery</h6>
+        </div>
+
+        <div
+          class="pe-2"
+          style="overflow-y: auto; overflow-x: hidden; max-height: 500px"
+        >
+          <div
+            id="speciesImages"
+            class="row g-2 pb-3 mt-0"
+            style="margin-left: 0; margin-right: 0"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

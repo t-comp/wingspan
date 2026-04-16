@@ -1,0 +1,361 @@
+<nav class="wingspan-nav fixed-top shadow-sm">
+  <div
+    class="nav-container d-flex justify-content-between align-items-center w-100"
+  >
+    <div
+      class="d-flex align-items-center gap-4 flex-grow-1"
+      style="max-width: 1200px"
+    >
+      <div
+        class="nav-brand flex-shrink-0"
+        id="navBrandLink"
+        style="cursor: pointer; white-space: nowrap"
+      >
+        <img src="assets/img/butterfly.png" alt="Logo" class="nav-logo" />
+        <span>WINGSPAN</span>
+      </div>
+
+      <div
+        id="galleryControlsWrapper"
+        class="d-flex align-items-center flex-grow-1 gap-3 ms-4"
+      >
+        <div class="d-flex align-items-center w-100" style="max-width: 550px">
+          <div
+            class="input-group shadow-sm search-pill-container flex-nowrap"
+            style="
+              border-radius: 50px;
+              background-color: white;
+              border: 1px solid transparent;
+              width: 100%;
+            "
+          >
+            <span
+              class="input-group-text bg-white border-0"
+              style="border-radius: 50px 0 0 50px"
+            >
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input
+              id="searchInput"
+              class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
+              type="search"
+              placeholder="Search by common name..."
+              style="-webkit-appearance: none; min-width: 250px"
+            />
+            <div
+              class="d-flex flex-column align-items-center position-relative nav-action-container"
+            >
+              <button
+                class="btn bg-white border-0 border-start filter-symbol-btn h-100"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#filterPanel"
+                style="
+                  border-radius: 0 50px 50px 0;
+                  color: #1abc9c;
+                  border-color: #ced4da !important;
+                  padding-left: 15px;
+                  padding-right: 20px;
+                "
+              >
+                <i class="fas fa-filter"></i>
+              </button>
+              <span
+                class="navbar-static-label custom-tooltip"
+                style="bottom: -22px"
+                >Filter</span
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          class="d-flex flex-column align-items-center position-relative nav-action-container"
+        >
+          <button
+            id="uploadBtn"
+            class="btn btn-clean-upload rounded-circle fw-bold flex-shrink-0"
+            data-bs-toggle="modal"
+            data-bs-target="#addButterflyModal"
+            style="
+              width: 42px;
+              height: 42px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 1.2rem;
+            "
+          >
+            <i class="fas fa-plus text-white"></i>
+          </button>
+          <span class="navbar-static-label custom-tooltip" style="bottom: -22px"
+            >Upload</span
+          >
+        </div>
+      </div>
+      <div
+        id="teamsControlsWrapper"
+        class="align-items-center flex-grow-1 gap-3 ms-4 d-none"
+      >
+        <div class="d-flex align-items-center w-100" style="max-width: 550px">
+          <div
+            class="input-group shadow-sm search-pill-container flex-nowrap"
+            style="
+              border-radius: 50px;
+              background-color: white;
+              border: 1px solid transparent;
+              width: 100%;
+            "
+          >
+            <span
+              class="input-group-text bg-white border-0"
+              style="border-radius: 50px 0 0 50px"
+            >
+              <i class="fas fa-search text-muted"></i>
+            </span>
+
+            <input
+              id="adminTeamSearch"
+              class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
+              type="search"
+              placeholder="Search teams..."
+              style="-webkit-appearance: none; min-width: 250px"
+            />
+
+            <select
+              id="teamYearFilter"
+              class="form-select border-0 border-start shadow-none bg-white fw-bold ps-2 pe-4 text-center"
+              style="
+                border-radius: 0 50px 50px 0;
+                width: 110px;
+                flex: none;
+                cursor: pointer;
+                outline: none;
+                color: #1abc9c;
+                border-color: #ced4da !important;
+              "
+            ></select>
+          </div>
+        </div>
+
+        <div
+          class="d-flex flex-column align-items-center position-relative nav-action-container"
+        >
+          <button
+            class="btn btn-clean-upload rounded-circle fw-bold flex-shrink-0"
+            data-bs-toggle="modal"
+            data-bs-target="#adminCreateTeamModal"
+            style="
+              width: 42px;
+              height: 42px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 1.2rem;
+            "
+          >
+            <div class="d-flex align-items-start">
+              <i class="fas fa-users text-white"></i>
+              <i
+                class="fas fa-plus text-white"
+                style="font-size: 0.5em; margin-left: -2px; margin-top: -2px"
+              ></i>
+            </div>
+          </button>
+          <span class="navbar-static-label custom-tooltip" style="bottom: -22px"
+            >Create Team</span
+          >
+        </div>
+      </div>
+
+      <div
+        id="usersControlsWrapper"
+        class="align-items-center flex-grow-1 gap-3 ms-4 d-none"
+      >
+        <div class="d-flex align-items-center w-100" style="max-width: 550px">
+          <div
+            class="input-group shadow-sm search-pill-container flex-nowrap"
+            style="
+              border-radius: 50px;
+              background-color: white;
+              border: 1px solid transparent;
+              width: 100%;
+            "
+          >
+            <span
+              class="input-group-text bg-white border-0"
+              style="border-radius: 50px 0 0 50px"
+            >
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input
+              id="adminUserSearch"
+              class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
+              type="search"
+              placeholder="Search users..."
+              style="
+                -webkit-appearance: none;
+                min-width: 250px;
+                border-radius: 0 50px 50px 0;
+              "
+            />
+          </div>
+        </div>
+        <div
+          class="d-flex flex-column align-items-center position-relative nav-action-container"
+        >
+          <button
+            class="btn btn-clean-upload rounded-circle fw-bold flex-shrink-0"
+            data-bs-toggle="modal"
+            data-bs-target="#adminAddUserModal"
+            style="
+              width: 42px;
+              height: 42px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 1.2rem;
+            "
+          >
+            <i class="fas fa-user-plus text-white"></i>
+          </button>
+          <span class="navbar-static-label custom-tooltip" style="bottom: -22px"
+            >Create User</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-4">
+      <div class="form-check form-switch ms-3 d-none" id="deleteToggleWrapper">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          role="switch"
+          id="deleteModeToggle"
+        />
+        <label
+          class="form-check-label text-danger fw-bold"
+          for="deleteModeToggle"
+          style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5)"
+          >Delete Mode</label
+        >
+      </div>
+
+      <div class="d-flex gap-3 mt-1 align-items-center">
+        <button id="viewGalleryBtn" class="nav-text-link active">
+          Gallery
+        </button>
+
+        <div class="dropdown">
+          <button
+            id="viewTeamBtn"
+            class="nav-text-link"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            style="background: transparent; border: none"
+          >
+            Dashboard
+          </button>
+          <ul
+            class="dropdown-menu shadow border-0 mt-3 p-2"
+            aria-labelledby="viewTeamBtn"
+            id="dashboardDropdownMenu"
+            style="min-width: 130px"
+          >
+            <li>
+              <a
+                class="dropdown-item admin-only-nav"
+                href="#"
+                id="navAdminTeams"
+              >
+                <i class="fas fa-users me-2 text-muted"></i>Teams
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item admin-only-nav"
+                href="#"
+                id="navAdminUsers"
+              >
+                <i class="fas fa-user me-2 text-muted"></i>Users
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item admin-only-nav"
+                href="#"
+                id="navAdminTags"
+              >
+                <i class="fas fa-tags me-2 text-muted"></i>Tags
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item student-only-nav"
+                href="#"
+                id="navStudentTeam"
+                style="display: none"
+              >
+                <i class="fas fa-users me-2 text-muted"></i>My Team
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div
+        class="dropdown d-flex flex-column align-items-center position-relative nav-action-container"
+      >
+        <button
+          class="btn btn-link text-white p-0 shadow-none"
+          id="settingsDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="fas fa-ellipsis-h fs-4"></i>
+        </button>
+        <span class="navbar-static-label custom-tooltip">Settings</span>
+        <ul
+          class="dropdown-menu dropdown-menu-end shadow border-0 mt-3"
+          aria-labelledby="settingsDropdown"
+          style="min-width: 220px"
+        >
+          <li>
+            <a
+              class="dropdown-item fw-bold text-secondary"
+              href="#"
+              id="navDocsBtn"
+            >
+              <i class="fas fa-book me-2"></i> Documentation
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item py-2" href="#" id="nameToggleBtn">
+              <i class="fas fa-exchange-alt me-2 text-muted"></i
+              ><span>Switch to Scientific</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item py-2" href="#" id="openChangePasswordBtn">
+              <i class="fas fa-lock me-2 text-muted"></i>Change Password
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item py-2" href="#" id="toggleTheme">
+              <i class="fas fa-moon me-2 text-muted"></i>Toggle Light/Dark Mode
+            </a>
+          </li>
+          <li>
+            <a
+              class="dropdown-item py-2 text-danger fw-bold"
+              href="#"
+              id="logoutLink"
+            >
+              <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

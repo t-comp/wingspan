@@ -1,0 +1,93 @@
+<div class="modal fade" id="imageDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Image Record Details</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <p><strong>Image Size:</strong> <span id="modalSize"></span></p>
+        <hr />
+        <h6>Notes</h6>
+        <p id="modalNotes" class="text-muted"></p>
+
+        <textarea
+          id="editNotesInput"
+          class="form-control d-none mb-3"
+          rows="3"
+        ></textarea>
+        <div id="getImageSection">
+          <hr />
+          <h6 class="fw-bold text-primary">Get Image</h6>
+          <p class="small text-muted mb-2">
+            Copy links to use in your team's application.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <button
+              id="copyOriginalUrlBtn"
+              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+            >
+              <i class="fas fa-link me-1"></i>Original
+            </button>
+            <button
+              id="copyLargeUrlBtn"
+              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+            >
+              <i class="fas fa-link me-1"></i>Large
+            </button>
+            <button
+              id="copyMediumUrlBtn"
+              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+            >
+              <i class="fas fa-link me-1"></i>Medium
+            </button>
+            <button
+              id="copySmallUrlBtn"
+              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+            >
+              <i class="fas fa-link me-1"></i>Small
+            </button>
+          </div>
+        </div>
+
+        <hr />
+        <h6>Tags</h6>
+        <div id="modalTags" class="d-flex flex-wrap gap-1"></div>
+
+        <div id="editTagsContainer" class="d-none">
+          <hr />
+          <h6 class="small fw-bold text-muted">Manage Tags:</h6>
+          <div
+            id="tagCheckboxList"
+            class="d-flex flex-wrap border p-2 rounded bg-white shadow-sm"
+            style="max-height: 250px; overflow-y: auto"
+          ></div>
+        </div>
+      </div>
+
+      <div class="modal-footer justify-content-between">
+        <div>
+          <button id="editImageBtn" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-edit"></i> Edit Details
+          </button>
+          <button id="saveImageBtn" class="btn btn-sm btn-success d-none">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,288 @@
+<section id="teamView" class="py-4" style="display: none; min-height: 50vh">
+  <div class="container">
+    <div id="studentTeamContent" style="display: none">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <h2 class="text-muted mb-4">Account Information</h2>
+          <div class="card shadow-sm border-0 bg-light p-4 mb-5">
+            <div class="d-flex align-items-center">
+              <div
+                class="profile-circle me-4 shadow-sm"
+                style="
+                  width: 65px;
+                  height: 65px;
+                  font-size: 1.8rem;
+                  background-color: #0399b0;
+                  color: white;
+                "
+              >
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <h4
+                  class="fw-bold mb-1"
+                  id="dropdownUsername"
+                  style="color: #0399b0"
+                ></h4>
+                <div class="text-muted mb-2" id="dropdownEmail"></div>
+                <span
+                  class="badge px-3 py-2 shadow-sm"
+                  id="dropdownRole"
+                  style="background-color: #0399b0; font-size: 0.75rem"
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <div id="studentTeamDynamicContent">
+            <h2 class="text-muted mb-4">My Team Overview</h2>
+            <div class="card shadow-sm border-0 bg-light p-4">
+              <div class="card-body">
+                <h4 class="fw-bold text-primary">Your Team Information</h4>
+                <p class="text-muted">
+                  Currently, you are assigned as a Student user. Future updates
+                  will display your assigned team members and project API keys
+                  here.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="adminTeamContent" style="display: none">
+      <div class="tab-content" id="adminTeamTabsContent">
+        <div class="tab-pane fade" id="tab-teams" role="tabpanel" tabindex="0">
+          <div id="teamsContainer" class="row g-3 align-items-stretch"></div>
+        </div>
+
+        <div
+          class="tab-pane fade show active"
+          id="tab-users"
+          role="tabpanel"
+          tabindex="0"
+        >
+          <div class="bg-white rounded border">
+            <div
+              class="table-responsive m-0"
+              style="
+                max-height: calc(100vh - 220px);
+                overflow-y: auto;
+                overflow-x: hidden;
+              "
+            >
+              <table
+                class="table table-hover align-middle mb-0"
+                style="table-layout: fixed; width: 100%"
+              >
+                <thead
+                  class="table-light"
+                  style="position: sticky; top: 0; z-index: 10"
+                >
+                  <tr>
+                    <th style="width: 25%">Username</th>
+                    <th style="width: 30%">Email</th>
+                    <th style="width: 15%">Role</th>
+                    <th style="width: 15%">Team</th>
+                    <th class="text-end" style="width: 15%">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="allUsersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-tags" role="tabpanel" tabindex="0">
+          <div class="bg-white rounded border p-0">
+            <div class="row g-0 h-100" style="min-height: 500px">
+              <div class="col-md-4 border-end bg-light d-flex flex-column">
+                <div
+                  class="p-3 border-bottom d-flex justify-content-between align-items-center sticky-top bg-light"
+                >
+                  <h5 class="fw-bold mb-0 text-muted">Categories</h5>
+                  <button
+                    class="btn btn-sm shadow-sm rounded-circle d-flex align-items-center justify-content-center p-0 btn-category-add"
+                    style="width: 32px; height: 32px"
+                    onclick="window.promptNewCategory()"
+                  >
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+                <div
+                  class="list-group list-group-flush flex-grow-1 overflow-auto"
+                  id="adminTagCategoryList"
+                ></div>
+              </div>
+
+              <div class="col-md-8 d-flex flex-column p-4">
+                <div
+                  id="tagEditorEmptyState"
+                  class="text-center text-muted m-auto"
+                >
+                  <i
+                    class="fas fa-tag fa-4x mb-3 text-secondary opacity-50"
+                  ></i>
+                  <h5>Select a category to manage its tags</h5>
+                  <p class="small">Choose a category from the left menu.</p>
+                </div>
+
+                <div id="tagEditorContainer" class="d-none flex-column h-100">
+                  <h4
+                    id="currentEditingCategory"
+                    class="fw-bold mb-4"
+                    style="color: #0399b0"
+                  ></h4>
+
+                  <div
+                    class="flex-grow-1 overflow-auto mb-4 border rounded p-3 bg-light"
+                  >
+                    <div id="activeTagsGrid" class="d-flex flex-wrap"></div>
+                  </div>
+
+                  <div class="mt-auto border-top pt-3">
+                    <label class="form-label fw-bold small text-muted"
+                      >Add New Tag to Category</label
+                    >
+                    <div class="input-group shadow-sm">
+                      <input
+                        type="text"
+                        id="adminNewTagName"
+                        class="form-control"
+                        placeholder="Enter new tag name..."
+                      />
+                      <button
+                        id="adminAddTagSubmit"
+                        class="btn btn-success fw-bold px-4"
+                        type="button"
+                      >
+                        <i class="fas fa-plus me-1"></i> Add
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="adminEditUserModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Edit User</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="adminEditUserForm">
+              <input type="hidden" id="editUserId" />
+              <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editUsername"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="editEmail"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">New Password (Optional)</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="editPassword"
+                  placeholder="Leave blank to keep current"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">
+                Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="adminCreateTeamModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Create Empty Team</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="adminCreateTeamForm">
+              <div class="mb-3">
+                <label class="form-label">Team Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newCreateTeamName"
+                  placeholder="e.g. sp26-wingspan-01"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Project Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newCreateProjectName"
+                  placeholder="e.g. Wingspan"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Semester</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newCreateSemester"
+                  placeholder="e.g. Spring 2026"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                Create Team & API Key
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

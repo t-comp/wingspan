@@ -79,6 +79,7 @@ export async function initHome(userRole, userEmail) {
   const teamView = document.getElementById("teamView");
   const speciesView = document.getElementById("speciesView");
   const filterPanel = document.getElementById("filterPanel");
+  const docsView = document.getElementById("docsView");
 
   const adminTeamContent = document.getElementById("adminTeamContent");
   const studentTeamContent = document.getElementById("studentTeamContent");
@@ -197,6 +198,7 @@ export async function initHome(userRole, userEmail) {
     if (portfolio) portfolio.style.display = "none";
     if (speciesView) speciesView.style.display = "none";
     if (teamView) teamView.style.display = "block";
+    if (docsView) docsView.style.display = "none";
     window.scrollTo(0, 0);
 
     // 2. Identify Navbar Containers
