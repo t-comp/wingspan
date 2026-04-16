@@ -49,11 +49,32 @@
           <div class="row g-0" id="butterflyGrid"></div>
         </div>
       </section>
+      <!-- ======================== SPECIES VIEW ======================== -->
+      {{> views/species_view }}
 
-      {{> views/species_view }} {{> views/team_view }} {{> views/docs_view }}
-      {{> modals/admin_modals }} {{> modals/auth_modals }} {{>
-      modals/upload_modal }} {{> modals/image_details }} {{>
-      modals/species_modals }} {{> footer }}
+      <!-- ======================== TEAM VIEW ======================== -->
+      {{> views/team_view }}
+
+      <!-- ======================== DOCUMENTATION VIEW ======================== -->
+      {{> views/docs_view }}
+
+      <!-- ======================== ADMIN MODALS ======================== -->
+      {{> modals/admin_modals }}
+
+      <!-- ======================== AUTHENTICATION MODALS ======================== -->
+      {{> modals/auth_modals }}
+
+      <!-- ======================== UPLOAD MODAL ======================== -->
+      {{> modals/upload_modal }}
+
+      <!-- ======================== IMAGE DETAILS MODAL ======================== -->
+      {{> modals/image_details }}
+
+      <!-- ======================== SPECIES MODALS ======================== -->
+      {{> modals/species_modals }}
+
+      <!-- ======================== FOOTER ======================== -->
+      {{> footer }}
     </div>
 
     <script type="module" src="./src/core/router.ts"></script>
