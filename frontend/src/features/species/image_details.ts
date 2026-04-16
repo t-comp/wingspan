@@ -61,6 +61,7 @@ export function openImageDetailsModal(
 
   setupImageEditing(img, reloadSpeciesCallback);
 
+  // Notice we removed the hardcoded pixelText parameter!
   const setupCopyButton = (
     btnId: string,
     urlKey: string,
@@ -69,31 +70,78 @@ export function openImageDetailsModal(
     const btn = document.getElementById(btnId);
     if (!btn) return;
 
-    btn.innerHTML = `<i class="fas fa-link me-1"></i>${sizeLabel}`;
+    // Grab the specific URL from the image data
+    const targetUrl = img[urlKey];
 
-    btn.onclick = () => {
-      // Look for the specific size. If it's null (image was too small to scale up),
-      // gracefully fall back to the medium (url) or the original image!
-      let urlToCopy = img[urlKey] || img.url || img.originalUrl;
+    // Hide if the backend didn't generate this size (and it's not the original)
+    if (!targetUrl && urlKey !== "originalUrl") {
+      btn.classList.add("d-none");
+      return;
+    }
 
-      if (!urlToCopy) return; // Safety check
+    btn.classList.remove("d-none");
 
-      // Always append the API key so students can load the image!
-      if (AppState.studentApiKey) {
-        const separator = urlToCopy.includes("?") ? "&" : "?";
-        urlToCopy += `${separator}apiKey=${AppState.studentApiKey}`;
-      }
+    // Put a cute little loading spinner on the button while we measure the image!
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${sizeLabel}...`;
 
-      navigator.clipboard.writeText(urlToCopy);
-      btn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
-      setTimeout(
-        () => (btn.innerHTML = `<i class="fas fa-link me-1"></i>${sizeLabel}`),
-        2000,
-      );
+    // The ultimate fallback path for the actual copy action
+    const urlToCopy = targetUrl || img.url || img.originalUrl;
+
+    // --- THE MAGIC FRONTEND MEASURING TAPE ---
+    const measureImg = new Image();
+
+    measureImg.onload = function () {
+      // Once the image loads in the background, grab the exact dimensions!
+      const exactPixels = `(${measureImg.naturalWidth}x${measureImg.naturalHeight}px)`;
+      const finalButtonText = `${sizeLabel} ${exactPixels}`;
+
+      // Update the button with the real numbers!
+      btn.innerHTML = `<i class="fas fa-link me-1"></i>${finalButtonText}`;
+
+      // Attach the click event now that we know the text
+      btn.onclick = () => {
+        let finalUrl = urlToCopy;
+
+        // Always append the API key so students can load the image!
+        if (AppState.studentApiKey) {
+          const separator = finalUrl.includes("?") ? "&" : "?";
+          finalUrl += `${separator}apiKey=${AppState.studentApiKey}`;
+        }
+
+        navigator.clipboard.writeText(finalUrl);
+        btn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+
+        // Reset the button text back to normal after 2 seconds
+        setTimeout(() => {
+          btn.innerHTML = `<i class="fas fa-link me-1"></i>${finalButtonText}`;
+        }, 2000);
+      };
     };
+
+    // If the image fails to load, just show the label without dimensions
+    measureImg.onerror = function () {
+      const finalButtonText = sizeLabel;
+      btn.innerHTML = `<i class="fas fa-link me-1"></i>${finalButtonText}`;
+
+      btn.onclick = () => {
+        let finalUrl = urlToCopy;
+        if (AppState.studentApiKey) {
+          const separator = finalUrl.includes("?") ? "&" : "?";
+          finalUrl += `${separator}apiKey=${AppState.studentApiKey}`;
+        }
+        navigator.clipboard.writeText(finalUrl);
+        btn.innerHTML = `<i class="fas fa-check me-1"></i>Copied!`;
+        setTimeout(() => {
+          btn.innerHTML = `<i class="fas fa-link me-1"></i>${finalButtonText}`;
+        }, 2000);
+      };
+    };
+
+    // Trigger the background download to start measuring!
+    measureImg.src = urlToCopy;
   };
 
-  // Map the buttons directly to your new backend JSON keys!
+  // Now you just pass the label, and the code figures out the rest!
   setupCopyButton("copyOriginalUrlBtn", "originalUrl", "Original");
   setupCopyButton("copyLargeUrlBtn", "largeUrl", "Large");
   setupCopyButton("copyMediumUrlBtn", "mediumUrl", "Medium");
