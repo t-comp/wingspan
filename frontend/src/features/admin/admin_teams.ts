@@ -14,6 +14,46 @@ export async function loadTeams() {
     ButterflyAPI.getUnassignedStudents(),
     ButterflyAPI.getAllApiKeys(),
   ]);
+
+  // --- DYNAMIC YEAR LOGIC STARTS HERE ---
+  const teamYearFilter = document.getElementById(
+    "teamYearFilter",
+  ) as HTMLSelectElement;
+  if (teamYearFilter) {
+    const currentSelection = teamYearFilter.value;
+    const uniqueYears = new Set<string>();
+
+    // Search through every team and extract the 4-digit year from their semester
+    teams.forEach((t: any) => {
+      const match = t.semester.match(/\d{4}/);
+      if (match) uniqueYears.add(match[0]);
+    });
+
+    // Clear the dropdown and add the default "All"
+    teamYearFilter.innerHTML = '<option value="All">All Years</option>';
+
+    // Sort the years from newest to oldest
+    const sortedYears = Array.from(uniqueYears).sort().reverse();
+
+    sortedYears.forEach((year) => {
+      const option = document.createElement("option");
+      option.value = year;
+      option.innerText = year;
+      teamYearFilter.appendChild(option);
+    });
+
+    // Smart default: Keep their current selection, or use the current year, or default to All
+    const currentYearStr = new Date().getFullYear().toString();
+    if (currentSelection && uniqueYears.has(currentSelection)) {
+      teamYearFilter.value = currentSelection;
+    } else if (uniqueYears.has(currentYearStr)) {
+      teamYearFilter.value = currentYearStr;
+    } else {
+      teamYearFilter.value = "All";
+    }
+  }
+  // --- DYNAMIC YEAR LOGIC ENDS HERE ---
+
   const container = document.getElementById("teamsContainer");
   if (!container) return;
 
@@ -224,8 +264,6 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
     }
   };
 
-  // --- REPLACE EVERYTHING BELOW YOUR removeStudentFromTeam FUNCTION WITH THIS ---
-
   (window as any).applyTeamFilters = () => {
     const searchEl = document.getElementById(
       "adminTeamSearch",
@@ -263,26 +301,11 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
     adminTeamSearch.addEventListener("input", (window as any).applyTeamFilters);
   }
 
+  // --- CLEANED UP EVENT LISTENER ---
   const teamYearFilter = document.getElementById(
     "teamYearFilter",
   ) as HTMLSelectElement;
   if (teamYearFilter) {
-    if (!teamYearFilter.getAttribute("data-initialized")) {
-      const currentYear = new Date().getFullYear();
-
-      // Magically generate years from 2024 to 4 years in the future!
-      for (let y = 2024; y <= currentYear + 4; y++) {
-        const option = document.createElement("option");
-        option.value = y.toString();
-        option.innerText = y.toString();
-        teamYearFilter.appendChild(option);
-      }
-
-      // Automatically set the dropdown to the current year
-      teamYearFilter.value = currentYear.toString();
-      teamYearFilter.setAttribute("data-initialized", "true");
-    }
-
     teamYearFilter.addEventListener("change", (window as any).applyTeamFilters);
   }
 
