@@ -204,7 +204,15 @@ export async function showSpeciesView(b: any) {
       img.nathansNotes || img.nathan_notes || img.notes || "";
     return {
       id: img.id,
-      url: img.fpath,
+      url: img.fpath, // We keep this for the main UI backward compatibility
+
+      // --- NEW URL FIELDS FROM BACKEND ---
+      originalUrl: img.originalUrl,
+      largeUrl: img.largeUrl,
+      mediumUrl: img.fpath,
+      smallUrl: img.smallUrl,
+      // -----------------------------------
+
       size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
       lifecycle: img.lifecycle || "Unknown",
       nathansNotes: noteFromBackend,

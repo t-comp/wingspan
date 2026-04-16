@@ -61,22 +61,22 @@ export function openImageDetailsModal(
 
   setupImageEditing(img, reloadSpeciesCallback);
 
-  const setupCopyButton = (btnId: string, sizeParam: string | null) => {
+  const setupCopyButton = (
+    btnId: string,
+    urlKey: string,
+    sizeLabel: string,
+  ) => {
     const btn = document.getElementById(btnId);
     if (!btn) return;
 
-    const sizeLabel = btnId.replace("copy", "").replace("UrlBtn", "");
     btn.innerHTML = `<i class="fas fa-link me-1"></i>${sizeLabel}`;
 
     btn.onclick = () => {
-      let baseImgUrl = img.url || img.fpath;
-      let urlToCopy = baseImgUrl;
+      // Look for the specific size. If it's null (image was too small to scale up),
+      // gracefully fall back to the medium (url) or the original image!
+      let urlToCopy = img[urlKey] || img.url || img.originalUrl;
 
-      // Append a size parameter to the URL if requested
-      if (sizeParam) {
-        const separator = urlToCopy.includes("?") ? "&" : "?";
-        urlToCopy += `${separator}size=${sizeParam.toLowerCase()}`;
-      }
+      if (!urlToCopy) return; // Safety check
 
       // Always append the API key so students can load the image!
       if (AppState.studentApiKey) {
@@ -93,10 +93,11 @@ export function openImageDetailsModal(
     };
   };
 
-  setupCopyButton("copyOriginalUrlBtn", null);
-  setupCopyButton("copyLargeUrlBtn", "Large");
-  setupCopyButton("copyMediumUrlBtn", "Medium");
-  setupCopyButton("copySmallUrlBtn", "Small");
+  // Map the buttons directly to your new backend JSON keys!
+  setupCopyButton("copyOriginalUrlBtn", "originalUrl", "Original");
+  setupCopyButton("copyLargeUrlBtn", "largeUrl", "Large");
+  setupCopyButton("copyMediumUrlBtn", "mediumUrl", "Medium");
+  setupCopyButton("copySmallUrlBtn", "smallUrl", "Small");
 
   const modalElement = document.getElementById("imageDetailsModal");
   if (modalElement) {

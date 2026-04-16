@@ -113,6 +113,7 @@ function renderPagination(totalItems: number, totalPages: number) {
 }
 
 export function goToGallery() {
+  const docsView = document.getElementById("docsView");
   const portfolio = document.getElementById("portfolio");
   const speciesView = document.getElementById("speciesView");
   const teamView = document.getElementById("teamView");
@@ -122,10 +123,11 @@ export function goToGallery() {
   const usersControls = document.getElementById("usersControlsWrapper");
   const filterPanel = document.getElementById("filterPanel");
 
-  // 1. Show Gallery content, hide others
+  // 1. Show Gallery content, hide ALL others
   if (portfolio) portfolio.style.display = "block";
   if (speciesView) speciesView.style.display = "none";
   if (teamView) teamView.style.display = "none";
+  if (docsView) docsView.style.display = "none";
 
   // 2. Clean Slate the Navbar
   [teamsControls, usersControls].forEach((wrapper) => {
@@ -142,7 +144,7 @@ export function goToGallery() {
 
   // 3. Manage Filter Panel and Nav Highlights
   if (filterPanel) {
-    filterPanel.style.display = ""; //
+    filterPanel.style.display = "";
     filterPanel.classList.remove("show");
   }
 
