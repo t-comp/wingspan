@@ -1,8 +1,8 @@
 <div class="modal fade" id="imageDetailsModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Image Record Details</h5>
+        <h5 class="modal-title">Image Details</h5>
         <button
           type="button"
           class="btn-close"
@@ -12,81 +12,102 @@
       </div>
 
       <div class="modal-body">
-        <p><strong>Image Size:</strong> <span id="modalSize"></span></p>
-        <hr />
-        <h6>Notes</h6>
-        <p id="modalNotes" class="text-muted"></p>
+        <div class="row">
+          <div
+            class="col-md-5 border-end pe-4 d-flex flex-column position-relative"
+          >
+            <div
+              class="flex-grow-1 overflow-auto pe-2"
+              style="max-height: 65vh"
+            >
+              <h6 class="fw-bold mb-1">Notes</h6>
+              <p id="modalNotes" class="text-muted small mb-3"></p>
+              <textarea
+                id="editNotesInput"
+                class="form-control d-none mb-3"
+                rows="3"
+              ></textarea>
 
-        <textarea
-          id="editNotesInput"
-          class="form-control d-none mb-3"
-          rows="3"
-        ></textarea>
-        <div id="getImageSection">
-          <hr />
-          <h6 class="fw-bold text-primary">Get Image</h6>
-          <p class="small text-muted mb-2">
-            Copy links to use in your team's application.
-          </p>
-          <div class="d-flex flex-wrap gap-2">
-            <button
-              id="copyOriginalUrlBtn"
-              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
+              <hr class="my-3" />
+
+              <h6 class="fw-bold mb-2">Tags</h6>
+              <div id="modalTags" class="d-flex flex-wrap gap-1 mb-2"></div>
+
+              <div id="editTagsContainer" class="d-none">
+                <hr class="my-3" />
+                <h6 class="small fw-bold text-muted mb-2">Manage Tags:</h6>
+                <div
+                  id="tagCheckboxList"
+                  class="d-flex flex-wrap border p-2 rounded bg-white shadow-sm"
+                  style="max-height: 200px; overflow-y: auto"
+                ></div>
+              </div>
+            </div>
+
+            <div
+              class="mt-3 pt-3 border-top position-sticky bottom-0 bg-white d-flex gap-2"
+              style="z-index: 10"
             >
-              <i class="fas fa-link me-1"></i>Original
-            </button>
-            <button
-              id="copyLargeUrlBtn"
-              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
-            >
-              <i class="fas fa-link me-1"></i>Large
-            </button>
-            <button
-              id="copyMediumUrlBtn"
-              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
-            >
-              <i class="fas fa-link me-1"></i>Medium
-            </button>
-            <button
-              id="copySmallUrlBtn"
-              class="btn btn-sm btn-outline-primary shadow-sm rounded-pill"
-            >
-              <i class="fas fa-link me-1"></i>Small
-            </button>
+              <div class="action-tooltip-container" id="editBtnWrapper">
+                <button
+                  id="editImageBtn"
+                  class="btn-icon-only"
+                  style="font-size: 1.25rem"
+                >
+                  <i class="fas fa-edit text-secondary"></i>
+                </button>
+                <span
+                  class="action-tooltip"
+                  style="
+                    bottom: 100%;
+                    top: auto;
+                    margin-bottom: 8px;
+                    left: 0;
+                    right: auto;
+                    transform: none;
+                    white-space: nowrap;
+                  "
+                  >Edit Details</span
+                >
+              </div>
+
+              <div class="action-tooltip-container d-none" id="saveBtnWrapper">
+                <button
+                  id="saveImageBtn"
+                  class="btn-icon-only"
+                  style="font-size: 1.25rem"
+                >
+                  <i class="fas fa-save text-success"></i>
+                </button>
+                <span
+                  class="action-tooltip"
+                  style="
+                    bottom: 100%;
+                    top: auto;
+                    margin-bottom: 8px;
+                    left: 0;
+                    right: auto;
+                    transform: none;
+                    white-space: nowrap;
+                  "
+                  >Save Changes</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-7 ps-4">
+            <h6 class="fw-bold text-primary mb-1">Get Image Links</h6>
+            <p class="small text-muted mb-3">
+              Copy optimized links to use in your team's application.
+            </p>
+
+            <div
+              id="imageDownloadOptions"
+              class="d-flex flex-column gap-2"
+            ></div>
           </div>
         </div>
-
-        <hr />
-        <h6>Tags</h6>
-        <div id="modalTags" class="d-flex flex-wrap gap-1"></div>
-
-        <div id="editTagsContainer" class="d-none">
-          <hr />
-          <h6 class="small fw-bold text-muted">Manage Tags:</h6>
-          <div
-            id="tagCheckboxList"
-            class="d-flex flex-wrap border p-2 rounded bg-white shadow-sm"
-            style="max-height: 250px; overflow-y: auto"
-          ></div>
-        </div>
-      </div>
-
-      <div class="modal-footer justify-content-between">
-        <div>
-          <button id="editImageBtn" class="btn btn-sm btn-outline-secondary">
-            <i class="fas fa-edit"></i> Edit Details
-          </button>
-          <button id="saveImageBtn" class="btn btn-sm btn-success d-none">
-            <i class="fas fa-save"></i> Save Changes
-          </button>
-        </div>
-        <button
-          type="button"
-          class="btn btn-sm btn-secondary"
-          data-bs-dismiss="modal"
-        >
-          Close
-        </button>
       </div>
     </div>
   </div>
