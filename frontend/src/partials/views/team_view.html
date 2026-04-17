@@ -308,5 +308,84 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="modal fade"
+      id="adminEditTeamModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Edit Team</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="adminEditTeamForm">
+              <input type="hidden" id="editTeamId" />
+              <div class="mb-3">
+                <label class="form-label fw-bold">Team Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editTeamName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Project Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editProjectName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold"
+                  >Semester <span class="text-danger">*</span></label
+                >
+                <div class="row g-2">
+                  <div class="col-6">
+                    <select
+                      class="form-select"
+                      id="editSemesterSeason"
+                      required
+                    >
+                      <option value="Spring">Spring</option>
+                      <option value="Fall">Fall</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="editSemesterYear"
+                      placeholder="YYYY"
+                      pattern="\d{4}"
+                      maxlength="4"
+                      minlength="4"
+                      title="Please enter a 4-digit year"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary w-100 rounded-pill fw-bold"
+              >
+                Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>

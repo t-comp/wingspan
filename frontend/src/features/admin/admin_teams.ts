@@ -2,8 +2,8 @@
 
 /**
  * This file powers the team management section of the admin dashboard.
- * It handles rendering the team cards, assigning unassigned students to specific teams,
- * and creating or deleting team groups for the semester.
+ * It handles rendering the team cards with a searchable, multi-select student
+ * dropdown that dynamically updates its label based on selected students.
  */
 
 import { ButterflyAPI } from "../../core/api.js";
@@ -53,6 +53,10 @@ export async function loadTeams() {
     return;
   }
 
+  teams.sort((a: any, b: any) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+  );
+
   const membersByTeam = await Promise.all(
     teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id)),
   );
@@ -64,13 +68,12 @@ export async function loadTeams() {
     const isActive =
       teamKey && teamKey.active !== false && teamKey.status !== "INACTIVE";
 
-    // THE FIX: Generate the checkbox HTML INSIDE the loop so each team gets unique IDs
+    // Generate Checkbox List for the searchable dropdown with unique IDs per card
     let studentCheckboxesHtml = "";
     if (unassigned.length === 0) {
       studentCheckboxesHtml = `<div class="text-muted small p-2">No unassigned students available.</div>`;
     } else {
       unassigned.forEach((u: any) => {
-        // We add the team.id to the ID and the FOR attribute to make them unique per card!
         const uniqueId = `chk-${team.id}-${u.userId}`;
         studentCheckboxesHtml += `
               <div class="form-check p-2 ms-4 student-item" data-search-term="${u.username.toLowerCase()} ${u.email.toLowerCase()}">
@@ -97,17 +100,79 @@ export async function loadTeams() {
             )
             .join("");
 
-    let apiKeyHtml = teamKey
-      ? `
+    let apiKeyHtml = "";
+    if (!teamKey) {
+      apiKeyHtml = `
+        <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
+            <span class="text-muted small fst-italic">No API key found</span>
+            <div class="action-tooltip-container">
+                <button class="btn-icon-only" onclick="window.regenerateTeamKey('${team.name}', '${team.projectName}', '${team.semester}')">
+                    <i class="fas fa-key"></i>
+                </button>
+                <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Generate Key</span>
+            </div>
+        </div>`;
+    } else {
+      let expiresHtml = `<span class="text-muted" style="font-size:0.7rem;">No expiry set</span>`;
+      if (teamKey.expiration) {
+        const expDate = new Date(teamKey.expiration);
+        const now = new Date();
+        const diffDays = Math.ceil(
+          (expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        const formattedDate = expDate.toLocaleDateString();
+
+        if (diffDays <= 0)
+          expiresHtml = `<span class="text-danger fw-bold" style="font-size:0.7rem;">Expired!</span>`;
+        else if (diffDays <= 7)
+          expiresHtml = `<span class="text-danger fw-bold" style="font-size:0.7rem;">${diffDays} days left!</span>`;
+        else if (diffDays <= 30)
+          expiresHtml = `<span class="fw-bold" style="font-size:0.7rem; color: #d97706;">${Math.floor(diffDays / 7) || 1} weeks left!</span>`;
+        else
+          expiresHtml = `<span class="text-muted" style="font-size:0.7rem;">Expires ${formattedDate}</span>`;
+      }
+
+      apiKeyHtml = `
         <div class="p-2 rounded" style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
             <div class="d-flex align-items-center justify-content-between mb-1">
                 <span class="badge rounded-pill px-2 py-1" style="font-size:0.7rem; background: ${isActive ? "#d1fae5" : "#fef3c7"}; color: ${isActive ? "#065f46" : "#92400e"};">
                     ${isActive ? "Active" : "Inactive"}
                 </span>
+                ${expiresHtml}
             </div>
-            <div class="font-monospace text-break pt-2 mt-2 border-top" style="font-size:0.72rem; color:#555;">${teamKey.keyVal}</div>
-        </div>`
-      : `<div class="text-muted small fst-italic p-2 border rounded bg-light">No API key found</div>`;
+            <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                <div class="font-monospace text-break mb-0" style="font-size:0.72rem; color:#555; word-break:break-all;">
+                    ${teamKey.keyVal}
+                </div>
+                <div class="d-flex flex-wrap gap-1 flex-shrink-0 ms-3">
+                    <div class="action-tooltip-container">
+                        <button class="btn-icon-only" onclick="window.toggleApiKeyStatus('${teamKey.id}', ${isActive})">
+                            <i class="fas fa-power-off text-${isActive ? "secondary" : "success"}"></i>
+                        </button>
+                        <span class="action-tooltip" style="right: 0; left: auto; transform: none;">${isActive ? "Deactivate" : "Activate"}</span>
+                    </div>
+                    <div class="action-tooltip-container">
+                        <button class="btn-icon-only" onclick="window.openExtendModal('${teamKey.id}')">
+                            <i class="fas fa-calendar-plus text-secondary"></i>
+                        </button>
+                        <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Extend Time</span>
+                    </div>
+                    <div class="action-tooltip-container">
+                        <button class="btn-icon-only" onclick="window.regenerateTeamKey('${team.name}', '${team.projectName}', '${team.semester}')">
+                            <i class="fas fa-sync-alt text-secondary"></i>
+                        </button>
+                        <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Regenerate</span>
+                    </div>
+                    <div class="action-tooltip-container">
+                        <button class="btn-icon-only delete-btn" onclick="window.deleteApiKey('${teamKey.id}')">
+                            <i class="fas fa-trash-alt text-danger"></i>
+                        </button>
+                        <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Delete Key</span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
 
     const col = document.createElement("div");
     col.className = "col-lg-6 team-card-wrapper";
@@ -119,9 +184,20 @@ export async function loadTeams() {
                         <h5 class="fw-bold mb-0" style="color: #0399b0;">${team.name}</h5>
                         <div class="text-muted small">${team.projectName} &nbsp;·&nbsp; ${team.semester}</div>
                     </div>
-                    <button class="btn-icon-only delete-btn" onclick="window.deleteTeam('${team.id}', '${team.name}')">
-                        <i class="fas fa-trash text-danger"></i>
-                    </button>
+                    <div class="d-flex gap-2">
+                        <div class="action-tooltip-container">
+                          <button class="btn-icon-only" onclick="window.openEditTeamModal('${team.id}', '${team.name}', '${team.projectName}', '${team.semester}')">
+                              <i class="fas fa-pencil-alt text-secondary"></i>
+                          </button>
+                          <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Edit Team</span>
+                        </div>
+                        <div class="action-tooltip-container">
+                          <button class="btn-icon-only delete-btn" onclick="window.deleteTeam('${team.id}', '${team.name}')">
+                              <i class="fas fa-trash text-danger"></i>
+                          </button>
+                          <span class="action-tooltip" style="right: 0; left: auto; transform: none;">Delete Team</span>
+                        </div>
+                    </div>
                 </div>
                 <hr class="my-2">
                 
@@ -170,7 +246,7 @@ export async function loadTeams() {
 }
 
 export function initAdminTeams(refreshAdminData: () => Promise<void>) {
-  // 1. Live Search Filtering
+  // Live Search Filtering
   document.addEventListener("input", (e) => {
     const target = e.target as HTMLInputElement;
     if (target.classList.contains("student-search-input")) {
@@ -189,14 +265,13 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
     }
   });
 
-  // 2. NEW: Update Dropdown Button Text when checkboxes change
+  // Update Dropdown Button Text dynamically
   document.addEventListener("change", (e) => {
     const target = e.target as HTMLInputElement;
     if (target.classList.contains("student-checkbox")) {
       const listContainer = target.closest(".student-list-scrollable");
       const teamId = listContainer?.id.replace("studentList-", "");
       const btn = document.getElementById(`studentDropdownBtn-${teamId}`);
-
       if (listContainer && btn) {
         const checkedBoxes = listContainer.querySelectorAll(
           ".student-checkbox:checked",
@@ -204,14 +279,13 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
         const names = Array.from(checkedBoxes).map((cb) =>
           cb.getAttribute("data-username"),
         );
-
         btn.innerText =
           names.length === 0 ? "Select a student..." : names.join(", ");
       }
     }
   });
 
-  // 3. Bulk Add Members
+  // Bulk Add Members
   (window as any).addMultipleStudentsToTeam = async (teamId: string) => {
     const listContainer = document.getElementById(`studentList-${teamId}`);
     if (!listContainer) return;
@@ -232,6 +306,72 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
       alert("Error: " + error.message);
     }
   };
+
+  // Edit Team Modal & Form Logic
+  (window as any).openEditTeamModal = (
+    teamId: string,
+    name: string,
+    projectName: string,
+    semester: string,
+  ) => {
+    (document.getElementById("editTeamId") as HTMLInputElement).value = teamId;
+    (document.getElementById("editTeamName") as HTMLInputElement).value = name;
+    (document.getElementById("editProjectName") as HTMLInputElement).value =
+      projectName;
+
+    const parts = semester.split(" ");
+    if (parts.length === 2) {
+      (
+        document.getElementById("editSemesterSeason") as HTMLSelectElement
+      ).value = parts[0];
+      (document.getElementById("editSemesterYear") as HTMLInputElement).value =
+        parts[1];
+    }
+
+    const modalEl = document.getElementById("adminEditTeamModal");
+    if (modalEl) {
+      // @ts-ignore
+      new bootstrap.Modal(modalEl).show();
+    }
+  };
+
+  const adminEditTeamForm = document.getElementById("adminEditTeamForm");
+  if (adminEditTeamForm) {
+    adminEditTeamForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const teamId = (document.getElementById("editTeamId") as HTMLInputElement)
+        .value;
+      const season = (
+        document.getElementById("editSemesterSeason") as HTMLSelectElement
+      ).value;
+      const year = (
+        document.getElementById("editSemesterYear") as HTMLInputElement
+      ).value;
+
+      const teamData = {
+        name: (document.getElementById("editTeamName") as HTMLInputElement)
+          .value,
+        projectName: (
+          document.getElementById("editProjectName") as HTMLInputElement
+        ).value,
+        semester: `${season} ${year}`,
+      };
+
+      try {
+        await ButterflyAPI.updateTeam(teamId, teamData);
+        await refreshAdminData();
+        alert("Team Updated Successfully!");
+
+        const modal = document.getElementById("adminEditTeamModal");
+        if (modal) {
+          // @ts-ignore
+          bootstrap.Modal.getInstance(modal)?.hide();
+        }
+      } catch (error: any) {
+        alert("Update failed: " + error.message);
+      }
+    });
+  }
 
   (window as any).deleteTeam = async (teamId: string, teamName: string) => {
     if (confirm("Delete this team entirely?")) {
