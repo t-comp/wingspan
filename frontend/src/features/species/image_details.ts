@@ -133,30 +133,70 @@ export function openImageDetailsModal(
           const separator = clipboardUrl.includes("?") ? "&" : "?";
           clipboardUrl += `${separator}apiKey=${AppState.studentApiKey}`;
         }
-        // Fallback for non-HTTPS (unsecure) environments like raw IP addresses
+
+        console.log("=== COPY LINK CLICKED ===");
+        console.log("Target URL:", clipboardUrl);
+
+        // 1. Secure Context (HTTPS or Localhost)
         if (navigator.clipboard && window.isSecureContext) {
-          // Works locally and on HTTPS
-          navigator.clipboard.writeText(clipboardUrl);
-        } else {
-          // Fallback for HTTP server
+          console.log(
+            "Status: Secure context detected. Using modern Clipboard API.",
+          );
+          navigator.clipboard
+            .writeText(clipboardUrl)
+            .then(() => console.log("Success: Copied via Clipboard API!"))
+            .catch((err) => console.error("Error: Clipboard API failed:", err));
+        }
+
+        // 2. Unsecure Context (HTTP IP Address)
+        else {
+          console.log(
+            "Status: Unsecure HTTP context detected. Using fallback method.",
+          );
+
           const textArea = document.createElement("textarea");
           textArea.value = clipboardUrl;
 
-          // Hide it off screen so the user doesn't see it jump
-          textArea.style.position = "absolute";
-          textArea.style.left = "-999999px";
-          document.body.prepend(textArea);
+          // Make it completely invisible but still "renderable" for the browser
+          textArea.style.position = "fixed";
+          textArea.style.top = "0";
+          textArea.style.left = "0";
+          textArea.style.width = "2em";
+          textArea.style.height = "2em";
+          textArea.style.padding = "0";
+          textArea.style.border = "none";
+          textArea.style.outline = "none";
+          textArea.style.boxShadow = "none";
+          textArea.style.background = "transparent";
+
+          // CRITICAL BOOTSTRAP FIX: Append it specifically inside the modal!
+          const modalBody =
+            document.querySelector(".modal-body") || document.body;
+          modalBody.appendChild(textArea);
+
+          // Force focus and selection
+          textArea.focus();
           textArea.select();
 
           try {
-            document.execCommand("copy");
-          } catch (error) {
-            console.error("Fallback copy failed", error);
+            const successful = document.execCommand("copy");
+            if (successful) {
+              console.log("Success: Fallback copy command worked!");
+              console.log("Text in clipboard should be:", textArea.value);
+            } else {
+              console.warn(
+                "Warning: Fallback copy command ran, but returned false.",
+              );
+            }
+          } catch (err) {
+            console.error("Error: Fallback copy threw an exception!", err);
           } finally {
-            textArea.remove();
+            // Always clean up the invisible text box
+            modalBody.removeChild(textArea);
           }
         }
 
+        // Visual UI Feedback (The checkmark animation)
         btn.innerHTML = `<i class="fas fa-check" style="color: #198754 !important;"></i>`;
         const tooltip = document.getElementById(`tooltip-${urlKey}`);
         if (tooltip) tooltip.innerText = "Copied!";
