@@ -10,6 +10,8 @@ import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 import { TagManager } from "../admin/admin_tags.js";
 
+const WINGSPAN_TEAL = "#0399b0";
+
 export function openImageDetailsModal(
   img: any,
   reloadSpeciesCallback: () => Promise<void>,
@@ -27,18 +29,15 @@ export function openImageDetailsModal(
     return;
 
   if (AppState.userRole === "ADMIN") {
-    editBtn.classList.remove("d-none");
     editWrapper?.classList.remove("d-none");
   } else {
-    editBtn.classList.add("d-none");
     editWrapper?.classList.add("d-none");
   }
 
-  saveBtn.classList.add("d-none");
+  saveWrapper?.classList.add("d-none");
   notesDisplay.classList.remove("d-none");
   notesInput.classList.add("d-none");
   tagsDisplay.classList.remove("d-none");
-  saveWrapper?.classList.add("d-none");
 
   if (editTagsContainer) editTagsContainer.classList.add("d-none");
 
@@ -71,13 +70,11 @@ export function openImageDetailsModal(
   if (downloadContainer) downloadContainer.innerHTML = "";
 
   const setupDownloadRow = async (label: string, urlKey: string) => {
-    // 1. Check if the backend actually generated this size
     const targetUrl = img[urlKey];
     if (!targetUrl && urlKey !== "originalUrl") return;
 
     const finalUrl = targetUrl || img.url || img.originalUrl;
 
-    // 2. Build the UI Row with the exact Wingspan Teal color
     const row = document.createElement("div");
     row.className =
       "d-flex justify-content-between align-items-center p-3 border rounded shadow-sm bg-light";
@@ -92,8 +89,8 @@ export function openImageDetailsModal(
       <div class="action-tooltip-container">
         <button class="btn-icon-only copy-btn d-flex justify-content-center align-items-center" 
                 id="btn-${urlKey}" 
-                style="width: 36px; height: 36px; border-radius: 50%; color: #0399b0 !important;">
-          <i class="fas fa-link"></i>
+                style="width: 36px; height: 36px; border-radius: 50%;">
+          <i class="fas fa-link" style="color: ${WINGSPAN_TEAL} !important;"></i>
         </button>
         <span class="action-tooltip" id="tooltip-${urlKey}" 
               style="top: 100%; bottom: auto; margin-top: 8px; right: 0; left: auto; transform: none; white-space: nowrap;">
@@ -104,10 +101,8 @@ export function openImageDetailsModal(
 
     if (downloadContainer) downloadContainer.appendChild(row);
 
-    // 3. Figure out the File Size Text
-    let sizeText = ""; // Default to blank for the smaller images
+    let sizeText = "";
 
-    // If it is the original image, calculate the MB from the database size!
     if (urlKey === "originalUrl" && img.size && img.size !== "Unknown") {
       const byteNum = parseInt(String(img.size).replace(/\D/g, ""));
       if (!isNaN(byteNum)) {
@@ -115,13 +110,11 @@ export function openImageDetailsModal(
       }
     }
 
-    // 4. Measure pixel dimensions in the background
     const measureImg = new Image();
 
     measureImg.onload = () => {
       const dimText = `${measureImg.naturalWidth}x${measureImg.naturalHeight}px`;
       const meta = document.getElementById(`meta-${urlKey}`);
-      // Combine the sizeText (which is only set for Original) and the pixel dimensions!
       if (meta) meta.innerHTML = `${sizeText}${dimText}`;
     };
 
@@ -132,7 +125,6 @@ export function openImageDetailsModal(
 
     measureImg.src = finalUrl;
 
-    // 5. Wire up the Copy Action
     const btn = document.getElementById(`btn-${urlKey}`);
     if (btn) {
       btn.onclick = () => {
@@ -143,17 +135,13 @@ export function openImageDetailsModal(
         }
         navigator.clipboard.writeText(clipboardUrl);
 
-        // Change icon to checkmark and turn it green!
-        btn.innerHTML = `<i class="fas fa-check"></i>`;
-        btn.style.color = "#198754"; // Bootstrap success green
+        btn.innerHTML = `<i class="fas fa-check" style="color: #198754 !important;"></i>`;
         const tooltip = document.getElementById(`tooltip-${urlKey}`);
         if (tooltip) tooltip.innerText = "Copied!";
 
-        // Revert everything back after 2 seconds
         setTimeout(() => {
           if (btn) {
-            btn.innerHTML = `<i class="fas fa-link"></i>`;
-            btn.style.setProperty("color", "#0399b0", "important");
+            btn.innerHTML = `<i class="fas fa-link" style="color: ${WINGSPAN_TEAL} !important;"></i>`;
           }
           if (tooltip) tooltip.innerText = "Copy Link";
         }, 2000);
@@ -161,7 +149,6 @@ export function openImageDetailsModal(
     }
   };
 
-  // Build the rows in order from largest to smallest!
   setupDownloadRow("Original", "originalUrl");
   setupDownloadRow("Large", "largeUrl");
   setupDownloadRow("Medium", "mediumUrl");
@@ -169,7 +156,16 @@ export function openImageDetailsModal(
 
   const modalElement = document.getElementById("imageDetailsModal");
   if (modalElement) {
+    // --- ARIA WARNING FIX: Remove focus when the modal closes! ---
+    modalElement.addEventListener("hide.bs.modal", () => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    });
+
+    // @ts-ignore
     let detailModal = bootstrap.Modal.getInstance(modalElement);
+    // @ts-ignore
     if (!detailModal) detailModal = new bootstrap.Modal(modalElement);
     detailModal.show();
   }
@@ -188,8 +184,6 @@ function setupImageEditing(
   if (!editBtn || !saveBtn) return;
 
   editBtn.onclick = async () => {
-    editBtn.classList.add("d-none");
-    saveBtn.classList.remove("d-none");
     document.getElementById("editBtnWrapper")?.classList.add("d-none");
     document.getElementById("saveBtnWrapper")?.classList.remove("d-none");
 
@@ -224,7 +218,6 @@ function setupImageEditing(
         allCheckboxes.forEach((node) => {
           const cb = node as HTMLInputElement;
           if (currentTagIds.includes(cb.value)) cb.checked = true;
-          cb.classList.add("edit-tag-checkbox");
         });
       }
     } catch (err) {
@@ -236,17 +229,23 @@ function setupImageEditing(
     const id = img.id || img.imageId;
     if (!id) return alert("Error: Could not find the ID for this image.");
 
+    // Convert the image ID to a strict Number
+    const numId = Number(id);
+
     const editInput = document.getElementById(
       "editNotesInput",
     ) as HTMLTextAreaElement | null;
+
     const selectedCheckboxes = document.querySelectorAll(
-      ".edit-tag-checkbox:checked",
-    );
-    const newTagIds = Array.from(selectedCheckboxes).map((cb) =>
-      String((cb as HTMLInputElement).value),
+      '#tagCheckboxList input[type="checkbox"]:checked',
     );
 
-    const oldTagIds = (img.tags || []).map((t: any) => String(t.id || t.tagId));
+    // --- TAG FIX: Force all tag IDs to be strict Numbers! ---
+    const newTagIds = Array.from(selectedCheckboxes).map((cb) =>
+      Number((cb as HTMLInputElement).value),
+    );
+
+    const oldTagIds = (img.tags || []).map((t: any) => Number(t.id || t.tagId));
     const toAdd = newTagIds.filter((tagId) => !oldTagIds.includes(tagId));
     const toRemove = oldTagIds.filter((tagId) => !newTagIds.includes(tagId));
 
@@ -255,70 +254,84 @@ function setupImageEditing(
     ) as HTMLElement | null;
     const updatedNotes = editInput?.value ?? (modalNotesElem?.innerText || "");
 
-    try {
-      await ButterflyAPI.updateImageDetails(id, {
-        nathansNotes: updatedNotes,
-        life_cycle:
-          (document.getElementById("editLifecycleInput") as HTMLTextAreaElement)
-            ?.value || "Adult",
-      });
+    // ==============================================================
+    // INSTANT OPTIMISTIC UI UPDATE
+    // ==============================================================
+    document.getElementById("saveBtnWrapper")?.classList.add("d-none");
+    document.getElementById("editBtnWrapper")?.classList.remove("d-none");
 
+    if (modalNotesElem) {
+      modalNotesElem.innerText = updatedNotes || "No notes available.";
+      modalNotesElem.classList.remove("d-none");
+    }
+    if (editInput) editInput.classList.add("d-none");
+
+    if (tagsDisplay) {
+      tagsDisplay.innerHTML = "";
+      if (selectedCheckboxes.length > 0) {
+        selectedCheckboxes.forEach((cb) => {
+          const labelText = cb.nextElementSibling?.textContent || "Tag";
+          const span = document.createElement("span");
+          span.className =
+            "badge rounded-pill border border-info text-dark me-1 px-2 py-1";
+          span.innerText = labelText;
+          tagsDisplay.appendChild(span);
+        });
+      } else {
+        tagsDisplay.innerHTML =
+          '<span class="text-muted small">No tags assigned.</span>';
+      }
+      tagsDisplay.classList.remove("d-none");
+    }
+    if (editTagsContainer) editTagsContainer.classList.add("d-none");
+
+    img.nathansNotes = updatedNotes;
+    img.tags = Array.from(selectedCheckboxes).map((cb) => ({
+      id: (cb as HTMLInputElement).value,
+      tagName: cb.nextElementSibling?.textContent || "Tag",
+    }));
+
+    // ==============================================================
+    // BACKGROUND API CALLS (The Shotgun Approach)
+    // ==============================================================
+    console.log("=== STARTING IMAGE SAVE PROCESS ===");
+
+    // We send every possible variation of the notes variable so the backend is guaranteed to catch it!
+    const payload = {
+      nathansNotes: updatedNotes,
+      nathanNotes: updatedNotes,
+      nathan_notes: updatedNotes,
+      notes: updatedNotes,
+      life_cycle: "Adult",
+      lifecycle: "Adult",
+      tagId: newTagIds,
+      tags: newTagIds,
+      tagIds: newTagIds,
+    };
+
+    console.log("Sending Shotgun Payload:", payload);
+
+    try {
+      await ButterflyAPI.updateImageDetails(id, payload);
+      console.log("Main image details updated successfully!");
+
+      // Fire the individual tag endpoints using STRICT NUMBERS
       const tagPromises = [
-        ...toAdd.map((tagId) => ButterflyAPI.addTagToImage(tagId, id)),
-        ...toRemove.map((tagId) => ButterflyAPI.removeTagFromImage(tagId, id)),
+        ...toAdd.map((tagId) => ButterflyAPI.addTagToImage(tagId, numId)),
+        ...toRemove.map((tagId) =>
+          ButterflyAPI.removeTagFromImage(tagId, numId),
+        ),
       ];
 
-      await Promise.all(tagPromises);
+      if (tagPromises.length > 0) {
+        await Promise.all(tagPromises);
+        console.log("Individual Tag Promises updated successfully!");
+      }
 
-      // Call the refresh function to update the main gallery in the background
       await reloadSpeciesCallback();
-
-      // --- INSTEAD OF CLOSING THE MODAL, WE JUST REVERT THE UI TO VIEW MODE ---
-
-      // 1. Swap the footer buttons back
-      document.getElementById("saveBtnWrapper")?.classList.add("d-none");
-      document.getElementById("editBtnWrapper")?.classList.remove("d-none");
-
-      // 2. Swap Notes back to plain text
-      const notesDisplay = document.getElementById("modalNotes");
-      if (notesDisplay) {
-        notesDisplay.innerText = updatedNotes || "No notes available.";
-        notesDisplay.classList.remove("d-none");
-      }
-      if (editInput) editInput.classList.add("d-none");
-
-      // 3. Swap Tags back to blue pills
-      const tagsDisplay = document.getElementById("modalTags");
-      const editTagsContainer = document.getElementById("editTagsContainer");
-
-      if (tagsDisplay) {
-        tagsDisplay.innerHTML = "";
-        if (selectedCheckboxes.length > 0) {
-          selectedCheckboxes.forEach((cb) => {
-            const labelText = cb.nextElementSibling?.textContent || "Tag";
-            const span = document.createElement("span");
-            span.className =
-              "badge rounded-pill border border-info text-dark me-1 px-2 py-1";
-            span.innerText = labelText;
-            tagsDisplay.appendChild(span);
-          });
-        } else {
-          tagsDisplay.innerHTML =
-            '<span class="text-muted small">No tags assigned.</span>';
-        }
-        tagsDisplay.classList.remove("d-none");
-      }
-      if (editTagsContainer) editTagsContainer.classList.add("d-none");
-
-      // 4. Update the local image object so if they click edit again right now, it remembers!
-      img.nathansNotes = updatedNotes;
-      img.tags = Array.from(selectedCheckboxes).map((cb) => ({
-        id: (cb as HTMLInputElement).value,
-        tagName: cb.nextElementSibling?.textContent || "Tag",
-      }));
+      console.log("=== SAVE PROCESS COMPLETE ===");
     } catch (err: any) {
-      console.error("Save failed:", err);
-      alert("Error saving: " + err.message);
+      console.error("!!! BACKGROUND SAVE ERROR !!!", err);
     }
   };
 }
