@@ -157,32 +157,23 @@ export function openImageDetailsModal(
           const textArea = document.createElement("textarea");
           textArea.value = clipboardUrl;
 
-          // BULLETPROOF FALLBACK FIX:
-          // Lock position to top-left to prevent scrolling or layout shifts
-          textArea.style.position = "fixed";
-          textArea.style.top = "0";
-          textArea.style.left = "0";
-          // Ensure it's rendered as small as possible
-          textArea.style.width = "2rem";
-          textArea.style.height = "2rem";
-          textArea.style.padding = "0";
-          textArea.style.border = "none";
-          textArea.style.outline = "none";
-          textArea.style.boxShadow = "none";
-          textArea.style.background = "transparent";
-          // Make it invisible using opacity so it remains selectable
-          textArea.style.opacity = "0";
+          // THE FIX: Move it far off-screen instead of using opacity: 0
+          // Browsers block selection on elements they consider "invisible"
+          textArea.style.position = "absolute";
+          textArea.style.left = "-9999px";
+          textArea.style.top = "-9999px";
+          textArea.setAttribute("readonly", ""); // Prevent keyboard pop-ups
 
           document.body.appendChild(textArea);
           textArea.focus();
           textArea.select();
+          textArea.setSelectionRange(0, 99999); // Ensure selection works universally
 
           try {
             const successful = document.execCommand("copy");
             if (successful) {
               console.log("Success: Fallback copy command actually worked!");
             } else {
-              // If Chrome still blocks it, give the user a pre-highlighted prompt
               window.prompt(
                 "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
                 clipboardUrl,
@@ -195,10 +186,7 @@ export function openImageDetailsModal(
               clipboardUrl,
             );
           } finally {
-            // Clean up the invisible text box
             document.body.removeChild(textArea);
-
-            // Put the Bootstrap focus trap back!
             if (modalEl) modalEl.setAttribute("tabindex", "-1");
           }
         }
