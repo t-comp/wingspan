@@ -157,8 +157,20 @@ export function openImageDetailsModal(
           const textArea = document.createElement("textarea");
           textArea.value = clipboardUrl;
 
-          // Make it invisible using opacity so the browser still treats it as a real, selectable element
+          // BULLETPROOF FALLBACK FIX:
+          // Lock position to top-left to prevent scrolling or layout shifts
           textArea.style.position = "fixed";
+          textArea.style.top = "0";
+          textArea.style.left = "0";
+          // Ensure it's rendered as small as possible
+          textArea.style.width = "2rem";
+          textArea.style.height = "2rem";
+          textArea.style.padding = "0";
+          textArea.style.border = "none";
+          textArea.style.outline = "none";
+          textArea.style.boxShadow = "none";
+          textArea.style.background = "transparent";
+          // Make it invisible using opacity so it remains selectable
           textArea.style.opacity = "0";
 
           document.body.appendChild(textArea);
@@ -170,7 +182,7 @@ export function openImageDetailsModal(
             if (successful) {
               console.log("Success: Fallback copy command actually worked!");
             } else {
-              // BULLETPROOF FALLBACK: If Chrome still blocks it, give the user a pre-highlighted prompt!
+              // If Chrome still blocks it, give the user a pre-highlighted prompt
               window.prompt(
                 "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
                 clipboardUrl,
