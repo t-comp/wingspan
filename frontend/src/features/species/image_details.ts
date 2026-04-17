@@ -150,21 +150,22 @@ export function openImageDetailsModal(
             "Status: Unsecure HTTP context detected. Using fallback method.",
           );
 
-          // BOOTSTRAP FIX: Temporarily remove the focus trap!
-          const modalEl = document.getElementById("imageDetailsModal");
-          if (modalEl) modalEl.removeAttribute("tabindex");
+          // Get the modal so we can append the text box inside it!
+          const modalEl =
+            document.getElementById("imageDetailsModal") || document.body;
 
           const textArea = document.createElement("textarea");
           textArea.value = clipboardUrl;
 
-          // THE FIX: Move it far off-screen instead of using opacity: 0
-          // Browsers block selection on elements they consider "invisible"
+          // Keep it hidden but physically present
           textArea.style.position = "absolute";
           textArea.style.left = "-9999px";
-          textArea.style.top = "-9999px";
-          textArea.setAttribute("readonly", ""); // Prevent keyboard pop-ups
+          textArea.style.top = "0";
 
-          document.body.appendChild(textArea);
+          // THE FIX: Append to the modal, NOT document.body.
+          // This prevents Bootstrap's focus trap from stealing focus!
+          modalEl.appendChild(textArea);
+
           textArea.focus();
           textArea.select();
           textArea.setSelectionRange(0, 99999); // Ensure selection works universally
@@ -186,8 +187,8 @@ export function openImageDetailsModal(
               clipboardUrl,
             );
           } finally {
-            document.body.removeChild(textArea);
-            if (modalEl) modalEl.setAttribute("tabindex", "-1");
+            // Clean it up from the modal
+            modalEl.removeChild(textArea);
           }
         }
 
