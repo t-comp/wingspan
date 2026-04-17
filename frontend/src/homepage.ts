@@ -33,6 +33,8 @@ import {
 } from "./features/gallery/gallery_core.js";
 
 export async function initHome(userRole, userEmail) {
+
+  
   console.log(
     "Home Initializing with role:",
     userRole,
@@ -46,6 +48,19 @@ export async function initHome(userRole, userEmail) {
   AppState.userRole = userRole;
   AppState.userEmail = userEmail;
   AppState.butterflies = await ButterflyAPI.getAll();
+
+
+// logic for attributes but its like lokwye not working and dirivng me crazy
+AppState.allAttributeKeys = new Set<string>(); 
+
+AppState.butterflies.forEach(species => {
+    if (species.attributeDefs) {
+        Object.keys(species.attributeDefs).forEach(key => {
+            AppState.allAttributeKeys.add(key);
+        });
+    }
+});
+console.log("Attributes recovered after refresh:", Array.from(AppState.allAttributeKeys));
 
   let studentApiKey = "";
   if (userRole !== "ADMIN") {
