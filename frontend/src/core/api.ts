@@ -479,20 +479,15 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
-  async updateImageDetails(imageId, data) {
-    const response = await fetch(`${API_BASE_URL}/images/admin/${imageId}`, {
-      method: "PATCH",
-      headers: {
-        ...getHeaders(),
-        "Content-Type": "application/json",
+  async updateImageDetails(imageId, params) {
+    // Append the URLSearchParams directly to the URL
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}?${params.toString()}`,
+      {
+        method: "PATCH",
+        headers: getHeaders(), // Standard headers, no body needed
       },
-      body: JSON.stringify({
-        description: data.description || "",
-        nathansNotes: data.nathansNotes || "",
-        //life_cycle: data.life_cycle || "",
-        tagIds: data.tagIds || [],
-      }),
-    });
+    );
     return checkResponse(response);
   },
 
