@@ -267,15 +267,39 @@
                 />
               </div>
               <div class="mb-3">
-                <label class="form-label">Semester</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="newCreateSemester"
-                  placeholder="e.g. Spring 2026"
-                  required
-                />
+                <label class="form-label"
+                  >Semester <span class="text-danger">*</span></label
+                >
+                <div class="row g-2">
+                  <div class="col-6">
+                    <select
+                      class="form-select"
+                      id="newCreateSemesterSeason"
+                      required
+                    >
+                      <option value="" disabled selected>
+                        Select Season...
+                      </option>
+                      <option value="Spring">Spring</option>
+                      <option value="Fall">Fall</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="newCreateSemesterYear"
+                      placeholder="YYYY (e.g. 2026)"
+                      pattern="\d{4}"
+                      maxlength="4"
+                      minlength="4"
+                      title="Please enter a 4-digit year"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
+
               <button type="submit" class="btn btn-primary w-100">
                 Create Team & API Key
               </button>

@@ -259,6 +259,8 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
     try {
       await ButterflyAPI.addTeamMember(teamId, userId);
       await refreshAdminData();
+
+      alert("Team Member Added Successfully!");
     } catch (error: any) {
       alert("Could not add student: " + error.message);
     }
@@ -332,6 +334,9 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
 
       await ButterflyAPI.createTeam(teamData);
       await refreshAdminData();
+
+      alert("Team Created Successfully!");
+
       (e.target as HTMLFormElement).reset();
       const modal = document.getElementById("adminCreateTeamModal");
 
