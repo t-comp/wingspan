@@ -135,13 +135,9 @@ export function openImageDetailsModal(
         }
 
         console.log("=== COPY LINK CLICKED ===");
-        console.log("Target URL:", clipboardUrl);
 
         // 1. Secure Context (HTTPS or Localhost)
         if (navigator.clipboard && window.isSecureContext) {
-          console.log(
-            "Status: Secure context detected. Using modern Clipboard API.",
-          );
           navigator.clipboard
             .writeText(clipboardUrl)
             .then(() => console.log("Success: Copied via Clipboard API!"))
@@ -154,49 +150,48 @@ export function openImageDetailsModal(
             "Status: Unsecure HTTP context detected. Using fallback method.",
           );
 
+          // BOOTSTRAP FIX: Temporarily remove the focus trap!
+          const modalEl = document.getElementById("imageDetailsModal");
+          if (modalEl) modalEl.removeAttribute("tabindex");
+
           const textArea = document.createElement("textarea");
           textArea.value = clipboardUrl;
 
-          // Make it completely invisible but still "renderable" for the browser
+          // Make it invisible using opacity so the browser still treats it as a real, selectable element
           textArea.style.position = "fixed";
-          textArea.style.top = "0";
-          textArea.style.left = "0";
-          textArea.style.width = "2em";
-          textArea.style.height = "2em";
-          textArea.style.padding = "0";
-          textArea.style.border = "none";
-          textArea.style.outline = "none";
-          textArea.style.boxShadow = "none";
-          textArea.style.background = "transparent";
+          textArea.style.opacity = "0";
 
-          // CRITICAL BOOTSTRAP FIX: Append it specifically inside the modal!
-          const modalBody =
-            document.querySelector(".modal-body") || document.body;
-          modalBody.appendChild(textArea);
-
-          // Force focus and selection
+          document.body.appendChild(textArea);
           textArea.focus();
           textArea.select();
 
           try {
             const successful = document.execCommand("copy");
             if (successful) {
-              console.log("Success: Fallback copy command worked!");
-              console.log("Text in clipboard should be:", textArea.value);
+              console.log("Success: Fallback copy command actually worked!");
             } else {
-              console.warn(
-                "Warning: Fallback copy command ran, but returned false.",
+              // BULLETPROOF FALLBACK: If Chrome still blocks it, give the user a pre-highlighted prompt!
+              window.prompt(
+                "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
+                clipboardUrl,
               );
             }
           } catch (err) {
-            console.error("Error: Fallback copy threw an exception!", err);
+            console.error("Error: ExecCommand threw an exception.", err);
+            window.prompt(
+              "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
+              clipboardUrl,
+            );
           } finally {
-            // Always clean up the invisible text box
-            modalBody.removeChild(textArea);
+            // Clean up the invisible text box
+            document.body.removeChild(textArea);
+
+            // Put the Bootstrap focus trap back!
+            if (modalEl) modalEl.setAttribute("tabindex", "-1");
           }
         }
 
-        // Visual UI Feedback (The checkmark animation)
+        // Visual UI Feedback
         btn.innerHTML = `<i class="fas fa-check" style="color: #198754 !important;"></i>`;
         const tooltip = document.getElementById(`tooltip-${urlKey}`);
         if (tooltip) tooltip.innerText = "Copied!";
