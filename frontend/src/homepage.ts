@@ -54,8 +54,8 @@ export async function initHome(userRole, userEmail) {
 AppState.allAttributeKeys = new Set<string>(); 
 
 AppState.butterflies.forEach(species => {
-    if (species.attributeDefs) {
-        Object.keys(species.attributeDefs).forEach(key => {
+    if (species.attributeDef) {
+        Object.keys(species.attributeDef).forEach(key => {
             AppState.allAttributeKeys.add(key);
         });
     }

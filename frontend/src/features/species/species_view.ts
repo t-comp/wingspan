@@ -85,9 +85,9 @@ const customAttrContainer = document.getElementById("customAttributesDisplay");
 if (customAttrContainer) {
     customAttrContainer.innerHTML = ""; // Clear old ones
 
-    if (b.attributeDefs && Object.keys(b.attributeDefs).length > 0) {
+    if (b.attributeDef && Object.keys(b.attributeDef).length > 0) {
         let html = "";
-        Object.entries(b.attributeDefs).forEach(([key, value]) => {
+        Object.entries(b.attributeDef).forEach(([key, value]) => {
             if (value && String(value).trim() !== "") {
                 html += `
                 <div class="row mb-2">
@@ -163,7 +163,7 @@ if (customAttrContainer) {
       AppState.allAttributeKeys.forEach(key => {
         // If THIS specific species has a value for this key, get it. 
         // Otherwise, it stays an empty string.
-        const value = (b.attributeDefs && b.attributeDefs[key]) ? b.attributeDefs[key] : "";
+        const value = (b.attributeDef && b.attributeDef[key]) ? b.attributeDef[key] : "";
         
         // This adds the input field to the modal
         addDynamicField(key, String(value));
