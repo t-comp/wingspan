@@ -53,22 +53,6 @@ export async function loadTeams() {
     return;
   }
 
-  // Generate Checkbox List for the searchable dropdown
-  let studentCheckboxesHtml = "";
-  if (unassigned.length === 0) {
-    studentCheckboxesHtml = `<div class="text-muted small p-2">No unassigned students available.</div>`;
-  } else {
-    unassigned.forEach((u: any) => {
-      studentCheckboxesHtml += `
-            <div class="form-check p-2 ms-4 student-item" data-search-term="${u.username.toLowerCase()} ${u.email.toLowerCase()}">
-                <input class="form-check-input student-checkbox" type="checkbox" value="${u.userId}" id="chk-${u.userId}" data-username="${u.username}">
-                <label class="form-check-label small w-100 cursor-pointer" for="chk-${u.userId}">
-                    ${u.username} <span class="text-muted">— ${u.email}</span>
-                </label>
-            </div>`;
-    });
-  }
-
   const membersByTeam = await Promise.all(
     teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id)),
   );
@@ -79,6 +63,24 @@ export async function loadTeams() {
     const teamKey = allKeys.find((k: any) => k.teamName === team.name);
     const isActive =
       teamKey && teamKey.active !== false && teamKey.status !== "INACTIVE";
+
+    // THE FIX: Generate the checkbox HTML INSIDE the loop so each team gets unique IDs
+    let studentCheckboxesHtml = "";
+    if (unassigned.length === 0) {
+      studentCheckboxesHtml = `<div class="text-muted small p-2">No unassigned students available.</div>`;
+    } else {
+      unassigned.forEach((u: any) => {
+        // We add the team.id to the ID and the FOR attribute to make them unique per card!
+        const uniqueId = `chk-${team.id}-${u.userId}`;
+        studentCheckboxesHtml += `
+              <div class="form-check p-2 ms-4 student-item" data-search-term="${u.username.toLowerCase()} ${u.email.toLowerCase()}">
+                  <input class="form-check-input student-checkbox" type="checkbox" value="${u.userId}" id="${uniqueId}" data-username="${u.username}">
+                  <label class="form-check-label small w-100 cursor-pointer" for="${uniqueId}">
+                      ${u.username} <span class="text-muted">— ${u.email}</span>
+                  </label>
+              </div>`;
+      });
+    }
 
     let membersHtml =
       members.length === 0
