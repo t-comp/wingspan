@@ -13,6 +13,8 @@ import { UI } from "../../shared/ui.js";
 import { openImageDetailsModal } from "./image_details.js";
 import { addDynamicField } from "./species_editor.js";
 
+import noImagePlaceholder from "../../../assets/img/noimage.jpg";
+
 export function initSpeciesView() {
   // Attach the permanent listener for the Delete Species button
   const deleteSpeciesBtn = document.getElementById("deleteSpeciesFullBtn");
@@ -153,7 +155,7 @@ export async function showSpeciesView(b: any) {
   }
 
   const setMainImage = (img: any) => {
-    const url = img.url || "assets/img/noimage.jpg";
+    const url = img.url || noImagePlaceholder;
 
     const speciesImg = document.getElementById(
       "speciesImage",
@@ -249,8 +251,8 @@ export async function showSpeciesView(b: any) {
       const col = document.createElement("div");
       col.className = "col-4 mb-2 gallery-thumb-wrapper position-relative";
       col.innerHTML = `
-          <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
-              <img src="${imgObj.url || "assets/img/noimage.jpg"}"
+        <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
+              <img src="${imgObj.url || noImagePlaceholder}"
                    style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
           </div>
           ${
