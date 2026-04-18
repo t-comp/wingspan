@@ -15,47 +15,68 @@
       style="width: 70px; filter: brightness(0) invert(1)"
       class="mb-3"
     />
-    <h1 class="display-5 fw-bold text-uppercase mb-4">Login</h1>
+    <h1 class="display-5 fw-bold text-uppercase mb-4">WingSpan</h1>
+
     <div
-      class="card p-4 shadow-lg text-dark text-start"
+      class="card p-4 shadow-lg text-dark text-start mb-4"
       style="max-width: 400px; width: 100%; border-radius: 15px"
     >
       <form id="loginForm">
         <div class="mb-3">
-          <label class="form-label fw-bold">Email or Username</label>
+          <label class="form-label text-muted small fw-bold mb-1"
+            >Username or email</label
+          >
           <input
             type="text"
-            class="form-control rounded-pill px-3 py-2"
+            class="form-control px-3 py-2"
             id="loginEmail"
+            placeholder="e.g., isu58"
+            style="border-radius: 6px"
             required
           />
         </div>
         <div class="mb-4">
-          <label class="form-label fw-bold">Password</label>
+          <label class="form-label text-muted small fw-bold mb-1"
+            >Password</label
+          >
           <input
             type="password"
-            class="form-control rounded-pill px-3 py-2"
+            class="form-control px-3 py-2"
             id="loginPassword"
+            placeholder="•••••••"
+            style="border-radius: 6px"
             required
           />
         </div>
-        <button
-          type="submit"
-          class="btn btn-lg rounded-pill fw-bold text-white w-100 mb-3"
-          style="background-color: #0399b0"
-        >
-          Login
-        </button>
-        <div class="text-center">
+
+        <div class="d-flex justify-content-between align-items-center pt-2">
           <button
             type="button"
             id="loginBackToWelcomeBtn"
-            class="btn btn-link text-muted text-decoration-none"
+            class="btn btn-back-circle shadow-sm"
+            aria-label="Back"
+            onclick="window.location.href = 'welcome.html'"
           >
-            &larr; Back
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-wingspan-primary rounded-pill fw-bold px-4 py-2"
+          >
+            Sign in
           </button>
         </div>
       </form>
+    </div>
+    <div class="text-center mt-3">
+      <span class="text-white fw-medium me-1">Don't have an account?</span>
+      <a
+        href="create_account.html"
+        id="goToCreateAccountBtn"
+        class="btn-wingspan-white text-decoration-none fw-bold px-3 py-1 rounded-pill"
+        >Sign up</a
+      >
     </div>
   </div>
 </div>
