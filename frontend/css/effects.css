@@ -770,3 +770,14 @@
   background-color: #51b8a5;
   color: #ffffff;
 }
+
+/* =========================================
+   SPECIES VIEW THUMBNAIL ZOOM
+   ========================================= */
+.gallery-thumb-wrapper img {
+  transition: transform 0.3s ease;
+}
+
+.gallery-thumb-wrapper:hover img {
+  transform: scale(1.06);
+}
