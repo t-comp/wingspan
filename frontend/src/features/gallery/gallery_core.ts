@@ -45,13 +45,17 @@ function renderPagination(totalItems: number, totalPages: number) {
     return;
   }
 
-  let html = `<ul class="pagination pagination-sm justify-content-center mb-4 shadow-sm" style="border-radius: 12px; overflow: hidden;">`;
+  const wingSpanTeal = "#0399b0";
 
-  // Previous Button
+  // Removed the white pill background, shadow, and border!
+  let html = `<ul class="pagination justify-content-center align-items-center mb-0 gap-2" style="background: transparent; border: none;">`;
+
+  // Previous Arrow
+  const prevDisabled = currentPage === 1;
   html += `
-    <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
-        <a class="page-link text-muted fw-bold px-3 border-0 bg-white" href="#" data-page="${currentPage - 1}" style="cursor: ${currentPage === 1 ? "not-allowed" : "pointer"};">
-            <i class="fas fa-chevron-left small"></i>
+    <li class="page-item ${prevDisabled ? "disabled" : ""}">
+        <a class="page-link text-decoration-none fw-bold border-0 d-flex align-items-center px-2" href="#" data-page="${prevDisabled ? currentPage : currentPage - 1}" style="color: ${prevDisabled ? "#6c757d" : wingSpanTeal}; background: transparent;">
+            <i class="fas fa-chevron-left me-2 small"></i> Prev
         </a>
     </li>`;
 
@@ -66,39 +70,56 @@ function renderPagination(totalItems: number, totalPages: number) {
   }
 
   if (startPage > 1) {
-    html += `<li class="page-item"><a class="page-link text-dark fw-bold border-0 bg-white" href="#" data-page="1">1</a></li>`;
+    html += `<li class="page-item"><a class="page-link text-decoration-none fw-bold border-0 rounded-circle" href="#" data-page="1" style="color: var(--card-text); background: transparent; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">1</a></li>`;
     if (startPage > 2) {
-      html += `<li class="page-item disabled"><span class="page-link text-muted border-0 bg-white px-2">...</span></li>`;
+      html += `<li class="page-item disabled"><span class="page-link border-0 bg-transparent text-muted" style="background: transparent;">...</span></li>`;
     }
   }
 
   for (let i = startPage; i <= endPage; i++) {
     if (i === currentPage) {
-      html += `<li class="page-item active"><span class="page-link text-white fw-bold border-0" style="background-color: #0399b0;">${i}</span></li>`;
+      // Active Page (Solid Teal Circle remains!)
+      html += `
+        <li class="page-item active">
+            <span class="page-link fw-bold border-0 shadow-sm" style="background-color: ${wingSpanTeal}; color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">${i}</span>
+        </li>`;
     } else {
-      html += `<li class="page-item"><a class="page-link text-dark fw-bold border-0 bg-white" href="#" data-page="${i}">${i}</a></li>`;
+      // Inactive Pages
+      html += `
+        <li class="page-item">
+            <a class="page-link text-decoration-none fw-bold border-0 rounded-circle" href="#" data-page="${i}" style="color: var(--card-text); background: transparent; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">${i}</a>
+        </li>`;
     }
   }
 
   if (endPage < totalPages) {
     if (endPage < totalPages - 1) {
-      html += `<li class="page-item disabled"><span class="page-link text-muted border-0 bg-white px-2">...</span></li>`;
+      html += `<li class="page-item disabled"><span class="page-link border-0 bg-transparent text-muted" style="background: transparent;">...</span></li>`;
     }
-    html += `<li class="page-item"><a class="page-link text-dark fw-bold border-0 bg-white" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+    html += `<li class="page-item"><a class="page-link text-decoration-none fw-bold border-0 rounded-circle" href="#" data-page="${totalPages}" style="color: var(--card-text); background: transparent; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">${totalPages}</a></li>`;
   }
 
-  // Next Button
+  // Next Arrow
+  const nextDisabled = currentPage === totalPages;
   html += `
-    <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
-        <a class="page-link text-muted fw-bold px-3 border-0 bg-white" href="#" data-page="${currentPage + 1}" style="cursor: ${currentPage === totalPages ? "not-allowed" : "pointer"};">
-            <i class="fas fa-chevron-right small"></i>
+    <li class="page-item ${nextDisabled ? "disabled" : ""}">
+        <a class="page-link text-decoration-none fw-bold border-0 d-flex align-items-center px-2" href="#" data-page="${nextDisabled ? currentPage : currentPage + 1}" style="color: ${nextDisabled ? "#6c757d" : wingSpanTeal}; background: transparent;">
+            Next <i class="fas fa-chevron-right ms-2 small"></i>
         </a>
     </li>`;
 
   html += `</ul>`;
   paginationContainer.innerHTML = html;
 
+  // Re-attach the click listeners
   paginationContainer.querySelectorAll(".page-link").forEach((link) => {
+    // Prevent clicking on the active bubble or disabled ellipses
+    if (
+      link.parentElement?.classList.contains("active") ||
+      link.parentElement?.classList.contains("disabled")
+    )
+      return;
+
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const targetPage = parseInt(
