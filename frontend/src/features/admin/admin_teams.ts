@@ -44,22 +44,26 @@ export async function loadTeams() {
     }
   }
 
-  const container = document.getElementById("teamsContainer");
-  if (!container) return;
-  container.innerHTML = "";
-
-  if (teams.length === 0) {
-    container.innerHTML = `<p class="text-muted fst-italic">No teams yet. Click "Create Team" to get started.</p>`;
-    return;
-  }
-
   teams.sort((a: any, b: any) =>
     a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
   );
 
+  // fetch ALL the data FIRST before touching the screen
   const membersByTeam = await Promise.all(
     teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id)),
   );
+
+  // grab the container and clear it
+  const container = document.getElementById("teamsContainer");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  // handle the empty state
+  if (teams.length === 0) {
+    container.innerHTML = `<p class="text-muted fst-italic">No teams yet. Click "Create Team" to get started.</p>`;
+    return;
+  }
 
   for (let idx = 0; idx < teams.length; idx++) {
     const team = teams[idx];
