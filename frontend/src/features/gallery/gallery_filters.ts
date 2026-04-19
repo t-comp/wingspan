@@ -182,6 +182,42 @@ export async function initGalleryFilters(
       applyAllFilters();
     });
   }
+  // --- Clear All Filters Logic ---
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      // Uncheck all checkboxes in Order and Family containers
+      document.querySelectorAll(".filter-checkbox").forEach((cb) => {
+        (cb as HTMLInputElement).checked = false;
+      });
+
+      // Clear the nested search inputs inside dropdowns
+      const searchOrder = document.getElementById(
+        "searchOrder",
+      ) as HTMLInputElement;
+      const searchFamily = document.getElementById(
+        "searchFamily",
+      ) as HTMLInputElement;
+      if (searchOrder) searchOrder.value = "";
+      if (searchFamily) searchFamily.value = "";
+
+      // Reset the visibility of filter items hidden by the nested search
+      document.querySelectorAll(".filter-item").forEach((item) => {
+        (item as HTMLElement).style.display = "block";
+      });
+
+      // Reset the main top search bar
+      if (searchInput) {
+        searchInput.value = "";
+      }
+
+      // Trigger the filter refresh to update UI text and the grid
+      applyAllFilters();
+    });
+  }
 
   // Run immediately on boot to load the default grid
   applyAllFilters();

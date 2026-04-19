@@ -843,3 +843,30 @@
   color: #028094 !important; /* Slightly darker teal on hover */
   box-shadow: 0 2px 3px rgba(0,0,0,0.1);
 }
+
+/* Custom styling for the Reset button */
+.btn-clear-filters {
+  width: 32px;  /* Smaller size */
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid transparent; /* Keeps sizing consistent when border appears */
+  background: transparent;
+  color: #343a40; /* Keeping your dark arrow color */
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.btn-clear-filters:hover {
+  border-color: #ced4da; /* Gray outline pops up */
+  background-color: rgba(0, 0, 0, 0.05); /* Optional subtle fill for depth */
+  color: #343a40;
+}
+
+.btn-clear-filters i {
+  font-size: 0.9rem; /* Slightly smaller icon to match the new button size */
+}
+
+/* Ensure the tooltip doesn't have a massive delay */
+.tooltip {
+  pointer-events: none;
+}
