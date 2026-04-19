@@ -178,7 +178,6 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
 
     const modal = document.getElementById("adminEditUserModal");
     if (modal) {
-      // @ts-ignore
       new bootstrap.Modal(modal).show();
     }
   };
@@ -236,7 +235,6 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
         const modal = document.getElementById("adminAddUserModal");
         if (modal) {
           (document.activeElement as HTMLElement)?.blur();
-          // @ts-ignore
           bootstrap.Modal.getInstance(modal)?.hide();
         }
         alert("User successfully created!");
@@ -299,7 +297,6 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
         const modal = document.getElementById("adminEditUserModal");
         if (modal) {
           (document.activeElement as HTMLElement)?.blur();
-          // @ts-ignore
           bootstrap.Modal.getInstance(modal)?.hide();
         }
         alert("User successfully updated!");
