@@ -10,12 +10,17 @@ import java.util.List;
 @Setter
 public class RoboflowPrediction {
     private String predicted_classes;
-    private List<PredictionClass> predictions;
+    private List<Detection> predictions;
+
 
     @Getter
     @Setter
-    public static class PredictionClass{
+    public static class Detection {
         private String class_name;
         private double confidence;
+        private double x;
+        private double y;
+        private double width;
+        private double height;
     }
 }

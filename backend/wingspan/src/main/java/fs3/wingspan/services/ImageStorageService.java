@@ -93,18 +93,16 @@ public class ImageStorageService {
         image.setLifecyclestage(lifecycle_stage);
         image.setNathansnotes(nathansNotes);
 
-        RoboflowPrediction prediction = RoboflowService.classifyImage(file);
-
-        if(prediction != null && prediction.getPredictions() != null){
-            String topClass = prediction.getPredicted_classes();
-            double confidence = prediction.getPredictions().get(0).getConfidence();
-            log.info("Classified as: {} with {}% confidence", topClass, confidence * 100);
-
-            if(lifecycle_stage == null && topClass.contains("adult")){
-                image.setLifecyclestage("adult");
-            }else if(lifecycle_stage == null && topClass.contains("juvenile")){
-                image.setLifecyclestage("juvenile");
+        try{
+            String detectedStage = RoboflowService.getLifecycleStage(file);
+            if(detectedStage != null){
+                image.setLifecyclestage(
+                        lifecycle_stage != null ? lifecycle_stage : detectedStage);
+                log.info("Lifecycle stage set to: {}", lifecycle_stage);
             }
+        }catch(Exception e){
+            log.warn("Roboflow detection failed, skipping: {}", e.getMessage());
+            image.setLifecyclestage(lifecycle_stage);
         }
 
         log.info("About to save - lifecycle: {}, nathansNotes: {}, description: {}",

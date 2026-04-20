@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import org.springframework.http.HttpHeaders;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.Map;
 
 @Service
@@ -42,7 +43,18 @@ public class RoboflowService {
 
         log.info("Roboflow prediction: {}", response.getBody());
         return response.getBody();
+    }
 
+    public static String getLifecycleStage(MultipartFile file) throws IOException {
+        RoboflowPrediction prediction = classifyImage(file);
 
+        if (prediction != null || prediction.getPredictions() == null || prediction.getPredictions().isEmpty()) {
+            log.warn("No predictions found for image {}", file.getOriginalFilename());
+            return null;
+        }
+        return prediction.getPredictions().stream()
+                .max(Comparator.comparingDouble(RoboflowPrediction.Detection::getConfidence))
+                .map(RoboflowPrediction.Detection::getClass_name)
+                .orElse(null);
     }
 }
