@@ -253,7 +253,8 @@ export async function showSpeciesView(b: any) {
       col.innerHTML = `
         <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
               <img src="${imgObj.url || noImagePlaceholder}"
-                   style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
+                  draggable="false"
+                  style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
           </div>
           ${
             isAdmin
