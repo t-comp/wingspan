@@ -1,15 +1,9 @@
 // src/features/gallery/gallery_filters.ts
 
-/**
- * This module controls the search bar and dropdown filters above the main gallery.
- * It listens for user input across orders, families, and text searches, sorts the
- * global state data accordingly, and triggers the gallery to re-render with the
- * refined results. It also handles the button that flips everything between common
- * and scientific names because the biology majors kept complaining.
- */
-
 import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
+import Fuse from "fuse.js";
+import noImagePlaceholder from "../../../assets/img/noimage.jpg";
 
 export async function initGalleryFilters(
   refreshGalleryCallback: (data: any[], page: number) => void,
@@ -17,12 +11,25 @@ export async function initGalleryFilters(
   const searchInput = document.getElementById(
     "searchInput",
   ) as HTMLInputElement | null;
+  const searchDropdown = document.getElementById("searchAutocompleteDropdown");
   const nameToggleBtn = document.getElementById("nameToggleBtn");
 
-  async function applyAllFilters() {
+  // 1. Initialize Fuse.js with TIGHTER thresholds and Score Tracking
+  let fuse = new Fuse(AppState.butterflies, {
+    keys: ["name", "scientificName"],
+    threshold: 0.2, // Tighter threshold to prevent bad matches
+    ignoreLocation: true,
+    includeScore: true, // CRITICAL: We need the score to sort by relevance!
+  });
+
+  function applyAllFilters() {
+    // 2. ALWAYS sync Fuse with the latest database state so newly uploaded species appear!
+    fuse.setCollection(AppState.butterflies);
+
     const checkedOrders = Array.from(
       document.querySelectorAll("#filterOrderContainer input:checked"),
     ).map((cb) => (cb as HTMLInputElement).value);
+
     const checkedFamilies = Array.from(
       document.querySelectorAll("#filterFamilyContainer input:checked"),
     ).map((cb) => (cb as HTMLInputElement).value);
@@ -43,7 +50,7 @@ export async function initGalleryFilters(
           : "All Families";
     }
 
-    const query = searchInput ? searchInput.value.toLowerCase() : "";
+    const query = searchInput ? searchInput.value.trim() : "";
     let filtered = AppState.butterflies;
 
     if (checkedOrders.length > 0) {
@@ -51,46 +58,47 @@ export async function initGalleryFilters(
         checkedOrders.includes(b.orderName),
       );
     }
+
     if (checkedFamilies.length > 0) {
       filtered = filtered.filter((b: any) =>
         checkedFamilies.includes(b.family),
       );
     }
 
+    // 3. Filter AND Sort by Relevance Score
     if (query) {
-      filtered = filtered.filter((b: any) => {
-        if (AppState.currentDisplayMode === "scientific") {
-          return (b.scientificName || "").toLowerCase().includes(query);
-        }
-        return (b.name || "").toLowerCase().includes(query);
+      const results = fuse.search(query);
+      const matchedIds = new Set(results.map((r) => r.item.id));
+      filtered = filtered.filter((b: any) => matchedIds.has(b.id));
+
+      const scoreMap = new Map();
+      results.forEach((r, index) => scoreMap.set(r.item.id, index));
+      filtered.sort(
+        (a: any, b: any) => scoreMap.get(a.id) - scoreMap.get(b.id),
+      );
+    } else {
+      // If search is empty, fallback to alphabetical
+      filtered.sort((a: any, b: any) => {
+        const nameA =
+          AppState.currentDisplayMode === "scientific" && a.scientificName
+            ? a.scientificName
+            : a.name;
+        const nameB =
+          AppState.currentDisplayMode === "scientific" && b.scientificName
+            ? b.scientificName
+            : b.name;
+        return (nameA || "")
+          .toLowerCase()
+          .localeCompare((nameB || "").toLowerCase());
       });
     }
 
-    filtered.sort((a: any, b: any) => {
-      const nameA =
-        AppState.currentDisplayMode === "scientific" && a.scientificName
-          ? a.scientificName
-          : a.name;
-      const nameB =
-        AppState.currentDisplayMode === "scientific" && b.scientificName
-          ? b.scientificName
-          : b.name;
-      return (nameA || "")
-        .toLowerCase()
-        .localeCompare((nameB || "").toLowerCase());
-    });
-
-    // Save the new filtered list to state so pagination can use it!
     AppState.currentFilteredData = filtered;
-
-    // Tell the UI to render page 1 of the new data
     refreshGalleryCallback(AppState.currentFilteredData, 1);
   }
 
-  // We expose this so other files (like the upload wizard) can force a gallery refresh
   (window as any).applyAllFilters = applyAllFilters;
 
-  // Initialize the Dropdowns
   try {
     const options = await ButterflyAPI.getFilterOptions();
     const orderContainer = document.getElementById("filterOrderContainer");
@@ -128,12 +136,10 @@ export async function initGalleryFilters(
     populateCheckboxes(orderContainer, uniqueOrders, "order");
     populateCheckboxes(familyContainer, uniqueFamilies, "family");
 
-    // Listeners for checkboxes
     document.querySelectorAll(".filter-checkbox").forEach((cb) => {
       cb.addEventListener("change", applyAllFilters);
     });
 
-    // Listeners for the tiny search bars INSIDE the dropdowns
     const setupSearch = (inputId: string, containerId: string) => {
       const searchBox = document.getElementById(inputId);
       if (searchBox) {
@@ -160,12 +166,101 @@ export async function initGalleryFilters(
     console.error("Could not load filter options:", err);
   }
 
-  // Listener for the main top search bar
-  if (searchInput) {
-    searchInput.addEventListener("input", applyAllFilters);
+  // Search Input Listener for Dropdown Suggestions ONLY
+  if (searchInput && searchDropdown) {
+    const searchContainer = searchInput.closest(
+      ".search-pill-container",
+    ) as HTMLElement;
+
+    // CSS Helper Functions
+    const closeDropdown = () => {
+      searchDropdown.classList.remove("show-dropdown");
+      if (searchContainer) searchContainer.classList.remove("search-active");
+    };
+
+    const openDropdown = () => {
+      searchDropdown.classList.add("show-dropdown");
+      if (searchContainer) searchContainer.classList.add("search-active");
+    };
+
+    searchInput.addEventListener("input", (e) => {
+      // 4. Update Fuse collection in real-time as they type
+      fuse.setCollection(AppState.butterflies);
+      const query = (e.target as HTMLInputElement).value.trim();
+
+      if (!query) {
+        closeDropdown();
+        return;
+      }
+
+      const results = fuse.search(query);
+
+      if (results.length > 0) {
+        searchDropdown.innerHTML = "";
+
+        results.slice(0, 5).forEach((res: any) => {
+          const b = res.item;
+
+          let primaryName, secondaryName;
+          if (AppState.currentDisplayMode === "scientific") {
+            primaryName = b.scientificName || b.name;
+            secondaryName = b.scientificName && b.name ? b.name : "";
+          } else {
+            primaryName = b.name || b.scientificName;
+            secondaryName = b.name && b.scientificName ? b.scientificName : "";
+          }
+
+          // Automatically grab the thumbnail, or default to the placeholder
+          const thumbUrl =
+            b.thumbnailUrl ||
+            b.imageUrl ||
+            b.url ||
+            b.fpath ||
+            noImagePlaceholder;
+
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <a class="dropdown-item d-flex align-items-center py-2 px-3" href="#" style="cursor: pointer;">
+              <img src="${thumbUrl}" class="rounded shadow-sm me-3" style="width: 36px; height: 36px; object-fit: cover; border: 1px solid #eaeaea;" alt="Thumb">
+              <span class="fw-bold text-dark">${primaryName}</span>
+              ${secondaryName ? `<span class="small text-muted ms-2 fst-italic">(${secondaryName})</span>` : ""}
+            </a>`;
+
+          li.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            searchInput.value = primaryName;
+            closeDropdown();
+            applyAllFilters();
+          });
+
+          searchDropdown.appendChild(li);
+        });
+
+        openDropdown();
+      } else {
+        searchDropdown.innerHTML = `<li class="px-3 py-2 text-muted small">No species found for "${query}"</li>`;
+        openDropdown();
+      }
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        closeDropdown();
+        applyAllFilters();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (
+        !searchInput.contains(e.target as Node) &&
+        !searchDropdown.contains(e.target as Node)
+      ) {
+        closeDropdown();
+      }
+    });
   }
 
-  // Listener for the Scientific/Common name toggle in the settings menu
   if (nameToggleBtn) {
     nameToggleBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -182,19 +277,15 @@ export async function initGalleryFilters(
       applyAllFilters();
     });
   }
-  // --- Clear All Filters Logic ---
-  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
 
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
   if (clearFiltersBtn) {
     clearFiltersBtn.addEventListener("click", (e) => {
       e.preventDefault();
-
-      // Uncheck all checkboxes in Order and Family containers
       document.querySelectorAll(".filter-checkbox").forEach((cb) => {
         (cb as HTMLInputElement).checked = false;
       });
 
-      // Clear the nested search inputs inside dropdowns
       const searchOrder = document.getElementById(
         "searchOrder",
       ) as HTMLInputElement;
@@ -204,21 +295,22 @@ export async function initGalleryFilters(
       if (searchOrder) searchOrder.value = "";
       if (searchFamily) searchFamily.value = "";
 
-      // Reset the visibility of filter items hidden by the nested search
       document.querySelectorAll(".filter-item").forEach((item) => {
         (item as HTMLElement).style.display = "block";
       });
 
-      // Reset the main top search bar
       if (searchInput) {
         searchInput.value = "";
+        if (searchDropdown) {
+          searchDropdown.classList.remove("show-dropdown");
+          const searchContainer = searchInput.closest(
+            ".search-pill-container",
+          ) as HTMLElement;
+          if (searchContainer)
+            searchContainer.classList.remove("search-active");
+        }
       }
-
-      // Trigger the filter refresh to update UI text and the grid
       applyAllFilters();
     });
   }
-
-  // Run immediately on boot to load the default grid
-  applyAllFilters();
 }

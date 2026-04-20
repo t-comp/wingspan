@@ -19,14 +19,17 @@
         id="galleryControlsWrapper"
         class="d-flex align-items-center flex-grow-1 gap-3 ms-4"
       >
-        <div class="d-flex align-items-center w-100" style="max-width: 550px">
+        <div
+          class="d-flex align-items-center"
+          style="width: 500px; flex-shrink: 0"
+        >
           <div
             class="input-group shadow-sm search-pill-container flex-nowrap"
             style="
               border-radius: 50px;
               background-color: white;
               border: 1px solid transparent;
-              width: 100%;
+              width: 500px;
             "
           >
             <span
@@ -35,13 +38,29 @@
             >
               <i class="fas fa-search text-muted"></i>
             </span>
+
             <input
               id="searchInput"
               class="form-control border-0 ps-0 shadow-none bg-white search-input-field"
               type="search"
               placeholder="Search by common name..."
+              autocomplete="off"
               style="-webkit-appearance: none; min-width: 250px"
             />
+
+            <ul
+              id="searchAutocompleteDropdown"
+              class="dropdown-menu shadow-sm border border-top-0 w-100"
+              style="
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                z-index: 1050;
+                border-radius: 0 0 12px 12px;
+              "
+            ></ul>
+
             <div
               class="d-flex flex-column align-items-center position-relative nav-action-container"
             >
@@ -92,6 +111,7 @@
           >
         </div>
       </div>
+
       <div
         id="teamsControlsWrapper"
         class="align-items-center flex-grow-1 gap-3 ms-4 d-none"

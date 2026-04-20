@@ -870,3 +870,32 @@
 .tooltip {
   pointer-events: none;
 }
+
+/* =========================================
+   SEARCH DROPDOWN PERFECT ALIGNMENT (CSS FIX)
+   ========================================= */
+.search-pill-container.search-active {
+  border-radius: 24px 24px 0 0 !important;
+}
+
+.search-pill-container.search-active .input-group-text {
+  border-radius: 24px 0 0 0 !important;
+}
+
+.search-pill-container.search-active .filter-symbol-btn {
+  border-radius: 0 24px 0 0 !important;
+}
+
+#searchAutocompleteDropdown.show-dropdown {
+  display: block !important;
+  margin-top: 0 !important;
+  border: none !important;
+  border-radius: 0 0 24px 24px !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,0.15) !important;
+  overflow: hidden !important;
+  
+  /* The Magic CSS Math: Matches parent width exactly and covers the 1px borders */
+  width: calc(100% + 2px) !important;
+  left: -1px !important;
+  padding: 0;
+}
