@@ -215,7 +215,7 @@ export async function initGalleryFilters(
             b.thumbnailUrl ||
             b.imageUrl ||
             b.url ||
-            b.fpath ||
+            b.mediumUrl ||
             noImagePlaceholder;
 
           const li = document.createElement("li");
