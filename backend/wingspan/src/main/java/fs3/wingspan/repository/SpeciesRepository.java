@@ -27,4 +27,6 @@ public interface SpeciesRepository extends JpaRepository<Species, Integer> {
 
     @Query("SELECT DISTINCT s.genus FROM Species s WHERE s.genus IS NOT NULL ORDER BY s.genus")
     List<String> findAllGenesus();
+
+    Species findByNameOrScientificName(String name, String scientificName);
 }

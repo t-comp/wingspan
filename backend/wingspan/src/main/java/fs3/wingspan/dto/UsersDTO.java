@@ -13,6 +13,8 @@ public class UsersDTO {
     private String userType;
     private Integer teamId;
     private String teamName;
+    private String firstName;
+    private String lastName;
 
     public static UsersDTO fromUser(Users u) {
         return UsersDTO.builder()
@@ -21,6 +23,24 @@ public class UsersDTO {
                 .email(u.getEmail())
                 .userType(u.getUtype().toString())
                 .teamId(u.getTeamId())
+                .firstName(u.getFirstName())
+                .lastName(u.getLastName())
+                .build();
+    }
+
+    /**
+     * when team context is available
+     */
+    public static UsersDTO fromUser(Users u, String teamName) {
+        return UsersDTO.builder()
+                .userId(u.getId())
+                .username(u.getUsername())
+                .email(u.getEmail())
+                .userType(u.getUtype().toString())
+                .teamId(u.getTeamId())
+                .teamName(teamName)
+                .firstName(u.getFirstName())
+                .lastName(u.getLastName())
                 .build();
     }
 }

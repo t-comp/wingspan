@@ -41,17 +41,17 @@ public class Image {
     @Column(name="filename", nullable=false)
     private String filename;
 
-    // thumbnail (300px)
-    @Column(name="thumbnail_url")
-    private String thumbnailUrl;
+    // xSmall (300px)
+    @Column(name="x_small_url")
+    private String xSmallUrl;
 
     // small (800px)
     @Column(name="small_url")
     private String smallUrl;
 
     // medium/display (1024px)
-    @Column(name="display_url", nullable=false)
-    private String displayUrl;
+    @Column(name="medium_url", nullable=false)
+    private String mediumUrl;
 
     // large (2048px)
     @Column(name="large_url")
@@ -78,6 +78,9 @@ public class Image {
 
     @Column(name="nathansnotes", columnDefinition = "TEXT")
     private String nathansnotes;
+
+    @Column(name="is_featured")
+    private Boolean isFeatured = false;
 
     @Column(columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)

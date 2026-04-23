@@ -15,9 +15,9 @@ public class ImageDTO {
 
     private int id;
     private String filename;
-    private String thumbnailUrl;
+    private String xSmallUrl;
     private String smallUrl;
-    private String fpath;
+    private String mediumUrl;
     private String largeUrl;
     private String originalUrl;
     private String description;
@@ -28,30 +28,48 @@ public class ImageDTO {
     private int height;
     private String dimensions;
     private String lifecyclestage;
+    private Boolean isFeatured;
     private Set<TagDTO> tags;
     private Map<String, String> attributes;
 
     public static ImageDTO fromImage(final Image image) {
         int w = image.getWidth();
         int h = image.getHeight();
-        Long fsize = image.getFsize() != null ? image.getFsize().longValue() : null;
+
+        Long fsize = null;
+        if(image.getFsize() != null){
+            fsize = image.getFsize().longValue();
+        }
+
+        String fileSizeFormatted = null;
+        Integer fileSizeRaw = null;
+        if(fsize != null){
+            fileSizeFormatted = formatBytes(fsize);
+            fileSizeRaw = fsize.intValue();
+        }
+
+        String dimensions = null;
+        if(w > 0 && h > 0){
+            dimensions = w + "×" + h;
+        }
 
         return ImageDTO.builder()
                 .id(image.getId())
                 .filename(image.getFilename())
-                .thumbnailUrl(image.getThumbnailUrl())
+                .xSmallUrl(image.getXSmallUrl())
                 .smallUrl(image.getSmallUrl())
-                .fpath(image.getDisplayUrl())
+                .mediumUrl(image.getMediumUrl())
                 .largeUrl(image.getLargeUrl())
                 .originalUrl(image.getOriginalUrl())
                 .description(image.getDescription())
                 .nathansNotes(image.getNathansnotes())
                 .lifecyclestage(image.getLifecyclestage())
-                .fileSize(fsize != null ? fsize.intValue() : null)
-                .fileSizeFormatted(fsize != null ? formatBytes(fsize) : null)
+                .fileSize(fileSizeRaw)
+                .fileSizeFormatted(fileSizeFormatted)
                 .width(w)
                 .height(h)
-                .dimensions(w > 0 && h > 0 ? w + "×" + h : null)
+                .dimensions(dimensions)
+                .isFeatured(image.getIsFeatured())
                 .attributes(image.getAttributes())
                 .tags(image.getTags() != null
                         ? image.getTags().stream().map(TagDTO::from).collect(Collectors.toSet()) : new HashSet<>())

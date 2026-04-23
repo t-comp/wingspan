@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Integer> {
@@ -15,6 +16,7 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
 
     List<Image> findBySpeciesId(Integer speciesId);
     List<Image> findByLifecyclestage(String lifecyclestage);
+
     @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.id = :tagId")
     List<Image> findByTagId(@Param("tagId") Integer tagId);
 
@@ -26,6 +28,7 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
             @Param("speciesId") Integer speciesId,
             @Param("stage") String stage
     );
+
     boolean existsByFilename(String fileName);
     long countBySpeciesId(Integer speciesID);
 
@@ -39,4 +42,63 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
     List<Image> findByAllTags(
             @Param("tagIds") List<Integer> tagIds,
             @Param("tagCount") Long tagCount);
+
+    @Query("""
+        SELECT i FROM Image i
+        JOIN i.tags t
+        WHERE i.species.id = :speciesId
+        AND t.id IN :tagIds
+        GROUP BY i
+        HAVING COUNT(DISTINCT t.id) = :tagCount
+        """)
+    List<Image> findBySpeciesAndTagIds(
+            @Param("speciesId") Integer speciesId,
+            @Param("tagIds") List<Integer> tagIds,
+            @Param("tagCount") Long tagCount);
+
+    // filter images by species + tag names (must have ALL tags)
+    @Query("""
+        SELECT i FROM Image i
+        JOIN i.tags t
+        WHERE i.species.id = :speciesId
+        AND LOWER(t.name) IN :tagNames
+        GROUP BY i
+        HAVING COUNT(DISTINCT t.id) = :tagCount
+        """)
+    List<Image> findBySpeciesAndTagNames(
+            @Param("speciesId") Integer speciesId,
+            @Param("tagNames") List<String> tagNames,
+            @Param("tagCount") Long tagCount);
+
+    // get featured image for a species + exact tag name set
+    @Query("""
+        SELECT i FROM Image i
+        JOIN i.tags t
+        WHERE i.species.id = :speciesId
+        AND i.isFeatured = true
+        AND LOWER(t.name) IN :tagNames
+        GROUP BY i
+        HAVING COUNT(DISTINCT t.id) = :tagCount
+        """)
+    Optional<Image> findFeaturedBySpeciesAndTagNames(
+            @Param("speciesId") Integer speciesId,
+            @Param("tagNames") List<String> tagNames,
+            @Param("tagCount") Long tagCount);
+
+
+    @Query("""
+        SELECT i FROM Image i
+        JOIN i.tags t
+        WHERE i.species.id = :speciesId
+        AND i.isFeatured = true
+        AND i.id != :excludeId
+        GROUP BY i
+        HAVING COUNT(DISTINCT t.id) = :tagCount
+        AND SUM(CASE WHEN LOWER(t.name) IN :tagNames THEN 1 ELSE 0 END) = :tagCount
+        """)
+    List<Image> findCurrentlyFeaturedForSameCombo(
+            @Param("speciesId") Integer speciesId,
+            @Param("tagNames") List<String> tagNames,
+            @Param("tagCount") Long tagCount,
+            @Param("excludeId") Integer excludeId);
 }
