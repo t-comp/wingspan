@@ -66,6 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  const backToLoginBtn = document.getElementById("backToLoginBtn");
+  if (backToLoginBtn) {
+    backToLoginBtn.onclick = (e) => {
+      e.preventDefault();
+      showScreen("login");
+    };
+  }
+
   const backBtns = document.querySelectorAll("[id$='BackToWelcomeBtn']");
   backBtns.forEach((btn) => {
     btn.addEventListener("click", () => showScreen("welcome"));

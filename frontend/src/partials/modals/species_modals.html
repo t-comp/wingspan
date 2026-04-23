@@ -1,0 +1,132 @@
+<div class="modal fade" id="editSpeciesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Edit Species</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="editSpeciesForm">
+          <input type="hidden" id="editSpeciesId" />
+          <div class="mb-3">
+            <label class="form-label fw-bold">Common Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editSpeciesName"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Scientific Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editSpeciesScientific"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Description</label>
+            <textarea
+              class="form-control"
+              id="editSpeciesDescription"
+              rows="2"
+            ></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold">Order</label>
+              <input type="text" class="form-control" id="editSpeciesOrder" />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold">Family</label>
+              <input type="text" class="form-control" id="editSpeciesFamily" />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold">Genus</label>
+              <input type="text" class="form-control" id="editSpeciesGenus" />
+            </div>
+          </div>
+          <div class="row"></div>
+
+          <div id="dynamicSpeciesFields" class="mt-2"></div>
+
+          <div class="mb-3">
+            <button
+              type="button"
+              id="addNewSpeciesFieldBtn"
+              class="btn btn-sm btn-outline-secondary border-dashed w-100"
+            >
+              <i class="fas fa-plus-circle me-1"></i> Add Another Attribute
+            </button>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-100 rounded-pill fw-bold"
+          >
+            Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="addImageToSpeciesModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          Add Images to <span id="targetSpeciesNameDisplay"></span>
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="addImageToSpeciesForm">
+          <input type="hidden" id="targetSpeciesId" />
+          <div class="mb-3">
+            <label class="form-label fw-bold"
+              >Image Files <span class="text-danger">*</span></label
+            >
+            <input
+              type="file"
+              class="form-control"
+              id="speciesImageFiles"
+              accept="image/*"
+              multiple
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Notes</label>
+            <textarea
+              class="form-control"
+              id="speciesImageNotes"
+              rows="2"
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary w-100 rounded-pill fw-bold"
+          >
+            <i class="fas fa-upload me-2"></i>Upload Images
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

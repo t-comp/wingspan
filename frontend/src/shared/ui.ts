@@ -9,6 +9,8 @@
  * If a butterfly card doesn't look how we want it to, fix the HTML in here.
  */
 
+import noImagePlaceholder from "../../assets/img/noimage.jpg";
+
 export const UI = {
   renderGrid(list: any[], onCardClick: Function, displayMode = "common") {
     const grid = document.getElementById("butterflyGrid");
@@ -18,9 +20,13 @@ export const UI = {
         const col = document.createElement("div");
         col.className = "col-6 col-md-4 col-lg-3 p-1";
 
-        const imageUrl = b.thumbnailUrl
-          ? b.thumbnailUrl
-          : "assets/img/noimage.jpg";
+        const imageUrl = b.thumbnailUrl ? b.thumbnailUrl : noImagePlaceholder;
+
+        // DEBUG LOG: Track what URL the grid is actually trying to render
+        console.log(
+          `[Gallery Grid] Loading thumbnail for: ${b.name} | URL:`,
+          imageUrl,
+        );
 
         const displayName =
           displayMode === "scientific" && b.scientificName
@@ -29,7 +35,7 @@ export const UI = {
 
         col.innerHTML = `
             <div class="position-relative w-100 species-card-wrapper" style="aspect-ratio: 1 / 1; cursor: pointer;">
-                <img src="${imageUrl}" alt="${b.name}" class="w-100 h-100" style="object-fit: cover; border-radius: 0;">
+                <img src="${imageUrl}" alt="${b.name}" draggable="false" class="w-100 h-100" style="object-fit: cover; border-radius: 0;">
                 
                 <div class="name-gradient-overlay position-absolute bottom-0 start-0 w-100 p-3 d-flex flex-column justify-content-end">
                     <h5 class="text-white fw-bold mb-0" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">${displayName}</h5>
@@ -64,7 +70,7 @@ export const UI = {
     const imgElem = document.getElementById(
       "speciesImage",
     ) as HTMLImageElement | null;
-    if (imgElem) imgElem.src = b.thumbnailUrl || "assets/img/noimage.jpg";
+    if (imgElem) imgElem.src = b.thumbnailUrl || noImagePlaceholder;
 
     const orderElem = document.getElementById("speciesOrder");
     if (orderElem) orderElem.innerText = b.orderName || "—";
@@ -118,7 +124,7 @@ export const UI = {
       "thumbnailModalImage",
     ) as HTMLImageElement | null;
     if (thumbModalImg) {
-      thumbModalImg.src = b.thumbnailUrl || "assets/img/noimage.jpg";
+      thumbModalImg.src = b.thumbnailUrl || noImagePlaceholder;
     }
 
     const deleteSection = document.getElementById("adminDeleteSection");

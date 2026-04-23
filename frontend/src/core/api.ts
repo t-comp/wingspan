@@ -47,17 +47,33 @@ export const ButterflyAPI = {
   // ==========================
   // SPECIES ENDPOINTS
   // ==========================
+
   async getAll() {
     try {
       const response = await fetch(`${API_BASE_URL}/species/all`, {
         headers: getHeaders(),
       });
+
+      // ADD THIS LINE: If it's a 500 error, throw immediately to the catch block
+      if (!response.ok) throw new Error("Backend returned an error!");
+
       return await response.json();
     } catch (error) {
       console.error("Error fetching species. Is the server running?", error);
-      return [];
+      return []; // Now it safely returns an empty array!
     }
   },
+  // async getAll() {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/species/all`, {
+  //       headers: getHeaders(),
+  //     });
+  //     return await response.json();
+  //   } catch (error) {
+  //     console.error("Error fetching species. Is the server running?", error);
+  //     return [];
+  //   }
+  // },
 
   async getSpeciesById(speciesId) {
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
@@ -351,6 +367,17 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
+  async deleteApiKeyByTeam(teamName) {
+    const response = await fetch(`${API_BASE_URL}/api-key/team/${teamName}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    if (!response.ok && response.status !== 404) {
+      throw new Error("Failed to delete team API keys");
+    }
+    return true;
+  },
+
   // ==========================
   // TEAM ENDPOINTS
   // ==========================
@@ -468,20 +495,15 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
-  async updateImageDetails(imageId, data) {
-    const response = await fetch(`${API_BASE_URL}/images/admin/${imageId}`, {
-      method: "PATCH",
-      headers: {
-        ...getHeaders(),
-        "Content-Type": "application/json",
+  async updateImageDetails(imageId, params) {
+    // Append the URLSearchParams directly to the URL
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}?${params.toString()}`,
+      {
+        method: "PATCH",
+        headers: getHeaders(), // Standard headers, no body needed
       },
-      body: JSON.stringify({
-        description: data.description || "",
-        nathansNotes: data.nathansNotes || "",
-        //life_cycle: data.life_cycle || "",
-        tagIds: data.tagIds || [],
-      }),
-    });
+    );
     return checkResponse(response);
   },
 

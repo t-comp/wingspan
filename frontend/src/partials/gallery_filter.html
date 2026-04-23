@@ -1,0 +1,108 @@
+<div
+  class="collapse bg-light border-bottom shadow-sm fixed-top"
+  id="filterPanel"
+  style="top: 80px; z-index: 1040"
+>
+  <div class="container py-3">
+    <div class="row g-3 justify-content-center">
+      <div class="col-md-5">
+        <label class="form-label fw-bold text-muted small mb-1">Order</label>
+        <div class="dropdown w-100">
+          <button
+            class="btn btn-white border w-100 text-start d-flex justify-content-between align-items-center shadow-sm bg-white"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            aria-expanded="false"
+          >
+            <span id="orderBtnText">All Orders</span>
+            <i class="fas fa-chevron-down text-muted small"></i>
+          </button>
+          <div
+            class="dropdown-menu p-0 shadow border mt-1"
+            style="width: 100%; z-index: 1050"
+          >
+            <div class="p-2 border-bottom sticky-top bg-white rounded-top">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="searchOrder"
+                placeholder="Search orders..."
+              />
+            </div>
+            <div
+              class="overflow-auto p-2"
+              style="max-height: 250px"
+              id="filterOrderContainer"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <label class="form-label fw-bold text-muted small mb-1">Family</label>
+        <div class="dropdown w-100">
+          <button
+            class="btn btn-white border w-100 text-start d-flex justify-content-between align-items-center shadow-sm bg-white"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            data-bs-display="static"
+            aria-expanded="false"
+          >
+            <span id="familyBtnText">All Families</span>
+            <i class="fas fa-chevron-down text-muted small"></i>
+          </button>
+          <div
+            class="dropdown-menu w-100 p-0 shadow border mt-1"
+            style="z-index: 1050"
+          >
+            <div class="p-2 border-bottom sticky-top bg-white rounded-top">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="searchFamily"
+                placeholder="Search families..."
+              />
+            </div>
+            <div
+              class="overflow-auto p-2"
+              style="max-height: 250px"
+              id="filterFamilyContainer"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-auto d-flex align-items-end ms-1 pb-1">
+        <div
+          class="d-flex flex-column align-items-center position-relative nav-action-container"
+        >
+          <button
+            id="clearFiltersBtn"
+            class="btn btn-clear-filters d-flex align-items-center justify-content-center p-0"
+          >
+            <i class="fas fa-undo-alt"></i>
+          </button>
+
+          <span
+            class="navbar-static-label custom-tooltip"
+            style="bottom: -25px; white-space: nowrap"
+          >
+            Clear Filters
+          </span>
+        </div>
+      </div>
+
+      <!-- <div class="col-md-2 d-flex align-items-end">
+        <button
+          id="clearFiltersBtn"
+          class="btn btn-outline-secondary w-100 shadow-sm fw-bold d-flex align-items-center justify-content-center"
+          style="height: 38px; border-style: dashed"
+        >
+          <i class="fas fa-undo-alt me-2"></i> Clear All
+        </button>
+      </div> -->
+    </div>
+  </div>
+</div>

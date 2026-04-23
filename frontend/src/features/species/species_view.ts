@@ -13,6 +13,8 @@ import { UI } from "../../shared/ui.js";
 import { openImageDetailsModal } from "./image_details.js";
 import { addDynamicField } from "./species_editor.js";
 
+import noImagePlaceholder from "../../../assets/img/noimage.jpg";
+
 export function initSpeciesView() {
   // Attach the permanent listener for the Delete Species button
   const deleteSpeciesBtn = document.getElementById("deleteSpeciesFullBtn");
@@ -153,7 +155,7 @@ export async function showSpeciesView(b: any) {
   }
 
   const setMainImage = (img: any) => {
-    const url = img.url || "assets/img/noimage.jpg";
+    const url = img.url || noImagePlaceholder;
 
     const speciesImg = document.getElementById(
       "speciesImage",
@@ -204,7 +206,15 @@ export async function showSpeciesView(b: any) {
       img.nathansNotes || img.nathan_notes || img.notes || "";
     return {
       id: img.id,
-      url: img.fpath,
+      url: img.mediumUrl, // We keep this for the main UI backward compatibility
+
+      // --- NEW URL FIELDS FROM BACKEND ---
+      originalUrl: img.originalUrl,
+      largeUrl: img.largeUrl,
+      mediumUrl: img.mediumUrl,
+      smallUrl: img.smallUrl,
+      // -----------------------------------
+
       size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
       lifecycle: img.lifecycle || "Unknown",
       nathansNotes: noteFromBackend,
@@ -241,9 +251,10 @@ export async function showSpeciesView(b: any) {
       const col = document.createElement("div");
       col.className = "col-4 mb-2 gallery-thumb-wrapper position-relative";
       col.innerHTML = `
-          <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
-              <img src="${imgObj.url || "assets/img/noimage.jpg"}"
-                   style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
+        <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
+              <img src="${imgObj.url || noImagePlaceholder}"
+                  draggable="false"
+                  style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
           </div>
           ${
             isAdmin

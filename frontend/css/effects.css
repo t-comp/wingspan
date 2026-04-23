@@ -770,3 +770,132 @@
   background-color: #51b8a5;
   color: #ffffff;
 }
+
+/* =========================================
+   SPECIES VIEW THUMBNAIL ZOOM
+   ========================================= */
+.gallery-thumb-wrapper img {
+  transition: transform 0.3s ease;
+}
+
+.gallery-thumb-wrapper:hover img {
+  transform: scale(1.06);
+}
+
+
+
+/* =========================================
+   AUTH SCREEN BUTTONS
+   ========================================= */
+.btn-wingspan-primary {
+  background-color: #0399b0;
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-wingspan-primary:hover {
+  background-color: #028094;
+  color: white;
+
+
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* =========================================
+   WELCOME SCREEN BUTTON
+   ========================================= */
+.btn-welcome-start {
+  background-color: #ffffff;
+  color: #0399b0; /* WingSpan Teal */
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-welcome-start:hover {
+  background-color: #f8f9fa;
+  color: #028094;
+  box-shadow: 0 5px 7px rgba(0,0,0,0.15);
+}
+
+/* Forces the focus ring to be white instead of default green/blue */
+.btn-welcome-start:focus, 
+.btn-welcome-start:active {
+  background-color: #ffffff !important;
+  color: #0399b0 !important;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.4) !important;
+  outline: none;
+}
+
+/* White Pill Button (For bottom links) */
+.btn-wingspan-white {
+  background-color: #ffffff;
+  color: #0399b0 !important; /* WingSpan Teal */
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+  display: inline-block; /* Required for the transform bounce to work on an <a> tag */
+}
+
+.btn-wingspan-white:hover {
+  background-color: #f8f9fa;
+  color: #028094 !important; /* Slightly darker teal on hover */
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* Custom styling for the Reset button */
+.btn-clear-filters {
+  width: 32px;  /* Smaller size */
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid transparent; /* Keeps sizing consistent when border appears */
+  background: transparent;
+  color: #343a40; /* Keeping your dark arrow color */
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.btn-clear-filters:hover {
+  border-color: #ced4da; /* Gray outline pops up */
+  background-color: rgba(0, 0, 0, 0.05); /* Optional subtle fill for depth */
+  color: #343a40;
+}
+
+.btn-clear-filters i {
+  font-size: 0.9rem; /* Slightly smaller icon to match the new button size */
+}
+
+/* Ensure the tooltip doesn't have a massive delay */
+.tooltip {
+  pointer-events: none;
+}
+
+/* =========================================
+   SEARCH DROPDOWN PERFECT ALIGNMENT (CSS FIX)
+   ========================================= */
+.search-pill-container.search-active {
+  border-radius: 24px 24px 0 0 !important;
+}
+
+.search-pill-container.search-active .input-group-text {
+  border-radius: 24px 0 0 0 !important;
+}
+
+.search-pill-container.search-active .filter-symbol-btn {
+  border-radius: 0 24px 0 0 !important;
+}
+
+#searchAutocompleteDropdown.show-dropdown {
+  display: block !important;
+  margin-top: 0 !important;
+  border: none !important;
+  border-radius: 0 0 24px 24px !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,0.15) !important;
+  overflow: hidden !important;
+  
+  /* The Magic CSS Math: Matches parent width exactly and covers the 1px borders */
+  width: calc(100% + 2px) !important;
+  left: -1px !important;
+  padding: 0;
+}

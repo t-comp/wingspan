@@ -56,7 +56,6 @@ export function initSettings(userEmail: string) {
       }
     });
   }
-
   // --- Theme Toggle Logic ---
   const themeToggle = document.getElementById("toggleTheme");
   if (themeToggle) {
@@ -72,6 +71,50 @@ export function initSettings(userEmail: string) {
       document.querySelectorAll(".modal-content").forEach((m) => {
         m.classList.toggle("bg-dark");
       });
+    });
+  }
+
+  // --- Documentation View Logic ---
+  const openDocs = () => {
+    //  Grab and hide all the other main views
+    const portfolio = document.getElementById("portfolio");
+    const speciesView = document.getElementById("speciesView");
+    const teamView = document.getElementById("teamView");
+
+    if (portfolio) portfolio.style.display = "none";
+    if (speciesView) speciesView.style.display = "none";
+    if (teamView) teamView.style.display = "none";
+
+    //  Hide the navbar filter controls
+    const galleryControls = document.getElementById("galleryControlsWrapper");
+    const teamsControls = document.getElementById("teamsControlsWrapper");
+    const usersControls = document.getElementById("usersControlsWrapper");
+    [galleryControls, teamsControls, usersControls].forEach((wrapper) => {
+      if (wrapper) {
+        wrapper.classList.add("d-none");
+        wrapper.classList.remove("d-flex");
+      }
+    });
+
+    // Show the docs
+    const docsView = document.getElementById("docsView");
+    if (docsView) docsView.style.display = "block";
+
+    //  Manage active states on the top nav text links
+    const activeGalleryBtn = document.getElementById("viewGalleryBtn");
+    const activeDashboardBtn = document.getElementById("viewTeamBtn");
+    if (activeGalleryBtn) activeGalleryBtn.classList.remove("active");
+    if (activeDashboardBtn) activeDashboardBtn.classList.remove("active");
+
+    window.scrollTo(0, 0);
+  };
+
+  // Attach the click listener to the Documentation button
+  const navDocsBtn = document.getElementById("navDocsBtn");
+  if (navDocsBtn) {
+    navDocsBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDocs();
     });
   }
 }

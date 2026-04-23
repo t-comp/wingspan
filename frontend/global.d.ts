@@ -1,9 +1,17 @@
+/// <reference types="vite/client" />
+
 export {};
 
 declare global {
   const bootstrap: any;
 
   interface Window {
+    openEditTeamModal: (
+      teamId: string,
+      name: string,
+      projectName: string,
+      semester: string,
+    ) => void;
     deleteSystemUser: (userId: string | number) => Promise<void>;
     toggleUserRole: (
       userId: string | number,
