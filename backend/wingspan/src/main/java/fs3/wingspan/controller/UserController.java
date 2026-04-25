@@ -1,14 +1,12 @@
 package fs3.wingspan.controller;
 
+import fs3.wingspan.config.JwtUtils;
 import fs3.wingspan.dto.*;
 import fs3.wingspan.model.UType;
 import fs3.wingspan.model.Users;
 import fs3.wingspan.model.Teams;
 import fs3.wingspan.model.APIKeys;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -39,11 +37,14 @@ public class UserController {
     @Autowired
     private APIKeyRepository apiKeyRepository;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
 
     //********** ACCOUNT CREATION + LOGGING IN **********
 
     /**
-     * create new account (student self-registers)
+     * create new account (student reg)
      * POST /user/create-account
      */
     @PostMapping("/create-account")
@@ -54,6 +55,7 @@ public class UserController {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("Please make sure username is at least 5 characters."));
         }
+
         if (userRepository.existsByUsername(u.getUsername())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new MessageResponse("Account with this username already exists."));
@@ -124,7 +126,7 @@ public class UserController {
                     .body(new MessageResponse("Please make sure password is at least 7 characters."));
         }
 
-        // if a teamId was provided, make sure it actually exists
+        // if a teamId was given make sure it exits
         if (u.getTeamId() != null) {
             if (!teamsRepository.existsById(u.getTeamId())) {
                 return ResponseEntity.badRequest()
@@ -150,11 +152,11 @@ public class UserController {
 
     /**
      * user logs in with username or email and password
-     * stores user in session on success
+     * returns JWT token on success
      * POST /user/login
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginInfoDTO info, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody LoginInfoDTO info) {
 
         if (info.getUsernameOrEmail() == null || info.getPassword() == null ||
                 info.getUsernameOrEmail().isEmpty() || info.getPassword().isEmpty()) {
@@ -171,46 +173,28 @@ public class UserController {
         }
 
         if (u != null && passwordEncoder.matches(info.getPassword(), u.getPassword())) {
-            // store in session
-            session.setAttribute("user", u);
+            String token = jwtUtils.generateToken(u);
 
-            // tell spring security who is logged in
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    u, null, u.getAuthorities()
-            );
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("token", token);
+            responseBody.put("user", UsersDTO.fromUser(u));
 
-            return ResponseEntity.ok(UsersDTO.fromUser(u));
+            return ResponseEntity.ok(responseBody);
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new MessageResponse("Username/email or password is incorrect."));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Username/email or password is incorrect."));
     }
 
     /**
-     * log out - invalidates session
+     * logout with JWT
      * POST /user/logout
      */
     @PostMapping("/logout")
-    public ResponseEntity<MessageResponse> logout(HttpSession session) {
-        session.invalidate();
-        SecurityContextHolder.clearContext();
+    public ResponseEntity<MessageResponse> logout() {
         return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
     }
 
-    /**
-     * get currently logged in user from session
-     * GET /user/me
-     */
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpSession session) {
-        Users u = (Users) session.getAttribute("user");
-        if (u == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageResponse("Not logged in"));
-        }
-        return ResponseEntity.ok(UsersDTO.fromUser(u));
-    }
+
 
 
     // ACCOUNT VALIDATION HELPER METHODS
@@ -466,6 +450,33 @@ public class UserController {
     }
 
     /**
+     * update user's first and last name
+     * PUT /user/{userId}/update-name?firstName=
+     */
+    @PutMapping("/{userId}/update-name")
+    public ResponseEntity<MessageResponse> updateName(@PathVariable int userId, @RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName) {
+        Users u = userRepository.findById(userId).orElse(null);
+        if (u == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
+        }
+
+        if (firstName == null && lastName == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Please provide a first name or last name to update."));
+        }
+
+        if (firstName != null) {
+            u.setFirstName(firstName);
+        }
+        if (lastName != null) {
+            u.setLastName(lastName);
+        }
+
+        userRepository.save(u);
+
+        return ResponseEntity.ok(new MessageResponse("Name has been updated!"));
+    }
+    /**
      * delete all users (BE CAREFUL!)
      * DELETE /user/delete-all
      */
@@ -489,28 +500,28 @@ public class UserController {
                     .body(new MessageResponse("User not found"));
         }
 
-        // response map
         Map<String, Object> dash = new HashMap<>();
-        dash.put("user", UsersDTO.fromUser(u));
 
         if (u.getTeamId() == null) {
+            dash.put("user", UsersDTO.fromUser(u));
             dash.put("hasTeam", false);
             dash.put("message", "You are not currently assigned to a team.");
             return ResponseEntity.ok(dash);
         }
-        Teams t = teamsRepository.findById(u.getTeamId()).orElse(null);
 
+        Teams team = teamsRepository.findById(u.getTeamId()).orElse(null);
         APIKeys apiKey = apiKeyRepository.findByTeamId(u.getTeamId());
 
-        if (t == null || apiKey == null) {
+        if (team == null || apiKey == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Team or API key not found"));
         }
 
+        dash.put("user", UsersDTO.fromUser(u, team.getName()));
         dash.put("hasTeam", true);
-        dash.put("teamName", t.getName());
-        dash.put("projectName", t.getProjectName());
-        dash.put("semester", t.getSemester());
+        dash.put("teamName", team.getName());
+        dash.put("projectName", team.getProjectName());
+        dash.put("semester", team.getSemester());
         dash.put("apiKey", apiKey.getKeyVal());
         dash.put("apiKeyActive", apiKey.getActive());
         dash.put("expiresAt", apiKey.getExpiration().toString());

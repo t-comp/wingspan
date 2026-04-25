@@ -77,12 +77,12 @@ public class SpeciesController {
     }
 
     /**
-     * get species by name
+     * get species by name or scientific name
      * GET /species/name/{name}
      */
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getSpeciesByName(@PathVariable String name) {
-        Species species = speciesRepository.findByName(name);
+        Species species = speciesRepository.findByNameOrScientificName(name, name);
         if (species == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Species not found"));
@@ -208,27 +208,65 @@ public class SpeciesController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Species not found"));
         }
+        s.setThumbnail(null);
+        speciesRepository.save(s);
+        List<Image> images = imageRepository.findBySpeciesId(speciesId);
+        imageRepository.deleteAll(images);
         String name = s.getName();
         speciesRepository.delete(s);
+
         return ResponseEntity.ok(new MessageResponse(name + " has been deleted."));
     }
 
 
-    /** helper - thumbnail url with fallback
+    /**
+     * helper - thumbnail url with fallback
      * if thumbnail set -> use it
      * if no thumbnail but has images -> use first image
      * if no images at all -> null (fe handle placeholder)
      */
     private String thumbnailFallback(Species s) {
         if (s.getThumbnail() != null) {
-            return s.getThumbnail().getFpath();
+            return s.getThumbnail().getMediumUrl();
         }
 
         List<Image> images = imageRepository.findBySpeciesId(s.getId());
         if (!images.isEmpty()) {
-            return images.get(0).getFpath();
+            return images.get(0).getMediumUrl();
         }
 
         return null;
     }
+
+    /**
+     * set attribute definitions for a species (what custom fields this species has)
+     * PUT /species/{speciesId}/attributes
+     * body: { "Wing Pattern": "text", "Wingspan (inches)": "number" }
+     */
+    @PutMapping("/{speciesId}/attributes")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> setAttributeDefinitions(@PathVariable int speciesId, @RequestBody Map<String, String> defs) {
+        Species s = speciesRepository.findById(speciesId).orElse(null);
+        if (s == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Species not found"));
+        }
+        s.setAttributeDefs(defs);
+        speciesRepository.save(s);
+        return ResponseEntity.ok(new MessageResponse("Attribute definitions updated for " + s.getName()));
+    }
+
+    /**
+     * get attribute definitions for a species
+     * GET /species/{speciesId}/attributes
+     */
+    @GetMapping("/{speciesId}/attributes")
+    public ResponseEntity<?> getAttributeDefinitions(@PathVariable int speciesId) {
+        Species s = speciesRepository.findById(speciesId).orElse(null);
+        if (s == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Species not found"));
+        }
+        return ResponseEntity.ok(s.getAttributeDefs());
+    }
+
+
 }

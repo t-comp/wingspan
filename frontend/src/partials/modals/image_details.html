@@ -1,0 +1,115 @@
+<div class="modal fade" id="imageDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content overflow-hidden">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Image Details</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body p-0">
+        <div class="row g-0">
+          <div
+            class="col-md-7 p-4 pe-4 border-end"
+            style="max-height: calc(70vh - 56px); overflow: auto"
+          >
+            <h6 class="fw-bold mb-1" style="color: #0399b0">Get Image Links</h6>
+            <p class="small text-muted mb-4">
+              Copy image links to use in your team's application.
+            </p>
+
+            <div
+              id="imageDownloadOptions"
+              class="d-flex flex-column gap-2"
+            ></div>
+          </div>
+
+          <div
+            class="col-md-5 d-flex flex-column position-relative"
+            style="height: calc(70vh - 56px)"
+          >
+            <div class="flex-grow-1 overflow-auto p-4 ps-3">
+              <h6 class="fw-bold text-dark mb-1">Notes</h6>
+              <p id="modalNotes" class="text-muted small mb-3"></p>
+              <textarea
+                id="editNotesInput"
+                class="form-control d-none mb-3"
+                rows="3"
+              ></textarea>
+
+              <hr class="my-3" />
+
+              <h6 class="fw-bold text-dark mb-2">Tags</h6>
+              <div id="modalTags" class="d-flex flex-wrap gap-1 mb-2"></div>
+
+              <div id="editTagsContainer" class="d-none">
+                <hr class="my-3" />
+                <h6 class="small fw-bold text-muted mb-2">Manage Tags:</h6>
+                <div
+                  id="tagCheckboxList"
+                  class="d-flex flex-wrap border p-2 rounded bg-white shadow-sm"
+                  style="max-height: 200px; overflow-y: auto"
+                ></div>
+              </div>
+            </div>
+
+            <div
+              class="p-3 border-top mt-auto position-sticky bottom-0 bg-white d-flex justify-content-end gap-2"
+              style="z-index: 10"
+            >
+              <div class="action-tooltip-container" id="editBtnWrapper">
+                <button
+                  id="editImageBtn"
+                  class="btn-icon-only"
+                  style="font-size: 1.25rem"
+                >
+                  <i class="fas fa-edit text-secondary"></i>
+                </button>
+                <span
+                  class="action-tooltip"
+                  style="
+                    bottom: 100%;
+                    top: auto;
+                    margin-bottom: 8px;
+                    right: 0;
+                    left: auto;
+                    transform: none;
+                    white-space: nowrap;
+                  "
+                  >Edit Details</span
+                >
+              </div>
+
+              <div class="action-tooltip-container d-none" id="saveBtnWrapper">
+                <button
+                  id="saveImageBtn"
+                  class="btn-icon-only"
+                  style="font-size: 1.25rem"
+                >
+                  <i class="fas fa-save text-success"></i>
+                </button>
+                <span
+                  class="action-tooltip"
+                  style="
+                    bottom: 100%;
+                    top: auto;
+                    margin-bottom: 8px;
+                    right: 0;
+                    left: auto;
+                    transform: none;
+                    white-space: nowrap;
+                  "
+                  >Save Changes</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,13 @@
-// js/api.js
-const API_BASE_URL = "http://159.203.134.226:8080";
+// src/core/api.js
 
-// const API_BASE_URL = "http://localhost:8080";
+/**
+ * This is the file that actually talks to the backend so our app isn't just a static HTML page.
+ * It holds all the fetch requests for species, users, and tags.
+ * So if the server goes down and everything breaks,
+ * talk to backend ab what happened and what the issue is.
+ */
+
+const API_BASE_URL = "http://159.203.134.226:8080";
 
 function getHeaders() {
   const headers = {
@@ -24,29 +30,55 @@ async function checkResponse(response) {
   const text = await response.text();
   if (!response.ok) {
     let msg = text;
-    try { msg = JSON.parse(text).message || text; } catch {}
+    try {
+      msg = JSON.parse(text).message || text;
+    } catch {}
     throw new Error(msg || "Request failed with status " + response.status);
   }
   if (!text) return null;
-  try { return JSON.parse(text); } catch { return text; }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }
 
 export const ButterflyAPI = {
   // ==========================
   // SPECIES ENDPOINTS
   // ==========================
+
   async getAll() {
     try {
-      const response = await fetch(`${API_BASE_URL}/species/all`, { headers: getHeaders() });
+      const response = await fetch(`${API_BASE_URL}/species/all`, {
+        headers: getHeaders(),
+      });
+
+      // ADD THIS LINE: If it's a 500 error, throw immediately to the catch block
+      if (!response.ok) throw new Error("Backend returned an error!");
+
       return await response.json();
     } catch (error) {
       console.error("Error fetching species. Is the server running?", error);
-      return [];
+      return []; // Now it safely returns an empty array!
     }
   },
+  // async getAll() {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/species/all`, {
+  //       headers: getHeaders(),
+  //     });
+  //     return await response.json();
+  //   } catch (error) {
+  //     console.error("Error fetching species. Is the server running?", error);
+  //     return [];
+  //   }
+  // },
 
   async getSpeciesById(speciesId) {
-    const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
@@ -67,11 +99,14 @@ export const ButterflyAPI = {
   },
 
   async updateSpecies(speciesId, data) {
-    const response = await fetch(`${API_BASE_URL}/species/${speciesId}/update`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/species/${speciesId}/update`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      },
+    );
     return checkResponse(response);
   },
 
@@ -88,27 +123,36 @@ export const ButterflyAPI = {
     if (orderName) params.append("orderName", orderName);
     if (family) params.append("family", family);
     if (genus) params.append("genus", genus);
-    const response = await fetch(`${API_BASE_URL}/species/filter?${params.toString()}`, { headers: getHeaders() });
+    const response = await fetch(
+      `${API_BASE_URL}/species/filter?${params.toString()}`,
+      { headers: getHeaders() },
+    );
     return checkResponse(response);
   },
 
   async getFilterOptions() {
-    const response = await fetch(`${API_BASE_URL}/species/filter-options`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/species/filter-options`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
   async setThumbnail(speciesId, imageId) {
     const response = await fetch(
       `${API_BASE_URL}/species/${speciesId}/set-thumbnail?imageId=${imageId}`,
-      { method: "PUT", headers: getHeaders() }
+      { method: "PUT", headers: getHeaders() },
     );
     return checkResponse(response);
   },
 
   async removeThumbnail(speciesId) {
-    const response = await fetch(`${API_BASE_URL}/species/${speciesId}/remove-thumbnail`, {
-      method: "PUT", headers: getHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/species/${speciesId}/remove-thumbnail`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+      },
+    );
     return checkResponse(response);
   },
 
@@ -118,8 +162,14 @@ export const ButterflyAPI = {
   async login(usernameVal, passwordVal) {
     const response = await fetch(`${API_BASE_URL}/user/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ usernameOrEmail: usernameVal, password: passwordVal }),
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        usernameOrEmail: usernameVal,
+        password: passwordVal,
+      }),
     });
     if (!response.ok) {
       const errorMsg = await response.text();
@@ -137,7 +187,10 @@ export const ButterflyAPI = {
   async createAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/create-account`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify({
         username: userData.username,
         email: userData.email,
@@ -158,13 +211,18 @@ export const ButterflyAPI = {
   },
 
   async getStudentDashboard(email) {
-    const response = await fetch(`${API_BASE_URL}/user/dashboard?email=${email}`, { headers: getHeaders() });
+    const response = await fetch(
+      `${API_BASE_URL}/user/dashboard?email=${email}`,
+      { headers: getHeaders() },
+    );
     return checkResponse(response);
   },
 
   async getAllUsers() {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/all`, { headers: getHeaders() });
+      const response = await fetch(`${API_BASE_URL}/user/all`, {
+        headers: getHeaders(),
+      });
       return await response.json();
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -174,7 +232,8 @@ export const ButterflyAPI = {
 
   async deleteUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}`, {
-      method: "DELETE", headers: getHeaders(),
+      method: "DELETE",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
@@ -182,7 +241,7 @@ export const ButterflyAPI = {
   async updateUsername(userId, newUsername) {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-username?newUsername=${newUsername}`,
-      { method: "PUT", headers: getHeaders() }
+      { method: "PUT", headers: getHeaders() },
     );
     return checkResponse(response);
   },
@@ -190,35 +249,50 @@ export const ButterflyAPI = {
   async updateEmail(userId, newEmail) {
     const response = await fetch(
       `${API_BASE_URL}/user/${userId}/update-email?newEmail=${newEmail}`,
-      { method: "PUT", headers: getHeaders() }
+      { method: "PUT", headers: getHeaders() },
+    );
+    return checkResponse(response);
+  },
+
+  async resetPassword(email, newPassword) {
+    const response = await fetch(
+      `${API_BASE_URL}/user/reset-password?email=${encodeURIComponent(email)}&newPassword=${encodeURIComponent(newPassword)}`,
+      { method: "PUT", headers: getHeaders() },
     );
     return checkResponse(response);
   },
 
   async makeAdmin(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/make-admin`, {
-      method: "PUT", headers: getHeaders(),
+      method: "PUT",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
 
   async makeStudent(userId) {
-    const response = await fetch(`${API_BASE_URL}/user/${userId}/make-student`, {
-      method: "PUT", headers: getHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/user/${userId}/make-student`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+      },
+    );
     return checkResponse(response);
   },
 
   async activateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/activate`, {
-      method: "PUT", headers: getHeaders(),
+      method: "PUT",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
 
   async deactivateUser(userId) {
     const response = await fetch(`${API_BASE_URL}/user/${userId}/deactivate`, {
-      method: "PUT", headers: getHeaders(),
+      method: "PUT",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
@@ -228,7 +302,9 @@ export const ButterflyAPI = {
   // ==========================
   async getAllApiKeys() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api-key/all`, { headers: getHeaders() });
+      const response = await fetch(`${API_BASE_URL}/api-key/all`, {
+        headers: getHeaders(),
+      });
       return await response.json();
     } catch (error) {
       console.error("Error fetching API keys:", error);
@@ -237,7 +313,9 @@ export const ButterflyAPI = {
   },
 
   async getActiveApiKeys() {
-    const response = await fetch(`${API_BASE_URL}/api-key/active`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/api-key/active`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
@@ -255,15 +333,20 @@ export const ButterflyAPI = {
   },
 
   async deactivateApiKey(keyId) {
-    const response = await fetch(`${API_BASE_URL}/api-key/${keyId}/deactivate`, {
-      method: "PUT", headers: getHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api-key/${keyId}/deactivate`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+      },
+    );
     return checkResponse(response);
   },
 
   async activateApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}/activate`, {
-      method: "PUT", headers: getHeaders(),
+      method: "PUT",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
@@ -271,16 +354,28 @@ export const ButterflyAPI = {
   async extendApiKey(keyId, months) {
     const response = await fetch(
       `${API_BASE_URL}/api-key/${keyId}/extra-time?months=${months}`,
-      { method: "PUT", headers: getHeaders() }
+      { method: "PUT", headers: getHeaders() },
     );
     return checkResponse(response);
   },
 
   async deleteApiKey(keyId) {
     const response = await fetch(`${API_BASE_URL}/api-key/${keyId}`, {
-      method: "DELETE", headers: getHeaders(),
+      method: "DELETE",
+      headers: getHeaders(),
     });
     return checkResponse(response);
+  },
+
+  async deleteApiKeyByTeam(teamName) {
+    const response = await fetch(`${API_BASE_URL}/api-key/team/${teamName}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    if (!response.ok && response.status !== 404) {
+      throw new Error("Failed to delete team API keys");
+    }
+    return true;
   },
 
   // ==========================
@@ -296,22 +391,30 @@ export const ButterflyAPI = {
   },
 
   async getAllTeams() {
-    const response = await fetch(`${API_BASE_URL}/teams/all`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/teams/all`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
   async getTeamById(teamId) {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
   async getUnassignedStudents() {
-    const response = await fetch(`${API_BASE_URL}/teams/unassigned-students`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/teams/unassigned-students`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
   async getTeamMembers(teamId) {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
@@ -325,11 +428,14 @@ export const ButterflyAPI = {
   },
 
   async removeTeamMember(teamId, userId) {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}/remove-member`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify({ userId: parseInt(userId) }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/teams/${teamId}/remove-member`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ userId: parseInt(userId) }),
+      },
+    );
     return checkResponse(response);
   },
 
@@ -344,7 +450,8 @@ export const ButterflyAPI = {
 
   async deleteTeam(teamId) {
     const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
-      method: "DELETE", headers: getHeaders(),
+      method: "DELETE",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
@@ -362,13 +469,17 @@ export const ButterflyAPI = {
   },
 
   async getImagesBySpecies(speciesId) {
-    const response = await fetch(`${API_BASE_URL}/images/species/${speciesId}`, { headers: getHeaders() });
+    const response = await fetch(
+      `${API_BASE_URL}/images/species/${speciesId}`,
+      { headers: getHeaders() },
+    );
     return checkResponse(response);
   },
 
   async deleteImage(id) {
     const response = await fetch(`${API_BASE_URL}/images/admin/${id}`, {
-      method: "DELETE", headers: getHeaders(),
+      method: "DELETE",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
@@ -379,22 +490,42 @@ export const ButterflyAPI = {
     if (nathansNotes) params.append("nathansNotes", nathansNotes);
     const response = await fetch(
       `${API_BASE_URL}/images/admin/${imageId}/description?${params.toString()}`,
-      { method: "PATCH", headers: getHeaders() }
+      { method: "PATCH", headers: getHeaders() },
+    );
+    return checkResponse(response);
+  },
+
+  async updateImageDetails(imageId, params) {
+    // Append the URLSearchParams directly to the URL
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}?${params.toString()}`,
+      {
+        method: "PATCH",
+        headers: getHeaders(), // Standard headers, no body needed
+      },
     );
     return checkResponse(response);
   },
 
   async addTagToImage(tagId, imageId) {
-    const response = await fetch(`${API_BASE_URL}/tags/${tagId}/images/${imageId}`, {
-      method: "POST", headers: getHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/tags/${tagId}/images/${imageId}`,
+      {
+        method: "POST",
+        headers: getHeaders(),
+      },
+    );
     return checkResponse(response);
   },
 
   async removeTagFromImage(tagId, imageId) {
-    const response = await fetch(`${API_BASE_URL}/tags/${tagId}/images/${imageId}`, {
-      method: "DELETE", headers: getHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/tags/${tagId}/images/${imageId}`,
+      {
+        method: "DELETE",
+        headers: getHeaders(),
+      },
+    );
     return checkResponse(response);
   },
 
@@ -402,11 +533,13 @@ export const ButterflyAPI = {
   // TAG ENDPOINTS
   // ==========================
   async getAllTags() {
-    const response = await fetch(`${API_BASE_URL}/tags`, { headers: getHeaders() });
+    const response = await fetch(`${API_BASE_URL}/tags`, {
+      headers: getHeaders(),
+    });
     return checkResponse(response);
   },
 
-  async createTag(tagData) {
+  async createTag(tagData: { name: string; category: string }) {
     const response = await fetch(`${API_BASE_URL}/tags/admin`, {
       method: "POST",
       headers: getHeaders(),
@@ -417,7 +550,8 @@ export const ButterflyAPI = {
 
   async deleteTag(tagId) {
     const response = await fetch(`${API_BASE_URL}/tags/admin/${tagId}`, {
-      method: "DELETE", headers: getHeaders(),
+      method: "DELETE",
+      headers: getHeaders(),
     });
     return checkResponse(response);
   },
@@ -433,7 +567,10 @@ export const ButterflyAPI = {
 
   async filterImagesByTags(tagIds) {
     const queryString = tagIds.map((id) => "tagIds=" + id).join("&");
-    const response = await fetch(`${API_BASE_URL}/images/filter?${queryString}`, { headers: getHeaders() });
+    const response = await fetch(
+      `${API_BASE_URL}/images/filter?${queryString}`,
+      { headers: getHeaders() },
+    );
     return checkResponse(response);
   },
 };

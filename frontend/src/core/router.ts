@@ -1,7 +1,14 @@
-// js/router.js
-import { initHome } from "./homepage.js";
+// src/core/router.js
+
+/**
+ * This file is the main navigation controller for the application's login and welcome screens.
+ * It manages user session persistence via local storage, handles the login/signup form submissions,
+ * and routes the user to the main homepage upon successful authentication.
+ */
+
+import { initHome } from "../homepage.js";
 import { ButterflyAPI } from "./api.js";
-import { TagManager } from "./tags.js";
+import { TagManager } from "../features/admin/admin_tags.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const screens = {
@@ -15,29 +22,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutLink = document.getElementById("logoutLink");
     if (logoutLink) logoutLink.classList.remove("d-none");
 
-    const circle = document.getElementById("profileDropdown");
-    if (circle && user) {
-      const initials = (user.username || "?").substring(0, 2).toUpperCase();
-      circle.innerText = initials;
-      circle.style.background = role === "ADMIN"
-        ? "linear-gradient(135deg, #e74c3c, #c0392b)"
-        : "linear-gradient(135deg, #0399b0, #027a8d)";
-      circle.style.color = "white";
-      circle.style.fontWeight = "bold";
-      circle.style.fontSize = "0.8rem";
-      circle.style.display = "flex";
-      circle.style.alignItems = "center";
-      circle.style.justifyContent = "center";
-    }
-
     const dropdownUsername = document.getElementById("dropdownUsername");
     const dropdownEmail = document.getElementById("dropdownEmail");
     const dropdownRole = document.getElementById("dropdownRole");
-    if (dropdownUsername && user) dropdownUsername.innerText = user.username || "";
+
+    if (dropdownUsername && user)
+      dropdownUsername.innerText = user.username || "";
     if (dropdownEmail && user) dropdownEmail.innerText = user.email || "";
     if (dropdownRole && user) {
       dropdownRole.innerText = role;
-      dropdownRole.style.backgroundColor = role === "ADMIN" ? "#e74c3c" : "#0399b0";
+      dropdownRole.style.backgroundColor =
+        role === "ADMIN" ? "#e74c3c" : "#0399b0";
     }
   }
 
@@ -71,18 +66,31 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  const backToLoginBtn = document.getElementById("backToLoginBtn");
+  if (backToLoginBtn) {
+    backToLoginBtn.onclick = (e) => {
+      e.preventDefault();
+      showScreen("login");
+    };
+  }
+
   const backBtns = document.querySelectorAll("[id$='BackToWelcomeBtn']");
   backBtns.forEach((btn) => {
-    btn.onclick = () => showScreen("welcome");
+    btn.addEventListener("click", () => showScreen("welcome"));
   });
 
-    async function handleLogin(e) {
+  async function handleLogin(e: Event) {
     e.preventDefault();
-    const emailVal = document.getElementById("loginEmail").value;
-    const passVal = document.getElementById("loginPassword").value;
+    const emailVal = (document.getElementById("loginEmail") as HTMLInputElement)
+      .value;
+    const passVal = (
+      document.getElementById("loginPassword") as HTMLInputElement
+    ).value;
 
-    if (emailVal.length < 5) return alert("Username must be at least 5 characters long.");
-    if (passVal.length < 7) return alert("Password must be at least 7 characters long.");
+    if (emailVal.length < 5)
+      return alert("Username must be at least 5 characters long.");
+    if (passVal.length < 7)
+      return alert("Password must be at least 7 characters long.");
 
     try {
       const user = await ButterflyAPI.login(emailVal, passVal);
@@ -98,16 +106,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const uploadBtn = document.getElementById("uploadBtn");
         if (role === "ADMIN") {
-          if (uploadBtn) uploadBtn.classList.remove("d-none");
+          if (uploadBtn) {
+            uploadBtn.classList.remove("d-none");
+            uploadBtn.parentElement?.classList.remove("d-none"); // Show the container
+          }
         } else {
-          if (uploadBtn) uploadBtn.classList.add("d-none");
+          if (uploadBtn) {
+            uploadBtn.classList.add("d-none");
+            uploadBtn.parentElement?.classList.add("d-none"); // Hide the container so it doesn't block clicks
+          }
         }
       } else {
         alert("Login failed: couldn't get user role from server");
       }
     } catch (error) {
       console.error("Login Error:", error);
-      if (confirm(`Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`)) {
+      if (
+        confirm(
+          `Login failed. Account not found or incorrect password.\n\nWould you like to create a new account?`,
+        )
+      ) {
         showScreen("create");
       }
     }
@@ -118,27 +136,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const createAccountForm = document.getElementById("createAccountForm");
   if (createAccountForm) {
-    createAccountForm.addEventListener("submit", async (e) => {
+    createAccountForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      const usernameVal = document.getElementById("createUsername").value;
-      const emailVal = document.getElementById("createEmail").value;
-      const passVal = document.getElementById("createPassword").value;
+      const usernameVal = (
+        document.getElementById("createUsername") as HTMLInputElement
+      ).value;
+      const emailVal = (
+        document.getElementById("createEmail") as HTMLInputElement
+      ).value;
+      const passVal = (
+        document.getElementById("createPassword") as HTMLInputElement
+      ).value;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailVal)) return alert("Please enter a valid email address.");
-      if (usernameVal.length < 5) return alert("Username must be at least 5 characters long.");
-      if (passVal.length < 7) return alert("Password must be at least 7 characters long.");
+      if (!emailRegex.test(emailVal))
+        return alert("Please enter a valid email address.");
+      if (usernameVal.length < 5)
+        return alert("Username must be at least 5 characters long.");
+      if (passVal.length < 7)
+        return alert("Password must be at least 7 characters long.");
 
       try {
         const allUsers = await ButterflyAPI.getAllUsers();
-        if (allUsers.some((u) => u.username.toLowerCase() === usernameVal.toLowerCase())) {
-          return alert("This username already exists. Please choose a different one.");
+        if (
+          allUsers.some(
+            (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
+          )
+        ) {
+          return alert(
+            "This username already exists. Please choose a different one.",
+          );
         }
-        await ButterflyAPI.createAccount({ username: usernameVal, email: emailVal, password: passVal, utype: "STUDENT" });
+        await ButterflyAPI.createAccount({
+          username: usernameVal,
+          email: emailVal,
+          password: passVal,
+          utype: "STUDENT",
+        });
         alert("Account created successfully! Please log in.");
-        e.target.reset();
+        (e.target as HTMLFormElement).reset();
         showScreen("welcome");
-      } catch (error) {
+      } catch (error: any) {
         alert(`Could not create account: ${error.message}`);
       }
     });
@@ -163,7 +201,13 @@ document.addEventListener("DOMContentLoaded", () => {
       initHome(role, user.email);
       toggleLogoutButtons(role, user);
       const uploadBtn = document.getElementById("uploadBtn");
-      if (role === "ADMIN" && uploadBtn) uploadBtn.classList.remove("d-none");
+      if (role === "ADMIN" && uploadBtn) {
+        uploadBtn.classList.remove("d-none");
+        uploadBtn.parentElement?.classList.remove("d-none");
+      } else if (uploadBtn) {
+        uploadBtn.classList.add("d-none");
+        uploadBtn.parentElement?.classList.add("d-none");
+      }
     } catch (e) {
       console.error("Error loading saved user", e);
       localStorage.removeItem("butterflyUser");
@@ -171,8 +215,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  document.addEventListener("show.bs.modal", function (event) {
-    if (event.target.id === "addButterflyModal") {
+  document.addEventListener("show.bs.modal", function (event: Event) {
+    if ((event.target as HTMLElement).id === "addButterflyModal") {
       TagManager.initTagContainer();
     }
   });

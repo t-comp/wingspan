@@ -1,0 +1,302 @@
+<div class="modal fade" id="addButterflyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Upload</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="universalUploadForm">
+          <div id="uploadPhase1">
+            <div class="mb-4 p-3 bg-light rounded border">
+              <label class="form-label fw-bold text-primary"
+                >Target Species</label
+              >
+              <input type="hidden" id="speciesSelectorValue" value="NEW" />
+              <div class="dropdown w-100">
+                <button
+                  class="btn btn-white border w-100 text-start d-flex justify-content-between align-items-center shadow-sm bg-white form-control border-primary"
+                  type="button"
+                  id="speciesDropdownBtn"
+                  data-bs-toggle="dropdown"
+                  data-bs-auto-close="outside"
+                  aria-expanded="false"
+                >
+                  <span id="speciesDropdownText"
+                    ><span class="text-primary fw-bold"
+                      >Create New Species</span
+                    ></span
+                  >
+                  <i class="fas fa-chevron-down text-muted small"></i>
+                </button>
+                <div
+                  class="dropdown-menu p-0 shadow border mt-1 w-100"
+                  style="z-index: 1050; overflow: hidden"
+                >
+                  <div class="p-2 border-bottom bg-light">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      id="searchSpeciesInput"
+                      placeholder="Search species..."
+                    />
+                  </div>
+                  <div
+                    class="overflow-auto p-0"
+                    style="max-height: 200px"
+                    id="speciesDropdownList"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="newSpeciesFields">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold"
+                    >Common Name <span class="text-danger">*</span></label
+                  >
+                  <input type="text" class="form-control" id="newName" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold"
+                    >Scientific Name <span class="text-danger">*</span></label
+                  >
+                  <input type="text" class="form-control" id="newScientific" />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Description</label>
+                <textarea
+                  class="form-control"
+                  id="newDescription"
+                  rows="2"
+                ></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label fw-bold">Order</label>
+                  <input type="text" class="form-control" id="newOrderName" />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label fw-bold">Family</label>
+                  <input type="text" class="form-control" id="newFamily" />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label fw-bold">Genus</label>
+                  <input type="text" class="form-control" id="newGenus" />
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button
+                type="button"
+                id="btnNextToPhase2"
+                class="btn btn-modal-nav-circle shadow-sm"
+                title="Next Step"
+              >
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="uploadPhase2" class="d-none">
+            <div class="row">
+              <div class="col-md-5 border-end pr-3">
+                <div
+                  class="d-flex justify-content-between align-items-end mb-2"
+                >
+                  <label class="form-label fw-bold mb-0"
+                    >Upload Images <span class="text-danger">*</span></label
+                  >
+                  <span
+                    class="small fw-bold"
+                    style="color: #0399b0"
+                    id="uploadFileCounter"
+                    >0 files selected</span
+                  >
+                </div>
+                <div
+                  id="imageDropZone"
+                  class="border border-secondary rounded p-3 text-center bg-white cursor-pointer shadow-sm mb-3 drag-drop-transition"
+                  style="border-style: dashed !important"
+                >
+                  <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                  <p class="mb-0 text-muted fw-bold small">
+                    Drag & Drop or Click
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  class="form-control d-none"
+                  id="newImageFile"
+                  accept="image/*"
+                  multiple
+                />
+
+                <label class="form-label fw-bold small text-muted mb-1"
+                  >Selected Files (Click to edit)</label
+                >
+                <ul
+                  id="selectedFilesList"
+                  class="list-group mb-2 shadow-sm"
+                  style="max-height: 250px; overflow-y: auto"
+                ></ul>
+              </div>
+
+              <div class="col-md-7 ps-4">
+                <div
+                  id="noImageSelectedPrompt"
+                  class="text-center text-muted p-5 bg-light rounded border border-dashed h-100 d-flex flex-column align-items-center justify-content-center"
+                >
+                  <i class="fas fa-hand-pointer fs-1 mb-3 text-secondary"></i>
+                  <p class="mb-0">
+                    Select an image from the list on the left to preview it and
+                    add specific tags/notes.
+                  </p>
+                </div>
+
+                <div id="imagePreviewSection" class="d-none">
+                  <div class="text-center mb-3 bg-light rounded p-2 border">
+                    <img
+                      id="uploadImagePreview"
+                      src=""
+                      draggable="false"
+                      class="img-fluid rounded shadow-sm"
+                      style="max-height: 180px; object-fit: contain"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label fw-bold small text-primary"
+                      ><i class="fas fa-edit me-1"></i> Notes for this
+                      image</label
+                    >
+                    <textarea
+                      class="form-control form-control-sm"
+                      id="nathanNotes"
+                      rows="2"
+                    ></textarea>
+                  </div>
+
+                  <div class="mb-1">
+                    <div class="accordion shadow-sm" id="tagAccordion">
+                      <div
+                        class="accordion-item border-primary border-opacity-25"
+                      >
+                        <h2 class="accordion-header">
+                          <button
+                            class="accordion-button py-2 fw-bold small text-primary"
+                            style="background-color: #f1f8f9"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseTags"
+                          >
+                            <i class="fas fa-tags me-2"></i> Add Tags to this
+                            image
+                          </button>
+                        </h2>
+                        <div
+                          id="collapseTags"
+                          class="accordion-collapse collapse show"
+                          data-bs-parent="#tagAccordion"
+                        >
+                          <div
+                            class="accordion-body p-2"
+                            style="max-height: 160px; overflow-y: auto"
+                          >
+                            <div
+                              id="tagCheckboxContainer"
+                              class="d-flex flex-wrap gap-2"
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="mt-4 mb-3" />
+            <div class="d-flex justify-content-between align-items-center">
+              <button
+                type="button"
+                id="btnBackToPhase1"
+                class="btn btn-modal-nav-circle shadow-sm"
+                title="Back"
+              >
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <button
+                type="submit"
+                id="btnSubmitUpload"
+                class="btn btn-success fw-bold rounded-pill px-5 shadow-sm"
+              >
+                <i class="fas fa-upload me-2"></i> Submit Upload
+              </button>
+            </div>
+          </div>
+          <div
+            id="uploadLoadingScreen"
+            class="d-none d-flex flex-column align-items-center justify-content-center flex-grow-1 text-center"
+            style="min-height: 100%"
+          >
+            <div
+              id="loadingSpinnerContainer"
+              class="position-relative mb-4 d-flex justify-content-center align-items-center"
+              style="width: 85px; height: 85px"
+            >
+              <div
+                class="spinner-border position-absolute w-100 h-100"
+                style="color: #0399b0; border-width: 0.25em"
+                role="status"
+              ></div>
+            </div>
+
+            <div id="uploadSuccessIcon" class="d-none mb-4">
+              <i
+                class="fas fa-check-circle"
+                style="color: #198754; font-size: 4.5rem"
+              ></i>
+            </div>
+
+            <h4
+              class="fw-bold mb-2"
+              id="loadingScreenTitle"
+              style="color: #2c3e50"
+            >
+              Image Uploading...
+            </h4>
+            <p class="text-muted fw-semibold mb-1" id="loadingScreenSubtitle">
+              Please wait. This may take a few moments.
+            </p>
+            <p
+              class="small text-secondary fw-bold mt-2"
+              id="uploadProgressText"
+            >
+              File Status: Preparing upload...
+            </p>
+
+            <div class="mt-4 w-100 d-flex justify-content-center">
+              <button
+                type="button"
+                id="btnFinishUpload"
+                class="btn btn-success fw-bold rounded-pill px-5 py-2 shadow-sm d-none text-nowrap"
+                style="background-color: #198754; border-color: #198754"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

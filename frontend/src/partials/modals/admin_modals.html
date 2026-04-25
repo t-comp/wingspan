@@ -1,0 +1,137 @@
+<div class="modal fade" id="adminAddUserModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Add New User</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="adminAddUserForm">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="adminNewUsername"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input
+              type="text"
+              class="form-control"
+              id="adminNewEmail"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="adminNewPassword"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select class="form-select" id="adminNewRole">
+              <option value="STUDENT">Student</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success w-100">
+            Create User
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="adminGenerateKeyModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Generate New API Key</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="adminGenerateKeyForm">
+          <div class="mb-3">
+            <label class="form-label">Team Name</label>
+            <input type="text" class="form-control" id="newTeamName" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Project Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="newProjectName"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Semester</label>
+            <input type="text" class="form-control" id="newSemester" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            Generate Key
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="adminExtendKeyModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Extend API Key</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="adminExtendKeyForm">
+          <input type="hidden" id="extendKeyId" />
+          <div class="mb-3">
+            <label class="form-label">Additional Months</label>
+            <input
+              type="number"
+              class="form-control"
+              id="extendMonths"
+              min="1"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-warning w-100">
+            Extend Time
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
