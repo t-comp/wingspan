@@ -147,6 +147,32 @@ public class ImageController {
     }
 
     /**
+     * GET image by species name specifically for Longevity integration
+     * GET /images/species/by-name/{speciesName}
+     */
+    @GetMapping("/species/by-name/{speciesName}")
+    public ResponseEntity<?> getImageBySpeciesName(
+            @PathVariable String speciesName,
+            @RequestParam(required = false, defaultValue = "adult") String lifecyclestage
+    ){
+        try{
+            List<Image> images = imageRepository.findBySpeciesScientificNameAndLifecyclestage(speciesName, lifecyclestage);
+
+            if(images.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+            Image image = images.get(0);
+            return ResponseEntity.ok(Map.of(
+                    "speciesName", speciesName,
+                    "lifecyclestage", lifecyclestage,
+                    "url", image.getOriginalUrl()
+            ));
+        }catch(RuntimeException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * Filter images within a species by tag IDs
      * GET /images/species/{speciesId}/filter?tagIds=1,2,3
      */
