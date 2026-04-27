@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -41,7 +43,7 @@ public class ImageStorageService {
     private static final long SMALL_RANGE_MIN  = 500 * 1024;   // 500kb
 
     // widths for each tier (px)
-    private static final int THUMBNAIL_WIDTH = 300;
+    private static final int XSMALL_WIDTH = 300;
     private static final int SMALL_WIDTH = 800;
     private static final int MEDIUM_WIDTH = 1024;
     private static final int LARGE_WIDTH = 2048;
@@ -112,16 +114,16 @@ public class ImageStorageService {
         }
 
         // mb and px range check
-        String thumbURL = null;
-        String smallURL = null;
-        String fpath    = ogURL;
-        String largeURL = null;
+        String xSmallURL = null;
+        String smallURL  = null;
+        String mediumURL = ogURL;
+        String largeURL  = null;
 
         if(fSize >= SMALL_RANGE_MIN && im != null){
 
-            // thumbnail 500kb+
-            if(ogWidth > THUMBNAIL_WIDTH){
-                thumbURL = uploadResized(im, baseName, "_thumbnail", extension, THUMBNAIL_WIDTH, file.getContentType());
+            // xSmall 500kb+
+            if(ogWidth > XSMALL_WIDTH){
+                xSmallURL = uploadResized(im, baseName, "_xsmall", extension, XSMALL_WIDTH, file.getContentType());
             }
 
             // small for 500kb+
@@ -131,7 +133,7 @@ public class ImageStorageService {
 
             // medium for 2MB+
             if(fSize >= MEDIUM_RANGE_MIN && ogWidth > MEDIUM_WIDTH){
-                fpath = uploadResized(im, baseName, "_medium", extension, MEDIUM_WIDTH, file.getContentType());
+                mediumURL = uploadResized(im, baseName, "_medium", extension, MEDIUM_WIDTH, file.getContentType());
             }
 
             // large for 10MB+
@@ -146,9 +148,9 @@ public class ImageStorageService {
         image.setSpecies(species);
         image.setFilename(baseName + extension);
         image.setOriginalUrl(ogURL);
-        image.setThumbnailUrl(thumbURL);
+        image.setXSmallUrl(xSmallURL);
         image.setSmallUrl(smallURL);
-        image.setDisplayUrl(fpath);
+        image.setMediumUrl(mediumURL);
         image.setLargeUrl(largeURL);
         image.setFsize(BigInteger.valueOf(fSize));
         image.setWidth(ogWidth);
@@ -156,6 +158,7 @@ public class ImageStorageService {
         image.setLifecyclestage(lifecycle_stage);
         image.setDescription(description);
         image.setNathansnotes(nathansNotes);
+        image.setIsFeatured(false);
 
         log.info("About to save - lifecycle: {}, nathansNotes: {}, description: {}",
                 image.getLifecyclestage(), image.getNathansnotes(), image.getDescription());
@@ -262,6 +265,97 @@ public class ImageStorageService {
             return imageRepository.findAll();
         }
         return imageRepository.findByAllTags(tagIds, (long) tagIds.size());
+    }
+
+    /**
+     * Filter images within a species by tag IDs (must have ALL tags)
+     */
+    public List<Image> filterBySpeciesAndTagIds(int speciesId, List<Integer> tagIds){
+        if(tagIds == null || tagIds.isEmpty()){
+            return imageRepository.findBySpeciesId(speciesId);
+        }
+        return imageRepository.findBySpeciesAndTagIds(speciesId, tagIds, (long) tagIds.size());
+    }
+
+    /**
+     * Filter images within a species by tag names (must have ALL tags)
+     * optionally returns featured image first
+     */
+    public List<Image> filterBySpeciesAndTagNames(int speciesId, List<String> tagNames, boolean featuredFirst){
+        if(tagNames == null || tagNames.isEmpty()){
+            return imageRepository.findBySpeciesId(speciesId);
+        }
+
+        List<String> lowerTagNames = tagNames.stream().map(String::toLowerCase).collect(Collectors.toList());
+
+        if(!featuredFirst){
+            return imageRepository.findBySpeciesAndTagNames(speciesId, lowerTagNames, (long) lowerTagNames.size());
+        }
+
+        // get all matching images
+        List<Image> matching = imageRepository.findBySpeciesAndTagNames(speciesId, lowerTagNames, (long) lowerTagNames.size());
+
+        // find featured one and put it first
+        Optional<Image> featured = imageRepository.findFeaturedBySpeciesAndTagNames(speciesId, lowerTagNames, (long) lowerTagNames.size());
+
+        if(featured.isPresent()){
+            List<Image> result = new ArrayList<>();
+            result.add(featured.get());
+            matching.stream()
+                    .filter(i -> i.getId() != featured.get().getId())
+                    .forEach(result::add);
+            return result;
+        }
+
+        return matching;
+    }
+
+    /**
+     * Set an image as featured for its species + tag combination
+     * automatically unmarks any previously featured image for the same combo
+     */
+    @Transactional
+    public Image setFeatured(int imageId){
+        Image image = imageRepository.findById(imageId).orElse(null);
+        if(image == null){
+            throw new RuntimeException("Image not found with id: " + imageId);
+        }
+
+        // get tag names for this image
+        List<String> tagNames = image.getTags().stream()
+                .map(t -> t.getName().toLowerCase())
+                .collect(Collectors.toList());
+
+        // unmark any previously featured image for this species + exact tag combo
+        if(!tagNames.isEmpty()){
+            List<Image> previouslyFeatured = imageRepository.findCurrentlyFeaturedForSameCombo(
+                    image.getSpecies().getId(), tagNames, (long) tagNames.size(), imageId);
+            for(Image prev : previouslyFeatured){
+                prev.setIsFeatured(false);
+                imageRepository.save(prev);
+                log.info("Unmarked previously featured image id={}", prev.getId());
+            }
+        }
+
+        image.setIsFeatured(true);
+        Image updated = imageRepository.save(image);
+        log.info("Image id={} marked as featured", imageId);
+        return updated;
+    }
+
+    /**
+     * Unset featured on an image
+     */
+    @Transactional
+    public Image unsetFeatured(int imageId){
+        Image image = imageRepository.findById(imageId).orElse(null);
+        if(image == null){
+            throw new RuntimeException("Image not found with id: " + imageId);
+        }
+        image.setIsFeatured(false);
+        Image updated = imageRepository.save(image);
+        log.info("Image id={} unmarked as featured", imageId);
+        return updated;
     }
 
     /**

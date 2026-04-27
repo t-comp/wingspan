@@ -77,12 +77,12 @@ public class SpeciesController {
     }
 
     /**
-     * get species by name
+     * get species by name or scientific name
      * GET /species/name/{name}
      */
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getSpeciesByName(@PathVariable String name) {
-        Species species = speciesRepository.findByName(name);
+        Species species = speciesRepository.findByNameOrScientificName(name, name);
         if (species == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Species not found"));
@@ -219,20 +219,20 @@ public class SpeciesController {
     }
 
 
-
-    /** helper - thumbnail url with fallback
+    /**
+     * helper - thumbnail url with fallback
      * if thumbnail set -> use it
      * if no thumbnail but has images -> use first image
      * if no images at all -> null (fe handle placeholder)
      */
     private String thumbnailFallback(Species s) {
         if (s.getThumbnail() != null) {
-            return s.getThumbnail().getDisplayUrl();
+            return s.getThumbnail().getMediumUrl();
         }
 
         List<Image> images = imageRepository.findBySpeciesId(s.getId());
         if (!images.isEmpty()) {
-            return images.get(0).getDisplayUrl();
+            return images.get(0).getMediumUrl();
         }
 
         return null;
@@ -267,4 +267,6 @@ public class SpeciesController {
         }
         return ResponseEntity.ok(s.getAttributeDefs());
     }
+
+
 }

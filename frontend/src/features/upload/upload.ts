@@ -104,6 +104,9 @@ export function initUpload(callbacks: UploadCallbacks) {
         const btnNext = document.getElementById("btnNextToPhase2");
         const btnBack = document.getElementById("btnBackToPhase1");
 
+        const loadingScreen = document.getElementById("uploadLoadingScreen");
+        if (loadingScreen) loadingScreen.classList.add("d-none");
+
         if (hiddenInput.value === "NEW") {
           if (phase1) phase1.classList.remove("d-none");
           if (phase2) phase2.classList.add("d-none");
@@ -403,6 +406,20 @@ export function initUpload(callbacks: UploadCallbacks) {
       if (selectedUploadFiles.length === 0)
         return alert("Please select at least one image file.");
 
+      // ==========================================
+      // NEW: TRANSITION TO LOADING SCREEN
+      // ==========================================
+      const phase1 = document.getElementById("uploadPhase1");
+      const phase2 = document.getElementById("uploadPhase2");
+      const loadingScreen = document.getElementById("uploadLoadingScreen");
+      const progressText = document.getElementById("uploadProgressText");
+
+      if (phase1) phase1.classList.add("d-none");
+      if (phase2) phase2.classList.add("d-none");
+      if (loadingScreen) loadingScreen.classList.remove("d-none");
+      if (progressText)
+        progressText.innerText = `File Status: Uploading Image 1 of ${selectedUploadFiles.length}...`;
+
       const hiddenInput = document.getElementById(
         "speciesSelectorValue",
       ) as HTMLInputElement;
@@ -410,6 +427,8 @@ export function initUpload(callbacks: UploadCallbacks) {
 
       if (speciesId === "NEW") {
         try {
+          if (progressText)
+            progressText.innerText = "File Status: Saving Species Data...";
           const newSpecies = await ButterflyAPI.create({
             name: (
               document.getElementById("newName") as HTMLInputElement
@@ -432,14 +451,25 @@ export function initUpload(callbacks: UploadCallbacks) {
           });
           speciesId = newSpecies.id;
         } catch (err: any) {
+          // If creation fails, hide the loading screen and return to Phase 2
+          if (loadingScreen) loadingScreen.classList.add("d-none");
+          if (phase2) phase2.classList.remove("d-none");
           return alert("Failed to create species: " + err.message);
         }
       }
 
       let successCount = 0;
       let failCount = 0;
+      const totalFiles = selectedUploadFiles.length;
 
-      for (const data of selectedUploadFiles) {
+      for (let i = 0; i < totalFiles; i++) {
+        const data = selectedUploadFiles[i];
+
+        // NEW: Update UI text for every file
+        if (progressText) {
+          progressText.innerText = `File Status: Uploading Image ${i + 1} of ${totalFiles}...`;
+        }
+
         const formData = new FormData();
         formData.append("file", data.file);
         formData.append("species_id", speciesId);
@@ -456,32 +486,73 @@ export function initUpload(callbacks: UploadCallbacks) {
         }
       }
 
+      // ==========================================
+      // CLEANUP AFTER UPLOAD (SUCCESS STATE)
+      // ==========================================
+      const spinnerContainer = document.getElementById(
+        "loadingSpinnerContainer",
+      );
+      const successIcon = document.getElementById("uploadSuccessIcon");
+      const loadingTitle = document.getElementById("loadingScreenTitle");
+      const loadingSubtitle = document.getElementById("loadingScreenSubtitle");
+      const finishBtn = document.getElementById("btnFinishUpload");
+
+      // 1. Update the Text and Icons
       if (failCount === 0) {
-        alert(
-          `${successCount} image${successCount > 1 ? "s" : ""} uploaded successfully!`,
-        );
+        if (loadingTitle) loadingTitle.innerText = "Upload Complete!";
+        if (loadingSubtitle)
+          loadingSubtitle.innerText = `${successCount} image${successCount > 1 ? "s" : ""} uploaded successfully.`;
       } else {
-        alert(`${successCount} uploaded, ${failCount} failed. Check console.`);
+        if (loadingTitle)
+          loadingTitle.innerText = "Upload Finished with Errors";
+        if (loadingSubtitle)
+          loadingSubtitle.innerText = `${successCount} uploaded, ${failCount} failed. Check console.`;
       }
 
-      selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
-      selectedUploadFiles = [];
-      const fileListContainer = document.getElementById("selectedFilesList");
-      if (fileListContainer) fileListContainer.innerHTML = "";
+      // 2. Hide the spinner/progress, Show the success check/button
+      if (progressText) progressText.classList.add("d-none");
+      if (spinnerContainer) spinnerContainer.classList.add("d-none");
+      if (successIcon) successIcon.classList.remove("d-none");
+      if (finishBtn) finishBtn.classList.remove("d-none");
 
-      (e.target as HTMLFormElement).reset();
-      if (hiddenInput) hiddenInput.value = "NEW";
+      // 3. Wait for the admin to click "Done" before closing and refreshing
+      if (finishBtn) {
+        finishBtn.onclick = async () => {
+          // Reset the UI back to the default loading state for the next time it opens
+          if (loadingTitle) loadingTitle.innerText = "Image Uploading...";
+          if (loadingSubtitle)
+            loadingSubtitle.innerText =
+              "Please wait. This may take a few moments.";
+          if (progressText) progressText.classList.remove("d-none");
+          if (spinnerContainer) spinnerContainer.classList.remove("d-none");
+          if (successIcon) successIcon.classList.add("d-none");
+          if (finishBtn) finishBtn.classList.add("d-none");
+          if (loadingScreen) loadingScreen.classList.add("d-none");
 
-      const modalEl = document.getElementById("addButterflyModal");
-      if (modalEl) bootstrap.Modal.getInstance(modalEl)?.hide();
+          // Clear stored files
+          selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
+          selectedUploadFiles = [];
+          const fileListContainer =
+            document.getElementById("selectedFilesList");
+          if (fileListContainer) fileListContainer.innerHTML = "";
 
-      AppState.butterflies = await ButterflyAPI.getAll();
-      const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
+          (e.target as HTMLFormElement).reset();
+          if (hiddenInput) hiddenInput.value = "NEW";
 
-      if (freshSpecies) {
-        await callbacks.reloadSpecies(freshSpecies);
-      } else {
-        await callbacks.reloadGallery();
+          // Close Modal
+          const modalEl = document.getElementById("addButterflyModal");
+          if (modalEl) bootstrap.Modal.getInstance(modalEl)?.hide();
+
+          // Refresh underlying data
+          AppState.butterflies = await ButterflyAPI.getAll();
+          const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
+
+          if (freshSpecies) {
+            await callbacks.reloadSpecies(freshSpecies);
+          } else {
+            await callbacks.reloadGallery();
+          }
+        };
       }
     });
   }

@@ -19,6 +19,7 @@
           >
             <img
               id="speciesImage"
+              draggable="false"
               class="img-fluid"
               style="
                 width: 100%;
@@ -167,6 +168,7 @@
               >
                 <img
                   id="butterflyModalImage"
+                  draggable="false"
                   class="img-fluid shadow-lg rounded"
                   style="max-height: 90vh; object-fit: contain; cursor: default"
                 />
@@ -178,13 +180,22 @@
         <div class="p-3 rounded border mb-4" style="background-color: #f1f8f9">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold mb-0" style="color: #0399b0">Filter Tags</h6>
-            <button
-              id="clearFiltersBtn"
-              class="btn btn-sm btn-link text-decoration-none p-0"
-              style="color: #0399b0; font-size: 0.8rem"
-            >
-              Clear All
-            </button>
+            <div>
+              <button
+                id="featureMainImageBtn"
+                class="btn btn-sm btn-outline-warning d-none me-2"
+                title="Feature this image for its tags"
+              >
+                <i id="featureMainStarIcon" class="far fa-star"></i> Feature
+              </button>
+              <button
+                id="clearFiltersBtn"
+                class="btn btn-sm btn-link text-decoration-none p-0"
+                style="color: #0399b0; font-size: 0.8rem"
+              >
+                Clear All
+              </button>
+            </div>
           </div>
           <div
             id="filterTagCloud"

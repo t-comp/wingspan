@@ -47,17 +47,33 @@ export const ButterflyAPI = {
   // ==========================
   // SPECIES ENDPOINTS
   // ==========================
+
   async getAll() {
     try {
       const response = await fetch(`${API_BASE_URL}/species/all`, {
         headers: getHeaders(),
       });
+
+      // ADD THIS LINE: If it's a 500 error, throw immediately to the catch block
+      if (!response.ok) throw new Error("Backend returned an error!");
+
       return await response.json();
     } catch (error) {
       console.error("Error fetching species. Is the server running?", error);
-      return [];
+      return []; // Now it safely returns an empty array!
     }
   },
+  // async getAll() {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/species/all`, {
+  //       headers: getHeaders(),
+  //     });
+  //     return await response.json();
+  //   } catch (error) {
+  //     console.error("Error fetching species. Is the server running?", error);
+  //     return [];
+  //   }
+  // },
 
   async getSpeciesById(speciesId) {
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
@@ -517,6 +533,28 @@ export const ButterflyAPI = {
   async removeTagFromImage(tagId, imageId) {
     const response = await fetch(
       `${API_BASE_URL}/tags/${tagId}/images/${imageId}`,
+      {
+        method: "DELETE",
+        headers: getHeaders(),
+      },
+    );
+    return checkResponse(response);
+  },
+
+  async setFeaturedImage(imageId) {
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}/featured`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+      },
+    );
+    return checkResponse(response);
+  },
+
+  async unsetFeaturedImage(imageId) {
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}/featured`,
       {
         method: "DELETE",
         headers: getHeaders(),

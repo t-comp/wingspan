@@ -1,8 +1,11 @@
 package fs3.wingspan.controller;
 
 import fs3.wingspan.dto.ImageDTO;
+import fs3.wingspan.dto.MessageResponse;
 import fs3.wingspan.model.Image;
+import fs3.wingspan.model.Species;
 import fs3.wingspan.repository.ImageRepository;
+import fs3.wingspan.repository.SpeciesRepository;
 import fs3.wingspan.services.ImageStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,9 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/images")
@@ -29,6 +34,9 @@ public class ImageController {
 
     @Autowired
     private ImageStorageService imageStorageService;
+
+    @Autowired
+    private SpeciesRepository speciesRepository;
 
     /**
      * Upload a single image
@@ -42,19 +50,16 @@ public class ImageController {
                                          @RequestParam(required = false) String description,
                                          @RequestParam(required = false) String nathansNotes,
                                          @RequestParam(required = false) List<Integer> tagId){
-        // Validation
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "File is empty"));
         }
 
         try {
-            //let service handle all business logic
             Image savedImage = imageStorageService.saveImage(file, species_id, life_cycle, description, nathansNotes, tagId);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ImageDTO.fromImage(savedImage));
         }catch(RuntimeException e) {
-            //Catches species not found
             return ResponseEntity.badRequest()
                     .body(Map.of("message", e.getMessage()));
         } catch (IOException e) {
@@ -115,12 +120,86 @@ public class ImageController {
     }
 
     /**
-     * Get all images for a species
+     * Get all images for a species by ID
      * GET /images/species/{speciesId}
      */
     @GetMapping("/species/{speciesId}")
     public ResponseEntity<List<ImageDTO>> getImagesBySpecies(@PathVariable Integer speciesId) {
         List<Image> images = imageRepository.findBySpeciesId(speciesId);
+        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * Get all images for a species by common name or scientific name
+     * GET /images/species/name/{name}
+     */
+    @GetMapping("/species/name/{name}")
+    public ResponseEntity<?> getImagesBySpeciesName(@PathVariable String name) {
+        Species species = speciesRepository.findByNameOrScientificName(name, name);
+        if(species == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
+        }
+        List<Image> images = imageRepository.findBySpeciesId(species.getId());
+        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * Filter images within a species by tag IDs
+     * GET /images/species/{speciesId}/filter?tagIds=1,2,3
+     */
+    @GetMapping("/species/{speciesId}/filter")
+    public ResponseEntity<List<ImageDTO>> filterImagesBySpeciesAndTags(
+            @PathVariable Integer speciesId,
+            @RequestParam(required = false) List<Integer> tagIds,
+            @RequestParam(required = false) String tagNames,
+            @RequestParam(required = false, defaultValue = "false") boolean featured) {
+
+        List<Image> images;
+
+        if(tagNames != null && !tagNames.isEmpty()){
+            List<String> nameList = Arrays.stream(tagNames.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+            images = imageStorageService.filterBySpeciesAndTagNames(speciesId, nameList, featured);
+        } else if(tagIds != null && !tagIds.isEmpty()){
+            images = imageStorageService.filterBySpeciesAndTagIds(speciesId, tagIds);
+        } else {
+            images = imageRepository.findBySpeciesId(speciesId);
+        }
+
+        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * Filter images within a species by name + tag names + optional featured
+     * GET /images/species/name/{name}/filter?tagNames=wings-open,male&featured=true
+     */
+    @GetMapping("/species/name/{name}/filter")
+    public ResponseEntity<?> filterImagesBySpeciesNameAndTags(
+            @PathVariable String name,
+            @RequestParam(required = false) String tagNames,
+            @RequestParam(required = false, defaultValue = "false") boolean featured) {
+
+        Species species = speciesRepository.findByNameOrScientificName(name, name);
+        if(species == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Species not found"));
+        }
+
+        List<Image> images;
+        if(tagNames != null && !tagNames.isEmpty()){
+            List<String> nameList = Arrays.stream(tagNames.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+            images = imageStorageService.filterBySpeciesAndTagNames(species.getId(), nameList, featured);
+        } else {
+            images = imageRepository.findBySpeciesId(species.getId());
+        }
+
         List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
         return ResponseEntity.ok(dtos);
     }
@@ -134,6 +213,37 @@ public class ImageController {
         List<Image> images = imageStorageService.filterByAllTags(tagIds);
         List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * Set an image as featured for its species + tag combination
+     * auto unmarks any previously featured image for the same combo
+     * PUT /images/admin/{imageId}/featured
+     */
+    @PutMapping("/admin/{imageId}/featured")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> setFeatured(@PathVariable int imageId) {
+        try{
+            Image updated = imageStorageService.setFeatured(imageId);
+            return ResponseEntity.ok(ImageDTO.fromImage(updated));
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Unset featured on an image
+     * DELETE /images/admin/{imageId}/featured
+     */
+    @DeleteMapping("/admin/{imageId}/featured")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> unsetFeatured(@PathVariable int imageId) {
+        try{
+            Image updated = imageStorageService.unsetFeatured(imageId);
+            return ResponseEntity.ok(ImageDTO.fromImage(updated));
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 
     /**

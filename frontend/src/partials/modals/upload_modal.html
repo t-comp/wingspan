@@ -2,7 +2,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold">Upload Image or New Species</h5>
+        <h5 class="modal-title fw-bold">Upload</h5>
         <button
           type="button"
           class="btn-close"
@@ -167,6 +167,7 @@
                     <img
                       id="uploadImagePreview"
                       src=""
+                      draggable="false"
                       class="img-fluid rounded shadow-sm"
                       style="max-height: 180px; object-fit: contain"
                     />
@@ -239,6 +240,58 @@
                 class="btn btn-success fw-bold rounded-pill px-5 shadow-sm"
               >
                 <i class="fas fa-upload me-2"></i> Submit Upload
+              </button>
+            </div>
+          </div>
+          <div
+            id="uploadLoadingScreen"
+            class="d-none d-flex flex-column align-items-center justify-content-center flex-grow-1 text-center"
+            style="min-height: 100%"
+          >
+            <div
+              id="loadingSpinnerContainer"
+              class="position-relative mb-4 d-flex justify-content-center align-items-center"
+              style="width: 85px; height: 85px"
+            >
+              <div
+                class="spinner-border position-absolute w-100 h-100"
+                style="color: #0399b0; border-width: 0.25em"
+                role="status"
+              ></div>
+            </div>
+
+            <div id="uploadSuccessIcon" class="d-none mb-4">
+              <i
+                class="fas fa-check-circle"
+                style="color: #198754; font-size: 4.5rem"
+              ></i>
+            </div>
+
+            <h4
+              class="fw-bold mb-2"
+              id="loadingScreenTitle"
+              style="color: #2c3e50"
+            >
+              Image Uploading...
+            </h4>
+            <p class="text-muted fw-semibold mb-1" id="loadingScreenSubtitle">
+              Please wait. This may take a few moments.
+            </p>
+            <p
+              class="small text-secondary fw-bold mt-2"
+              id="uploadProgressText"
+            >
+              File Status: Preparing upload...
+            </p>
+
+            <div class="mt-4 w-100 d-flex justify-content-center">
+              <button
+                type="button"
+                id="btnFinishUpload"
+                class="btn btn-success fw-bold rounded-pill px-5 py-2 shadow-sm d-none text-nowrap"
+                style="background-color: #198754; border-color: #198754"
+              >
+                Done
               </button>
             </div>
           </div>

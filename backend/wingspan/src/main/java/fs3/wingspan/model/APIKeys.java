@@ -40,6 +40,7 @@ public class APIKeys {
     @Column(name = "team_id")
     private Integer teamId;
 
+    @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }

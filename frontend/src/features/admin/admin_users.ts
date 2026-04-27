@@ -14,6 +14,53 @@ export function renderAllUsersTable(usersList: any[]) {
   if (!tbody) return;
   tbody.innerHTML = "";
 
+  // --- UI FIX: Push the footer up ---
+  const teamView = document.getElementById("teamView");
+  if (teamView) {
+    (teamView as HTMLElement).style.minHeight = "auto";
+  }
+
+  // --- The "Floating Card" Design---
+  const tableWrapper = tbody.closest(".table-responsive");
+  if (tableWrapper) {
+    (tableWrapper as HTMLElement).style.maxHeight = "calc(100vh - 180px)";
+    (tableWrapper as HTMLElement).style.overflow = "auto";
+    (tableWrapper as HTMLElement).style.borderRadius = "10px";
+    // We drop the hard border completely...
+    (tableWrapper as HTMLElement).style.border = "none";
+    // ...and use a soft, elegant shadow to define the scrollable area
+    (tableWrapper as HTMLElement).style.boxShadow =
+      "0 4px 15px rgba(0, 0, 0, 0.05)";
+  }
+
+  // --- Standard rows inside ---
+  const table = tbody.closest("table");
+  if (table) {
+    table.classList.remove("table-borderless"); // Bring back the normal thin lines between users
+    (table as HTMLElement).style.minWidth = "850px";
+    (table as HTMLElement).style.margin = "0";
+    (table as HTMLElement).style.border = "none";
+    (table as HTMLElement).style.borderColor = "#f1f1f1";
+  }
+
+  // --- header ---
+  const thead = tbody.closest("table")?.querySelector("thead");
+  if (thead) {
+    thead.querySelectorAll("th").forEach((th) => {
+      (th as HTMLElement).style.position = "sticky";
+      (th as HTMLElement).style.top = "0";
+      (th as HTMLElement).style.zIndex = "10";
+      (th as HTMLElement).style.backgroundColor = "#ffffff";
+
+      // Strip ALL standard borders because they glitch when scrolling
+      (th as HTMLElement).style.border = "none";
+
+      // Use an inset box-shadow to fake the bottom line so it sticks!
+      (th as HTMLElement).style.boxShadow = "inset 0 -2px 0 #dee2e6";
+      (th as HTMLElement).style.borderRadius = "0";
+    });
+  }
+
   usersList.forEach((u) => {
     const tr = document.createElement("tr");
     const currentRole = u.uType || u.userType || u.utype;
@@ -22,30 +69,36 @@ export function renderAllUsersTable(usersList: any[]) {
       AppState.globalUserTeamMap[u.userId] ||
       '<span class="text-muted fst-italic">Unassigned</span>';
 
+    // Safely grab the username, fallback to email if it doesn't exist
+    const safeUsername =
+      u.username && u.username !== "undefined"
+        ? u.username
+        : u.email || "this user";
+
     tr.innerHTML = `
-        <td><span class="fw-bold" style="font-size: 0.9rem;">${u.username}</span></td>
+        <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${safeUsername}</span></td>
         <td class="text-muted text-truncate" style="font-size: 0.85rem; max-width: 200px;" title="${u.email}">${u.email}</td>
-        <td><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
-        <td><span class="fw-bold text-secondary text-truncate d-inline-block" style="font-size: 0.85rem; max-width: 150px;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
-        <td class="text-end">
-            <div class="d-flex justify-content-end gap-1">
+        <td style="white-space: nowrap;"><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
+        <td class="text-truncate" style="max-width: 150px;"><span class="fw-bold text-secondary d-inline-block" style="font-size: 0.85rem;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
+        <td class="text-end" style="white-space: nowrap; min-width: 160px;">
+            <div class="d-flex justify-content-end gap-1 flex-nowrap">
                 <div class="action-tooltip-container">
-                    <button class="btn-icon-only" onclick="window.openEditUserModal('${u.userId}', '${u.username}', '${u.email}')">
-                        <i class="fas fa-edit"></i>
+                    <button class="btn-icon-only" onclick="window.openEditUserModal('${u.userId}', '${safeUsername}', '${u.email}')">
+                        <i class="fas fa-edit text-secondary"></i>
                     </button>
-                    <span class="action-tooltip">Edit User</span>
+                    <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Edit User</span>
                 </div>
                 <div class="action-tooltip-container">
                     <button class="btn-icon-only" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">
-                        <i class="fas fa-user-cog"></i>
+                        <i class="fas fa-user-cog text-secondary"></i>
                     </button>
-                    <span class="action-tooltip">Toggle Role</span>
+                    <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Toggle Role</span>
                 </div>
                 <div class="action-tooltip-container">
-                    <button class="btn-icon-only delete-btn" onclick="window.deleteSystemUser('${u.userId}')">
+                    <button class="btn-icon-only delete-btn" onclick="window.deleteUser('${u.userId}', '${safeUsername}')">
                         <i class="fas fa-trash text-danger"></i>
                     </button>
-                    <span class="action-tooltip">Delete User</span>
+                    <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Delete User</span>
                 </div>
             </div>
         </td>`;
@@ -55,13 +108,21 @@ export function renderAllUsersTable(usersList: any[]) {
 }
 
 export function initAdminUsers(refreshAdminData: () => Promise<void>) {
-  (window as any).deleteSystemUser = async (userId: string) => {
-    if (confirm("Delete this user permanently?")) {
-      await ButterflyAPI.deleteUser(userId);
-      await refreshAdminData();
+  // --- DELETE USER LOGIC ---
+  (window as any).deleteUser = async (userId: string, username: string) => {
+    if (confirm(`Delete '${username}' permanently?`)) {
+      try {
+        await ButterflyAPI.deleteUser(userId);
+        await refreshAdminData();
+        // The requested success alert!
+        alert(`The user "${username}" has been successfully deleted!`);
+      } catch (error: any) {
+        alert("Failed to delete user: " + error.message);
+      }
     }
   };
 
+  // --- TOGGLE USER ROLE LOGIC ---
   (window as any).toggleUserRole = async (
     userId: string,
     currentRole: string,
@@ -102,6 +163,7 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
     await refreshAdminData();
   };
 
+  // --- OPEN EDIT USER MODAL ---
   (window as any).openEditUserModal = (
     userId: string,
     currentUsername: string,
@@ -113,49 +175,42 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
     (document.getElementById("editEmail") as HTMLInputElement).value =
       currentEmail;
     (document.getElementById("editPassword") as HTMLInputElement).value = "";
-    new bootstrap.Modal(document.getElementById("adminEditUserModal")).show();
+
+    const modal = document.getElementById("adminEditUserModal");
+    if (modal) {
+      new bootstrap.Modal(modal).show();
+    }
   };
 
-  const adminUserSearchEl = document.getElementById(
-    "adminUserSearch",
-  ) as HTMLInputElement | null;
-  if (adminUserSearchEl) {
-    const newSearchBtn = adminUserSearchEl.cloneNode(true) as HTMLInputElement;
-    adminUserSearchEl.parentNode?.replaceChild(newSearchBtn, adminUserSearchEl);
-
-    newSearchBtn.addEventListener("input", (e) => {
-      const query = (e.target as HTMLInputElement).value.toLowerCase();
-      if (AppState.allCachedUsers) {
-        const filtered = AppState.allCachedUsers.filter((u: any) =>
-          u.username.toLowerCase().includes(query),
-        );
-        renderAllUsersTable(filtered);
-      }
-    });
-  }
-
+  // --- ADD USER FORM LOGIC (STRICT) ---
   const adminAddUserForm = document.getElementById("adminAddUserForm");
   if (adminAddUserForm) {
     adminAddUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const usernameVal = (
         document.getElementById("adminNewUsername") as HTMLInputElement
-      ).value;
+      ).value.trim();
       const emailVal = (
         document.getElementById("adminNewEmail") as HTMLInputElement
-      ).value;
+      ).value.trim();
       const passVal = (
         document.getElementById("adminNewPassword") as HTMLInputElement
       ).value;
       const roleVal = (
-        document.getElementById("adminNewRole") as HTMLInputElement
+        document.getElementById("adminNewRole") as HTMLSelectElement
       ).value;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const usernameRegex = /^[a-zA-Z0-9_]+$/;
+
       if (!emailRegex.test(emailVal))
         return alert("Please enter a valid email address.");
       if (usernameVal.length < 5)
         return alert("Username must be at least 5 characters long.");
+      if (!usernameRegex.test(usernameVal))
+        return alert(
+          "Username can only contain letters, numbers, and underscores (no spaces allowed).",
+        );
       if (passVal.length < 7)
         return alert("Password must be at least 7 characters long.");
 
@@ -176,9 +231,12 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
         });
         await refreshAdminData();
         (e.target as HTMLFormElement).reset();
-        bootstrap.Modal.getInstance(
-          document.getElementById("adminAddUserModal"),
-        )?.hide();
+
+        const modal = document.getElementById("adminAddUserModal");
+        if (modal) {
+          (document.activeElement as HTMLElement)?.blur();
+          bootstrap.Modal.getInstance(modal)?.hide();
+        }
         alert("User successfully created!");
       } catch (error: any) {
         alert("Could not create user: " + error.message);
@@ -186,6 +244,7 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
     });
   }
 
+  // --- EDIT USER FORM LOGIC (STRICT) ---
   const adminEditUserForm = document.getElementById("adminEditUserForm");
   if (adminEditUserForm) {
     adminEditUserForm.addEventListener("submit", async (e) => {
@@ -194,16 +253,22 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
         .value;
       const newUsername = (
         document.getElementById("editUsername") as HTMLInputElement
-      ).value;
+      ).value.trim();
       const newEmail = (
         document.getElementById("editEmail") as HTMLInputElement
-      ).value;
+      ).value.trim();
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const usernameRegex = /^[a-zA-Z0-9_]+$/;
+
       if (!emailRegex.test(newEmail))
         return alert("Please enter a valid email address.");
       if (newUsername.length < 5)
         return alert("Username must be at least 5 characters long.");
+      if (!usernameRegex.test(newUsername))
+        return alert(
+          "Username can only contain letters, numbers, and underscores (no spaces allowed).",
+        );
 
       try {
         const allUsers = await ButterflyAPI.getAllUsers();
@@ -228,12 +293,36 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
           await ButterflyAPI.resetPassword(newEmail, newPassword);
         }
         await refreshAdminData();
-        bootstrap.Modal.getInstance(
-          document.getElementById("adminEditUserModal"),
-        )?.hide();
+
+        const modal = document.getElementById("adminEditUserModal");
+        if (modal) {
+          (document.activeElement as HTMLElement)?.blur();
+          bootstrap.Modal.getInstance(modal)?.hide();
+        }
         alert("User successfully updated!");
       } catch (error) {
         alert("Failed to update user.");
+      }
+    });
+  }
+
+  // --- SEARCH LOGIC ---
+  const adminUserSearchEl = document.getElementById(
+    "adminUserSearch",
+  ) as HTMLInputElement | null;
+  if (adminUserSearchEl) {
+    const newSearchBtn = adminUserSearchEl.cloneNode(true) as HTMLInputElement;
+    adminUserSearchEl.parentNode?.replaceChild(newSearchBtn, adminUserSearchEl);
+
+    newSearchBtn.addEventListener("input", (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase();
+      if (AppState.allCachedUsers) {
+        const filtered = AppState.allCachedUsers.filter(
+          (u: any) =>
+            (u.username && u.username.toLowerCase().includes(query)) ||
+            (u.email && u.email.toLowerCase().includes(query)),
+        );
+        renderAllUsersTable(filtered);
       }
     });
   }

@@ -16,6 +16,7 @@ export function openImageDetailsModal(
   img: any,
   reloadSpeciesCallback: () => Promise<void>,
 ) {
+  console.log("2. MODAL RECEIVED THIS IMAGE:", img);
   const editBtn = document.getElementById("editImageBtn");
   const saveBtn = document.getElementById("saveImageBtn");
   const notesDisplay = document.getElementById("modalNotes");
@@ -69,11 +70,28 @@ export function openImageDetailsModal(
   const downloadContainer = document.getElementById("imageDownloadOptions");
   if (downloadContainer) downloadContainer.innerHTML = "";
 
+  // NEW: Keep track of pixel dimensions we've already shown
+  const renderedDimensions = new Set<string>();
+
   const setupDownloadRow = async (label: string, urlKey: string) => {
     const targetUrl = img[urlKey];
-    if (!targetUrl && urlKey !== "originalUrl") return;
+
+    console.log(
+      `3. Building Row [${label}]: Looking for key [${urlKey}]. Found:`,
+      targetUrl,
+    );
+
+    if (!targetUrl && urlKey !== "originalUrl") {
+      console.log(`   -> STOPPED: No URL found for ${label}`);
+      return;
+    }
 
     const finalUrl = targetUrl || img.url || img.originalUrl;
+
+    // Change the condition to only check against the originalUrl:
+    if (urlKey !== "originalUrl" && finalUrl === img.originalUrl) {
+      return;
+    }
 
     const row = document.createElement("div");
     row.className =
@@ -113,7 +131,20 @@ export function openImageDetailsModal(
     const measureImg = new Image();
 
     measureImg.onload = () => {
-      const dimText = `${measureImg.naturalWidth}x${measureImg.naturalHeight}px`;
+      // Create a string like "80x80"
+      const dimKey = `${measureImg.naturalWidth}x${measureImg.naturalHeight}`;
+
+      // NEW: If this isn't the original image, and we already rendered an image
+      // with these exact dimensions, remove this row from the UI entirely!
+      if (urlKey !== "originalUrl" && renderedDimensions.has(dimKey)) {
+        row.remove();
+        return;
+      }
+
+      // Add this dimension to our Set so future duplicates are caught
+      renderedDimensions.add(dimKey);
+
+      const dimText = `${dimKey}px`;
       const meta = document.getElementById(`meta-${urlKey}`);
       if (meta) meta.innerHTML = `${sizeText}${dimText}`;
     };
@@ -211,6 +242,7 @@ export function openImageDetailsModal(
   setupDownloadRow("Large", "largeUrl");
   setupDownloadRow("Medium", "mediumUrl");
   setupDownloadRow("Small", "smallUrl");
+  setupDownloadRow("xSmall", "xSmallUrl");
 
   const modalElement = document.getElementById("imageDetailsModal");
   if (modalElement) {

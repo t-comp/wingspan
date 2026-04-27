@@ -208,7 +208,14 @@ public class APIKeysController {
                     .body(new MessageResponse("API key not found"));
         }
 
-        LocalDateTime time = LocalDateTime.now().plusMonths(months);
+        LocalDateTime base;
+        if (k.getExpiration() != null && k.getExpiration().isAfter(LocalDateTime.now())) {
+            base = k.getExpiration();
+        } else {
+            base = LocalDateTime.now();
+        }
+
+        LocalDateTime time = base.plusMonths(months);
         k.setExpiration(time);
         apiKeyRepository.save(k);
 

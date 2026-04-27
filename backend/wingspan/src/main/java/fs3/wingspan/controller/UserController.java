@@ -450,6 +450,33 @@ public class UserController {
     }
 
     /**
+     * update user's first and last name
+     * PUT /user/{userId}/update-name?firstName=
+     */
+    @PutMapping("/{userId}/update-name")
+    public ResponseEntity<MessageResponse> updateName(@PathVariable int userId, @RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName) {
+        Users u = userRepository.findById(userId).orElse(null);
+        if (u == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
+        }
+
+        if (firstName == null && lastName == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Please provide a first name or last name to update."));
+        }
+
+        if (firstName != null) {
+            u.setFirstName(firstName);
+        }
+        if (lastName != null) {
+            u.setLastName(lastName);
+        }
+
+        userRepository.save(u);
+
+        return ResponseEntity.ok(new MessageResponse("Name has been updated!"));
+    }
+    /**
      * delete all users (BE CAREFUL!)
      * DELETE /user/delete-all
      */
@@ -473,28 +500,28 @@ public class UserController {
                     .body(new MessageResponse("User not found"));
         }
 
-        // response map
         Map<String, Object> dash = new HashMap<>();
-        dash.put("user", UsersDTO.fromUser(u));
 
         if (u.getTeamId() == null) {
+            dash.put("user", UsersDTO.fromUser(u));
             dash.put("hasTeam", false);
             dash.put("message", "You are not currently assigned to a team.");
             return ResponseEntity.ok(dash);
         }
-        Teams t = teamsRepository.findById(u.getTeamId()).orElse(null);
 
+        Teams team = teamsRepository.findById(u.getTeamId()).orElse(null);
         APIKeys apiKey = apiKeyRepository.findByTeamId(u.getTeamId());
 
-        if (t == null || apiKey == null) {
+        if (team == null || apiKey == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Team or API key not found"));
         }
 
+        dash.put("user", UsersDTO.fromUser(u, team.getName()));
         dash.put("hasTeam", true);
-        dash.put("teamName", t.getName());
-        dash.put("projectName", t.getProjectName());
-        dash.put("semester", t.getSemester());
+        dash.put("teamName", team.getName());
+        dash.put("projectName", team.getProjectName());
+        dash.put("semester", team.getSemester());
         dash.put("apiKey", apiKey.getKeyVal());
         dash.put("apiKeyActive", apiKey.getActive());
         dash.put("expiresAt", apiKey.getExpiration().toString());

@@ -202,6 +202,8 @@ if (customAttrContainer) {
     // };
   }
 
+  // src/features/species/species_view.ts
+
   const setMainImage = (img: any) => {
     const url = img.url || noImagePlaceholder;
 
@@ -240,11 +242,51 @@ if (customAttrContainer) {
         });
       };
     }
+
+    // --- FEATURED IMAGE LOGIC ---
+    const featureBtn = document.getElementById("featureMainImageBtn");
+    const featureIcon = document.getElementById("featureMainStarIcon");
+
+    if (featureBtn && featureIcon) {
+      if (isAdmin) {
+        featureBtn.classList.remove("d-none");
+        const isFeatured = img.isFeatured;
+
+        // THE FIX: Only use setAttribute here inside the Admin check!
+        featureIcon.setAttribute(
+          "class",
+          isFeatured ? "fas fa-star" : "far fa-star",
+        );
+
+        featureBtn.className = isFeatured
+          ? "btn btn-sm btn-warning me-2"
+          : "btn btn-sm btn-outline-warning me-2";
+
+        featureBtn.onclick = async () => {
+          try {
+            if (isFeatured) await ButterflyAPI.unsetFeaturedImage(img.id);
+            else await ButterflyAPI.setFeaturedImage(img.id);
+
+            // Reload the view to sync the data and remove stars from old images!
+            const freshSpecies = await ButterflyAPI.getSpeciesById(
+              AppState.currentSpeciesId,
+            );
+            await showSpeciesView(freshSpecies);
+          } catch (err) {
+            console.error("Feature toggle failed", err);
+            alert("Failed to update featured status.");
+          }
+        };
+      } else {
+        featureBtn.classList.add("d-none");
+      }
+    }
   };
 
   let fetchedImages: any[] = [];
   try {
     fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
+    console.log("1. RAW BACKEND DATA:", fetchedImages);
   } catch (err) {
     console.error("Could not load images for species:", err);
   }
@@ -254,13 +296,14 @@ if (customAttrContainer) {
       img.nathansNotes || img.nathan_notes || img.notes || "";
     return {
       id: img.id,
-      url: img.mediumUrl || img.fpath || img.displayUrl,   
+      url: img.mediumUrl || img.fpath || img.displayUrl,
 
       originalUrl: img.originalUrl,
       largeUrl: img.largeUrl,
       mediumUrl: img.mediumUrl || img.fpath || img.displayUrl,
       smallUrl: img.smallUrl,
 
+      // catch capitalization, AND reconstruct the old URL for un-migrated images!
       xSmallUrl:
         img.xsmallUrl ||
         img.XSmallUrl ||
@@ -271,15 +314,25 @@ if (customAttrContainer) {
       // -----------------------------------
 
       isFeatured: img.isFeatured === true,
-
-
       size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
       lifecycle: img.lifecycle || "Unknown",
       nathansNotes: noteFromBackend,
       tags: img.tags || [],
     };
   });
+
   const gridContainer = document.getElementById("speciesImages");
+
+  const sortImagesByFeatured = (images: any[]) => {
+    return [...images].sort((a, b) => {
+      const primaryFeaturedSort =
+        (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+      if (primaryFeaturedSort === 0) {
+        return a.id - b.id;
+      }
+      return primaryFeaturedSort;
+    });
+  };
 
   const renderInnerGrid = (selectedTags: string[] | string = "all") => {
     if (!gridContainer) return;
@@ -299,20 +352,37 @@ if (customAttrContainer) {
       return tagsArray.every((id) => imageTagIds.includes(String(id)));
     });
 
-    if (filtered.length === 0) {
+    // INTERCEPT AND SORT HERE
+    const sortedFilteredImages = sortImagesByFeatured(filtered);
+
+    // Update the length check to use our new sorted array
+    if (sortedFilteredImages.length === 0) {
       gridContainer.innerHTML =
         '<p class="text-muted p-3">No images match this filter.</p>';
       return;
     }
 
-    filtered.forEach((imgObj: any) => {
+    // 'filtered.forEach' TO 'sortedFilteredImages.forEach'
+    sortedFilteredImages.forEach((imgObj: any) => {
       const col = document.createElement("div");
       col.className = "col-4 mb-2 gallery-thumb-wrapper position-relative";
       col.innerHTML = `
         <div class="ratio ratio-1x1 shadow-sm rounded overflow-hidden">
               <img src="${imgObj.url || noImagePlaceholder}"
-                   style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
+                  draggable="false"
+                  style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
           </div>
+          
+          ${
+            imgObj.isFeatured
+              ? `
+            <div class="position-absolute bottom-0 start-0 m-1" style="z-index: 5;">
+              <i class="fas fa-star text-warning" style="filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.8));"></i>
+            </div>
+          `
+              : ""
+          }
+          
           ${
             isAdmin
               ? `
@@ -363,7 +433,9 @@ if (customAttrContainer) {
 
       if (gridContainer) gridContainer.appendChild(col);
     });
-    if (filtered.length > 0) setMainImage(filtered[0]);
+
+    //  the featured image becomes the main hero image
+    if (sortedFilteredImages.length > 0) setMainImage(sortedFilteredImages[0]);
   };
 
   const renderFilterPills = () => {

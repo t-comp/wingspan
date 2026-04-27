@@ -35,7 +35,7 @@ export const UI = {
 
         col.innerHTML = `
             <div class="position-relative w-100 species-card-wrapper" style="aspect-ratio: 1 / 1; cursor: pointer;">
-                <img src="${imageUrl}" alt="${b.name}" class="w-100 h-100" style="object-fit: cover; border-radius: 0;">
+                <img src="${imageUrl}" alt="${b.name}" draggable="false" class="w-100 h-100" style="object-fit: cover; border-radius: 0;">
                 
                 <div class="name-gradient-overlay position-absolute bottom-0 start-0 w-100 p-3 d-flex flex-column justify-content-end">
                     <h5 class="text-white fw-bold mb-0" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">${displayName}</h5>
