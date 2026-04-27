@@ -529,6 +529,28 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
+  async setFeaturedImage(imageId) {
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}/featured`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+      },
+    );
+    return checkResponse(response);
+  },
+
+  async unsetFeaturedImage(imageId) {
+    const response = await fetch(
+      `${API_BASE_URL}/images/admin/${imageId}/featured`,
+      {
+        method: "DELETE",
+        headers: getHeaders(),
+      },
+    );
+    return checkResponse(response);
+  },
+
   // ==========================
   // TAG ENDPOINTS
   // ==========================

@@ -154,6 +154,8 @@ export async function showSpeciesView(b: any) {
     };
   }
 
+  // src/features/species/species_view.ts
+
   const setMainImage = (img: any) => {
     const url = img.url || noImagePlaceholder;
 
@@ -192,6 +194,45 @@ export async function showSpeciesView(b: any) {
         });
       };
     }
+
+    // --- FEATURED IMAGE LOGIC ---
+    const featureBtn = document.getElementById("featureMainImageBtn");
+    const featureIcon = document.getElementById("featureMainStarIcon");
+
+    if (featureBtn && featureIcon) {
+      if (isAdmin) {
+        featureBtn.classList.remove("d-none");
+        const isFeatured = img.isFeatured;
+
+        // THE FIX: Only use setAttribute here inside the Admin check!
+        featureIcon.setAttribute(
+          "class",
+          isFeatured ? "fas fa-star" : "far fa-star",
+        );
+
+        featureBtn.className = isFeatured
+          ? "btn btn-sm btn-warning me-2"
+          : "btn btn-sm btn-outline-warning me-2";
+
+        featureBtn.onclick = async () => {
+          try {
+            if (isFeatured) await ButterflyAPI.unsetFeaturedImage(img.id);
+            else await ButterflyAPI.setFeaturedImage(img.id);
+
+            // Reload the view to sync the data and remove stars from old images!
+            const freshSpecies = await ButterflyAPI.getSpeciesById(
+              AppState.currentSpeciesId,
+            );
+            await showSpeciesView(freshSpecies);
+          } catch (err) {
+            console.error("Feature toggle failed", err);
+            alert("Failed to update featured status.");
+          }
+        };
+      } else {
+        featureBtn.classList.add("d-none");
+      }
+    }
   };
 
   let fetchedImages: any[] = [];
@@ -225,6 +266,7 @@ export async function showSpeciesView(b: any) {
           : null),
       // -----------------------------------
 
+      isFeatured: img.isFeatured === true,
       size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
       lifecycle: img.lifecycle || "Unknown",
       nathansNotes: noteFromBackend,
@@ -267,6 +309,17 @@ export async function showSpeciesView(b: any) {
                   draggable="false"
                   style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
           </div>
+          
+          ${
+            imgObj.isFeatured
+              ? `
+            <div class="position-absolute bottom-0 start-0 m-1" style="z-index: 5;">
+              <i class="fas fa-star text-warning" style="filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.8));"></i>
+            </div>
+          `
+              : ""
+          }
+          
           ${
             isAdmin
               ? `
