@@ -197,6 +197,7 @@ export async function showSpeciesView(b: any) {
   let fetchedImages: any[] = [];
   try {
     fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
+    console.log("1. RAW BACKEND DATA:", fetchedImages);
   } catch (err) {
     console.error("Could not load images for species:", err);
   }
@@ -206,13 +207,22 @@ export async function showSpeciesView(b: any) {
       img.nathansNotes || img.nathan_notes || img.notes || "";
     return {
       id: img.id,
-      url: img.mediumUrl, // We keep this for the main UI backward compatibility
+      url: img.mediumUrl || img.fpath || img.displayUrl,
 
       // --- NEW URL FIELDS FROM BACKEND ---
       originalUrl: img.originalUrl,
       largeUrl: img.largeUrl,
-      mediumUrl: img.mediumUrl,
+      mediumUrl: img.mediumUrl || img.fpath || img.displayUrl,
       smallUrl: img.smallUrl,
+
+      // catch capitalization, AND reconstruct the old URL for un-migrated images!
+      xSmallUrl:
+        img.xsmallUrl ||
+        img.XSmallUrl ||
+        img.xSmallUrl ||
+        (img.originalUrl
+          ? img.originalUrl.replace("_original", "_thumbnail")
+          : null),
       // -----------------------------------
 
       size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
@@ -221,6 +231,7 @@ export async function showSpeciesView(b: any) {
       tags: img.tags || [],
     };
   });
+
   const gridContainer = document.getElementById("speciesImages");
 
   const renderInnerGrid = (selectedTags: string[] | string = "all") => {
