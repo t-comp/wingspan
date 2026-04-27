@@ -38,7 +38,7 @@ export async function initHome(userRole, userEmail) {
     "Home Initializing with role:",
     userRole,
     "and email:",
-    userEmail
+    userEmail,
   );
 
   // ==========================================
@@ -61,7 +61,7 @@ export async function initHome(userRole, userEmail) {
           if (members.some((m) => m.email === userEmail)) {
             const keys = await ButterflyAPI.getAllApiKeys();
             const teamKey = keys.find(
-              (k) => k.teamName === t.name && k.active !== false
+              (k) => k.teamName === t.name && k.active !== false,
             );
             if (teamKey) studentApiKey = teamKey.keyVal;
             break;
@@ -85,7 +85,7 @@ export async function initHome(userRole, userEmail) {
   });
   console.log(
     "Attributes recovered after refresh:",
-    Array.from(AppState.allAttributeKeys)
+    Array.from(AppState.allAttributeKeys),
   );
 
   // ==========================================
@@ -128,7 +128,7 @@ export async function initHome(userRole, userEmail) {
 
         if (AppState.currentSpeciesId) {
           const freshButterfly = await ButterflyAPI.getSpeciesById(
-            AppState.currentSpeciesId
+            AppState.currentSpeciesId,
           );
           await showSpeciesView(freshButterfly);
         } else {
@@ -152,13 +152,13 @@ export async function initHome(userRole, userEmail) {
       ]);
 
       users.sort((a: any, b: any) =>
-        a.username.toLowerCase().localeCompare(b.username.toLowerCase())
+        a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
       );
       AppState.allCachedUsers = users;
 
       AppState.globalUserTeamMap = {};
       const memberResults = await Promise.all(
-        teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id))
+        teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id)),
       );
 
       teams.forEach((t: any, i: number) => {
@@ -181,7 +181,7 @@ export async function initHome(userRole, userEmail) {
     adminUserSearch.addEventListener("input", (e) => {
       const query = (e.target as HTMLInputElement).value.toLowerCase();
       const filtered = AppState.allCachedUsers.filter((u: any) =>
-        u.username.toLowerCase().includes(query)
+        u.username.toLowerCase().includes(query),
       );
       renderAllUsersTable(filtered);
     });
@@ -196,7 +196,7 @@ export async function initHome(userRole, userEmail) {
   document
     .getElementById("users-tab")
     ?.addEventListener("shown.bs.tab", () =>
-      renderAllUsersTable(AppState.allCachedUsers)
+      renderAllUsersTable(AppState.allCachedUsers),
     );
 
   // ==========================================
@@ -241,16 +241,16 @@ export async function initHome(userRole, userEmail) {
     if (userRole === "ADMIN") {
       if (adminTeamContent) adminTeamContent.style.display = "block";
       if (studentTeamContent) studentTeamContent.style.display = "none";
-    
+
       const tabTeams = document.getElementById("tab-teams");
       const tabUsers = document.getElementById("tab-users");
       const tabTags = document.getElementById("tab-tags");
       const tabAttrs = document.getElementById("tab-attributes"); // ADD THIS
-    
+
       [tabTeams, tabUsers, tabTags, tabAttrs].forEach((t) =>
-        t?.classList.remove("show", "active")
+        t?.classList.remove("show", "active"),
       );
-    
+
       if (tab === "teams") {
         tabTeams?.classList.add("show", "active");
         if (teamsControls) {
@@ -265,12 +265,11 @@ export async function initHome(userRole, userEmail) {
         }
       } else if (tab === "tags") {
         tabTags?.classList.add("show", "active");
-      } 
-      else if (tab === "attributes") {
+      } else if (tab === "attributes") {
         tabAttrs?.classList.add("show", "active");
-        AttributeManager.renderAttributesGrid(); 
+        AttributeManager.renderAttributesGrid();
       }
-    
+
       await loadAdminData();
     } else {
       if (adminTeamContent) adminTeamContent.style.display = "none";
@@ -296,10 +295,12 @@ export async function initHome(userRole, userEmail) {
     e.preventDefault();
     openDashboard("studentTeam");
   });
-  document.getElementById("navAdminAttributes")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    openDashboard("attributes");
-  });
+  document
+    .getElementById("navAdminAttributes")
+    ?.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDashboard("attributes");
+    });
 
   if (backBtn) backBtn.addEventListener("click", () => goToGallery());
   if (navBrand) navBrand.addEventListener("click", () => goToGallery());
@@ -307,6 +308,8 @@ export async function initHome(userRole, userEmail) {
     viewGalleryBtn.addEventListener("click", () => goToGallery());
 
   // Show/Hide Top Nav buttons based on role
+  const viewTeamBtn = document.getElementById("viewTeamBtn");
+
   if (userRole === "ADMIN") {
     document
       .querySelectorAll(".admin-only-nav")
@@ -314,6 +317,12 @@ export async function initHome(userRole, userEmail) {
     document
       .querySelectorAll(".student-only-nav")
       .forEach((el) => ((el as HTMLElement).style.display = "none"));
+
+    // Ensure Admins keep the dropdown functionality
+    if (viewTeamBtn) {
+      viewTeamBtn.setAttribute("data-bs-toggle", "dropdown");
+      viewTeamBtn.onclick = null; // Clear any direct click handlers
+    }
   } else {
     document
       .querySelectorAll(".admin-only-nav")
@@ -321,11 +330,18 @@ export async function initHome(userRole, userEmail) {
     document
       .querySelectorAll(".student-only-nav")
       .forEach((el) => ((el as HTMLElement).style.display = "block"));
+
+    // Remove dropdown for students and route directly to their team dashboard
+    if (viewTeamBtn) {
+      viewTeamBtn.removeAttribute("data-bs-toggle");
+      viewTeamBtn.onclick = (e) => {
+        e.preventDefault();
+        // Mimic a click on the actual student team link
+        document.getElementById("navStudentTeam")?.click();
+      };
+    }
   }
 
-  // ==========================================
-  // 6. MODULE INITIALIZATIONS
-  // ==========================================
   initAdminApiKeys(loadAdminData);
   initAdminTeams(loadAdminData);
   initAdminUsers(loadAdminData);
@@ -336,7 +352,7 @@ export async function initHome(userRole, userEmail) {
     },
     () => {
       (window as any).applyAllFilters();
-    }
+    },
   );
 
   initUpload({
