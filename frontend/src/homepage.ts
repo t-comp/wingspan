@@ -10,6 +10,7 @@
 import { ButterflyAPI } from "./core/api.js";
 import { AppState } from "./core/state.js";
 import { initSettings } from "./core/settings.js";
+import { AttributeManager } from "./features/admin/admin_attributes.js";
 
 // imported features
 import { TagManager } from "./features/admin/admin_tags.js";
@@ -33,13 +34,11 @@ import {
 } from "./features/gallery/gallery_core.js";
 
 export async function initHome(userRole, userEmail) {
-
-  
   console.log(
     "Home Initializing with role:",
     userRole,
     "and email:",
-    userEmail,
+    userEmail
   );
 
   // ==========================================
@@ -48,19 +47,6 @@ export async function initHome(userRole, userEmail) {
   AppState.userRole = userRole;
   AppState.userEmail = userEmail;
   AppState.butterflies = await ButterflyAPI.getAll();
-
-
-// logic for attributes but its like lokwye not working and dirivng me crazy
-AppState.allAttributeKeys = new Set<string>(); 
-
-AppState.butterflies.forEach(species => {
-    if (species.attributeDef) {
-        Object.keys(species.attributeDef).forEach(key => {
-            AppState.allAttributeKeys.add(key);
-        });
-    }
-});
-console.log("Attributes recovered after refresh:", Array.from(AppState.allAttributeKeys));
 
   let studentApiKey = "";
   if (userRole !== "ADMIN") {
@@ -75,7 +61,7 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
           if (members.some((m) => m.email === userEmail)) {
             const keys = await ButterflyAPI.getAllApiKeys();
             const teamKey = keys.find(
-              (k) => k.teamName === t.name && k.active !== false,
+              (k) => k.teamName === t.name && k.active !== false
             );
             if (teamKey) studentApiKey = teamKey.keyVal;
             break;
@@ -86,6 +72,21 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
       console.error("Could not fetch API key for modal", e);
     }
   }
+
+  // logic for attributes
+  AppState.allAttributeKeys = new Set<string>();
+
+  AppState.butterflies.forEach((species) => {
+    if (species.attributeDef) {
+      Object.keys(species.attributeDef).forEach((key) => {
+        AppState.allAttributeKeys.add(key);
+      });
+    }
+  });
+  console.log(
+    "Attributes recovered after refresh:",
+    Array.from(AppState.allAttributeKeys)
+  );
 
   // ==========================================
   // 2. DOM ELEMENT CACHING
@@ -127,7 +128,7 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
 
         if (AppState.currentSpeciesId) {
           const freshButterfly = await ButterflyAPI.getSpeciesById(
-            AppState.currentSpeciesId,
+            AppState.currentSpeciesId
           );
           await showSpeciesView(freshButterfly);
         } else {
@@ -151,13 +152,13 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
       ]);
 
       users.sort((a: any, b: any) =>
-        a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
+        a.username.toLowerCase().localeCompare(b.username.toLowerCase())
       );
       AppState.allCachedUsers = users;
 
       AppState.globalUserTeamMap = {};
       const memberResults = await Promise.all(
-        teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id)),
+        teams.map((t: any) => ButterflyAPI.getTeamMembers(t.id))
       );
 
       teams.forEach((t: any, i: number) => {
@@ -180,7 +181,7 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
     adminUserSearch.addEventListener("input", (e) => {
       const query = (e.target as HTMLInputElement).value.toLowerCase();
       const filtered = AppState.allCachedUsers.filter((u: any) =>
-        u.username.toLowerCase().includes(query),
+        u.username.toLowerCase().includes(query)
       );
       renderAllUsersTable(filtered);
     });
@@ -195,13 +196,14 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
   document
     .getElementById("users-tab")
     ?.addEventListener("shown.bs.tab", () =>
-      renderAllUsersTable(AppState.allCachedUsers),
+      renderAllUsersTable(AppState.allCachedUsers)
     );
 
   // ==========================================
   // 5. NAVIGATION & ROUTING
   // ==========================================
   // Destroy ghost listeners on dashboard button
+  AttributeManager.init();
   const dashboardToggleBtn = document.getElementById("viewTeamBtn");
   if (dashboardToggleBtn) {
     const freshBtn = dashboardToggleBtn.cloneNode(true);
@@ -236,21 +238,19 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
     if (activeGalleryBtn) activeGalleryBtn.classList.remove("active");
     if (activeDashboardBtn) activeDashboardBtn.classList.add("active");
 
-    // 5. Handle Role-Specific UI
     if (userRole === "ADMIN") {
       if (adminTeamContent) adminTeamContent.style.display = "block";
       if (studentTeamContent) studentTeamContent.style.display = "none";
-
+    
       const tabTeams = document.getElementById("tab-teams");
       const tabUsers = document.getElementById("tab-users");
       const tabTags = document.getElementById("tab-tags");
-
-      // Reset Tab Panes
-      [tabTeams, tabUsers, tabTags].forEach((t) =>
-        t?.classList.remove("show", "active"),
+      const tabAttrs = document.getElementById("tab-attributes"); // ADD THIS
+    
+      [tabTeams, tabUsers, tabTags, tabAttrs].forEach((t) =>
+        t?.classList.remove("show", "active")
       );
-
-      // Show ONLY the selected tab and its specific navbar controls
+    
       if (tab === "teams") {
         tabTeams?.classList.add("show", "active");
         if (teamsControls) {
@@ -265,15 +265,17 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
         }
       } else if (tab === "tags") {
         tabTags?.classList.add("show", "active");
+      } 
+      else if (tab === "attributes") {
+        tabAttrs?.classList.add("show", "active");
+        AttributeManager.renderAttributesGrid(); 
       }
-
+    
       await loadAdminData();
     } else {
-      // Student View logic
       if (adminTeamContent) adminTeamContent.style.display = "none";
       if (studentTeamContent) studentTeamContent.style.display = "block";
 
-      // FIX 2: Added '|| ""' to resolve the TypeScript null error
       await loadStudentData(AppState.userEmail || "");
     }
   };
@@ -293,6 +295,10 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
   document.getElementById("navStudentTeam")?.addEventListener("click", (e) => {
     e.preventDefault();
     openDashboard("studentTeam");
+  });
+  document.getElementById("navAdminAttributes")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    openDashboard("attributes");
   });
 
   if (backBtn) backBtn.addEventListener("click", () => goToGallery());
@@ -330,7 +336,7 @@ console.log("Attributes recovered after refresh:", Array.from(AppState.allAttrib
     },
     () => {
       (window as any).applyAllFilters();
-    },
+    }
   );
 
   initUpload({

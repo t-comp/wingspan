@@ -254,14 +254,24 @@ if (customAttrContainer) {
       img.nathansNotes || img.nathan_notes || img.notes || "";
     return {
       id: img.id,
-      url: img.fpath, // We keep this for the main UI backward compatibility
+      url: img.mediumUrl || img.fpath || img.displayUrl,   
 
-      // --- NEW URL FIELDS FROM BACKEND ---
       originalUrl: img.originalUrl,
       largeUrl: img.largeUrl,
-      mediumUrl: img.fpath,
+      mediumUrl: img.mediumUrl || img.fpath || img.displayUrl,
       smallUrl: img.smallUrl,
+
+      xSmallUrl:
+        img.xsmallUrl ||
+        img.XSmallUrl ||
+        img.xSmallUrl ||
+        (img.originalUrl
+          ? img.originalUrl.replace("_original", "_thumbnail")
+          : null),
       // -----------------------------------
+
+      isFeatured: img.isFeatured === true,
+
 
       size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
       lifecycle: img.lifecycle || "Unknown",
