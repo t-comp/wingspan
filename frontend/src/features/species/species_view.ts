@@ -170,39 +170,8 @@ if (customAttrContainer) {
     });
     };
 
-    // editSpeciesBtn.onclick = () => {
-    //   const dynamicContainer = document.getElementById("dynamicSpeciesFields");
-    //   if (dynamicContainer) dynamicContainer.innerHTML = "";
-
-    //   (document.getElementById("editSpeciesId") as HTMLInputElement).value =
-    //     b.id;
-    //   (document.getElementById("editSpeciesName") as HTMLInputElement).value =
-    //     b.name || "";
-    //   (
-    //     document.getElementById("editSpeciesScientific") as HTMLInputElement
-    //   ).value = b.scientificName || "";
-    //   (document.getElementById("editSpeciesOrder") as HTMLInputElement).value =
-    //     b.orderName || "";
-    //   (document.getElementById("editSpeciesFamily") as HTMLInputElement).value =
-    //     b.family || "";
-    //   (document.getElementById("editSpeciesGenus") as HTMLInputElement).value =
-    //     b.genus || "";
-
-    //   const fullDesc = b.description || "";
-    //   const attributeRegex = /\[\[(.*?):\s*(.*?)\]\]/g;
-    //   let match;
-
-    //   while ((match = attributeRegex.exec(fullDesc)) !== null) {
-    //     addDynamicField(match[1].trim(), match[2].trim());
-    //   }
-
-    //   (
-    //     document.getElementById("editSpeciesDescription") as HTMLInputElement
-    //   ).value = fullDesc.replace(/\[\[.*?\]\]/g, "").trim();
-    // };
   }
 
-  // src/features/species/species_view.ts
 
   const setMainImage = (img: any) => {
     const url = img.url || noImagePlaceholder;
