@@ -4,7 +4,7 @@
  * This is the file that actually talks to the backend so our app isn't just a static HTML page.
  * It holds all the fetch requests for species, users, and tags.
  * So if the server goes down and everything breaks,
- * talk to backend ab what happened and what the issue is.
+ * talk to backend about what happened and what the issue is.
  */
 
 const API_BASE_URL = "http://159.203.134.226:8080";
@@ -155,6 +155,18 @@ export const ButterflyAPI = {
     );
     return checkResponse(response);
   },
+  //check this 
+  async updateSpeciesAttributes(speciesId, attributeMap) {
+    const response = await fetch(
+      `${API_BASE_URL}/species/${speciesId}/attributes`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(attributeMap),
+      },
+    );
+    return checkResponse(response);
+},
 
   // ==========================
   // USER / AUTH ENDPOINTS
