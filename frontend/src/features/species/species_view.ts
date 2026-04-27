@@ -276,6 +276,17 @@ export async function showSpeciesView(b: any) {
 
   const gridContainer = document.getElementById("speciesImages");
 
+  const sortImagesByFeatured = (images: any[]) => {
+    return [...images].sort((a, b) => {
+      const primaryFeaturedSort =
+        (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+      if (primaryFeaturedSort === 0) {
+        return a.id - b.id;
+      }
+      return primaryFeaturedSort;
+    });
+  };
+
   const renderInnerGrid = (selectedTags: string[] | string = "all") => {
     if (!gridContainer) return;
     gridContainer.innerHTML = "";
@@ -294,13 +305,18 @@ export async function showSpeciesView(b: any) {
       return tagsArray.every((id) => imageTagIds.includes(String(id)));
     });
 
-    if (filtered.length === 0) {
+    // INTERCEPT AND SORT HERE
+    const sortedFilteredImages = sortImagesByFeatured(filtered);
+
+    // Update the length check to use our new sorted array
+    if (sortedFilteredImages.length === 0) {
       gridContainer.innerHTML =
         '<p class="text-muted p-3">No images match this filter.</p>';
       return;
     }
 
-    filtered.forEach((imgObj: any) => {
+    // 'filtered.forEach' TO 'sortedFilteredImages.forEach'
+    sortedFilteredImages.forEach((imgObj: any) => {
       const col = document.createElement("div");
       col.className = "col-4 mb-2 gallery-thumb-wrapper position-relative";
       col.innerHTML = `
@@ -370,7 +386,9 @@ export async function showSpeciesView(b: any) {
 
       if (gridContainer) gridContainer.appendChild(col);
     });
-    if (filtered.length > 0) setMainImage(filtered[0]);
+
+    //  the featured image becomes the main hero image
+    if (sortedFilteredImages.length > 0) setMainImage(sortedFilteredImages[0]);
   };
 
   const renderFilterPills = () => {
