@@ -33,6 +33,21 @@ export function refreshGallery(data = AppState.butterflies, page = 1) {
     },
     AppState.currentDisplayMode,
   );
+
+  // If the data array is empty, show the "No results" message
+  if (data.length === 0) {
+    const grid = document.getElementById("butterflyGrid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="col-12 text-center py-5 mt-5">
+          <i class="fas fa-search fa-3x text-muted mb-3" style="opacity: 0.3;"></i>
+          <h4 class="text-muted fw-bold">Nothing matched your results</h4>
+          <p class="text-muted">Try adjusting your search or clearing your filters.</p>
+        </div>
+      `;
+    }
+  }
+
   renderPagination(data.length, totalPages);
 }
 
