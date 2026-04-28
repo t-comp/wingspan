@@ -1,5 +1,6 @@
 package fs3.wingspan.services;
 
+import fs3.wingspan.dto.RoboflowPrediction;
 import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
 import fs3.wingspan.model.Tags;
@@ -158,7 +159,22 @@ public class ImageStorageService {
         image.setLifecyclestage(lifecycle_stage);
         image.setDescription(description);
         image.setNathansnotes(nathansNotes);
+
+
+        try{
+            String detectedStage = RoboflowService.getLifecycleStage(file);
+            if(detectedStage != null){
+                image.setLifecyclestage(
+                        lifecycle_stage != null ? lifecycle_stage : detectedStage);
+                log.info("Lifecycle stage set to: {}", lifecycle_stage);
+            }
+        }catch(Exception e){
+            log.warn("Roboflow detection failed, skipping: {}", e.getMessage());
+            image.setLifecyclestage(lifecycle_stage);
+        }
+
         image.setIsFeatured(false);
+
 
         log.info("About to save - lifecycle: {}, nathansNotes: {}, description: {}",
                 image.getLifecyclestage(), image.getNathansnotes(), image.getDescription());
