@@ -156,6 +156,7 @@ let currentPage = 1;
 const itemsPerPage = 40;
 let currentGalleryData: any[] = [];
 let observer: IntersectionObserver | null = null;
+let savedScrollPosition = 0; // 🛑 ADD THIS VARIABLE
 
 export function refreshGallery(data = AppState.butterflies, page = 1) {
   currentPage = page;
@@ -165,13 +166,13 @@ export function refreshGallery(data = AppState.butterflies, page = 1) {
   if (currentPage < 1) currentPage = 1;
   if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
-  // Render the grid, and if they click a card, open the species view!
-  // THE FIX: We slice from 0 all the way to the current max page limit!
   const itemsToShow = data.slice(0, currentPage * itemsPerPage);
 
+  // save the scroll position right before opening the species view!
   UI.renderGrid(
     itemsToShow,
     async (b) => {
+      savedScrollPosition = window.scrollY;
       await showSpeciesView(b);
     },
     AppState.currentDisplayMode,
@@ -208,33 +209,25 @@ function setupInfiniteScroll(totalPages: number) {
   if (currentPage >= totalPages) {
     sentinelContainer.innerHTML = `
       <div class="w-100 d-flex justify-content-center align-items-center py-4 mb-3">
-        
         <div class="d-flex flex-column align-items-center position-relative nav-action-container">
           <button id="resetGalleryBtn" class="btn-back-circle shadow-sm" title="Back to Top">
             <i class="fas fa-arrow-up"></i>
           </button>
-          
           <span class="navbar-static-label custom-tooltip" style="bottom: -32px">Back to Top</span>
         </div>
-        
       </div>
     `;
 
-    // Add the memory-clearing logic to the button
     const resetBtn = document.getElementById("resetGalleryBtn");
     if (resetBtn) {
       resetBtn.onclick = () => {
-        // Scroll back to the top smoothly
         window.scrollTo({ top: 0, behavior: "smooth" });
-
-        // Wait a split second for the scroll, then wipe the heavy DOM memory
-        setTimeout(() => {
-          refreshGallery(currentGalleryData, 1);
-        }, 400);
+        setTimeout(() => refreshGallery(currentGalleryData, 1), 400);
       };
     }
     return;
   }
+
   // Show the loading spinner at the bottom
   sentinelContainer.innerHTML = `
     <div class="w-100 text-center py-4 mt-5">
@@ -262,7 +255,7 @@ function setupInfiniteScroll(totalPages: number) {
   observer.observe(sentinelContainer);
 }
 
-export function goToGallery() {
+export function goToGallery(isReturning = false) {
   const docsView = document.getElementById("docsView");
   const portfolio = document.getElementById("portfolio");
   const speciesView = document.getElementById("speciesView");
@@ -309,10 +302,17 @@ export function goToGallery() {
   const galleryBtn = document.getElementById("viewGalleryBtn");
   if (galleryBtn) galleryBtn.classList.add("active");
 
-  window.scrollTo(0, 0);
-
-  // Refresh the grid
-  if (typeof (window as any).applyAllFilters === "function") {
-    (window as any).applyAllFilters();
+  // 4. Restore scroll if returning, otherwise wipe the slate clean!
+  if (isReturning) {
+    // We use a tiny 10ms timeout to let the browser render the gallery block first before jumping
+    setTimeout(() => {
+      window.scrollTo({ top: savedScrollPosition, behavior: "instant" });
+    }, 10);
+  } else {
+    window.scrollTo(0, 0);
+    // Refresh the grid and apply filters ONLY on a fresh gallery load
+    if (typeof (window as any).applyAllFilters === "function") {
+      (window as any).applyAllFilters();
+    }
   }
 }

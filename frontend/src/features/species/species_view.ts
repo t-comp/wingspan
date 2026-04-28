@@ -71,7 +71,7 @@ export async function showSpeciesView(b: any) {
   if (footer) footer.style.display = "block";
   if (copyright) copyright.style.display = "block";
 
-  window.scrollTo(0, 0);
+  window.scrollTo({ top: 0, behavior: "instant" });
 
   if (topSearchBarContainer) topSearchBarContainer.style.display = "none";
   if (filterPanel) {

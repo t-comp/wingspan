@@ -308,7 +308,8 @@ export async function initHome(userRole, userEmail) {
       openDashboard("attributes");
     });
 
-  if (backBtn) backBtn.addEventListener("click", () => goToGallery());
+  // Pass 'true' into the back button so it knows to restore the spot in the gallery after visiting a species page
+  if (backBtn) backBtn.addEventListener("click", () => goToGallery(true));
   if (navBrand) navBrand.addEventListener("click", () => goToGallery());
   if (viewGalleryBtn)
     viewGalleryBtn.addEventListener("click", () => goToGallery());
