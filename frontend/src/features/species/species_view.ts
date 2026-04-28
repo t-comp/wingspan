@@ -50,7 +50,6 @@ export async function showSpeciesView(b: any) {
   );
   const filterPanel = document.getElementById("filterPanel");
   const galleryControls = document.getElementById("galleryControlsWrapper"); // Updated ID
-  
 
   if (galleryControls) {
     galleryControls.classList.add("d-none");
@@ -66,6 +65,12 @@ export async function showSpeciesView(b: any) {
   if (portfolio) portfolio.style.display = "none";
   if (teamView) teamView.style.display = "none";
   if (speciesView) speciesView.style.display = "block";
+
+  const footer = document.querySelector("footer.footer") as HTMLElement;
+  const copyright = document.querySelector(".copyright") as HTMLElement;
+  if (footer) footer.style.display = "block";
+  if (copyright) copyright.style.display = "block";
+
   window.scrollTo(0, 0);
 
   if (topSearchBarContainer) topSearchBarContainer.style.display = "none";
@@ -81,24 +86,26 @@ export async function showSpeciesView(b: any) {
 
   // Render the attributes for the "View" mode
 
-const customAttrContainer = document.getElementById("customAttributesDisplay");
-if (customAttrContainer) {
+  const customAttrContainer = document.getElementById(
+    "customAttributesDisplay",
+  );
+  if (customAttrContainer) {
     customAttrContainer.innerHTML = ""; // Clear old ones
 
     if (b.attributeDef && Object.keys(b.attributeDef).length > 0) {
-        let html = "";
-        Object.entries(b.attributeDef).forEach(([key, value]) => {
-            if (value && String(value).trim() !== "") {
-                html += `
+      let html = "";
+      Object.entries(b.attributeDef).forEach(([key, value]) => {
+        if (value && String(value).trim() !== "") {
+          html += `
                 <div class="row mb-2">
                     <div class="col-4 fw-bold" style="color: #0399b0">${key}:</div>
                     <div class="col-8 text-muted">${value}</div>
                 </div>`;
-            }
-        });
-        customAttrContainer.innerHTML = html;
+        }
+      });
+      customAttrContainer.innerHTML = html;
     }
-}
+  }
 
   // Setup Admin Action Buttons
   const actionSection = document.getElementById("speciesActionButtons");
@@ -147,31 +154,39 @@ if (customAttrContainer) {
     editSpeciesBtn.onclick = () => {
       const dynamicContainer = document.getElementById("dynamicSpeciesFields");
       if (dynamicContainer) dynamicContainer.innerHTML = "";
-    
+
       // 1. Set Standard Fields
-      (document.getElementById("editSpeciesId") as HTMLInputElement).value = b.id;
-      (document.getElementById("editSpeciesName") as HTMLInputElement).value = b.name || "";
-      (document.getElementById("editSpeciesScientific") as HTMLInputElement).value = b.scientificName || "";
-      (document.getElementById("editSpeciesOrder") as HTMLInputElement).value = b.orderName || "";
-      (document.getElementById("editSpeciesFamily") as HTMLInputElement).value = b.family || "";
-      (document.getElementById("editSpeciesGenus") as HTMLInputElement).value = b.genus || "";
-    
+      (document.getElementById("editSpeciesId") as HTMLInputElement).value =
+        b.id;
+      (document.getElementById("editSpeciesName") as HTMLInputElement).value =
+        b.name || "";
+      (
+        document.getElementById("editSpeciesScientific") as HTMLInputElement
+      ).value = b.scientificName || "";
+      (document.getElementById("editSpeciesOrder") as HTMLInputElement).value =
+        b.orderName || "";
+      (document.getElementById("editSpeciesFamily") as HTMLInputElement).value =
+        b.family || "";
+      (document.getElementById("editSpeciesGenus") as HTMLInputElement).value =
+        b.genus || "";
+
       // 2. Set Description (Now just clean text)
-      (document.getElementById("editSpeciesDescription") as HTMLTextAreaElement).value = b.description || "";
-    
+      (
+        document.getElementById("editSpeciesDescription") as HTMLTextAreaElement
+      ).value = b.description || "";
+
       // 3. NEW ATTRIBUTE LOGIC: Populate from the backend Map
-      AppState.allAttributeKeys.forEach(key => {
-        // If THIS specific species has a value for this key, get it. 
+      AppState.allAttributeKeys.forEach((key) => {
+        // If THIS specific species has a value for this key, get it.
         // Otherwise, it stays an empty string.
-        const value = (b.attributeDef && b.attributeDef[key]) ? b.attributeDef[key] : "";
-        
+        const value =
+          b.attributeDef && b.attributeDef[key] ? b.attributeDef[key] : "";
+
         // This adds the input field to the modal
         addDynamicField(key, String(value));
-    });
+      });
     };
-
   }
-
 
   const setMainImage = (img: any) => {
     const url = img.url || noImagePlaceholder;

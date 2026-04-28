@@ -216,6 +216,12 @@ export async function initHome(userRole, userEmail) {
     if (speciesView) speciesView.style.display = "none";
     if (teamView) teamView.style.display = "block";
     if (docsView) docsView.style.display = "none";
+
+    const footer = document.querySelector("footer.footer") as HTMLElement;
+    const copyright = document.querySelector(".copyright") as HTMLElement;
+    if (footer) footer.style.display = "block";
+    if (copyright) copyright.style.display = "block";
+
     window.scrollTo(0, 0);
 
     // 2. Identify Navbar Containers
