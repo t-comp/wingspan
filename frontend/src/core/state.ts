@@ -28,4 +28,6 @@ export const AppState = {
   // admin context
   allCachedUsers: [] as any[],
   globalUserTeamMap: {} as any,
+  //added this but check after checking endpoint 
+  allAttributeKeys: new Set<string>(),
 };

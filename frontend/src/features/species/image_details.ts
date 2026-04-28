@@ -16,6 +16,7 @@ export function openImageDetailsModal(
   img: any,
   reloadSpeciesCallback: () => Promise<void>,
 ) {
+  console.log("2. MODAL RECEIVED THIS IMAGE:", img);
   const editBtn = document.getElementById("editImageBtn");
   const saveBtn = document.getElementById("saveImageBtn");
   const notesDisplay = document.getElementById("modalNotes");
@@ -74,15 +75,21 @@ export function openImageDetailsModal(
 
   const setupDownloadRow = async (label: string, urlKey: string) => {
     const targetUrl = img[urlKey];
-    if (!targetUrl && urlKey !== "originalUrl") return;
+
+    console.log(
+      `3. Building Row [${label}]: Looking for key [${urlKey}]. Found:`,
+      targetUrl,
+    );
+
+    if (!targetUrl && urlKey !== "originalUrl") {
+      console.log(`   -> STOPPED: No URL found for ${label}`);
+      return;
+    }
 
     const finalUrl = targetUrl || img.url || img.originalUrl;
 
-    // NEW: If the backend just passed the exact same URL string, skip it immediately
-    if (
-      urlKey !== "originalUrl" &&
-      (finalUrl === img.originalUrl || finalUrl === img.url)
-    ) {
+    // Change the condition to only check against the originalUrl:
+    if (urlKey !== "originalUrl" && finalUrl === img.originalUrl) {
       return;
     }
 
@@ -235,152 +242,7 @@ export function openImageDetailsModal(
   setupDownloadRow("Large", "largeUrl");
   setupDownloadRow("Medium", "mediumUrl");
   setupDownloadRow("Small", "smallUrl");
-
-  // const downloadContainer = document.getElementById("imageDownloadOptions");
-  // if (downloadContainer) downloadContainer.innerHTML = "";
-
-  // const setupDownloadRow = async (label: string, urlKey: string) => {
-  //   const targetUrl = img[urlKey];
-  //   if (!targetUrl && urlKey !== "originalUrl") return;
-
-  //   const finalUrl = targetUrl || img.url || img.originalUrl;
-
-  //   const row = document.createElement("div");
-  //   row.className =
-  //     "d-flex justify-content-between align-items-center p-3 border rounded shadow-sm bg-light";
-
-  //   row.innerHTML = `
-  //     <div>
-  //       <h6 class="mb-1 fw-bold text-dark">${label} Size</h6>
-  //       <div class="small text-muted" id="meta-${urlKey}">
-  //         <i class="fas fa-spinner fa-spin"></i> Loading details...
-  //       </div>
-  //     </div>
-  //     <div class="action-tooltip-container">
-  //       <button class="btn-icon-only copy-btn d-flex justify-content-center align-items-center"
-  //               id="btn-${urlKey}"
-  //               style="width: 36px; height: 36px; border-radius: 50%;">
-  //         <i class="fas fa-link" style="color: ${WINGSPAN_TEAL} !important;"></i>
-  //       </button>
-  //       <span class="action-tooltip" id="tooltip-${urlKey}"
-  //             style="top: 100%; bottom: auto; margin-top: 8px; right: 0; left: auto; transform: none; white-space: nowrap;">
-  //         Copy Link
-  //       </span>
-  //     </div>
-  //   `;
-
-  //   if (downloadContainer) downloadContainer.appendChild(row);
-
-  //   let sizeText = "";
-
-  //   if (urlKey === "originalUrl" && img.size && img.size !== "Unknown") {
-  //     const byteNum = parseInt(String(img.size).replace(/\D/g, ""));
-  //     if (!isNaN(byteNum)) {
-  //       sizeText = `<span class="fw-bold text-dark">${(byteNum / (1024 * 1024)).toFixed(2)} MB</span> &nbsp;•&nbsp; `;
-  //     }
-  //   }
-
-  //   const measureImg = new Image();
-
-  //   measureImg.onload = () => {
-  //     const dimText = `${measureImg.naturalWidth}x${measureImg.naturalHeight}px`;
-  //     const meta = document.getElementById(`meta-${urlKey}`);
-  //     if (meta) meta.innerHTML = `${sizeText}${dimText}`;
-  //   };
-
-  //   measureImg.onerror = () => {
-  //     const meta = document.getElementById(`meta-${urlKey}`);
-  //     if (meta) meta.innerHTML = `${sizeText}Dimensions unavailable`;
-  //   };
-
-  //   measureImg.src = finalUrl;
-
-  //   const btn = document.getElementById(`btn-${urlKey}`);
-  //   if (btn) {
-  //     btn.onclick = () => {
-  //       let clipboardUrl = finalUrl;
-  //       if (AppState.studentApiKey) {
-  //         const separator = clipboardUrl.includes("?") ? "&" : "?";
-  //         clipboardUrl += `${separator}apiKey=${AppState.studentApiKey}`;
-  //       }
-
-  //       console.log("=== COPY LINK CLICKED ===");
-
-  //       // 1. Secure Context (HTTPS or Localhost)
-  //       if (navigator.clipboard && window.isSecureContext) {
-  //         navigator.clipboard
-  //           .writeText(clipboardUrl)
-  //           .then(() => console.log("Success: Copied via Clipboard API!"))
-  //           .catch((err) => console.error("Error: Clipboard API failed:", err));
-  //       }
-
-  //       // 2. Unsecure Context (HTTP IP Address)
-  //       else {
-  //         console.log(
-  //           "Status: Unsecure HTTP context detected. Using fallback method.",
-  //         );
-
-  //         // Get the modal so we can append the text box inside it!
-  //         const modalEl =
-  //           document.getElementById("imageDetailsModal") || document.body;
-
-  //         const textArea = document.createElement("textarea");
-  //         textArea.value = clipboardUrl;
-
-  //         // Keep it hidden but physically present
-  //         textArea.style.position = "absolute";
-  //         textArea.style.left = "-9999px";
-  //         textArea.style.top = "0";
-
-  //         // THE FIX: Append to the modal, NOT document.body.
-  //         // This prevents Bootstrap's focus trap from stealing focus!
-  //         modalEl.appendChild(textArea);
-
-  //         textArea.focus();
-  //         textArea.select();
-  //         textArea.setSelectionRange(0, 99999); // Ensure selection works universally
-
-  //         try {
-  //           const successful = document.execCommand("copy");
-  //           if (successful) {
-  //             console.log("Success: Fallback copy command actually worked!");
-  //           } else {
-  //             window.prompt(
-  //               "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
-  //               clipboardUrl,
-  //             );
-  //           }
-  //         } catch (err) {
-  //           console.error("Error: ExecCommand threw an exception.", err);
-  //           window.prompt(
-  //             "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
-  //             clipboardUrl,
-  //           );
-  //         } finally {
-  //           // Clean it up from the modal
-  //           modalEl.removeChild(textArea);
-  //         }
-  //       }
-
-  //       // Visual UI Feedback
-  //       btn.innerHTML = `<i class="fas fa-check" style="color: #198754 !important;"></i>`;
-  //       const tooltip = document.getElementById(`tooltip-${urlKey}`);
-  //       if (tooltip) tooltip.innerText = "Copied!";
-
-  //       setTimeout(() => {
-  //         if (btn) {
-  //           btn.innerHTML = `<i class="fas fa-link" style="color: ${WINGSPAN_TEAL} !important;"></i>`;
-  //         }
-  //         if (tooltip) tooltip.innerText = "Copy Link";
-  //       }, 2000);
-  //     };
-  //   }
-  // };
-
-  // setupDownloadRow("Original", "originalUrl");
-  // setupDownloadRow("Large", "largeUrl");
-  // setupDownloadRow("Medium", "mediumUrl");
-  // setupDownloadRow("Small", "smallUrl");
+  setupDownloadRow("xSmall", "xSmallUrl");
 
   const modalElement = document.getElementById("imageDetailsModal");
   if (modalElement) {

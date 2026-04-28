@@ -10,6 +10,7 @@
 import { ButterflyAPI } from "./core/api.js";
 import { AppState } from "./core/state.js";
 import { initSettings } from "./core/settings.js";
+import { AttributeManager } from "./features/admin/admin_attributes.js";
 
 // imported features
 import { TagManager } from "./features/admin/admin_tags.js";
@@ -71,6 +72,21 @@ export async function initHome(userRole, userEmail) {
       console.error("Could not fetch API key for modal", e);
     }
   }
+
+  // logic for attributes
+  AppState.allAttributeKeys = new Set<string>();
+
+  AppState.butterflies.forEach((species) => {
+    if (species.attributeDef) {
+      Object.keys(species.attributeDef).forEach((key) => {
+        AppState.allAttributeKeys.add(key);
+      });
+    }
+  });
+  console.log(
+    "Attributes recovered after refresh:",
+    Array.from(AppState.allAttributeKeys),
+  );
 
   // ==========================================
   // 2. DOM ELEMENT CACHING
@@ -187,6 +203,7 @@ export async function initHome(userRole, userEmail) {
   // 5. NAVIGATION & ROUTING
   // ==========================================
   // Destroy ghost listeners on dashboard button
+  AttributeManager.init();
   const dashboardToggleBtn = document.getElementById("viewTeamBtn");
   if (dashboardToggleBtn) {
     const freshBtn = dashboardToggleBtn.cloneNode(true);
@@ -199,6 +216,12 @@ export async function initHome(userRole, userEmail) {
     if (speciesView) speciesView.style.display = "none";
     if (teamView) teamView.style.display = "block";
     if (docsView) docsView.style.display = "none";
+
+    const footer = document.querySelector("footer.footer") as HTMLElement;
+    const copyright = document.querySelector(".copyright") as HTMLElement;
+    if (footer) footer.style.display = "block";
+    if (copyright) copyright.style.display = "block";
+
     window.scrollTo(0, 0);
 
     // 2. Identify Navbar Containers
@@ -221,7 +244,6 @@ export async function initHome(userRole, userEmail) {
     if (activeGalleryBtn) activeGalleryBtn.classList.remove("active");
     if (activeDashboardBtn) activeDashboardBtn.classList.add("active");
 
-    // 5. Handle Role-Specific UI
     if (userRole === "ADMIN") {
       if (adminTeamContent) adminTeamContent.style.display = "block";
       if (studentTeamContent) studentTeamContent.style.display = "none";
@@ -229,13 +251,12 @@ export async function initHome(userRole, userEmail) {
       const tabTeams = document.getElementById("tab-teams");
       const tabUsers = document.getElementById("tab-users");
       const tabTags = document.getElementById("tab-tags");
+      const tabAttrs = document.getElementById("tab-attributes"); // ADD THIS
 
-      // Reset Tab Panes
-      [tabTeams, tabUsers, tabTags].forEach((t) =>
+      [tabTeams, tabUsers, tabTags, tabAttrs].forEach((t) =>
         t?.classList.remove("show", "active"),
       );
 
-      // Show ONLY the selected tab and its specific navbar controls
       if (tab === "teams") {
         tabTeams?.classList.add("show", "active");
         if (teamsControls) {
@@ -250,15 +271,16 @@ export async function initHome(userRole, userEmail) {
         }
       } else if (tab === "tags") {
         tabTags?.classList.add("show", "active");
+      } else if (tab === "attributes") {
+        tabAttrs?.classList.add("show", "active");
+        AttributeManager.renderAttributesGrid();
       }
 
       await loadAdminData();
     } else {
-      // Student View logic
       if (adminTeamContent) adminTeamContent.style.display = "none";
       if (studentTeamContent) studentTeamContent.style.display = "block";
 
-      // FIX 2: Added '|| ""' to resolve the TypeScript null error
       await loadStudentData(AppState.userEmail || "");
     }
   };
@@ -279,13 +301,22 @@ export async function initHome(userRole, userEmail) {
     e.preventDefault();
     openDashboard("studentTeam");
   });
+  document
+    .getElementById("navAdminAttributes")
+    ?.addEventListener("click", (e) => {
+      e.preventDefault();
+      openDashboard("attributes");
+    });
 
-  if (backBtn) backBtn.addEventListener("click", () => goToGallery());
+  // Pass 'true' into the back button so it knows to restore the spot in the gallery after visiting a species page
+  if (backBtn) backBtn.addEventListener("click", () => goToGallery(true));
   if (navBrand) navBrand.addEventListener("click", () => goToGallery());
   if (viewGalleryBtn)
     viewGalleryBtn.addEventListener("click", () => goToGallery());
 
   // Show/Hide Top Nav buttons based on role
+  const viewTeamBtn = document.getElementById("viewTeamBtn");
+
   if (userRole === "ADMIN") {
     document
       .querySelectorAll(".admin-only-nav")
@@ -293,6 +324,12 @@ export async function initHome(userRole, userEmail) {
     document
       .querySelectorAll(".student-only-nav")
       .forEach((el) => ((el as HTMLElement).style.display = "none"));
+
+    // Ensure Admins keep the dropdown functionality
+    if (viewTeamBtn) {
+      viewTeamBtn.setAttribute("data-bs-toggle", "dropdown");
+      viewTeamBtn.onclick = null; // Clear any direct click handlers
+    }
   } else {
     document
       .querySelectorAll(".admin-only-nav")
@@ -300,11 +337,18 @@ export async function initHome(userRole, userEmail) {
     document
       .querySelectorAll(".student-only-nav")
       .forEach((el) => ((el as HTMLElement).style.display = "block"));
+
+    // Remove dropdown for students and route directly to their team dashboard
+    if (viewTeamBtn) {
+      viewTeamBtn.removeAttribute("data-bs-toggle");
+      viewTeamBtn.onclick = (e) => {
+        e.preventDefault();
+        // Mimic a click on the actual student team link
+        document.getElementById("navStudentTeam")?.click();
+      };
+    }
   }
 
-  // ==========================================
-  // 6. MODULE INITIALIZATIONS
-  // ==========================================
   initAdminApiKeys(loadAdminData);
   initAdminTeams(loadAdminData);
   initAdminUsers(loadAdminData);

@@ -38,9 +38,12 @@ export function initUpload(callbacks: UploadCallbacks) {
         const target = e.target as HTMLInputElement;
         const start = target.selectionStart;
         const end = target.selectionEnd;
-        target.value = target.value.replace(/\b\w/g, (char) =>
+
+        // Add the negative lookbehind (?<!['’]) before the \b\w
+        target.value = target.value.replace(/(?<!['’])\b\w/g, (char) =>
           char.toUpperCase(),
         );
+
         target.setSelectionRange(start, end);
       });
     }

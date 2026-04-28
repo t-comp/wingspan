@@ -183,11 +183,8 @@ export const TagManager = {
       const grouped: { [key: string]: any[] } = {};
 
       dbTags.forEach((tag) => {
-        // 1. Get the category directly from the backend DTO
         let cat = tag.tagCategory;
 
-        // 2. FALLBACK ONLY: If the backend category is empty/null,
-        // check the hardcoded list to try and "guess" where it belongs.
         if (!cat || cat === "Uncategorized" || cat.trim() === "") {
           const cleanName = (tag.tagName || "").toLowerCase().trim();
           for (const [categoryName, tagNames] of Object.entries(
@@ -202,7 +199,6 @@ export const TagManager = {
           }
         }
 
-        // 3. Final safety net
         const finalCat = cat || "Uncategorized";
 
         if (!grouped[finalCat]) grouped[finalCat] = [];
@@ -212,7 +208,6 @@ export const TagManager = {
       const listContainer = document.getElementById("adminTagCategoryList");
       if (!listContainer) return;
 
-      // 4. Render only the categories that actually exist in your database/fallback
       const categories = Object.keys(grouped).sort();
       listContainer.innerHTML = categories
         .map(

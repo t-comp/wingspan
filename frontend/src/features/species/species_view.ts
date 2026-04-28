@@ -65,7 +65,13 @@ export async function showSpeciesView(b: any) {
   if (portfolio) portfolio.style.display = "none";
   if (teamView) teamView.style.display = "none";
   if (speciesView) speciesView.style.display = "block";
-  window.scrollTo(0, 0);
+
+  const footer = document.querySelector("footer.footer") as HTMLElement;
+  const copyright = document.querySelector(".copyright") as HTMLElement;
+  if (footer) footer.style.display = "block";
+  if (copyright) copyright.style.display = "block";
+
+  window.scrollTo({ top: 0, behavior: "instant" });
 
   if (topSearchBarContainer) topSearchBarContainer.style.display = "none";
   if (filterPanel) {
@@ -77,6 +83,29 @@ export async function showSpeciesView(b: any) {
   AppState.currentSpeciesId = b.id;
   const isAdmin = AppState.userRole === "ADMIN";
   UI.populateSpeciesView(b, isAdmin);
+
+  // Render the attributes for the "View" mode
+
+  const customAttrContainer = document.getElementById(
+    "customAttributesDisplay",
+  );
+  if (customAttrContainer) {
+    customAttrContainer.innerHTML = ""; // Clear old ones
+
+    if (b.attributeDef && Object.keys(b.attributeDef).length > 0) {
+      let html = "";
+      Object.entries(b.attributeDef).forEach(([key, value]) => {
+        if (value && String(value).trim() !== "") {
+          html += `
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold" style="color: #0399b0">${key}:</div>
+                    <div class="col-8 text-muted">${value}</div>
+                </div>`;
+        }
+      });
+      customAttrContainer.innerHTML = html;
+    }
+  }
 
   // Setup Admin Action Buttons
   const actionSection = document.getElementById("speciesActionButtons");
@@ -126,6 +155,7 @@ export async function showSpeciesView(b: any) {
       const dynamicContainer = document.getElementById("dynamicSpeciesFields");
       if (dynamicContainer) dynamicContainer.innerHTML = "";
 
+      // 1. Set Standard Fields
       (document.getElementById("editSpeciesId") as HTMLInputElement).value =
         b.id;
       (document.getElementById("editSpeciesName") as HTMLInputElement).value =
@@ -140,17 +170,21 @@ export async function showSpeciesView(b: any) {
       (document.getElementById("editSpeciesGenus") as HTMLInputElement).value =
         b.genus || "";
 
-      const fullDesc = b.description || "";
-      const attributeRegex = /\[\[(.*?):\s*(.*?)\]\]/g;
-      let match;
-
-      while ((match = attributeRegex.exec(fullDesc)) !== null) {
-        addDynamicField(match[1].trim(), match[2].trim());
-      }
-
+      // 2. Set Description (Now just clean text)
       (
-        document.getElementById("editSpeciesDescription") as HTMLInputElement
-      ).value = fullDesc.replace(/\[\[.*?\]\]/g, "").trim();
+        document.getElementById("editSpeciesDescription") as HTMLTextAreaElement
+      ).value = b.description || "";
+
+      // 3. NEW ATTRIBUTE LOGIC: Populate from the backend Map
+      AppState.allAttributeKeys.forEach((key) => {
+        // If THIS specific species has a value for this key, get it.
+        // Otherwise, it stays an empty string.
+        const value =
+          b.attributeDef && b.attributeDef[key] ? b.attributeDef[key] : "";
+
+        // This adds the input field to the modal
+        addDynamicField(key, String(value));
+      });
     };
   }
 
@@ -192,11 +226,51 @@ export async function showSpeciesView(b: any) {
         });
       };
     }
+
+    // --- FEATURED IMAGE LOGIC ---
+    const featureBtn = document.getElementById("featureMainImageBtn");
+    const featureIcon = document.getElementById("featureMainStarIcon");
+
+    if (featureBtn && featureIcon) {
+      if (isAdmin) {
+        featureBtn.classList.remove("d-none");
+        const isFeatured = img.isFeatured;
+
+        // THE FIX: Only use setAttribute here inside the Admin check!
+        featureIcon.setAttribute(
+          "class",
+          isFeatured ? "fas fa-star" : "far fa-star",
+        );
+
+        featureBtn.className = isFeatured
+          ? "btn btn-sm btn-warning me-2"
+          : "btn btn-sm btn-outline-warning me-2";
+
+        featureBtn.onclick = async () => {
+          try {
+            if (isFeatured) await ButterflyAPI.unsetFeaturedImage(img.id);
+            else await ButterflyAPI.setFeaturedImage(img.id);
+
+            // Reload the view to sync the data and remove stars from old images!
+            const freshSpecies = await ButterflyAPI.getSpeciesById(
+              AppState.currentSpeciesId,
+            );
+            await showSpeciesView(freshSpecies);
+          } catch (err) {
+            console.error("Feature toggle failed", err);
+            alert("Failed to update featured status.");
+          }
+        };
+      } else {
+        featureBtn.classList.add("d-none");
+      }
+    }
   };
 
   let fetchedImages: any[] = [];
   try {
     fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
+    console.log("1. RAW BACKEND DATA:", fetchedImages);
   } catch (err) {
     console.error("Could not load images for species:", err);
   }
@@ -206,22 +280,43 @@ export async function showSpeciesView(b: any) {
       img.nathansNotes || img.nathan_notes || img.notes || "";
     return {
       id: img.id,
-      url: img.mediumUrl, // We keep this for the main UI backward compatibility
+      url: img.mediumUrl || img.fpath || img.displayUrl,
 
-      // --- NEW URL FIELDS FROM BACKEND ---
       originalUrl: img.originalUrl,
       largeUrl: img.largeUrl,
-      mediumUrl: img.mediumUrl,
+      mediumUrl: img.mediumUrl || img.fpath || img.displayUrl,
       smallUrl: img.smallUrl,
+
+      // catch capitalization, AND reconstruct the old URL for un-migrated images!
+      xSmallUrl:
+        img.xsmallUrl ||
+        img.XSmallUrl ||
+        img.xSmallUrl ||
+        (img.originalUrl
+          ? img.originalUrl.replace("_original", "_thumbnail")
+          : null),
       // -----------------------------------
 
+      isFeatured: img.isFeatured === true,
       size: img.fileSize ? img.fileSize + " bytes" : "Unknown",
       lifecycle: img.lifecycle || "Unknown",
       nathansNotes: noteFromBackend,
       tags: img.tags || [],
     };
   });
+
   const gridContainer = document.getElementById("speciesImages");
+
+  const sortImagesByFeatured = (images: any[]) => {
+    return [...images].sort((a, b) => {
+      const primaryFeaturedSort =
+        (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+      if (primaryFeaturedSort === 0) {
+        return a.id - b.id;
+      }
+      return primaryFeaturedSort;
+    });
+  };
 
   const renderInnerGrid = (selectedTags: string[] | string = "all") => {
     if (!gridContainer) return;
@@ -241,13 +336,18 @@ export async function showSpeciesView(b: any) {
       return tagsArray.every((id) => imageTagIds.includes(String(id)));
     });
 
-    if (filtered.length === 0) {
+    // INTERCEPT AND SORT HERE
+    const sortedFilteredImages = sortImagesByFeatured(filtered);
+
+    // Update the length check to use our new sorted array
+    if (sortedFilteredImages.length === 0) {
       gridContainer.innerHTML =
         '<p class="text-muted p-3">No images match this filter.</p>';
       return;
     }
 
-    filtered.forEach((imgObj: any) => {
+    // 'filtered.forEach' TO 'sortedFilteredImages.forEach'
+    sortedFilteredImages.forEach((imgObj: any) => {
       const col = document.createElement("div");
       col.className = "col-4 mb-2 gallery-thumb-wrapper position-relative";
       col.innerHTML = `
@@ -256,6 +356,17 @@ export async function showSpeciesView(b: any) {
                   draggable="false"
                   style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
           </div>
+          
+          ${
+            imgObj.isFeatured
+              ? `
+            <div class="position-absolute bottom-0 start-0 m-1" style="z-index: 5;">
+              <i class="fas fa-star text-warning" style="filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.8));"></i>
+            </div>
+          `
+              : ""
+          }
+          
           ${
             isAdmin
               ? `
@@ -306,7 +417,9 @@ export async function showSpeciesView(b: any) {
 
       if (gridContainer) gridContainer.appendChild(col);
     });
-    if (filtered.length > 0) setMainImage(filtered[0]);
+
+    //  the featured image becomes the main hero image
+    if (sortedFilteredImages.length > 0) setMainImage(sortedFilteredImages[0]);
   };
 
   const renderFilterPills = () => {
