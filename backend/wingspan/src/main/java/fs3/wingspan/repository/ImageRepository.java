@@ -101,4 +101,24 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
             @Param("tagNames") List<String> tagNames,
             @Param("tagCount") Long tagCount,
             @Param("excludeId") Integer excludeId);
+
+    //gets scientific name from species for longvity to pull from
+    @Query("""
+    SELECT i FROM Image i
+    JOIN i.species s
+    WHERE LOWER(s.scientificName) = LOWER(:scientificName)
+    AND LOWER(i.lifecyclestage) = LOWER(:lifecyclestage)
+    """)
+    List<Image> findBySpeciesScientificNameAndLifecyclestage(
+            @Param("scientificName") String scientificName,
+            @Param("lifecyclestage") String lifecyclestage);
+
+    // Also add a fallback that ignores lifecycle stage
+    @Query("""
+    SELECT i FROM Image i
+    JOIN i.species s
+    WHERE LOWER(s.scientificName) = LOWER(:scientificName)
+    """)
+    List<Image> findBySpeciesScientificName(
+            @Param("scientificName") String scientificName);
 }

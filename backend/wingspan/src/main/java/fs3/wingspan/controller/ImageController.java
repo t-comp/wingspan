@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -144,6 +145,32 @@ public class ImageController {
         List<Image> images = imageRepository.findBySpeciesId(species.getId());
         List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * GET image by species name specifically for Longevity integration
+     * GET /images/species/by-name/{speciesName}
+     */
+    @GetMapping("/species/by-name/{speciesName}")
+    public ResponseEntity<?> getImageBySpeciesName(
+            @PathVariable String speciesName,
+            @RequestParam(required = false, defaultValue = "adult") String lifecyclestage
+    ){
+        try{
+            List<Image> images = imageRepository.findBySpeciesScientificNameAndLifecyclestage(speciesName, lifecyclestage);
+
+            if(images.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+            Image image = images.get(0);
+            return ResponseEntity.ok(Map.of(
+                    "speciesName", speciesName,
+                    "lifecyclestage", lifecyclestage,
+                    "url", image.getOriginalUrl()
+            ));
+        }catch(RuntimeException e){
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
@@ -394,5 +421,11 @@ public class ImageController {
         }catch(IOException e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Delete failed"));
         }
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(Map.of("message", "File too large. Maximum size is 20MB."));
     }
 }
