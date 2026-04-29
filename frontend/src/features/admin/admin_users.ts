@@ -75,28 +75,36 @@ export function renderAllUsersTable(usersList: any[]) {
         ? u.username
         : u.email || "this user";
 
+    // Grab the first and last name, or show a fallback if empty
+    const fName = u.firstName || "";
+    const lName = u.lastName || "";
+
     tr.innerHTML = `
-        <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${safeUsername}</span></td>
-        <td class="text-muted text-truncate" style="font-size: 0.85rem; max-width: 200px;" title="${u.email}">${u.email}</td>
+        <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${fName}</span></td>
+        <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${lName}</span></td>
+        <td style="white-space: nowrap;"><span class="text-muted" style="font-size: 0.85rem;">${safeUsername}</span></td>
+        <td class="text-muted text-truncate" style="font-size: 0.85rem; max-width: 150px;" title="${u.email}">${u.email}</td>
         <td style="white-space: nowrap;"><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
-        <td class="text-truncate" style="max-width: 150px;"><span class="fw-bold text-secondary d-inline-block" style="font-size: 0.85rem;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
-        <td class="text-end" style="white-space: nowrap; min-width: 160px;">
+        <td class="text-truncate" style="max-width: 120px;"><span class="fw-bold text-secondary d-inline-block" style="font-size: 0.85rem;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
+        <td class="text-end" style="white-space: nowrap; min-width: 140px;">
             <div class="d-flex justify-content-end gap-1 flex-nowrap">
                 <div class="action-tooltip-container">
-                    <button class="btn-icon-only" onclick="window.openEditUserModal('${u.userId}', '${safeUsername}', '${u.email}')">
+                    <button class="btn-icon-only" onclick="window.openEditUserModal('${u.userId}', '${safeUsername}', '${u.email}', '${fName}', '${lName}')">
                         <i class="fas fa-edit text-secondary"></i>
                     </button>
                     <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Edit User</span>
                 </div>
+                
                 <div class="action-tooltip-container">
                     <button class="btn-icon-only" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">
-                        <i class="fas fa-user-cog text-secondary"></i>
+                        <i class="fas fa-user-shield text-info"></i>
                     </button>
-                    <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Toggle Role</span>
+                    <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Change Role</span>
                 </div>
+                
                 <div class="action-tooltip-container">
-                    <button class="btn-icon-only delete-btn" onclick="window.deleteUser('${u.userId}', '${safeUsername}')">
-                        <i class="fas fa-trash text-danger"></i>
+                    <button class="btn-icon-only" onclick="window.deleteUser('${u.userId}', '${safeUsername}')">
+                        <i class="fas fa-trash-alt text-danger"></i>
                     </button>
                     <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Delete User</span>
                 </div>
@@ -168,18 +176,22 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
     userId: string,
     currentUsername: string,
     currentEmail: string,
+    currentFirstName: string,
+    currentLastName: string,
   ) => {
     (document.getElementById("editUserId") as HTMLInputElement).value = userId;
     (document.getElementById("editUsername") as HTMLInputElement).value =
       currentUsername;
     (document.getElementById("editEmail") as HTMLInputElement).value =
       currentEmail;
+    (document.getElementById("editFirstName") as HTMLInputElement).value =
+      currentFirstName;
+    (document.getElementById("editLastName") as HTMLInputElement).value =
+      currentLastName;
     (document.getElementById("editPassword") as HTMLInputElement).value = "";
 
     const modal = document.getElementById("adminEditUserModal");
-    if (modal) {
-      new bootstrap.Modal(modal).show();
-    }
+    if (modal) new bootstrap.Modal(modal).show();
   };
 
   // --- ADD USER FORM LOGIC (STRICT) ---
@@ -187,6 +199,12 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
   if (adminAddUserForm) {
     adminAddUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const fNameVal = (
+        document.getElementById("adminNewFirstName") as HTMLInputElement
+      ).value.trim();
+      const lNameVal = (
+        document.getElementById("adminNewLastName") as HTMLInputElement
+      ).value.trim();
       const usernameVal = (
         document.getElementById("adminNewUsername") as HTMLInputElement
       ).value.trim();
@@ -224,6 +242,8 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
           return alert("This username already exists.");
         }
         await ButterflyAPI.adminCreateAccount({
+          firstName: fNameVal,
+          lastName: lNameVal,
           username: usernameVal,
           email: emailVal,
           password: passVal,
@@ -319,8 +339,9 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
       if (AppState.allCachedUsers) {
         const filtered = AppState.allCachedUsers.filter(
           (u: any) =>
-            (u.username && u.username.toLowerCase().includes(query)) ||
-            (u.email && u.email.toLowerCase().includes(query)),
+            // Search by First or Last Name
+            (u.firstName && u.firstName.toLowerCase().includes(query)) ||
+            (u.lastName && u.lastName.toLowerCase().includes(query)),
         );
         renderAllUsersTable(filtered);
       }

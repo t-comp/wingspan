@@ -138,6 +138,15 @@ document.addEventListener("DOMContentLoaded", () => {
   if (createAccountForm) {
     createAccountForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
+
+      // Grab the First and Last Name values
+      const firstNameVal = (
+        document.getElementById("createFirstName") as HTMLInputElement
+      ).value;
+      const lastNameVal = (
+        document.getElementById("createLastName") as HTMLInputElement
+      ).value;
+
       const usernameVal = (
         document.getElementById("createUsername") as HTMLInputElement
       ).value;
@@ -167,12 +176,17 @@ document.addEventListener("DOMContentLoaded", () => {
             "This username already exists. Please choose a different one.",
           );
         }
+
+        // Pass the new fields into the API
         await ButterflyAPI.createAccount({
+          firstName: firstNameVal,
+          lastName: lastNameVal,
           username: usernameVal,
           email: emailVal,
           password: passVal,
           utype: "STUDENT",
         });
+
         alert("Account created successfully! Please log in.");
         (e.target as HTMLFormElement).reset();
         showScreen("welcome");
@@ -181,6 +195,54 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // const createAccountForm = document.getElementById("createAccountForm");
+  // if (createAccountForm) {
+  //   createAccountForm.addEventListener("submit", async (e: Event) => {
+  //     e.preventDefault();
+  //     const usernameVal = (
+  //       document.getElementById("createUsername") as HTMLInputElement
+  //     ).value;
+  //     const emailVal = (
+  //       document.getElementById("createEmail") as HTMLInputElement
+  //     ).value;
+  //     const passVal = (
+  //       document.getElementById("createPassword") as HTMLInputElement
+  //     ).value;
+
+  //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //     if (!emailRegex.test(emailVal))
+  //       return alert("Please enter a valid email address.");
+  //     if (usernameVal.length < 5)
+  //       return alert("Username must be at least 5 characters long.");
+  //     if (passVal.length < 7)
+  //       return alert("Password must be at least 7 characters long.");
+
+  //     try {
+  //       const allUsers = await ButterflyAPI.getAllUsers();
+  //       if (
+  //         allUsers.some(
+  //           (u) => u.username.toLowerCase() === usernameVal.toLowerCase(),
+  //         )
+  //       ) {
+  //         return alert(
+  //           "This username already exists. Please choose a different one.",
+  //         );
+  //       }
+  //       await ButterflyAPI.createAccount({
+  //         username: usernameVal,
+  //         email: emailVal,
+  //         password: passVal,
+  //         utype: "STUDENT",
+  //       });
+  //       alert("Account created successfully! Please log in.");
+  //       (e.target as HTMLFormElement).reset();
+  //       showScreen("welcome");
+  //     } catch (error: any) {
+  //       alert(`Could not create account: ${error.message}`);
+  //     }
+  //   });
+  // }
 
   const handleLogout = async (e) => {
     e.preventDefault();

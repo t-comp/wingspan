@@ -23,6 +23,35 @@
       style="max-width: 400px; width: 100%; border-radius: 15px"
     >
       <form id="createAccountForm">
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label text-muted small fw-bold mb-1"
+              >First Name</label
+            >
+            <input
+              type="text"
+              class="form-control px-3 py-2"
+              id="createFirstName"
+              placeholder="e.g., David"
+              style="border-radius: 6px"
+              required
+            />
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label text-muted small fw-bold mb-1"
+              >Last Name</label
+            >
+            <input
+              type="text"
+              class="form-control px-3 py-2"
+              id="createLastName"
+              placeholder="e.g., Cook"
+              style="border-radius: 6px"
+              required
+            />
+          </div>
+        </div>
+
         <div class="mb-3">
           <label class="form-label text-muted small fw-bold mb-1"
             >Username</label
@@ -44,7 +73,7 @@
             type="email"
             class="form-control px-3 py-2"
             id="createEmail"
-            placeholder="isu58@iastate.edu"
+            placeholder="e.g., isu58@iastate.edu"
             style="border-radius: 6px"
             required
           />

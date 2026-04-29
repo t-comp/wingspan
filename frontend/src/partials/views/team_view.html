@@ -78,7 +78,7 @@
                 class="table table-hover align-middle mb-0"
                 style="table-layout: fixed; width: 100%"
               >
-                <thead
+                <!-- <thead
                   class="table-light"
                   style="position: sticky; top: 0; z-index: 10"
                 >
@@ -87,6 +87,21 @@
                     <th style="width: 30%">Email</th>
                     <th style="width: 15%">Role</th>
                     <th style="width: 15%">Team</th>
+                    <th class="text-end" style="width: 15%">Actions</th>
+                  </tr>
+                </thead> -->
+
+                <thead
+                  class="table-light"
+                  style="position: sticky; top: 0; z-index: 10"
+                >
+                  <tr>
+                    <th style="width: 15%">First Name</th>
+                    <th style="width: 15%">Last Name</th>
+                    <th style="width: 15%">Username</th>
+                    <th style="width: 20%">Email</th>
+                    <th style="width: 10%">Role</th>
+                    <th style="width: 10%">Team</th>
                     <th class="text-end" style="width: 15%">Actions</th>
                   </tr>
                 </thead>
@@ -175,14 +190,21 @@
       <div class="bg-white rounded border p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h4 class="fw-bold mb-1" style="color: #0399b0">Species Attributes</h4>
-            <p class="text-muted small mb-0">Add or delete an attribute! Note that the change will reflect on all species. </p>
+            <h4 class="fw-bold mb-1" style="color: #0399b0">
+              Species Attributes
+            </h4>
+            <p class="text-muted small mb-0">
+              Add or delete an attribute! Note that the change will reflect on
+              all species.
+            </p>
           </div>
         </div>
-    
+
         <div class="row">
           <div class="col-lg-6">
-            <label class="form-label fw-bold small text-muted">New Attribute</label>
+            <label class="form-label fw-bold small text-muted"
+              >New Attribute</label
+            >
             <div class="input-group shadow-sm mb-4">
               <input
                 type="text"
@@ -190,20 +212,24 @@
                 class="form-control"
                 placeholder="e.g. Host Plant..."
               />
-              <button id="adminAddAttributeSubmit" class="btn btn-success fw-bold px-4">
+              <button
+                id="adminAddAttributeSubmit"
+                class="btn btn-success fw-bold px-4"
+              >
                 <i class="fas fa-plus me-1"></i> Add Field
               </button>
             </div>
           </div>
         </div>
-    
-        <div class="border rounded bg-light p-3" style="min-height: 300px; max-height: 500px; overflow-y: auto;">
-          <div id="adminAttributesGrid" class="row g-3">
-            </div>
+
+        <div
+          class="border rounded bg-light p-3"
+          style="min-height: 300px; max-height: 500px; overflow-y: auto"
+        >
+          <div id="adminAttributesGrid" class="row g-3"></div>
         </div>
       </div>
     </div>
-    
 
     <div
       class="modal fade"
@@ -224,6 +250,28 @@
           <div class="modal-body">
             <form id="adminEditUserForm">
               <input type="hidden" id="editUserId" />
+
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label">First Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editFirstName"
+                    required
+                  />
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Last Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editLastName"
+                    required
+                  />
+                </div>
+              </div>
+
               <div class="mb-3">
                 <label class="form-label">Username</label>
                 <input
@@ -233,6 +281,7 @@
                   required
                 />
               </div>
+
               <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input

@@ -155,7 +155,7 @@ export const ButterflyAPI = {
     );
     return checkResponse(response);
   },
-  //check this 
+  //check this
   async updateSpeciesAttributes(speciesId, attributeMap) {
     const response = await fetch(
       `${API_BASE_URL}/species/${speciesId}/attributes`,
@@ -166,7 +166,7 @@ export const ButterflyAPI = {
       },
     );
     return checkResponse(response);
-},
+  },
 
   // ==========================
   // USER / AUTH ENDPOINTS
@@ -196,22 +196,38 @@ export const ButterflyAPI = {
     localStorage.removeItem("jwt");
   },
 
-  async createAccount(userData) {
+  async createAccount(userData: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    password: string;
+    utype: string;
+  }) {
     const response = await fetch(`${API_BASE_URL}/user/create-account`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        username: userData.username,
-        email: userData.email,
-        password: userData.password,
-        utype: "STUDENT",
-      }),
+      headers: getHeaders(),
+      body: JSON.stringify(userData),
     });
     return checkResponse(response);
   },
+
+  // async createAccount(userData) {
+  //   const response = await fetch(`${API_BASE_URL}/user/create-account`, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Accept: "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       username: userData.username,
+  //       email: userData.email,
+  //       password: userData.password,
+  //       utype: "STUDENT",
+  //     }),
+  //   });
+  //   return checkResponse(response);
+  // },
 
   async adminCreateAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/admin/create-account`, {

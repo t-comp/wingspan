@@ -70,19 +70,44 @@ export function openImageDetailsModal(
   const downloadContainer = document.getElementById("imageDownloadOptions");
   if (downloadContainer) downloadContainer.innerHTML = "";
 
-  // NEW: Keep track of pixel dimensions we've already shown
+  // Keep track of pixel dimensions we've already shown
   const renderedDimensions = new Set<string>();
 
+  // const setupDownloadRow = async (label: string, urlKey: string) => {
+  //   const targetUrl = img[urlKey];
+
+  //   console.log(
+  //     `3. Building Row [${label}]: Looking for key [${urlKey}]. Found:`,
+  //     targetUrl,
+  //   );
+
+  //   if (!targetUrl && urlKey !== "originalUrl") {
+  //     console.log(`   -> STOPPED: No URL found for ${label}`);
+  //     return;
+  //   }
+
+  //   const finalUrl = targetUrl || img.url || img.originalUrl;
+
+  //   // Change the condition to only check against the originalUrl:
+  //   if (urlKey !== "originalUrl" && finalUrl === img.originalUrl) {
+  //     return;
+  //   }
+
   const setupDownloadRow = async (label: string, urlKey: string) => {
-    const targetUrl = img[urlKey];
+    // Safely convert to a string to catch weird backend data types
+    const targetUrl = img[urlKey] ? String(img[urlKey]) : null;
 
     console.log(
       `3. Building Row [${label}]: Looking for key [${urlKey}]. Found:`,
       targetUrl,
     );
 
-    if (!targetUrl && urlKey !== "originalUrl") {
-      console.log(`   -> STOPPED: No URL found for ${label}`);
+    // Stops the row from building if the URL is missing, empty, or literally "null"
+    if (
+      (!targetUrl || targetUrl.trim() === "" || targetUrl === "null") &&
+      urlKey !== "originalUrl"
+    ) {
+      console.log(`   -> STOPPED: No valid URL found for ${label}`);
       return;
     }
 
@@ -167,7 +192,7 @@ export function openImageDetailsModal(
 
         console.log("=== COPY LINK CLICKED ===");
 
-        // 1. Secure Context (HTTPS or Localhost)
+        // Secure Context (HTTPS or Localhost)
         if (navigator.clipboard && window.isSecureContext) {
           navigator.clipboard
             .writeText(clipboardUrl)
@@ -193,7 +218,7 @@ export function openImageDetailsModal(
           textArea.style.left = "-9999px";
           textArea.style.top = "0";
 
-          // THE FIX: Append to the modal, NOT document.body.
+          // Append to the modal, NOT document.body.
           // This prevents Bootstrap's focus trap from stealing focus!
           modalEl.appendChild(textArea);
 
@@ -253,9 +278,7 @@ export function openImageDetailsModal(
       }
     });
 
-    // @ts-ignore
     let detailModal = bootstrap.Modal.getInstance(modalElement);
-    // @ts-ignore
     if (!detailModal) detailModal = new bootstrap.Modal(modalElement);
     detailModal.show();
   }
