@@ -224,23 +224,6 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
-  // async createAccount(userData) {
-  //   const response = await fetch(`${API_BASE_URL}/user/create-account`, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Accept: "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       username: userData.username,
-  //       email: userData.email,
-  //       password: userData.password,
-  //       utype: "STUDENT",
-  //     }),
-  //   });
-  //   return checkResponse(response);
-  // },
-
   async adminCreateAccount(userData) {
     const response = await fetch(`${API_BASE_URL}/user/admin/create-account`, {
       method: "POST",

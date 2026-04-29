@@ -60,14 +60,26 @@ export async function loadStudentData(email: string) {
         </div>
         <div class="card shadow-sm border-0 bg-white overflow-hidden" style="border-radius: 15px;">
             <div class="row g-0">
-                <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
-                    <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>
-                    <p class="text-muted small mb-2">${email}</p>
-                    <span class="badge rounded-pill px-4 py-1 mt-2 shadow-sm fw-bold" style="background-color: #0399b0; color: white;">STUDENT</span>
-                </div>
+              <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
+    <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-user"></i>
+    </div>
+  <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>
+    <p class="text-muted small mb-2">
+        <span class="text-secondary fw-bold">@${currentUser.username}</span> 
+        <span class="mx-2 text-opacity-25">|</span> 
+        ${email}
+    </p>
+    
+    <span class="badge rounded-pill px-4 py-1 mt-2 shadow-sm fw-bold" style="background-color: #0399b0; color: white;">STUDENT</span>
+    
+   <div class="action-tooltip-container position-absolute" style="bottom: 15px; left: 15px;">
+        <button id="openStudentEditBtn" class="btn-icon-only" style="color: #0399b0; width: 35px; height: 35px; font-size: 1.1rem;">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+        <span class="action-tooltip" style="bottom: 100%; left: 0; transform: none; margin-bottom: 8px; white-space: nowrap;">Edit Profile</span>
+    </div>
+</div>
                 <div class="col-md-8 p-5 d-flex flex-column align-items-center justify-content-center text-center">
                     <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
                     <h4 class="fw-bold text-secondary">Not Assigned to a Team</h4>
@@ -125,14 +137,25 @@ export async function loadStudentData(email: string) {
       </div>
       
 <div class="card border-0 bg-white overflow-hidden" style="border-radius: 15px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);">          <div class="row g-0">
-              <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
-                  <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                      <i class="fas fa-user"></i>
-                  </div>
-                  <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>
-                  <p class="text-muted small mb-2">${email}</p>
-                  <span class="badge rounded-pill px-4 py-1 mt-2 shadow-sm fw-bold" style="background-color: #0399b0; color: white;">STUDENT</span>
-              </div>
+           <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
+    <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-user"></i>
+    </div>
+  <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>
+    <p class="text-muted small mb-2">
+        <span class="text-secondary fw-bold">@${currentUser.username}</span> 
+        <span class="mx-2 text-opacity-25">|</span> 
+        ${email}
+    </p>
+    <span class="badge rounded-pill px-4 py-1 mt-2 shadow-sm fw-bold" style="background-color: #0399b0; color: white;">STUDENT</span>
+    
+  <div class="action-tooltip-container position-absolute" style="bottom: 15px; left: 15px;">
+        <button id="openStudentEditBtn" class="btn-icon-only" style="color: #0399b0; width: 35px; height: 35px; font-size: 1.1rem;">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+        <span class="action-tooltip" style="bottom: 100%; left: 0; transform: none; margin-bottom: 8px; white-space: nowrap;">Edit Profile</span>
+    </div>
+</div>
               
               <div class="col-md-8 p-5">
                   <h4 class="fw-bold mb-1" style="color: #0399b0;">${myTeam.name}</h4>
@@ -152,6 +175,121 @@ export async function loadStudentData(email: string) {
               </div>
           </div>
       </div>`;
+
+    // --- 4. STUDENT EDIT PROFILE LOGIC ---
+    const editBtn = document.getElementById("openStudentEditBtn");
+    if (editBtn) {
+      editBtn.addEventListener("click", () => {
+        (
+          document.getElementById("studentEditFirstName") as HTMLInputElement
+        ).value = fName;
+        (
+          document.getElementById("studentEditLastName") as HTMLInputElement
+        ).value = lName;
+        (
+          document.getElementById("studentEditUsername") as HTMLInputElement
+        ).value = currentUser.username || "";
+        (
+          document.getElementById("studentEditEmail") as HTMLInputElement
+        ).value = email;
+        (
+          document.getElementById("studentEditPassword") as HTMLInputElement
+        ).value = "";
+        (
+          document.getElementById(
+            "studentEditConfirmPassword",
+          ) as HTMLInputElement
+        ).value = "";
+
+        const modalEl = document.getElementById("studentEditProfileModal");
+        if (modalEl) {
+          // @ts-ignore
+          new bootstrap.Modal(modalEl).show();
+        }
+      });
+    }
+
+    const editForm = document.getElementById(
+      "studentEditProfileForm",
+    ) as HTMLFormElement;
+    if (editForm) {
+      editForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const newFName = (
+          document.getElementById("studentEditFirstName") as HTMLInputElement
+        ).value.trim();
+        const newLName = (
+          document.getElementById("studentEditLastName") as HTMLInputElement
+        ).value.trim();
+        const newUsername = (
+          document.getElementById("studentEditUsername") as HTMLInputElement
+        ).value.trim();
+        const newEmail = (
+          document.getElementById("studentEditEmail") as HTMLInputElement
+        ).value.trim();
+        const newPass = (
+          document.getElementById("studentEditPassword") as HTMLInputElement
+        ).value;
+        const confirmPass = (
+          document.getElementById(
+            "studentEditConfirmPassword",
+          ) as HTMLInputElement
+        ).value;
+
+        // Validation Checks
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+
+        if (!emailRegex.test(newEmail))
+          return alert("Please enter a valid email address.");
+        if (newUsername.length < 5)
+          return alert("Username must be at least 5 characters long.");
+        if (!usernameRegex.test(newUsername))
+          return alert(
+            "Username can only contain letters, numbers, and underscores (no spaces allowed).",
+          );
+
+        if (newPass !== "" || confirmPass !== "") {
+          if (newPass !== confirmPass)
+            return alert("Passwords do not match! Please try again.");
+          if (newPass.length < 7)
+            return alert("Password must be at least 7 characters long.");
+        }
+
+        try {
+          const userId = currentUser.userId || currentUser.id;
+
+          // Process API Updates
+          await ButterflyAPI.updateUsername(userId, newUsername);
+          await ButterflyAPI.updateEmail(userId, newEmail);
+          await ButterflyAPI.updateName(userId, newFName, newLName);
+
+          if (newPass !== "") {
+            await ButterflyAPI.resetPassword(newEmail, newPass);
+          }
+
+          // Update Local Storage so the navbar stays in sync!
+          currentUser.firstName = newFName;
+          currentUser.lastName = newLName;
+          currentUser.username = newUsername;
+          currentUser.email = newEmail;
+          localStorage.setItem("butterflyUser", JSON.stringify(currentUser));
+
+          alert("Profile successfully updated!");
+
+          const modal = document.getElementById("studentEditProfileModal");
+          if (modal) {
+            // @ts-ignore
+            bootstrap.Modal.getInstance(modal)?.hide();
+          }
+
+          // Refresh the dashboard with the new email
+          loadStudentData(newEmail);
+        } catch (error: any) {
+          alert("Failed to update profile: " + error.message);
+        }
+      };
+    }
   } catch (error) {
     console.error("Error loading student dashboard:", error);
   }
