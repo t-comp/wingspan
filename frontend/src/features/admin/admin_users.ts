@@ -82,11 +82,11 @@ export function renderAllUsersTable(usersList: any[]) {
     tr.innerHTML = `
         <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${fName}</span></td>
         <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${lName}</span></td>
-        <td style="white-space: nowrap;"><span class="text-muted" style="font-size: 0.85rem;">${safeUsername}</span></td>
-        <td class="text-muted text-truncate" style="font-size: 0.85rem; max-width: 150px;" title="${u.email}">${u.email}</td>
+        <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${safeUsername}</span></td>
+        <td class="text-muted text-truncate" style="font-size: 0.85rem; max-width: 200px;" title="${u.email}">${u.email}</td>
         <td style="white-space: nowrap;"><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
-        <td class="text-truncate" style="max-width: 120px;"><span class="fw-bold text-secondary d-inline-block" style="font-size: 0.85rem;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
-        <td class="text-end" style="white-space: nowrap; min-width: 140px;">
+        <td class="text-truncate" style="max-width: 150px;"><span class="fw-bold text-secondary d-inline-block" style="font-size: 0.85rem;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
+        <td class="text-end" style="white-space: nowrap; min-width: 160px;">
             <div class="d-flex justify-content-end gap-1 flex-nowrap">
                 <div class="action-tooltip-container">
                     <button class="btn-icon-only" onclick="window.openEditUserModal('${u.userId}', '${safeUsername}', '${u.email}', '${fName}', '${lName}')">
@@ -94,22 +94,48 @@ export function renderAllUsersTable(usersList: any[]) {
                     </button>
                     <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Edit User</span>
                 </div>
-                
                 <div class="action-tooltip-container">
                     <button class="btn-icon-only" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">
-                        <i class="fas fa-user-shield text-info"></i>
+                        <i class="fas fa-user-cog text-secondary"></i>
                     </button>
-                    <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Change Role</span>
+                    <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Toggle Role</span>
                 </div>
-                
                 <div class="action-tooltip-container">
-                    <button class="btn-icon-only" onclick="window.deleteUser('${u.userId}', '${safeUsername}')">
-                        <i class="fas fa-trash-alt text-danger"></i>
+                    <button class="btn-icon-only delete-btn" onclick="window.deleteUser('${u.userId}', '${safeUsername}')">
+                        <i class="fas fa-trash text-danger"></i>
                     </button>
                     <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Delete User</span>
                 </div>
             </div>
         </td>`;
+
+    // tr.innerHTML = `
+    //     <td style="white-space: nowrap;"><span class="fw-bold" style="font-size: 0.9rem;">${safeUsername}</span></td>
+    //     <td class="text-muted text-truncate" style="font-size: 0.85rem; max-width: 200px;" title="${u.email}">${u.email}</td>
+    //     <td style="white-space: nowrap;"><span class="badge ${badgeClass}" style="font-size: 0.65rem;">${currentRole}</span></td>
+    //     <td class="text-truncate" style="max-width: 150px;"><span class="fw-bold text-secondary d-inline-block" style="font-size: 0.85rem;" title="${teamName.replace(/<[^>]*>?/gm, "")}">${teamName}</span></td>
+    //     <td class="text-end" style="white-space: nowrap; min-width: 160px;">
+    //         <div class="d-flex justify-content-end gap-1 flex-nowrap">
+    //             <div class="action-tooltip-container">
+    //                 <button class="btn-icon-only" onclick="window.openEditUserModal('${u.userId}', '${safeUsername}', '${u.email}')">
+    //                     <i class="fas fa-edit text-secondary"></i>
+    //                 </button>
+    //                 <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Edit User</span>
+    //             </div>
+    //             <div class="action-tooltip-container">
+    //                 <button class="btn-icon-only" onclick="window.toggleUserRole('${u.userId}', '${currentRole}')">
+    //                     <i class="fas fa-user-cog text-secondary"></i>
+    //                 </button>
+    //                 <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Toggle Role</span>
+    //             </div>
+    //             <div class="action-tooltip-container">
+    //                 <button class="btn-icon-only delete-btn" onclick="window.deleteUser('${u.userId}', '${safeUsername}')">
+    //                     <i class="fas fa-trash text-danger"></i>
+    //                 </button>
+    //                 <span class="action-tooltip" style="right: 100%; top: 50%; bottom: auto; left: auto; transform: translateY(-50%); margin-right: 8px; white-space: nowrap;">Delete User</span>
+    //             </div>
+    //         </div>
+    //     </td>`;
 
     tbody.appendChild(tr);
   });
@@ -265,6 +291,10 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
   }
 
   // --- EDIT USER FORM LOGIC (STRICT) ---
+
+  // src/features/admin/admin_users.ts
+
+  // --- EDIT USER FORM LOGIC (STRICT) ---
   const adminEditUserForm = document.getElementById("adminEditUserForm");
   if (adminEditUserForm) {
     adminEditUserForm.addEventListener("submit", async (e) => {
@@ -276,6 +306,14 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
       ).value.trim();
       const newEmail = (
         document.getElementById("editEmail") as HTMLInputElement
+      ).value.trim();
+
+      // THE FIX: Grab the new First and Last Name values!
+      const newFirstName = (
+        document.getElementById("editFirstName") as HTMLInputElement
+      ).value.trim();
+      const newLastName = (
+        document.getElementById("editLastName") as HTMLInputElement
       ).value.trim();
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -301,8 +339,18 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
         ) {
           return alert("This username already exists.");
         }
+
+        // Update the basic fields
         await ButterflyAPI.updateUsername(userId, newUsername);
         await ButterflyAPI.updateEmail(userId, newEmail);
+        if (typeof ButterflyAPI.updateName === "function") {
+          await ButterflyAPI.updateName(userId, newFirstName, newLastName);
+          console.log(
+            `Successfully updated name to: ${newFirstName} ${newLastName}`,
+          );
+        } else {
+          console.warn("ButterflyAPI.updateName is not yet implemented.");
+        }
 
         const newPassword = (
           document.getElementById("editPassword") as HTMLInputElement
@@ -311,8 +359,11 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
           if (newPassword.length < 7)
             return alert("Password must be at least 7 characters long.");
           await ButterflyAPI.resetPassword(newEmail, newPassword);
+          console.log("Password successfully reset!");
         }
+
         await refreshAdminData();
+        console.log("Admin data successfully refreshed after edit!");
 
         const modal = document.getElementById("adminEditUserModal");
         if (modal) {
@@ -321,6 +372,7 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
         }
         alert("User successfully updated!");
       } catch (error) {
+        console.error("Failed to update user:", error);
         alert("Failed to update user.");
       }
     });
@@ -335,14 +387,31 @@ export function initAdminUsers(refreshAdminData: () => Promise<void>) {
     adminUserSearchEl.parentNode?.replaceChild(newSearchBtn, adminUserSearchEl);
 
     newSearchBtn.addEventListener("input", (e) => {
-      const query = (e.target as HTMLInputElement).value.toLowerCase();
+      const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
+
       if (AppState.allCachedUsers) {
-        const filtered = AppState.allCachedUsers.filter(
-          (u: any) =>
-            // Search by First or Last Name
-            (u.firstName && u.firstName.toLowerCase().includes(query)) ||
-            (u.lastName && u.lastName.toLowerCase().includes(query)),
-        );
+        // If the search bar is empty, instantly render all users
+        if (query === "") {
+          renderAllUsersTable(AppState.allCachedUsers);
+          return;
+        }
+
+        // Otherwise, filter the list safely (handling null values)
+        const filtered = AppState.allCachedUsers.filter((u: any) => {
+          const fName = u.firstName ? u.firstName.toLowerCase() : "";
+          const lName = u.lastName ? u.lastName.toLowerCase() : "";
+          const uName = u.username ? u.username.toLowerCase() : "";
+          const email = u.email ? u.email.toLowerCase() : "";
+
+          // search by name, username, or email
+          return (
+            fName.includes(query) ||
+            lName.includes(query) ||
+            uName.includes(query) ||
+            email.includes(query)
+          );
+        });
+
         renderAllUsersTable(filtered);
       }
     });

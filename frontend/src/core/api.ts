@@ -212,6 +212,18 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
+  async updateName(userId, firstName, lastName) {
+    const params = new URLSearchParams();
+    if (firstName) params.append("firstName", firstName);
+    if (lastName) params.append("lastName", lastName);
+
+    const response = await fetch(
+      `${API_BASE_URL}/user/${userId}/update-name?${params.toString()}`,
+      { method: "PUT", headers: getHeaders() },
+    );
+    return checkResponse(response);
+  },
+
   // async createAccount(userData) {
   //   const response = await fetch(`${API_BASE_URL}/user/create-account`, {
   //     method: "POST",

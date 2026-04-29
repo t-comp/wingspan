@@ -1,51 +1,91 @@
 <div class="modal fade" id="adminAddUserModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold">Add New User</h5>
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+        <h5 class="modal-title fw-bold" style="color: #0399b0">Add New User</h5>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close shadow-none"
           data-bs-dismiss="modal"
         ></button>
       </div>
-      <div class="modal-body">
+
+      <div class="modal-body p-4">
         <form id="adminAddUserForm">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-muted mb-1"
+                >First Name</label
+              >
+              <input
+                type="text"
+                class="form-control shadow-none"
+                id="adminNewFirstName"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-muted mb-1"
+                >Last Name</label
+              >
+              <input
+                type="text"
+                class="form-control shadow-none"
+                id="adminNewLastName"
+                required
+              />
+            </div>
+          </div>
+
           <div class="mb-3">
-            <label class="form-label">Username</label>
+            <label class="form-label fw-bold small text-muted mb-1"
+              >Username</label
+            >
             <input
               type="text"
-              class="form-control"
+              class="form-control shadow-none"
               id="adminNewUsername"
               required
             />
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Email</label>
+            <label class="form-label fw-bold small text-muted mb-1"
+              >Email</label
+            >
             <input
-              type="text"
-              class="form-control"
+              type="email"
+              class="form-control shadow-none"
               id="adminNewEmail"
               required
             />
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Password</label>
+            <label class="form-label fw-bold small text-muted mb-1"
+              >Password</label
+            >
             <input
               type="password"
-              class="form-control"
+              class="form-control shadow-none"
               id="adminNewPassword"
               required
+              minlength="7"
             />
           </div>
-          <div class="mb-3">
-            <label class="form-label">Role</label>
-            <select class="form-select" id="adminNewRole">
+
+          <div class="mb-4">
+            <label class="form-label fw-bold small text-muted mb-1">Role</label>
+            <select class="form-select shadow-none" id="adminNewRole">
               <option value="STUDENT">Student</option>
               <option value="ADMIN">Admin</option>
             </select>
           </div>
-          <button type="submit" class="btn btn-success w-100">
+
+          <button
+            type="submit"
+            class="btn btn-wingspan-primary w-100 rounded-pill fw-bold py-2 mt-2"
+          >
             Create User
           </button>
         </form>

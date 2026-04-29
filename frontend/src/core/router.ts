@@ -282,4 +282,11 @@ document.addEventListener("DOMContentLoaded", () => {
       TagManager.initTagContainer();
     }
   });
+
+  // Fix for Chrome's strict aria-hidden focus warnings on Bootstrap modals
+  document.addEventListener("hide.bs.modal", () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  });
 });
