@@ -1,54 +1,13 @@
-<section id="teamView" class="py-4" style="display: none; min-height: 50vh">
+<section
+  id="teamView"
+  class="py-4"
+  style="display: none; min-height: auto !important"
+>
   <div class="container">
     <div id="studentTeamContent" style="display: none">
       <div class="row g-4">
-        <div class="col-lg-5">
-          <h2 class="text-muted mb-4">Account Information</h2>
-          <div class="card shadow-sm border-0 bg-light p-4 mb-5">
-            <div class="d-flex align-items-center">
-              <div
-                class="profile-circle me-4 shadow-sm"
-                style="
-                  width: 65px;
-                  height: 65px;
-                  font-size: 1.8rem;
-                  background-color: #0399b0;
-                  color: white;
-                "
-              >
-                <i class="fas fa-user"></i>
-              </div>
-              <div>
-                <h4
-                  class="fw-bold mb-1"
-                  id="dropdownUsername"
-                  style="color: #0399b0"
-                ></h4>
-                <div class="text-muted mb-2" id="dropdownEmail"></div>
-                <span
-                  class="badge px-3 py-2 shadow-sm"
-                  id="dropdownRole"
-                  style="background-color: #0399b0; font-size: 0.75rem"
-                ></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-7">
-          <div id="studentTeamDynamicContent">
-            <h2 class="text-muted mb-4">My Team Overview</h2>
-            <div class="card shadow-sm border-0 bg-light p-4">
-              <div class="card-body">
-                <h4 class="fw-bold text-primary">Your Team Information</h4>
-                <p class="text-muted">
-                  Currently, you are assigned as a Student user. Future updates
-                  will display your assigned team members and project API keys
-                  here.
-                </p>
-              </div>
-            </div>
-          </div>
+        <div class="col-12">
+          <div id="studentTeamDynamicContent"></div>
         </div>
       </div>
     </div>
@@ -78,7 +37,7 @@
                 class="table table-hover align-middle mb-0"
                 style="table-layout: fixed; width: 100%"
               >
-                <thead
+                <!-- <thead
                   class="table-light"
                   style="position: sticky; top: 0; z-index: 10"
                 >
@@ -87,6 +46,21 @@
                     <th style="width: 30%">Email</th>
                     <th style="width: 15%">Role</th>
                     <th style="width: 15%">Team</th>
+                    <th class="text-end" style="width: 15%">Actions</th>
+                  </tr>
+                </thead> -->
+
+                <thead
+                  class="table-light"
+                  style="position: sticky; top: 0; z-index: 10"
+                >
+                  <tr>
+                    <th style="width: 15%">First Name</th>
+                    <th style="width: 15%">Last Name</th>
+                    <th style="width: 15%">Username</th>
+                    <th style="width: 20%">Email</th>
+                    <th style="width: 10%">Role</th>
+                    <th style="width: 10%">Team</th>
                     <th class="text-end" style="width: 15%">Actions</th>
                   </tr>
                 </thead>
@@ -168,42 +142,58 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="tab-pane fade" id="tab-attributes" role="tabpanel" tabindex="0">
-      <div class="bg-white rounded border p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h4 class="fw-bold mb-1" style="color: #0399b0">Species Attributes</h4>
-            <p class="text-muted small mb-0">Add or delete an attribute! Note that the change will reflect on all species. </p>
-          </div>
-        </div>
-    
-        <div class="row">
-          <div class="col-lg-6">
-            <label class="form-label fw-bold small text-muted">New Attribute</label>
-            <div class="input-group shadow-sm mb-4">
-              <input
-                type="text"
-                id="adminNewAttributeName"
-                class="form-control"
-                placeholder="e.g. Host Plant..."
-              />
-              <button id="adminAddAttributeSubmit" class="btn btn-success fw-bold px-4">
-                <i class="fas fa-plus me-1"></i> Add Field
-              </button>
+        <div
+          class="tab-pane fade"
+          id="tab-attributes"
+          role="tabpanel"
+          tabindex="0"
+        >
+          <div class="bg-white rounded border p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="fw-bold mb-1" style="color: #0399b0">
+                  Species Attributes
+                </h4>
+                <p class="text-muted small mb-0">
+                  Add or delete an attribute! Note that the change will reflect
+                  on all species.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-lg-6">
+                <label class="form-label fw-bold small text-muted"
+                  >New Attribute</label
+                >
+                <div class="input-group shadow-sm mb-4">
+                  <input
+                    type="text"
+                    id="adminNewAttributeName"
+                    class="form-control"
+                    placeholder="e.g. Host Plant..."
+                  />
+                  <button
+                    id="adminAddAttributeSubmit"
+                    class="btn btn-success fw-bold px-4"
+                  >
+                    <i class="fas fa-plus me-1"></i> Add Field
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="border rounded bg-light p-3"
+              style="min-height: 300px; max-height: 500px; overflow-y: auto"
+            >
+              <div id="adminAttributesGrid" class="row g-3"></div>
             </div>
           </div>
-        </div>
-    
-        <div class="border rounded bg-light p-3" style="min-height: 300px; max-height: 500px; overflow-y: auto;">
-          <div id="adminAttributesGrid" class="row g-3">
-            </div>
         </div>
       </div>
     </div>
-    
 
     <div
       class="modal fade"
@@ -224,6 +214,28 @@
           <div class="modal-body">
             <form id="adminEditUserForm">
               <input type="hidden" id="editUserId" />
+
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label">First Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editFirstName"
+                    required
+                  />
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Last Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editLastName"
+                    required
+                  />
+                </div>
+              </div>
+
               <div class="mb-3">
                 <label class="form-label">Username</label>
                 <input
@@ -233,6 +245,7 @@
                   required
                 />
               </div>
+
               <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input
@@ -418,6 +431,112 @@
               </button>
             </form>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="studentEditProfileModal"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+          <h5 class="modal-title fw-bold" style="color: #0399b0">
+            Edit Profile
+          </h5>
+          <button
+            type="button"
+            class="btn-close shadow-none"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="studentEditProfileForm">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted mb-1"
+                  >First Name</label
+                >
+                <input
+                  type="text"
+                  class="form-control shadow-none"
+                  id="studentEditFirstName"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted mb-1"
+                  >Last Name</label
+                >
+                <input
+                  type="text"
+                  class="form-control shadow-none"
+                  id="studentEditLastName"
+                  required
+                />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted mb-1"
+                >Username</label
+              >
+              <input
+                type="text"
+                class="form-control shadow-none"
+                id="studentEditUsername"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted mb-1"
+                >Email</label
+              >
+              <input
+                type="email"
+                class="form-control shadow-none"
+                id="studentEditEmail"
+                required
+              />
+            </div>
+
+            <hr class="my-4 border-light" />
+            <h6 class="fw-bold small mb-3" style="color: #0399b0">
+              Update Password (Optional)
+            </h6>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted mb-1"
+                >New Password</label
+              >
+              <input
+                type="password"
+                class="form-control shadow-none"
+                id="studentEditPassword"
+                placeholder="Leave blank to keep current"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-muted mb-1"
+                >Confirm New Password</label
+              >
+              <input
+                type="password"
+                class="form-control shadow-none"
+                id="studentEditConfirmPassword"
+                placeholder="Leave blank to keep current"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-wingspan-primary w-100 rounded-pill fw-bold py-2 mt-2"
+            >
+              Save Changes
+            </button>
+          </form>
         </div>
       </div>
     </div>

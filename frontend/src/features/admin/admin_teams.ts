@@ -79,11 +79,15 @@ export async function loadTeams() {
     } else {
       unassigned.forEach((u: any) => {
         const uniqueId = `chk-${team.id}-${u.userId}`;
+        const fName = u.firstName || "";
+        const lName = u.lastName || "";
+        const fullName = `${fName} ${lName}`.trim() || u.email; // Fallback to email if no name exists
+
         studentCheckboxesHtml += `
-              <div class="form-check p-2 ms-4 student-item" data-search-term="${u.username.toLowerCase()} ${u.email.toLowerCase()}">
-                  <input class="form-check-input student-checkbox" type="checkbox" value="${u.userId}" id="${uniqueId}" data-username="${u.username}">
+              <div class="form-check p-2 ms-4 student-item" data-search-term="${fName.toLowerCase()} ${lName.toLowerCase()} ${u.email.toLowerCase()}">
+                  <input class="form-check-input student-checkbox" type="checkbox" value="${u.userId}" id="${uniqueId}" data-username="${fullName}">
                   <label class="form-check-label small w-100 cursor-pointer" for="${uniqueId}">
-                      ${u.username} <span class="text-muted">— ${u.email}</span>
+                      ${fullName} <span class="text-muted"> |  ${u.email}</span>
                   </label>
               </div>`;
       });
@@ -93,15 +97,18 @@ export async function loadTeams() {
       members.length === 0
         ? `<span class="text-muted fst-italic small">No members yet</span>`
         : members
-            .map(
-              (m: any) => `
-            <span class="d-inline-flex align-items-center gap-1 me-1 mb-1 px-3 py-1 rounded-pill border small fw-bold"
-                  style="background: #f8f9fa; font-size: 0.75rem; color: #495057;">
-                ${m.username}
-                <span style="cursor:pointer; font-size:11px; color:#adb5bd; margin-left:6px; padding: 2px;"
-                      onclick="window.removeStudentFromTeam('${team.id}', '${m.userId}')"><i class="fas fa-times"></i></span>
-            </span>`,
-            )
+            .map((m: any) => {
+              const fName = m.firstName || "";
+              const lName = m.lastName || "";
+              const fullName = `${fName} ${lName}`.trim() || m.email;
+              return `
+                <span class="d-inline-flex align-items-center gap-1 me-1 mb-1 px-3 py-1 rounded-pill border small fw-bold"
+                      style="background: #f8f9fa; font-size: 0.75rem; color: #495057;">
+                    ${fullName}
+                    <span style="cursor:pointer; font-size:11px; color:#adb5bd; margin-left:6px; padding: 2px;"
+                          onclick="window.removeStudentFromTeam('${team.id}', '${m.userId}')"><i class="fas fa-times"></i></span>
+                </span>`;
+            })
             .join("");
 
     let apiKeyHtml = "";

@@ -29,4 +29,8 @@ public interface SpeciesRepository extends JpaRepository<Species, Integer> {
     List<String> findAllGenesus();
 
     Species findByNameOrScientificName(String name, String scientificName);
+
+    boolean existsByScientificName(String scientificName);
+
+
 }

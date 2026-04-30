@@ -693,18 +693,11 @@
   color: #dc3545;
 }
 
-/* Settings Button Hover Effect */
+/* Settings Button Hover Effect (Updated for Username) */
 #settingsDropdown {
-  transition: background-color 0.2s ease;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-#settingsDropdown:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Action Tooltips (like the nav filter) */

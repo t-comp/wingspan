@@ -342,14 +342,25 @@
         class="dropdown d-flex flex-column align-items-center position-relative nav-action-container"
       >
         <button
-          class="btn btn-link text-white p-0 shadow-none"
+          class="btn btn-link text-white p-0 shadow-none text-decoration-none fw-bold d-flex align-items-center"
           id="settingsDropdown"
           data-bs-toggle="dropdown"
           aria-expanded="false"
+          style="transition: opacity 0.2s ease"
+          onmouseover="this.style.opacity = '0.8'"
+          onmouseout="this.style.opacity = '1'"
         >
-          <i class="fas fa-ellipsis-h fs-4"></i>
+          <i class="fas fa-user-circle fs-4 me-2"></i>
+          <span
+            id="dropdownUsername"
+            style="font-size: 1.05rem; letter-spacing: 0.5px"
+            >Account</span
+          >
+          <i
+            class="fas fa-chevron-down ms-2 opacity-75"
+            style="font-size: 0.75rem"
+          ></i>
         </button>
-        <span class="navbar-static-label custom-tooltip">Settings</span>
 
         <ul
           class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 py-0 overflow-hidden"

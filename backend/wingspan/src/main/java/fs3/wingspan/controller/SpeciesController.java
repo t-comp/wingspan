@@ -1,7 +1,9 @@
 package fs3.wingspan.controller;
 
+import fs3.wingspan.dto.ImageDTO;
 import fs3.wingspan.dto.MessageResponse;
 import fs3.wingspan.dto.SpeciesDTO;
+import fs3.wingspan.dto.SpeciesWithImagesDTO;
 import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
 import fs3.wingspan.repository.ImageRepository;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,18 +39,18 @@ public class SpeciesController {
     public ResponseEntity<?> createSpecies(@RequestBody Species s) {
 
         if (s.getName() == null || s.getName().isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Please enter a name for the species."));
+            return ResponseEntity.badRequest().body(new MessageResponse("Please enter a name for the species."));
         }
 
-        if (speciesRepository.existsByName(s.getName())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new MessageResponse(s.getName() + " already exists."));
+        if (s.getScientificName() == null || s.getScientificName().isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Scientific name is required."));
+        }
+        if (speciesRepository.existsByScientificName(s.getScientificName())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new MessageResponse(s.getScientificName() + " already exists."));
         }
 
         Species saved = speciesRepository.save(s);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(SpeciesDTO.fromSpecies(saved, thumbnailFallback(saved)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(SpeciesDTO.fromSpecies(saved, thumbnailFallback(saved)));
     }
 
     /**
@@ -266,6 +269,47 @@ public class SpeciesController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Species not found"));
         }
         return ResponseEntity.ok(s.getAttributeDefs());
+    }
+
+    /**
+     * get all species with all their images nested
+     * GET /species/all-with-images
+     */
+    @GetMapping("/all-with-images")
+    public ResponseEntity<List<SpeciesWithImagesDTO>> getAllSpeciesWithImages() {
+        List<Species> species = speciesRepository.findAll();
+        List<SpeciesWithImagesDTO> res = new ArrayList<>();
+
+        for(Species s : species){
+            List<Image> images = imageRepository.findBySpeciesId(s.getId());
+            List<ImageDTO> imageDTOs = new ArrayList<>();
+            for(Image i : images){
+                imageDTOs.add(ImageDTO.fromImage(i));
+            }
+            res.add(SpeciesWithImagesDTO.fromSpecies(s, thumbnailFallback(s), imageDTOs));
+        }
+
+        return ResponseEntity.ok(res);
+    }
+
+    /**
+     * get a single species with all its images by common name or scientific name
+     * GET /species/name/{name}/with-images
+     */
+    @GetMapping("/name/{name}/with-images")
+    public ResponseEntity<?> getSpeciesWithImagesByName(@PathVariable String name) {
+        Species s = speciesRepository.findByNameOrScientificName(name, name);
+        if(s == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Species not found"));
+        }
+
+        List<Image> images = imageRepository.findBySpeciesId(s.getId());
+        List<ImageDTO> imageDTOs = new ArrayList<>();
+        for(Image i : images){
+            imageDTOs.add(ImageDTO.fromImage(i));
+        }
+
+        return ResponseEntity.ok(SpeciesWithImagesDTO.fromSpecies(s, thumbnailFallback(s), imageDTOs));
     }
 
 
