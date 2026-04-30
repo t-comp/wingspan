@@ -136,42 +136,25 @@ public class ImageController {
      * GET /images/species/name/{name}
      */
     @GetMapping("/species/name/{name}")
-    public ResponseEntity<?> getImagesBySpeciesName(@PathVariable String name) {
+    public ResponseEntity<?> getImagesBySpeciesName(@PathVariable String name,
+                                                    @RequestParam(required = false) String lifecyclestage) {
         Species species = speciesRepository.findByNameOrScientificName(name, name);
         if(species == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Species not found"));
         }
-        List<Image> images = imageRepository.findBySpeciesId(species.getId());
+        List<Image> images = lifecyclestage != null
+                ? imageRepository.findBySpeciesIdAndLifecyclestage(species.getId(), lifecyclestage)
+                : imageRepository.findBySpeciesId(species.getId());
+
+        if(images.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
         List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
         return ResponseEntity.ok(dtos);
     }
 
-    /**
-     * GET image by species name specifically for Longevity integration
-     * GET /images/species/by-name/{speciesName}
-     */
-    @GetMapping("/species/by-name/{speciesName}")
-    public ResponseEntity<?> getImageBySpeciesName(
-            @PathVariable String speciesName,
-            @RequestParam(required = false, defaultValue = "adult") String lifecyclestage
-    ){
-        try{
-            List<Image> images = imageRepository.findBySpeciesScientificNameAndLifecyclestage(speciesName, lifecyclestage);
-
-            if(images.isEmpty()){
-                return ResponseEntity.notFound().build();
-            }
-            Image image = images.get(0);
-            return ResponseEntity.ok(Map.of(
-                    "speciesName", speciesName,
-                    "lifecyclestage", lifecyclestage,
-                    "url", image.getOriginalUrl()
-            ));
-        }catch(RuntimeException e){
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     /**
      * Filter images within a species by tag IDs
