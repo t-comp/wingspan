@@ -491,9 +491,9 @@ export const ButterflyAPI = {
     return checkResponse(response);
   },
 
-  async getImagesBySpecies(speciesId) {
+  async getImagesBySpecies(scientificName) {
     const response = await fetch(
-      `${API_BASE_URL}/images/species/${speciesId}`,
+      `${API_BASE_URL}/images/species/name/${encodeURIComponent(scientificName)}`,
       { headers: getHeaders() },
     );
     return checkResponse(response);

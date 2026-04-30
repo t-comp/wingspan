@@ -269,7 +269,10 @@ export async function showSpeciesView(b: any) {
 
   let fetchedImages: any[] = [];
   try {
-    fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
+    // fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
+    fetchedImages = await ButterflyAPI.getImagesBySpecies(
+      b.scientificName
+    );
     console.log("1. RAW BACKEND DATA:", fetchedImages);
   } catch (err) {
     console.error("Could not load images for species:", err);

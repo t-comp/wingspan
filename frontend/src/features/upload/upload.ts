@@ -24,29 +24,10 @@ export interface UploadCallbacks {
 }
 
 export function initUpload(callbacks: UploadCallbacks) {
-  const hInputDetect = document.getElementById(
-    "speciesSelectorValue"
-  ) as HTMLInputElement;
-  if (hInputDetect) {
-    const originalSet = Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value"
-    )!.set;
-    Object.defineProperty(hInputDetect, "value", {
-      set: function (val) {
-        if (val === "NEW") {
-          console.warn("!!! CULPRIT FOUND !!! Value being reset to NEW.");
-          console.trace(); // This prints the exact function path to the console
-        }
-        originalSet!.call(this, val);
-      },
-    });
-  }
+
   let selectedUploadFiles: UploadFileData[] = [];
   let currentSelectedFileIndex = -1;
-  // const hiddenInput = document.getElementById("speciesSelectorValue") as HTMLInputElement;
-  // const btnText = document.getElementById("speciesDropdownText");
-  // const newSpeciesFields = document.getElementById("newSpeciesFields");
+  let currentSpeciesId = "NEW";
 
   const universalUploadForm = document.getElementById("universalUploadForm");
 
@@ -98,28 +79,42 @@ export function initUpload(callbacks: UploadCallbacks) {
     });
   }
 
+  const updateSummary = () => {
+    const summaryArea = document.getElementById("selectedTagsSummary");
+
+    const checkedBoxes = document.querySelectorAll(
+      '#fullTagGrid input[type="checkbox"]:checked'
+    ) as NodeListOf<HTMLInputElement>;
+
+    if (summaryArea) {
+      if (checkedBoxes.length === 0) {
+        summaryArea.innerHTML =
+          '<span class="text-muted small italic">No tags selected</span>';
+      } else {
+        const badges = Array.from(checkedBoxes).map((cb) => {
+          const label =
+            document
+              .querySelector(`label[for="${cb.id}"]`)
+              ?.textContent?.trim() || "Tag";
+
+          return `
+            <span class="badge bg-primary rounded-pill px-2 py-1"
+              style="font-size: 10px;">
+              ${label}
+            </span>
+          `;
+        });
+
+        summaryArea.innerHTML = badges.join(" ");
+      }
+    }
+  };
+
   // --- Main Upload Modal Logic ---
   if (universalUploadForm) {
     const uploadModal = document.getElementById("addButterflyModal");
 
     if (uploadModal) {
-      uploadModal.addEventListener("hidden.bs.modal", (e) => {
-
-        if (e.target !== uploadModal) {
-          console.log(
-            "Blocking cleanup: Event came from child element:",
-            (e.target as HTMLElement).id
-          );
-          return;
-        }
-
-        console.log("REAL Cleanup: The Main Modal itself is actually closing.");
-
- 
-        selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
-        selectedUploadFiles = [];
-        currentSelectedFileIndex = -1;
-      });
 
       uploadModal.addEventListener("show.bs.modal", async (e) => {
         if (e.target !== uploadModal) return;
@@ -130,6 +125,13 @@ export function initUpload(callbacks: UploadCallbacks) {
         const hiddenInput = document.getElementById(
           "speciesSelectorValue"
         ) as HTMLInputElement;
+
+        currentSpeciesId = hiddenInput.value || "NEW";
+
+        console.log(
+          "Modal opened. Restored currentSpeciesId:",
+          currentSpeciesId
+        );
 
         const newSpeciesFields = document.getElementById("newSpeciesFields");
         const searchInput = document.getElementById(
@@ -168,7 +170,6 @@ export function initUpload(callbacks: UploadCallbacks) {
           );
         }
 
-
         let html = `<button type="button" class="dropdown-item species-option border-bottom py-2" data-value="NEW"><span class="text-primary fw-bold">Create New Species</span></button>`;
         const sortedForDropdown = [...AppState.butterflies].sort((a, b) => {
           const nameA =
@@ -196,12 +197,21 @@ export function initUpload(callbacks: UploadCallbacks) {
           item.addEventListener("click", (e) => {
             const btn = e.currentTarget as HTMLElement;
 
-            const val = btn.getAttribute("data-value") || "NEW";
+            // const val = btn.getAttribute("data-value") || "NEW";
+
+            const val = btn.getAttribute("data-value");
+
+            if (!val) {
+              console.error("Missing data-value on species option");
+              return;
+            }
 
             const hiddenInput = document.getElementById(
               "speciesSelectorValue"
             ) as HTMLInputElement;
+            currentSpeciesId = val;
             hiddenInput.value = val;
+
             console.log("Species selection changed to:", val);
 
             if (btnText) btnText.innerHTML = btn.innerHTML;
@@ -259,7 +269,6 @@ export function initUpload(callbacks: UploadCallbacks) {
             phase1.classList.remove("d-none");
           };
         }
-
 
         if (selectedUploadFiles.length > 0) {
           console.log(
@@ -454,18 +463,7 @@ export function initUpload(callbacks: UploadCallbacks) {
         );
         await TagManager.renderFullTagPicker();
 
-        const tagPickerEl = document.getElementById("tagPickerModal");
 
-        if (tagPickerEl) {
-          tagPickerEl.addEventListener("hidden.bs.modal", (e) => {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-
-            console.log(
-              "SHIELD ACTIVE: Prevented Tag Picker from wiping Main Modal data."
-            );
-          });
-        }
 
         document
           .getElementById("tagPickerSearch")
@@ -474,84 +472,13 @@ export function initUpload(callbacks: UploadCallbacks) {
             TagManager.renderFullTagPicker(term);
           });
 
-        const updateSummary = () => {
-          const summaryArea = document.getElementById("selectedTagsSummary");
-          const checkedBoxes = document.querySelectorAll(
-            '#fullTagGrid input[type="checkbox"]:checked'
-          ) as NodeListOf<HTMLInputElement>;
-
-          if (summaryArea) {
-            if (checkedBoxes.length === 0) {
-              summaryArea.innerHTML =
-                '<span class="text-muted small italic">No tags selected</span>';
-            } else {
-              const badges = Array.from(checkedBoxes).map((cb) => {
-                const label =
-                  document
-                    .querySelector(`label[for="${cb.id}"]`)
-                    ?.textContent?.trim() || "Tag";
-                return `<span class="badge bg-primary rounded-pill px-2 py-1" style="font-size: 10px;">${label}</span>`;
-              });
-              summaryArea.innerHTML = badges.join(" ");
-            }
-          }
-        };
-
-        const closePickerBtn = document.getElementById("closeTagPickerBtn");
-
-        closePickerBtn?.addEventListener("click", (e) => {
-          console.log("1. Apply Button Clicked");
-          e.preventDefault();
-          e.stopPropagation();
-
-          const pickerEl = document.getElementById("tagPickerModal");
-          const uploadModalEl = document.getElementById("addButterflyModal");
-
-          if (pickerEl) {
-            const modalInstance = bootstrap.Modal.getInstance(pickerEl);
-
-            pickerEl.classList.remove("show");
-            pickerEl.style.display = "none";
-            pickerEl.setAttribute("aria-hidden", "true");
-
-            const backdrops = document.querySelectorAll(".modal-backdrop");
-            if (backdrops.length > 1) {
-              backdrops[backdrops.length - 1].remove(); 
-            }
-
-            modalInstance?.hide();
-            setTimeout(() => {
-              if (uploadModalEl) {
-                document.body.classList.add("modal-open");
-                uploadModalEl.classList.add("show");
-                uploadModalEl.style.display = "block";
-                updateSummary();
-              }
-            }, 100);
-          }
-          if (uploadModalEl) {
-            uploadModalEl.setAttribute("aria-hidden", "false"); 
-            uploadModalEl.removeAttribute("inert"); 
-          }
-        });
-
         document
           .getElementById("universalUploadForm")
           ?.addEventListener("submit", (e) => {
             console.log("Form is submitting! Source of trigger:", e.submitter);
           });
 
-        document.addEventListener("hidden.bs.modal", function (event) {
-          if ((event.target as HTMLElement).id === "tagPickerModal") {
-            if (document.querySelectorAll(".modal.show").length > 0) {
-              document.body.classList.add("modal-open");
-              const backdrops = document.querySelectorAll(".modal-backdrop");
-              if (backdrops.length > 1) {
-                backdrops[backdrops.length - 1].remove();
-              }
-            }
-          }
-        });
+    
         document
           .getElementById("fullTagGrid")
           ?.addEventListener("change", updateSummary);
@@ -561,15 +488,66 @@ export function initUpload(callbacks: UploadCallbacks) {
       });
     }
 
+    console.log("REGISTERING CLOSE PICKER LISTENER");
+
+    const closePickerBtn = document.getElementById("closeTagPickerBtn");
+
+    closePickerBtn?.addEventListener("click", (e) => {
+      console.log("1. Apply Button Clicked");
+      e.preventDefault();
+      e.stopPropagation();
+
+      const pickerEl = document.getElementById("tagPickerModal");
+      const uploadModalEl = document.getElementById("addButterflyModal");
+
+      if (pickerEl) {
+        const modalInstance = bootstrap.Modal.getInstance(pickerEl);
+
+        pickerEl.classList.remove("show");
+        pickerEl.style.display = "none";
+        pickerEl.setAttribute("aria-hidden", "true");
+
+        const backdrops = document.querySelectorAll(".modal-backdrop");
+        if (backdrops.length > 1) {
+          backdrops[backdrops.length - 1].remove();
+        }
+
+        modalInstance?.hide();
+        setTimeout(() => {
+          if (uploadModalEl) {
+            document.body.classList.add("modal-open");
+            uploadModalEl.classList.add("show");
+            uploadModalEl.style.display = "block";
+            updateSummary();
+          }
+        }, 100);
+      }
+      if (uploadModalEl) {
+        uploadModalEl.setAttribute("aria-hidden", "false");
+        uploadModalEl.removeAttribute("inert");
+      }
+    });
+
+    document.addEventListener("hidden.bs.modal", function (event) {
+      if ((event.target as HTMLElement).id === "tagPickerModal") {
+        if (document.querySelectorAll(".modal.show").length > 0) {
+          document.body.classList.add("modal-open");
+          const backdrops = document.querySelectorAll(".modal-backdrop");
+          if (backdrops.length > 1) {
+            backdrops[backdrops.length - 1].remove();
+          }
+        }
+      }
+    });
+
     universalUploadForm.addEventListener("submit", async (e: Event) => {
       e.preventDefault();
-      let speciesId = (
-        document.getElementById("speciesSelectorValue") as HTMLInputElement
-      ).value;
+
+      let speciesId = currentSpeciesId;
 
       console.log("SUBMIT START - Fixed ID is:", speciesId);
 
-      if (speciesId === "undefined" || !speciesId) {
+      if (!speciesId) {
         return alert(
           "Error: Species ID was lost. Please re-select the species."
         );
@@ -580,7 +558,7 @@ export function initUpload(callbacks: UploadCallbacks) {
       ) as HTMLTextAreaElement;
       const tagCheckboxes = () =>
         document.querySelectorAll(
-          '#tagPickerModal input[type="checkbox"]' 
+          '#tagPickerModal input[type="checkbox"]'
         ) as NodeListOf<HTMLInputElement>;
 
       if (
@@ -661,16 +639,22 @@ export function initUpload(callbacks: UploadCallbacks) {
           const newSpecies = await ButterflyAPI.create({
             name: nameInput,
             scientificName: sciInput,
-            description: (document.getElementById("newDescription") as HTMLTextAreaElement).value,
-            
-            orderName: (document.getElementById("newOrderName") as HTMLInputElement).value.trim(),
-            family: (document.getElementById("newFamily") as HTMLInputElement).value.trim(),
-            genus: (document.getElementById("newGenus") as HTMLInputElement).value.trim(),
-            
+            description: (
+              document.getElementById("newDescription") as HTMLTextAreaElement
+            ).value,
+
+            orderName: (
+              document.getElementById("newOrderName") as HTMLInputElement
+            ).value.trim(),
+            family: (
+              document.getElementById("newFamily") as HTMLInputElement
+            ).value.trim(),
+            genus: (
+              document.getElementById("newGenus") as HTMLInputElement
+            ).value.trim(),
           });
-        
-          speciesId = newSpecies.id.toString(); 
-          
+
+          speciesId = newSpecies.id.toString();
         } catch (err: any) {
           if (loadingScreen) loadingScreen.classList.add("d-none");
           if (phase2) phase2.classList.remove("d-none");
@@ -710,6 +694,12 @@ export function initUpload(callbacks: UploadCallbacks) {
           failCount++;
         }
       }
+      console.log("Submitting with currentSpeciesId =", currentSpeciesId);
+      console.log(
+        "Hidden input value =",
+        (document.getElementById("speciesSelectorValue") as HTMLInputElement)
+          ?.value
+      );
 
       // ==========================================
       // CLEANUP AFTER UPLOAD (SUCCESS STATE)
@@ -752,7 +742,6 @@ export function initUpload(callbacks: UploadCallbacks) {
           if (finishBtn) finishBtn.classList.add("d-none");
           if (loadingScreen) loadingScreen.classList.add("d-none");
 
-
           const hInput = document.getElementById(
             "speciesSelectorValue"
           ) as HTMLInputElement;
@@ -776,8 +765,19 @@ export function initUpload(callbacks: UploadCallbacks) {
           (e.target as HTMLFormElement).reset();
           if (hInput) hInput.value = "NEW";
 
+   
           const modalEl = document.getElementById("addButterflyModal");
-          if (modalEl) bootstrap.Modal.getInstance(modalEl)?.hide();
+
+          if (modalEl) {
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+
+            if (modalInstance) {
+              modalInstance.hide();
+            } else {
+              const newInstance = new bootstrap.Modal(modalEl);
+              newInstance.hide();
+            }
+          }
 
           AppState.butterflies = await ButterflyAPI.getAll();
           const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
@@ -788,6 +788,9 @@ export function initUpload(callbacks: UploadCallbacks) {
             await callbacks.reloadGallery();
           }
         };
+
+        document.body.classList.remove("modal-open");
+document.querySelectorAll(".modal-backdrop").forEach((b) => b.remove());
       }
     });
   }
