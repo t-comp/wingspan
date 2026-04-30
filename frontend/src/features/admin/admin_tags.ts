@@ -121,7 +121,7 @@ export const TagManager = {
 
   async initTagContainer() {
     const containers = document.querySelectorAll(
-      "#tagCheckboxContainer, #tagCheckboxList, .tag-container-sync",
+      "#tagCheckboxContainer, #tagCheckboxList, .tag-container-sync"
     );
     if (containers.length === 0) return;
 
@@ -158,7 +158,7 @@ export const TagManager = {
                     <input class="form-check-input" type="checkbox" name="tagIds" value="${t.tagId}">
                     <label class="form-check-label small text-dark">${t.tagName}</label>
                 </div>
-            `,
+            `
             )
             .join("");
 
@@ -188,7 +188,7 @@ export const TagManager = {
         if (!cat || cat === "Uncategorized" || cat.trim() === "") {
           const cleanName = (tag.tagName || "").toLowerCase().trim();
           for (const [categoryName, tagNames] of Object.entries(
-            TagManager.tagData,
+            TagManager.tagData
           )) {
             if (
               tagNames.map((n) => n.toLowerCase().trim()).includes(cleanName)
@@ -215,17 +215,17 @@ export const TagManager = {
             <button class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" 
                     onclick="TagManager.renderTagEditor('${cat.replace(
                       /'/g,
-                      "\\'",
+                      "\\'"
                     )}', ${JSON.stringify(grouped[cat]).replace(
-                      /"/g,
-                      "&quot;",
-                    )})">
+            /"/g,
+            "&quot;"
+          )})">
                 <span class="fw-bold">${cat}</span>
                 <span class="badge bg-primary rounded-pill">${
                   grouped[cat].length
                 }</span>
             </button>
-        `,
+        `
         )
         .join("");
     } catch (err) {
@@ -246,7 +246,7 @@ export const TagManager = {
     if (grid) {
       // MATCHING TagDTO: tagId
       const uniqueTags = Array.from(
-        new Map(tags.map((t) => [t.tagId, t])).values(),
+        new Map(tags.map((t) => [t.tagId, t])).values()
       );
 
       grid.innerHTML = uniqueTags
@@ -258,20 +258,20 @@ export const TagManager = {
                     }</span>
                     <button class="btn btn-sm btn-white border border-start-0 text-danger" 
         onclick="TagManager.deleteTag(${tag.tagId}, '${categoryName.replace(
-          /'/g,
-          "\\'",
-        )}')">
+            /'/g,
+            "\\'"
+          )}')">
     <i class="fas fa-times"></i>
-</button>
+    </button>
                 </div>
-            `,
+            `
         )
         .join("");
     }
 
     const addBtn = document.getElementById("adminAddTagSubmit");
     const input = document.getElementById(
-      "adminNewTagName",
+      "adminNewTagName"
     ) as HTMLInputElement;
 
     if (addBtn) {
@@ -294,12 +294,12 @@ export const TagManager = {
             (t) =>
               (t.tagCategory || "").toLowerCase() ===
                 categoryName.toLowerCase() ||
-              (t.tagName || "").toLowerCase() === nameValue.toLowerCase(),
+              (t.tagName || "").toLowerCase() === nameValue.toLowerCase()
           );
           TagManager.renderTagEditor(categoryName, updatedTags);
         } catch (err: any) {
           alert(
-            "Action completed. If tag doesn't appear, check if it's a duplicate.",
+            "Action completed. If tag doesn't appear, check if it's a duplicate."
           );
         }
       };
@@ -318,7 +318,7 @@ export const TagManager = {
         const updatedTags = allTags.filter(
           (t) =>
             (t.tagCategory || "").toLowerCase() ===
-            currentCategory.toLowerCase(),
+            currentCategory.toLowerCase()
         );
 
         if (updatedTags.length > 0) {
@@ -338,11 +338,49 @@ export const TagManager = {
     }
   },
 
+async renderFullTagPicker(searchTerm: string = "") {
+  const grid = document.getElementById("fullTagGrid");
+  if (!grid) return;
+
+  const dbTags = await ButterflyAPI.getAllTags();
+  const search = searchTerm.toLowerCase();
+  const grouped: { [key: string]: any[] } = {};
+
+  dbTags.forEach(t => {
+    const cat = t.tagCategory || "Uncategorized";
+    if (t.tagName.toLowerCase().includes(search) || cat.toLowerCase().includes(search)) {
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(t);
+    }
+  });
+
+  grid.innerHTML = Object.keys(grouped).sort().map(catName => `
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body p-3">
+          <h6 class="fw-bold text-primary border-bottom pb-2 mb-3" style="font-size: 0.8rem;">
+            ${catName}
+          </h6>
+          <div class="d-flex flex-wrap gap-2">
+            ${grouped[catName].map(t => `
+              <div class="tag-chip-item">
+                <input type="checkbox" class="tag-chip-checkbox d-none" 
+                       id="picker-tag-${t.tagId}" value="${t.tagId}">
+                <label for="picker-tag-${t.tagId}" class="tag-chip">
+                  ${t.tagName}
+                </label>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join("");
+},
+
   async globalRefresh() {
     console.log("Syncing all tag components...");
-    // Refresh the Admin Dashboard sidebar
     await this.refreshAdminTagsView();
-    // Refresh the Checkbox containers (Upload Modal & Edit Image Modal)
     await this.initTagContainer();
   },
 };
