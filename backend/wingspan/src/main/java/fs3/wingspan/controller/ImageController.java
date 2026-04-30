@@ -120,16 +120,6 @@ public class ImageController {
         }
     }
 
-    /**
-     * Get all images for a species by ID
-     * GET /images/species/{speciesId}
-     */
-    @GetMapping("/species/{speciesId}")
-    public ResponseEntity<List<ImageDTO>> getImagesBySpecies(@PathVariable Integer speciesId) {
-        List<Image> images = imageRepository.findBySpeciesId(speciesId);
-        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
-        return ResponseEntity.ok(dtos);
-    }
 
     /**
      * Get all images for a species by common name or scientific name
@@ -143,7 +133,10 @@ public class ImageController {
                     .body(new MessageResponse("Species not found"));
         }
         List<Image> images = imageRepository.findBySpeciesId(species.getId());
-        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
+        List<ImageDTO> dtos = new ArrayList<>();
+        for(Image image : images){
+            dtos.add(ImageDTO.fromImage(image));
+        }
         return ResponseEntity.ok(dtos);
     }
 
@@ -174,42 +167,14 @@ public class ImageController {
     }
 
     /**
-     * Filter images within a species by tag IDs
-     * GET /images/species/{speciesId}/filter?tagIds=1,2,3
-     */
-    @GetMapping("/species/{speciesId}/filter")
-    public ResponseEntity<List<ImageDTO>> filterImagesBySpeciesAndTags(
-            @PathVariable Integer speciesId,
-            @RequestParam(required = false) List<Integer> tagIds,
-            @RequestParam(required = false) String tagNames,
-            @RequestParam(required = false, defaultValue = "false") boolean featured) {
-
-        List<Image> images;
-
-        if(tagNames != null && !tagNames.isEmpty()){
-            List<String> nameList = Arrays.stream(tagNames.split(","))
-                    .map(String::trim)
-                    .collect(Collectors.toList());
-            images = imageStorageService.filterBySpeciesAndTagNames(speciesId, nameList, featured);
-        } else if(tagIds != null && !tagIds.isEmpty()){
-            images = imageStorageService.filterBySpeciesAndTagIds(speciesId, tagIds);
-        } else {
-            images = imageRepository.findBySpeciesId(speciesId);
-        }
-
-        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
-        return ResponseEntity.ok(dtos);
-    }
-
-    /**
-     * Filter images within a species by name + tag names + optional featured
-     * GET /images/species/name/{name}/filter?tagNames=wings-open,male&featured=true
+     * Filter images within a species by common name or scientific name
+     * GET /images/species/name/{name}/filter
      */
     @GetMapping("/species/name/{name}/filter")
-    public ResponseEntity<?> filterImagesBySpeciesNameAndTags(
-            @PathVariable String name,
-            @RequestParam(required = false) String tagNames,
-            @RequestParam(required = false, defaultValue = "false") boolean featured) {
+    public ResponseEntity<?> filterImagesBySpeciesNameAndTags(@PathVariable String name,
+                                                              @RequestParam(required = false) List<Integer> tagIds,
+                                                              @RequestParam(required = false) String tagNames,
+                                                              @RequestParam(required = false, defaultValue = "false") boolean featured) {
 
         Species species = speciesRepository.findByNameOrScientificName(name, name);
         if(species == null){
@@ -219,15 +184,22 @@ public class ImageController {
 
         List<Image> images;
         if(tagNames != null && !tagNames.isEmpty()){
-            List<String> nameList = Arrays.stream(tagNames.split(","))
-                    .map(String::trim)
-                    .collect(Collectors.toList());
+            String[] split = tagNames.split(",");
+            List<String> nameList = new ArrayList<>();
+            for(String tag : split){
+                nameList.add(tag.trim());
+            }
             images = imageStorageService.filterBySpeciesAndTagNames(species.getId(), nameList, featured);
+        } else if(tagIds != null && !tagIds.isEmpty()){
+            images = imageStorageService.filterBySpeciesAndTagIds(species.getId(), tagIds);
         } else {
             images = imageRepository.findBySpeciesId(species.getId());
         }
 
-        List<ImageDTO> dtos = images.stream().map(ImageDTO::fromImage).toList();
+        List<ImageDTO> dtos = new ArrayList<>();
+        for(Image image : images){
+            dtos.add(ImageDTO.fromImage(image));
+        }
         return ResponseEntity.ok(dtos);
     }
 
