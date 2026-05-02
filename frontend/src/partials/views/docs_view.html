@@ -1,12 +1,65 @@
-<div id="docsView" style="display: none" class="container mt-4 pt-5">
-  <div class="row pt-4">
-    <div class="col-12">
-      <h2 class="fw-bold" style="color: #0399b0">Wingspan Documentation</h2>
-      <hr />
-      <p class="text-muted">
-        Welcome to the docs! This is where we will add our API info and project
-        details.
-      </p>
+<div id="docsView" style="display: none" class="container-fluid mt-4 pt-5">
+  <div class="row pt-4" style="min-height: 100vh">
+
+    <!-- ======================== SIDEBAR ======================== -->
+    <div class="col-12 col-md-3 col-lg-2 mb-4">
+      <div id="docsSidebar" style="
+        position: sticky;
+        top: 90px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.25rem 1rem;
+        border-left: 4px solid #0399b0;
+      ">
+        <p class="fw-bold mb-3" style="color: #0399b0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;">Documentation</p>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-1">
+            <button class="docs-nav-btn" data-file="01-getting-started.md" style="
+              background: none; border: none; text-align: left;
+              width: 100%; padding: 0.4rem 0.6rem; border-radius: 6px;
+              font-size: 0.9rem; cursor: pointer; color: #555;
+            ">Getting Started</button>
+          </li>
+          <li class="mb-1">
+            <button class="docs-nav-btn" data-file="02-image-sizing.md" style="
+              background: none; border: none; text-align: left;
+              width: 100%; padding: 0.4rem 0.6rem; border-radius: 6px;
+              font-size: 0.9rem; cursor: pointer; color: #555;
+            ">Image Sizing</button>
+          </li>
+          <li class="mb-1">
+            <button class="docs-nav-btn" data-file="04-tags-filtering.md" style="
+              background: none; border: none; text-align: left;
+              width: 100%; padding: 0.4rem 0.6rem; border-radius: 6px;
+              font-size: 0.9rem; cursor: pointer; color: #555;
+            ">Tags &amp; Filtering</button>
+          </li>
+          <li class="mb-1">
+            <button class="docs-nav-btn" data-file="03-api-reference.md" style="
+              background: none; border: none; text-align: left;
+              width: 100%; padding: 0.4rem 0.6rem; border-radius: 6px;
+              font-size: 0.9rem; cursor: pointer; color: #555;
+            ">API Reference</button>
+          </li>
+          <li class="mb-1">
+            <button class="docs-nav-btn" data-file="05-faq.md" style="
+              background: none; border: none; text-align: left;
+              width: 100%; padding: 0.4rem 0.6rem; border-radius: 6px;
+              font-size: 0.9rem; cursor: pointer; color: #555;
+            ">FAQ</button>
+          </li>
+        </ul>
+      </div>
     </div>
+
+    <!-- ======================== CONTENT ======================== -->
+    <div class="col-12 col-md-9 col-lg-10 pb-5">
+      <div id="docsContent" style="max-width: 860px;">
+        <div id="docsMarkdownBody" class="docs-markdown-body">
+          <p class="text-muted">Select a section from the sidebar to get started.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
