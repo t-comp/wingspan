@@ -121,4 +121,6 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
     """)
     List<Image> findBySpeciesScientificName(
             @Param("scientificName") String scientificName);
+
+    List<Image> findBySpeciesIdAndLifecyclestage(int speciesId, String lifecyclestage);
 }
