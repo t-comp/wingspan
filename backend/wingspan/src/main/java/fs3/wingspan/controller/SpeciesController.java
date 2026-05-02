@@ -6,6 +6,7 @@ import fs3.wingspan.dto.SpeciesDTO;
 import fs3.wingspan.dto.SpeciesWithImagesDTO;
 import fs3.wingspan.model.Image;
 import fs3.wingspan.model.Species;
+import fs3.wingspan.model.Tags;
 import fs3.wingspan.repository.ImageRepository;
 import fs3.wingspan.repository.SpeciesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -312,5 +313,57 @@ public class SpeciesController {
         return ResponseEntity.ok(SpeciesWithImagesDTO.fromSpecies(s, thumbnailFallback(s), imageDTOs));
     }
 
+    /**
+     * get coverage of core tags across species
+     * GET /species/core?tagNames=wings-open,male,female,horizontal,vertical
+     */
+    @GetMapping("/core")
+    public ResponseEntity<?> getSpeciesCoreCovg(@RequestParam List<String> tagNames, @RequestParam(required = false) List<String> speciesNames) {
+
+        List<Species> species;
+
+        if(speciesNames != null && !speciesNames.isEmpty()){
+            species = new ArrayList<>();
+            for(String name : speciesNames){
+                Species s = speciesRepository.findByNameOrScientificName(name, name);
+                if(s != null){
+                    species.add(s);
+                }
+            }
+        } else {
+            species = speciesRepository.findAll();
+        }
+
+        List<Map<String, Object>> res = new ArrayList<>();
+
+        for(Species s : species){
+            Map<String, Object> e = new HashMap<>();
+            e.put("speciesId", s.getId());
+            e.put("speciesName", s.getName());
+            e.put("scientificName", s.getScientificName());
+
+            Map<String, Boolean> c = new HashMap<>();
+            List<Image> images = imageRepository.findBySpeciesId(s.getId());
+
+            for(String n : tagNames){
+                boolean hasTag = false;
+                for(Image i : images){
+                    for(Tags tag : i.getTags()){
+                        if(tag.getName().equalsIgnoreCase(n)){
+                            hasTag = true;
+                            break;
+                        }
+                    }
+                    if(hasTag) break;
+                }
+                c.put(n, hasTag);
+            }
+
+            e.put("coverage", c);
+            res.add(e);
+        }
+
+        return ResponseEntity.ok(res);
+    }
 
 }
