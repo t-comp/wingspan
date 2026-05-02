@@ -531,6 +531,7 @@ public class ImageStorageService {
                 .width(targetWidth)
                 .keepAspectRatio(true)
                 .outputFormat(formatName)
+                .useExifOrientation(true)
                 .toOutputStream(baos);
 
         String key = baseName + suffix + extension;
