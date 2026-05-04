@@ -892,3 +892,71 @@
   left: -1px !important;
   padding: 0;
 }
+
+/* The actual checkbox is hidden */
+.tag-chip-checkbox {
+  display: none;
+}
+
+/* The Label (The Chip) */
+.tag-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+/* Hover effect */
+.tag-chip:hover {
+  background-color: #e9ecef;
+  border-color: #0399b0;
+  color: #0399b0;
+}
+
+/* THE FIX: When the checkbox is checked, style the chip */
+.tag-chip-checkbox:checked + .tag-chip {
+  background-color: #0399b0;
+  color: white;
+  border-color: #027a8d;
+  box-shadow: 0 2px 4px rgba(3, 153, 176, 0.3);
+}
+
+/* Ensure the Tag Picker is always on top of the Upload Modal */
+#tagPickerModal {
+  z-index: 1080 !important;
+}
+
+#addButterflyModal {
+  z-index: 1050 !important;
+}
+
+/* Ensure the backdrop doesn't block the upload modal after picker closes */
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+.modal-backdrop + .modal-backdrop {
+  z-index: 1070 !important;
+}
+
+/* Force modals to be clickable even if Bootstrap gets confused */
+.modal.show {
+  pointer-events: auto !important;
+}
+
+/* Ensure the backdrop doesn't swallow clicks meant for the modal */
+.modal-backdrop {
+  pointer-events: none !important; 
+}
+
+/* BUT allow the modal content to actually be clicked */
+.modal-content {
+  pointer-events: auto !important;
+}
