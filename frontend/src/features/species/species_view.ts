@@ -170,19 +170,14 @@ export async function showSpeciesView(b: any) {
       (document.getElementById("editSpeciesGenus") as HTMLInputElement).value =
         b.genus || "";
 
-      // 2. Set Description (Now just clean text)
       (
         document.getElementById("editSpeciesDescription") as HTMLTextAreaElement
       ).value = b.description || "";
 
-      // 3. NEW ATTRIBUTE LOGIC: Populate from the backend Map
       AppState.allAttributeKeys.forEach((key) => {
-        // If THIS specific species has a value for this key, get it.
-        // Otherwise, it stays an empty string.
         const value =
           b.attributeDef && b.attributeDef[key] ? b.attributeDef[key] : "";
 
-        // This adds the input field to the modal
         addDynamicField(key, String(value));
       });
     };
@@ -190,12 +185,32 @@ export async function showSpeciesView(b: any) {
 
   const setMainImage = (img: any) => {
     const url = img.url || noImagePlaceholder;
-
-    const speciesImg = document.getElementById(
-      "speciesImage",
-    ) as HTMLImageElement | null;
+    const speciesImg = document.getElementById("speciesImage") as HTMLImageElement | null;
     if (speciesImg) speciesImg.src = url;
 
+    const heroTagContainer = document.getElementById("heroImageTags");
+    
+    if (heroTagContainer) {
+        heroTagContainer.innerHTML = ""; 
+        
+        if (img.tags && img.tags.length > 0) {
+            img.tags.forEach((tag: any) => {
+                const tagName = tag.tagName || tag.name;
+                
+                const span = document.createElement("span");
+                
+                span.className = "badge rounded-pill px-3 py-2 shadow-sm";
+                span.style.backgroundColor = "#e0f2f4"; 
+                span.style.color = "#0399b0";          
+                span.style.border = "1px solid #0399b0";
+                span.style.fontSize = "0.75rem";
+                
+                span.innerText = tagName;
+                
+                heroTagContainer.appendChild(span);
+            });
+        }
+    }
     const modalImg = document.getElementById(
       "butterflyModalImage",
     ) as HTMLImageElement | null;
