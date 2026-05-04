@@ -24,7 +24,6 @@ export interface UploadCallbacks {
 }
 
 export function initUpload(callbacks: UploadCallbacks) {
-
   let selectedUploadFiles: UploadFileData[] = [];
   let currentSelectedFileIndex = -1;
   let currentSpeciesId = "NEW";
@@ -110,14 +109,16 @@ export function initUpload(callbacks: UploadCallbacks) {
     }
   };
 
+  
   // --- Main Upload Modal Logic ---
   if (universalUploadForm) {
     const uploadModal = document.getElementById("addButterflyModal");
+    
 
     if (uploadModal) {
-
       uploadModal.addEventListener("show.bs.modal", async (e) => {
         if (e.target !== uploadModal) return;
+
         await TagManager.initTagContainer();
 
         const listContainer = document.getElementById("speciesDropdownList");
@@ -463,8 +464,6 @@ export function initUpload(callbacks: UploadCallbacks) {
         );
         await TagManager.renderFullTagPicker();
 
-
-
         document
           .getElementById("tagPickerSearch")
           ?.addEventListener("input", (e) => {
@@ -478,7 +477,6 @@ export function initUpload(callbacks: UploadCallbacks) {
             console.log("Form is submitting! Source of trigger:", e.submitter);
           });
 
-    
         document
           .getElementById("fullTagGrid")
           ?.addEventListener("change", updateSummary);
@@ -486,58 +484,67 @@ export function initUpload(callbacks: UploadCallbacks) {
         renderFileList();
         updatePreviewPanel();
       });
+      
+      uploadModal.addEventListener("hidden.bs.modal", (e) => {
+        if ((e.target as HTMLElement).id === "tagPickerModal") return;
+
+        if (e.target === uploadModal) {
+            console.log("Modal closed via cancel/click-away. Resetting for next time.");
+            
+            currentSpeciesId = "NEW";
+            const hInput = document.getElementById("speciesSelectorValue") as HTMLInputElement;
+            if (hInput) hInput.value = "NEW";
+
+            document.getElementById("uploadPhase1")?.classList.remove("d-none");
+            document.getElementById("uploadPhase2")?.classList.add("d-none");
+            document.getElementById("uploadLoadingScreen")?.classList.add("d-none");
+
+            selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
+            selectedUploadFiles = [];
+            
+            const fileListContainer = document.getElementById("selectedFilesList");
+            if (fileListContainer) fileListContainer.innerHTML = "";
+            
+            const btnText = document.getElementById("speciesDropdownText");
+            if (btnText) {
+                btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
+            }
+        }
+      });
+
+      
     }
 
+    
+
     console.log("REGISTERING CLOSE PICKER LISTENER");
+    const openTagPickerBtn = document.getElementById("openTagPickerBtn");
+
+    openTagPickerBtn?.addEventListener("click", () => {
+      const pickerEl = document.getElementById("tagPickerModal");
+
+      if (pickerEl) {
+        const modal = new bootstrap.Modal(pickerEl);
+
+        pickerEl.style.zIndex = "1070";
+
+        modal.show();
+      }
+    });
 
     const closePickerBtn = document.getElementById("closeTagPickerBtn");
-
     closePickerBtn?.addEventListener("click", (e) => {
-      console.log("1. Apply Button Clicked");
       e.preventDefault();
-      e.stopPropagation();
 
       const pickerEl = document.getElementById("tagPickerModal");
-      const uploadModalEl = document.getElementById("addButterflyModal");
 
       if (pickerEl) {
         const modalInstance = bootstrap.Modal.getInstance(pickerEl);
 
-        pickerEl.classList.remove("show");
-        pickerEl.style.display = "none";
-        pickerEl.setAttribute("aria-hidden", "true");
-
-        const backdrops = document.querySelectorAll(".modal-backdrop");
-        if (backdrops.length > 1) {
-          backdrops[backdrops.length - 1].remove();
-        }
-
         modalInstance?.hide();
-        setTimeout(() => {
-          if (uploadModalEl) {
-            document.body.classList.add("modal-open");
-            uploadModalEl.classList.add("show");
-            uploadModalEl.style.display = "block";
-            updateSummary();
-          }
-        }, 100);
       }
-      if (uploadModalEl) {
-        uploadModalEl.setAttribute("aria-hidden", "false");
-        uploadModalEl.removeAttribute("inert");
-      }
-    });
 
-    document.addEventListener("hidden.bs.modal", function (event) {
-      if ((event.target as HTMLElement).id === "tagPickerModal") {
-        if (document.querySelectorAll(".modal.show").length > 0) {
-          document.body.classList.add("modal-open");
-          const backdrops = document.querySelectorAll(".modal-backdrop");
-          if (backdrops.length > 1) {
-            backdrops[backdrops.length - 1].remove();
-          }
-        }
-      }
+      updateSummary();
     });
 
     universalUploadForm.addEventListener("submit", async (e: Event) => {
@@ -733,53 +740,82 @@ export function initUpload(callbacks: UploadCallbacks) {
       if (finishBtn) {
         finishBtn.onclick = async () => {
           if (loadingTitle) loadingTitle.innerText = "Image Uploading...";
-          if (loadingSubtitle)
+
+          if (loadingSubtitle) {
             loadingSubtitle.innerText =
               "Please wait. This may take a few moments.";
+          }
+
           if (progressText) progressText.classList.remove("d-none");
           if (spinnerContainer) spinnerContainer.classList.remove("d-none");
           if (successIcon) successIcon.classList.add("d-none");
-          if (finishBtn) finishBtn.classList.add("d-none");
-          if (loadingScreen) loadingScreen.classList.add("d-none");
 
-          const hInput = document.getElementById(
-            "speciesSelectorValue"
-          ) as HTMLInputElement;
-          if (hInput) hInput.value = "NEW";
+          finishBtn.classList.add("d-none");
+
+          document.getElementById("uploadPhase1")?.classList.remove("d-none");
+          document.getElementById("uploadPhase2")?.classList.add("d-none");
+          document
+            .getElementById("uploadLoadingScreen")
+            ?.classList.add("d-none");
+
+          // Reset the Dropdown text to the default
+          const btnText = document.getElementById("speciesDropdownText");
+          if (btnText) {
+            btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
+          }
+
+          const modalEl = document.getElementById("addButterflyModal");
+
+          if (modalEl) {
+            const instance = bootstrap.Modal.getInstance(modalEl);
+            instance?.hide();
+          }
+
+          selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
+          selectedUploadFiles = [];
+
+          currentSelectedFileIndex = -1;
 
           const form = document.getElementById(
             "universalUploadForm"
           ) as HTMLFormElement;
-          if (form) form.reset();
 
-          console.log(
-            "Success cleanup: Species reset to NEW for the next upload."
-          );
+          form?.reset();
 
-          selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
-          selectedUploadFiles = [];
-          const fileListContainer =
-            document.getElementById("selectedFilesList");
-          if (fileListContainer) fileListContainer.innerHTML = "";
+          const hInput = document.getElementById(
+            "speciesSelectorValue"
+          ) as HTMLInputElement;
 
-          (e.target as HTMLFormElement).reset();
           if (hInput) hInput.value = "NEW";
 
-   
-          const modalEl = document.getElementById("addButterflyModal");
+          // reset phases
+          document.getElementById("uploadPhase1")?.classList.remove("d-none");
 
-          if (modalEl) {
-            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+          document.getElementById("uploadPhase2")?.classList.add("d-none");
 
-            if (modalInstance) {
-              modalInstance.hide();
-            } else {
-              const newInstance = new bootstrap.Modal(modalEl);
-              newInstance.hide();
-            }
+          document
+            .getElementById("uploadLoadingScreen")
+            ?.classList.add("d-none");
+
+          const fileListContainer =
+            document.getElementById("selectedFilesList");
+
+          if (fileListContainer) {
+            fileListContainer.innerHTML = "";
           }
 
+          document
+            .getElementById("imagePreviewSection")
+            ?.classList.add("d-none");
+
+          document
+            .getElementById("noImageSelectedPrompt")
+            ?.classList.remove("d-none");
+
+          console.log("Upload modal fully reset");
+
           AppState.butterflies = await ButterflyAPI.getAll();
+
           const freshSpecies = await ButterflyAPI.getSpeciesById(speciesId);
 
           if (freshSpecies) {
@@ -788,12 +824,12 @@ export function initUpload(callbacks: UploadCallbacks) {
             await callbacks.reloadGallery();
           }
         };
-
-        document.body.classList.remove("modal-open");
-document.querySelectorAll(".modal-backdrop").forEach((b) => b.remove());
       }
     });
+
+    
   }
+  
 
   // --- Add Images to Existing Species Form ---
   const addImageToSpeciesForm = document.getElementById(

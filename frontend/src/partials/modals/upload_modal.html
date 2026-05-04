@@ -189,15 +189,29 @@
                     <label class="form-label fw-bold small text-primary mb-2">
                       <i class="fas fa-tags me-1"></i> Image Tags
                     </label>
-                    
-                    <div id="selectedTagsSummary" class="d-flex flex-wrap gap-1 mb-2 p-2 bg-white border rounded shadow-sm" style="min-height: 42px;">
-                      <span class="text-muted small italic">No tags selected</span>
+
+                    <div
+                      id="selectedTagsSummary"
+                      class="d-flex flex-wrap gap-1 mb-2 p-2 bg-white border rounded shadow-sm"
+                      style="min-height: 42px"
+                    >
+                      <span class="text-muted small italic"
+                        >No tags selected</span
+                      >
                     </div>
-                  
-                    <button type="button" class="btn btn-sm btn-outline-primary w-100 fw-bold shadow-sm py-2" 
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary w-100 fw-bold shadow-sm py-2"
+                      id="openTagPickerBtn"
+                    >
+                      <i class="fas fa-external-link-alt me-1"></i>
+                      Manage Tags (Full View)
+                    </button>
+
+                    <!-- <button type="button" class="btn btn-sm btn-outline-primary w-100 fw-bold shadow-sm py-2" 
                             data-bs-toggle="modal" data-bs-target="#tagPickerModal">
                       <i class="fas fa-external-link-alt me-1"></i> Manage Tags (Full View)
-                    </button>
+                    </button> -->
                   </div>
                 </div>
               </div>
@@ -280,27 +294,53 @@
   </div>
 </div>
 
-
-<div class="modal fade" id="tagPickerModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+<div
+  class="modal"
+  id="tagPickerModal"
+  tabindex="-1"
+  aria-hidden="true"
+  style="z-index: 1070"
+>
+  <div
+    class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered"
+  >
     <div class="modal-content shadow-lg border-0">
       <div class="modal-header bg-light border-bottom-0">
-        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-tags me-2"></i>Select Species Tags</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title fw-bold text-primary">
+          <i class="fas fa-tags me-2"></i>Select Species Tags
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
       </div>
       <div class="modal-body p-4 bg-light">
         <div class="input-group mb-4 shadow-sm">
-          <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-          <input type="text" id="tagPickerSearch" class="form-control border-start-0" placeholder="Type to filter categories or tags...">
+          <span class="input-group-text bg-white border-end-0"
+            ><i class="fas fa-search text-muted"></i
+          ></span>
+          <input
+            type="text"
+            id="tagPickerSearch"
+            class="form-control border-start-0"
+            placeholder="Type to filter categories or tags..."
+          />
         </div>
-        
-        <div id="fullTagGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-          </div>
+
+        <div
+          id="fullTagGrid"
+          class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4"
+        ></div>
       </div>
       <div class="modal-footer bg-white border-top-0">
-        <button type="button" id="closeTagPickerBtn" class="btn btn-primary px-5 fw-bold rounded-pill">
+        <button
+          type="button"
+          id="closeTagPickerBtn"
+          class="btn btn-primary px-5 fw-bold rounded-pill"
+        >
           Apply & Close
-      </button>
+        </button>
       </div>
     </div>
   </div>
