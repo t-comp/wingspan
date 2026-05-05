@@ -21,12 +21,12 @@ export function initSpeciesView() {
   if (deleteSpeciesBtn) {
     deleteSpeciesBtn.addEventListener("click", async (e) => {
       const id = (e.currentTarget as HTMLElement).getAttribute(
-        "data-species-id",
+        "data-species-id"
       );
       if (
         id &&
         confirm(
-          "Are you sure you want to completely delete this species and all of its images?",
+          "Are you sure you want to completely delete this species and all of its images?"
         )
       ) {
         try {
@@ -41,15 +41,25 @@ export function initSpeciesView() {
   }
 }
 
+const backBtn = document.querySelector('[onclick*="speciesView"]') || document.getElementById("backToGalleryBtn");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      if ((window as any).galleryNeedsRefresh) {
+        (window as any).galleryNeedsRefresh = false;
+        location.reload();
+      }
+    });
+  }
+
 export async function showSpeciesView(b: any) {
   const portfolio = document.getElementById("portfolio");
   const speciesView = document.getElementById("speciesView");
   const teamView = document.getElementById("teamView");
   const topSearchBarContainer = document.getElementById(
-    "topSearchBarContainer",
+    "topSearchBarContainer"
   );
   const filterPanel = document.getElementById("filterPanel");
-  const galleryControls = document.getElementById("galleryControlsWrapper"); // Updated ID
+  const galleryControls = document.getElementById("galleryControlsWrapper"); 
 
   if (galleryControls) {
     galleryControls.classList.add("d-none");
@@ -87,7 +97,7 @@ export async function showSpeciesView(b: any) {
   // Render the attributes for the "View" mode
 
   const customAttrContainer = document.getElementById(
-    "customAttributesDisplay",
+    "customAttributesDisplay"
   );
   if (customAttrContainer) {
     customAttrContainer.innerHTML = ""; // Clear old ones
@@ -111,7 +121,7 @@ export async function showSpeciesView(b: any) {
   const actionSection = document.getElementById("speciesActionButtons");
   const openUploadBtn = document.getElementById("openSpeciesUploadBtn");
   const deleteBtn = document.getElementById(
-    "deleteSpeciesFullBtn",
+    "deleteSpeciesFullBtn"
   ) as HTMLButtonElement;
 
   if (actionSection && isAdmin) {
@@ -122,7 +132,7 @@ export async function showSpeciesView(b: any) {
     if (openUploadBtn) {
       openUploadBtn.onclick = () => {
         const hiddenInput = document.getElementById(
-          "speciesSelectorValue",
+          "speciesSelectorValue"
         ) as HTMLInputElement;
         const btnText = document.getElementById("speciesDropdownText");
 
@@ -170,19 +180,14 @@ export async function showSpeciesView(b: any) {
       (document.getElementById("editSpeciesGenus") as HTMLInputElement).value =
         b.genus || "";
 
-      // 2. Set Description (Now just clean text)
       (
         document.getElementById("editSpeciesDescription") as HTMLTextAreaElement
       ).value = b.description || "";
 
-      // 3. NEW ATTRIBUTE LOGIC: Populate from the backend Map
       AppState.allAttributeKeys.forEach((key) => {
-        // If THIS specific species has a value for this key, get it.
-        // Otherwise, it stays an empty string.
         const value =
           b.attributeDef && b.attributeDef[key] ? b.attributeDef[key] : "";
 
-        // This adds the input field to the modal
         addDynamicField(key, String(value));
       });
     };
@@ -190,14 +195,69 @@ export async function showSpeciesView(b: any) {
 
   const setMainImage = (img: any) => {
     const url = img.url || noImagePlaceholder;
-
     const speciesImg = document.getElementById(
-      "speciesImage",
+      "speciesImage"
     ) as HTMLImageElement | null;
     if (speciesImg) speciesImg.src = url;
 
+    const thumbBtn = document.getElementById("setAsThumbnailBtn");
+    const isAdmin = AppState.userRole === "ADMIN";
+
+    if (thumbBtn && isAdmin) {
+      thumbBtn.classList.remove("d-none");
+
+      const isCurrentThumb = b.thumbnailUrl === img.mediumUrl;
+
+      if (isCurrentThumb) {
+        thumbBtn.className = "btn btn-sm btn-info text-white me-2";
+        thumbBtn.innerHTML = `<i class="fas fa-check-circle me-1"></i> Current Thumbnail`;
+        thumbBtn.onclick = null; 
+      } else {
+        thumbBtn.className = "btn btn-sm btn-outline-info me-2";
+        thumbBtn.innerHTML = `<i class="fas fa-image me-1"></i> Set as Thumbnail`;
+
+        thumbBtn.onclick = async () => {
+          try {
+            await ButterflyAPI.setThumbnail(b.id, img.id);
+            b.thumbnailUrl = img.mediumUrl; 
+            (window as any).galleryNeedsRefresh = true; 
+            setMainImage(img); // Refresh button UI
+            alert("Success! Gallery thumbnail updated.");
+          } catch (err) {
+            console.error("Thumbnail update failed", err);
+            alert("Failed to update thumbnail.");
+          }
+        };
+      }
+    } else if (thumbBtn) {
+      thumbBtn.classList.add("d-none");
+    }
+
+    const heroTagContainer = document.getElementById("heroImageTags");
+
+    if (heroTagContainer) {
+      heroTagContainer.innerHTML = "";
+
+      if (img.tags && img.tags.length > 0) {
+        img.tags.forEach((tag: any) => {
+          const tagName = tag.tagName || tag.name;
+
+          const span = document.createElement("span");
+
+          span.className = "badge rounded-pill px-3 py-2 shadow-sm";
+          span.style.backgroundColor = "#e0f2f4";
+          span.style.color = "#0399b0";
+          span.style.border = "1px solid #0399b0";
+          span.style.fontSize = "0.75rem";
+
+          span.innerText = tagName;
+
+          heroTagContainer.appendChild(span);
+        });
+      }
+    }
     const modalImg = document.getElementById(
-      "butterflyModalImage",
+      "butterflyModalImage"
     ) as HTMLImageElement | null;
     if (modalImg) modalImg.src = url;
 
@@ -220,7 +280,7 @@ export async function showSpeciesView(b: any) {
         e.preventDefault();
         openImageDetailsModal(img, async () => {
           const freshSpecies = await ButterflyAPI.getSpeciesById(
-            AppState.currentSpeciesId,
+            AppState.currentSpeciesId
           );
           await showSpeciesView(freshSpecies);
         });
@@ -239,7 +299,7 @@ export async function showSpeciesView(b: any) {
         // THE FIX: Only use setAttribute here inside the Admin check!
         featureIcon.setAttribute(
           "class",
-          isFeatured ? "fas fa-star" : "far fa-star",
+          isFeatured ? "fas fa-star" : "far fa-star"
         );
 
         featureBtn.className = isFeatured
@@ -253,7 +313,7 @@ export async function showSpeciesView(b: any) {
 
             // Reload the view to sync the data and remove stars from old images!
             const freshSpecies = await ButterflyAPI.getSpeciesById(
-              AppState.currentSpeciesId,
+              AppState.currentSpeciesId
             );
             await showSpeciesView(freshSpecies);
           } catch (err) {
@@ -269,7 +329,8 @@ export async function showSpeciesView(b: any) {
 
   let fetchedImages: any[] = [];
   try {
-    fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
+    // fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
+    fetchedImages = await ButterflyAPI.getImagesBySpecies(b.scientificName);
     console.log("1. RAW BACKEND DATA:", fetchedImages);
   } catch (err) {
     console.error("Could not load images for species:", err);
@@ -386,21 +447,18 @@ export async function showSpeciesView(b: any) {
           document
             .querySelectorAll(".gallery-thumb-wrapper img")
             .forEach((el) =>
-              (el as HTMLElement).classList.remove(
-                "border-primary",
-                "border-3",
-              ),
+              (el as HTMLElement).classList.remove("border-primary", "border-3")
             );
           (e.currentTarget as HTMLElement).classList.add(
             "border-primary",
-            "border-3",
+            "border-3"
           );
           setMainImage(imgObj);
         };
       }
 
       const deleteBtn = col.querySelector(
-        ".delete-single-img-btn",
+        ".delete-single-img-btn"
       ) as HTMLElement | null;
       if (deleteBtn) {
         deleteBtn.onclick = (e) => {
@@ -430,8 +488,8 @@ export async function showSpeciesView(b: any) {
       new Map(
         allImgs
           .flatMap((img) => img.tags || [])
-          .map((t) => [t.tagId || t.id, t]),
-      ).values(),
+          .map((t) => [t.tagId || t.id, t])
+      ).values()
     );
     let html = `<button class="btn btn-sm btn-primary filter-pill active" data-tag="all">All</button>`;
 
@@ -453,7 +511,7 @@ export async function showSpeciesView(b: any) {
           filterBar.querySelectorAll(".filter-pill").forEach((b) => {
             (b as HTMLElement).classList.replace(
               "btn-primary",
-              "btn-outline-secondary",
+              "btn-outline-secondary"
             );
             (b as HTMLElement).classList.remove("active");
           });
@@ -465,7 +523,7 @@ export async function showSpeciesView(b: any) {
           btn.classList.toggle("btn-outline-secondary");
 
           const allBtn = filterBar.querySelector(
-            '[data-tag="all"]',
+            '[data-tag="all"]'
           ) as HTMLElement;
           if (allBtn) {
             allBtn.classList.replace("btn-primary", "btn-outline-secondary");
@@ -475,12 +533,12 @@ export async function showSpeciesView(b: any) {
 
         const activePills = filterBar.querySelectorAll(".filter-pill.active");
         const selectedIds = Array.from(activePills).map(
-          (p) => p.getAttribute("data-tag") as string,
+          (p) => p.getAttribute("data-tag") as string
         );
 
         if (selectedIds.length === 0) {
           const allBtn = filterBar.querySelector(
-            '[data-tag="all"]',
+            '[data-tag="all"]'
           ) as HTMLElement;
           if (allBtn) {
             allBtn.classList.replace("btn-outline-secondary", "btn-primary");

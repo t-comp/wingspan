@@ -11,7 +11,7 @@ import { ButterflyAPI } from "./core/api.js";
 import { AppState } from "./core/state.js";
 import { initSettings } from "./core/settings.js";
 import { AttributeManager } from "./features/admin/admin_attributes.js";
-
+import { initDocs } from "./features/student/docs.js";
 // imported features
 import { TagManager } from "./features/admin/admin_tags.js";
 import { loadStudentData } from "./features/student/student_dashboard.js";
@@ -307,6 +307,24 @@ export async function initHome(userRole, userEmail) {
       e.preventDefault();
       openDashboard("attributes");
     });
+
+  document.getElementById("navDocsBtn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  localStorage.setItem("activeView", "docs");
+  if (portfolio) portfolio.style.display = "none";
+  if (speciesView) speciesView.style.display = "none";
+  if (teamView) teamView.style.display = "none";
+  if (docsView) docsView.style.display = "block";
+  if (filterPanel) filterPanel.classList.remove("show");
+
+  const footer = document.querySelector("footer.footer") as HTMLElement;
+  const copyright = document.querySelector(".copyright") as HTMLElement;
+  if (footer) footer.style.display = "block";
+  if (copyright) copyright.style.display = "block";
+
+  window.scrollTo(0, 0);
+  initDocs();
+});
 
   // Pass 'true' into the back button so it knows to restore the spot in the gallery after visiting a species page
   if (backBtn) backBtn.addEventListener("click", () => goToGallery(true));
