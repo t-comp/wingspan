@@ -4,6 +4,9 @@ import fs3.wingspan.model.Teams;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+/**
+ * @author Taylor Bauer
+ */
 @Repository
 public interface TeamsRepository extends JpaRepository<Teams, Integer> {
     Teams findByName(String name);

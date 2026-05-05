@@ -10,6 +10,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 import java.net.URI;
 
+/**
+ * @author Taylor Bauer
+ */
 @Configuration
 public class S3Config {
 
@@ -22,6 +25,10 @@ public class S3Config {
     @Value("${spring.cloud.aws.endpoint}")
     private String endpoint;
 
+    /**
+     *
+     * @return build S3Client
+     */
     @Bean
     public S3Client S3Client(){
         return S3Client.builder()

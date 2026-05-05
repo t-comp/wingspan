@@ -8,16 +8,28 @@ import fs3.wingspan.model.Users;
 import java.security.Key;
 import java.util.Date;
 
+/**
+ * @author Taylor Bauer
+ */
 @Component
 public class JwtUtils {
 
     private static final String SECRET = "wingspan-secret-key-must-be-at-least-32-chars!!";
     private static final long EXPIRATION_MS = 86400000; // 24 hours
 
+    /**
+     *
+     * @return JWS key
+     */
     private Key getKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
+    /**
+     *
+     * @param user
+     * @return JWTS token that was generated
+     */
     public String generateToken(Users user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
@@ -30,6 +42,11 @@ public class JwtUtils {
                 .compact();
     }
 
+    /**
+     *
+     * @param token
+     * @return username found from given toke
+     */
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getKey()).build()
@@ -37,6 +54,11 @@ public class JwtUtils {
                 .getBody().getSubject();
     }
 
+    /**
+     *
+     * @param token
+     * @return true if token is valid or false if token is invalid
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token);

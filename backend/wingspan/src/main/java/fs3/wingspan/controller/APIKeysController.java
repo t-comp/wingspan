@@ -17,6 +17,7 @@ import java.util.UUID;
  * admin management of API keys
  * note: API keys are auto-generated when a team is created in TeamsController
  * this controller handles viewing, activating, deactivating, and extending keys
+ * @author Taylor Bauer
  */
 @RestController
 @RequestMapping("/api-key")
@@ -28,6 +29,8 @@ public class APIKeysController {
     /**
      * manually generate/regenerate API key for a team
      * POST /api-key/keygen
+     *  @param request
+     *  @return new API key generated
      */
     @PostMapping("/keygen")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -55,6 +58,7 @@ public class APIKeysController {
     /**
      * get all API keys
      * GET /api-key/all
+     * @return all API keys
      */
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -65,6 +69,8 @@ public class APIKeysController {
     /**
      * get API key by ID
      * GET /api-key/{keyId}
+     * @param keyId
+     * @return API key found through ID or an error if key does not exist
      */
     @GetMapping("/{keyId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -80,6 +86,7 @@ public class APIKeysController {
     /**
      * get only active API keys
      * GET /api-key/active
+     * @return all active API keys
      */
     @GetMapping("/active")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -90,6 +97,8 @@ public class APIKeysController {
     /**
      * get API key by team name
      * GET /api-key/team/{teamName}
+     * @param teamName
+     * @return API key for specific teamName
      */
     @GetMapping("/team/{teamName}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -100,6 +109,8 @@ public class APIKeysController {
     /**
      * get API key by project name
      * GET /api-key/project/{projectName}
+     * @param projectName
+     * @return API key for specific projectName
      */
     @GetMapping("/project/{projectName}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -110,6 +121,8 @@ public class APIKeysController {
     /**
      * deactivate API key by team name
      * PUT /api-key/deactivate/team/{teamName}
+     * @param teamName
+     * @return Message that confirms that the team key has been deactivated
      */
     @PutMapping("/deactivate/team/{teamName}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -136,6 +149,8 @@ public class APIKeysController {
     /**
      * deactivate specific API key by ID
      * PUT /api-key/{keyId}/deactivate
+     * @param keyId
+     * @return message that the key has been deactivated by id
      */
     @PutMapping("/{keyId}/deactivate")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -154,6 +169,8 @@ public class APIKeysController {
     /**
      * reactivate key by team name
      * PUT /api-key/activate/team/{teamName}
+     * @param teamName
+     * @return message that key has been reactivated by teamName
      */
     @PutMapping("/activate/team/{teamName}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -180,6 +197,8 @@ public class APIKeysController {
     /**
      * reactivate specific key by ID
      * PUT /api-key/{keyId}/activate
+     * @param keyId
+     * @return message that API key has been reactivated by its id
      */
     @PutMapping("/{keyId}/activate")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -198,6 +217,9 @@ public class APIKeysController {
     /**
      * push back expiration date
      * PUT /api-key/{keyId}/extra-time?months={months_here}
+     * @param keyId
+     * @param months
+     * @return message that API key expiration data has been pushed back
      */
     @PutMapping("/{keyId}/extra-time")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -225,6 +247,8 @@ public class APIKeysController {
     /**
      * delete key by team name
      * DELETE /api-key/team/{teamName}
+     * @param teamName
+     * @return message that API key has been deleted through teamName
      */
     @DeleteMapping("/team/{teamName}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -243,6 +267,8 @@ public class APIKeysController {
     /**
      * perma delete key
      * DELETE /api-key/{keyId}
+     * @param keyId
+     * @return message that API key has been deleted by keyId
      */
     @DeleteMapping("/{keyId}")
     @PreAuthorize("hasAuthority('ADMIN')")

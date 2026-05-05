@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+/**
+ * @author Taylor Bauer
+ */
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -46,6 +49,8 @@ public class UserController {
     /**
      * create new account (student reg)
      * POST /user/create-account
+     * @param u
+     * @return message that account was created
      */
     @PostMapping("/create-account")
     public ResponseEntity<?> createAccount(@RequestBody Users u) {
@@ -95,6 +100,8 @@ public class UserController {
      * admin creates an account on behalf of a student
      * can optionally assign them to a team right away
      * POST /user/admin/create-account
+     * @param u
+     * @return the account created + message that user created successfully
      */
     @PostMapping("/admin/create-account")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -154,6 +161,8 @@ public class UserController {
      * user logs in with username or email and password
      * returns JWT token on success
      * POST /user/login
+     * @param info
+     * @return confirmation that user was logged in
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginInfoDTO info) {
@@ -188,6 +197,7 @@ public class UserController {
     /**
      * logout with JWT
      * POST /user/logout
+     * @return message that user was logged out successfully
      */
     @PostMapping("/logout")
     public ResponseEntity<MessageResponse> logout() {
@@ -201,6 +211,8 @@ public class UserController {
 
     /**
      * validate password length
+     * @param password
+     * @return true is password is valid, false if password is invalid
      */
     private boolean isValidPassword(String password) {
         return password != null && password.length() >= 7;
@@ -208,6 +220,8 @@ public class UserController {
 
     /**
      * validate email format with regex
+     * @param email
+     * @return true is email is valid, false if email is invalid
      */
     private boolean isValidEmail(String email) {
         if (email == null) return false;
@@ -221,6 +235,7 @@ public class UserController {
     /**
      * get all users
      * GET /user/all
+     * @return all users that exist
      */
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -235,6 +250,8 @@ public class UserController {
     /**
      * get user by their ID
      * GET /user/{userId}
+     * @param userId
+     * @return user info of given userId
      */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable int userId) {
@@ -249,6 +266,8 @@ public class UserController {
     /**
      * get user by their username
      * GET /user/username/{username}
+     * @param username
+     * @return user info from given username
      */
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
@@ -263,6 +282,8 @@ public class UserController {
     /**
      * get user by their email
      * GET /user/email/{email}
+     * @param email
+     * @return user info connected to given email
      */
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
@@ -277,6 +298,9 @@ public class UserController {
     /**
      * reset password with email
      * PUT /user/reset-password?email=email_here&newPassword=password_here
+     * @param email
+     * @param newPassword
+     * @return message that password has been reset sucessfully
      */
     @PutMapping("/reset-password")
     public ResponseEntity<MessageResponse> resetPassword(@RequestParam String email, @RequestParam String newPassword) {
@@ -301,6 +325,9 @@ public class UserController {
     /**
      * update user's username
      * PUT /user/{userId}/update-username?newUsername=username_here
+     * @param userId
+     * @param newUsername
+     * @return message that username has been updated successfully
      */
     @PutMapping("/{userId}/update-username")
     public ResponseEntity<MessageResponse> updateUsername(@PathVariable int userId, @RequestParam String newUsername) {
@@ -329,6 +356,9 @@ public class UserController {
     /**
      * update user email
      * PUT /user/{userId}/update-email?newEmail=email_here
+     * @param userId
+     * @param newEmail
+     * @return message that email has been updated successfully
      */
     @PutMapping("/{userId}/update-email")
     public ResponseEntity<MessageResponse> updateEmail(@PathVariable int userId, @RequestParam String newEmail) {
@@ -357,6 +387,8 @@ public class UserController {
     /**
      * make a user an admin
      * PUT /user/{userId}/make-admin
+     * @param userId
+     * @return confirmation that user has been made admin
      */
     @PutMapping("/{userId}/make-admin")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -376,6 +408,8 @@ public class UserController {
     /**
      * make user a student
      * PUT /user/{userId}/make-student
+     * @param userId
+     * @return message that user has been successfully switched to a student
      */
     @PutMapping("/{userId}/make-student")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -395,6 +429,8 @@ public class UserController {
     /**
      * activate a user account
      * PUT /user/{userId}/activate
+     * @param userId
+     * @return message that user is successfully activated
      */
     @PutMapping("/{userId}/activate")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -414,6 +450,8 @@ public class UserController {
     /**
      * deactivate a user account
      * PUT /user/{userId}/deactivate
+     * @param userId
+     * @return message that user is successfully deactived
      */
     @PutMapping("/{userId}/deactivate")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -433,6 +471,8 @@ public class UserController {
     /**
      * delete a user by their ID
      * DELETE /user/{userId}
+     * @param userId
+     * @return message that user has been successfully deleted
      */
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -452,6 +492,10 @@ public class UserController {
     /**
      * update user's first and last name
      * PUT /user/{userId}/update-name?firstName=
+     * @param userId
+     * @param firstName
+     * @param lastName
+     * @return message that name has been successfully updated
      */
     @PutMapping("/{userId}/update-name")
     public ResponseEntity<MessageResponse> updateName(@PathVariable int userId, @RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName) {
@@ -479,6 +523,7 @@ public class UserController {
     /**
      * delete all users (BE CAREFUL!)
      * DELETE /user/delete-all
+     * @return message that all users have been deleted
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -490,6 +535,8 @@ public class UserController {
     /**
      * get user's db info
      * GET /user/dashboard?email=student@iastate.edu
+     * @param email
+     * @return user dashboard
      */
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboard(@RequestParam String email) {

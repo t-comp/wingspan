@@ -33,6 +33,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * @author Abby Van Der Brink
+ * @author Taylor Bauer
+ */
 @Service
 @Slf4j
 public class ImageStorageService {
@@ -72,6 +76,13 @@ public class ImageStorageService {
 
     /**
      * Save image file to disk and metadata to database
+     * @param file
+     * @param speciesId
+     * @param lifecycle_stage
+     * @param description
+     * @param nathansNotes
+     * @param tagIds
+     * @return the newly saved image
      */
     @Transactional
     public Image saveImage(MultipartFile file, int speciesId,
@@ -195,6 +206,14 @@ public class ImageStorageService {
 
     /**
      * Bulk save multiple images to the same species
+     * Save image file to disk and metadata to database
+     * @param files
+     * @param speciesId
+     * @param lifecycle_stage
+     * @param description
+     * @param nathansNotes
+     * @param tagIds
+     * @return the newly saved image
      */
     @Transactional
     public List<Image> bulkSaveImages(List<MultipartFile> files, int speciesId, String lifecycle_stage, String description, String nathansNotes, List<Integer> tagIds) throws IOException {
@@ -217,6 +236,13 @@ public class ImageStorageService {
 
     /**
      * update image metadata
+     * @param imageId
+     * @param species_id
+     * @param nathansNotes
+     * @param description
+     * @param life_cycle
+     * @param tagIds
+     * @return newly updated image
      */
     @Transactional
     public Image updateImage(int imageId, String description, String nathansNotes,
@@ -257,6 +283,8 @@ public class ImageStorageService {
 
     /**
      * Get image by ID
+     * @param imageId
+     * @return image that is connected to given id
      */
     public Image getImageById(Integer imageId) {
         return imageRepository.findById(imageId)
@@ -265,6 +293,7 @@ public class ImageStorageService {
 
     /**
      * Delete image (both file and database record)
+     * @param imageId
      */
     @Transactional
     public void deleteImage(Integer imageId) throws IOException {
@@ -276,6 +305,10 @@ public class ImageStorageService {
         log.info("Image deleted: id={}", imageId);
     }
 
+    /**
+     * @param tagIds
+     * @return all images that are connected to the tags given
+     */
     public List<Image> filterByAllTags(List<Integer> tagIds){
         if(tagIds == null || tagIds.isEmpty()){
             return imageRepository.findAll();
@@ -285,6 +318,9 @@ public class ImageStorageService {
 
     /**
      * Filter images within a species by tag IDs (must have ALL tags)
+     * @param speciesId
+     * @param tagIds
+     * @return images that connect to both species and tagids
      */
     public List<Image> filterBySpeciesAndTagIds(int speciesId, List<Integer> tagIds){
         if(tagIds == null || tagIds.isEmpty()){
@@ -296,6 +332,10 @@ public class ImageStorageService {
     /**
      * Filter images within a species by tag names (must have ALL tags)
      * optionally returns featured image first
+     * @param speciesId
+     * @param tagNames
+     * @param featuredFirst
+     * @return images that connect to both species and tag names
      */
     public List<Image> filterBySpeciesAndTagNames(int speciesId, List<String> tagNames, boolean featuredFirst){
         if(tagNames == null || tagNames.isEmpty()){
@@ -329,6 +369,8 @@ public class ImageStorageService {
     /**
      * Set an image as featured for its species + tag combination
      * automatically unmarks any previously featured image for the same combo
+     * @param imageId
+     * @return updated image with newly featured tag added
      */
     @Transactional
     public Image setFeatured(int imageId){
@@ -361,6 +403,8 @@ public class ImageStorageService {
 
     /**
      * Unset featured on an image
+     * @param imageId
+     * @return image without featured tag
      */
     @Transactional
     public Image unsetFeatured(int imageId){
@@ -376,6 +420,9 @@ public class ImageStorageService {
 
     /**
      * Merge attributes onto a single image
+     * @param imageId
+     * @param newA
+     * @return image with updated merged attributes
      */
     @Transactional
     public Image mergeAttributes(int imageId, Map<String, String> newA) {
@@ -398,6 +445,9 @@ public class ImageStorageService {
 
     /**
      * Merge same attributes onto a list of images
+     * @param imageIds
+     * @param newA
+     * @return all images with newly merged attributes
      */
     @Transactional
     public List<Image> bulkMergeAttributes(List<Integer> imageIds, Map<String, String> newA) {
@@ -425,6 +475,9 @@ public class ImageStorageService {
 
     /**
      * Merge same attributes onto all images of a species
+     * @param speciesId
+     * @param newA
+     * @return all images in the species with newly merged attributes
      */
     @Transactional
     public List<Image> bulkMergeAttributesBySpecies(int speciesId, Map<String, String> newA) {
@@ -453,6 +506,9 @@ public class ImageStorageService {
 
     /**
      * Remove specific attribute keys from a single image
+     * @param imageId
+     * @param keys
+     * @return image with specific attributes removed
      */
     @Transactional
     public Image removeAttributes(int imageId, List<String> keys) {
@@ -476,6 +532,9 @@ public class ImageStorageService {
 
     /**
      * Remove specific attribute keys from a list of images
+     * @param imageIds
+     * @param keys
+     * @return images with specific attributes removed
      */
     @Transactional
     public List<Image> bulkRemoveAttributes(List<Integer> imageIds, List<String> keys) {
@@ -504,6 +563,8 @@ public class ImageStorageService {
 
     /**
      * Clear all attributes from a single image
+     * @param imageId
+     * @return image with all attributes cleared
      */
     @Transactional
     public Image clearAttributes(int imageId) {
@@ -521,6 +582,13 @@ public class ImageStorageService {
 
     /**
      * Resize image to target width and upload to DO Spaces, returns the URL
+     * @param original
+     * @param baseName
+     * @param suffix
+     * @param extension
+     * @param targetWidth
+     * @param contentType
+     * @return url of resized image
      */
     private String uploadResized(BufferedImage original, String baseName, String suffix, String extension, int targetWidth, String contentType) throws IOException {
         String formatName = extension.replace(".", "");
@@ -546,6 +614,11 @@ public class ImageStorageService {
         return endpoint + "/" + bucketName + "/" + key;
     }
 
+    /**
+     * return the dimensions of an image
+     * @param file
+     * @return
+     */
     private int[] getImageDimensions(MultipartFile file){
         try{
             BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
@@ -558,6 +631,11 @@ public class ImageStorageService {
         return new int[]{0,0};
     }
 
+    /**
+     * returns the size range for file sizes
+     * @param fileSize
+     * @return
+     */
     private String getSizeRange(long fileSize){
         if(fileSize >= LARGE_RANGE_MIN)  return "large (10MB-20MB)";
         if(fileSize >= MEDIUM_RANGE_MIN) return "medium (2MB-10MB)";
@@ -565,6 +643,11 @@ public class ImageStorageService {
         return "tiny (under 500kb)";
     }
 
+    /**
+     * returns file extension of an image
+     * @param filename
+     * @return
+     */
     private String getFileExtension(String filename){
         if(filename == null || filename.isEmpty() || !filename.contains(".")){
             return "";
@@ -574,6 +657,8 @@ public class ImageStorageService {
 
     /**
      * Saves the original file name for the photos
+     * @param originalFilename
+     * @return a safe file name of image
      */
     private String getSafeFilename(String originalFilename){
         if(originalFilename == null || originalFilename.isEmpty()){

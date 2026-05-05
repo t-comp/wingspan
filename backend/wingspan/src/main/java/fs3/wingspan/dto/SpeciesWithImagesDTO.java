@@ -7,6 +7,9 @@ import lombok.Data;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Taylor Bauer
+ */
 @Data
 @Builder
 public class SpeciesWithImagesDTO {
@@ -22,6 +25,12 @@ public class SpeciesWithImagesDTO {
     private Map<String, String> attributeDef;
     private List<ImageDTO> images;
 
+    /**
+     * @param s
+     * @param thumbnailUrl
+     * @param images
+     * @return all info of species with images and image info
+     */
     public static SpeciesWithImagesDTO fromSpecies(Species s, String thumbnailUrl, List<ImageDTO> images) {
         return SpeciesWithImagesDTO.builder()
                 .id(s.getId())

@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * @author Abby Van Der Brink
+ */
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Integer> {
     Optional<Image> findByFilename(String filename);

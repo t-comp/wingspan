@@ -4,6 +4,9 @@ import fs3.wingspan.model.Users;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * @author Taylor Bauer
+ */
 @Data
 @Builder
 public class UsersDTO {
@@ -16,6 +19,10 @@ public class UsersDTO {
     private String firstName;
     private String lastName;
 
+    /**
+     * @param u
+     * @return all user info
+     */
     public static UsersDTO fromUser(Users u) {
         return UsersDTO.builder()
                 .userId(u.getId())

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author Taylor Bauer
+ */
 @Repository
 public interface SpeciesRepository extends JpaRepository<Species, Integer> {
     Species findByName(String name);

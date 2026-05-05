@@ -4,6 +4,9 @@ import fs3.wingspan.model.Tags;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * @author Abby Van Der Brink
+ */
 @Data
 @Builder
 public class TagDTO {
@@ -11,6 +14,10 @@ public class TagDTO {
     private String tagName;
     private String tagCategory;
 
+    /**
+     * @param tag
+     * @return all tag info
+     */
     public static TagDTO from(Tags tag){
         return TagDTO.builder()
                 .tagId(tag.getId())

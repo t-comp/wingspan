@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Abby Van Der Brink
+ */
 @Repository
 public interface TagRepository extends JpaRepository<Tags, Integer> {
     List<Tags> findByCategory(String category);

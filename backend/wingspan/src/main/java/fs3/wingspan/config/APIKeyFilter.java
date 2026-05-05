@@ -18,12 +18,23 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * @author Taylor Bauer
+ */
 @Component
 public class APIKeyFilter extends OncePerRequestFilter {
 
     @Autowired
     private APIKeyRepository apiKeyRepository;
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param chain
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {

@@ -2,6 +2,9 @@ package fs3.wingspan.dto;
 
 import lombok.Data;
 
+/**
+ * @author Taylor Bauer
+ */
 @Data
 public class UpdateTagRequest {
 

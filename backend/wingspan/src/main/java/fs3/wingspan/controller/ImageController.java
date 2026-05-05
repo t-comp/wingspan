@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+/**
+ * @author Abby Van Der Brink
+ * @author Taylor Bauer
+ */
 @RestController
 @RequestMapping("/images")
 @Validated
@@ -42,6 +47,13 @@ public class ImageController {
     /**
      * Upload a single image
      * POST /images/admin/upload
+     * @param file
+     * @param species_id
+     * @param life_cycle
+     * @param description
+     * @param nathansNotes
+     * @param tagId
+     * @return json text that shows the image has been saved with given info
      */
     @PostMapping(value = "/admin/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -72,6 +84,13 @@ public class ImageController {
     /**
      * Bulk upload multiple images to the same species
      * POST /images/admin/upload-bulk
+     * @param files
+     * @param species_id
+     * @param life_cycle
+     * @param description
+     * @param nathansNotes
+     * @param tagId
+     * @return json text that shows the images has been saved with given info
      */
     @PostMapping(value = "/admin/upload-bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -109,6 +128,8 @@ public class ImageController {
     /**
      * Get image by ID
      * GET /images/{imageId}
+     * @param imageId
+     * @return All image info in json format
      */
     @GetMapping("/{imageId}")
     public ResponseEntity<ImageDTO> getImageByID(@PathVariable Integer imageId) {
@@ -123,6 +144,8 @@ public class ImageController {
     /**
      * Get all images for a species by ID
      * GET /images/species/{speciesId}
+     * @param speciesId
+     * @return all images with this species id
      */
     @GetMapping("/species/{speciesId}")
     public ResponseEntity<List<ImageDTO>> getImagesBySpecies(@PathVariable Integer speciesId) {
@@ -134,6 +157,9 @@ public class ImageController {
     /**
      * Get all images for a species by common name or scientific name
      * GET /images/species/name/{name}
+     * @param name
+     * @param lifecyclestage
+     * @return image by species name (& lifecyclestage if included)
      */
     @GetMapping("/species/name/{name}")
     public ResponseEntity<?> getImagesBySpeciesName(@PathVariable String name,
@@ -159,6 +185,11 @@ public class ImageController {
     /**
      * Filter images within a species by tag IDs
      * GET /images/species/{speciesId}/filter?tagIds=1,2,3
+     * @param speciesId
+     * @param tagIds
+     * @param tagNames
+     * @param featured
+     * @return Images that have attributes that match the specific tags and species name
      */
     @GetMapping("/species/{speciesId}/filter")
     public ResponseEntity<List<ImageDTO>> filterImagesBySpeciesAndTags(
@@ -187,6 +218,10 @@ public class ImageController {
     /**
      * Filter images within a species by name + tag names + optional featured
      * GET /images/species/name/{name}/filter?tagNames=wings-open,male&featured=true
+     * @param name
+     * @param tagNames
+     * @param featured
+     * @return images with species name and tag names (also by features if included)
      */
     @GetMapping("/species/name/{name}/filter")
     public ResponseEntity<?> filterImagesBySpeciesNameAndTags(
@@ -217,6 +252,8 @@ public class ImageController {
     /**
      * Filter images by tags (image must have ALL specified tags)
      * GET /images/filter?tagIds=
+     * @param tagIds
+     * @return images that have the given tags
      */
     @GetMapping("/filter")
     public ResponseEntity<List<ImageDTO>> filterImagesByTags(@RequestParam List<Integer> tagIds) {
@@ -229,6 +266,8 @@ public class ImageController {
      * Set an image as featured for its species + tag combination
      * auto unmarks any previously featured image for the same combo
      * PUT /images/admin/{imageId}/featured
+     * @param imageId
+     * @return Image info including it being a newly featured image
      */
     @PutMapping("/admin/{imageId}/featured")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -244,6 +283,8 @@ public class ImageController {
     /**
      * Unset featured on an image
      * DELETE /images/admin/{imageId}/featured
+     * @param imageId
+     * @return image info including the field that shows it is no longer featured
      */
     @DeleteMapping("/admin/{imageId}/featured")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -259,6 +300,13 @@ public class ImageController {
     /**
      * Edit any attribute of an existing image
      * PATCH /images/admin/{imageId}
+     * @param imageId
+     * @param description
+     * @param nathansNotes
+     * @param life_cycle
+     * @param species_id
+     * @param tagIds
+     * @return update image information
      */
     @PatchMapping("/admin/{imageId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -275,6 +323,9 @@ public class ImageController {
     /**
      * Merge attributes onto a single image
      * PUT /images/admin/{imageId}/attributes
+     * @param imageId
+     * @param attributes
+     * @return image info with merged attributes
      */
     @PutMapping("/admin/{imageId}/attributes")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -290,6 +341,8 @@ public class ImageController {
     /**
      * Merge same attributes onto a list of images
      * PUT /images/admin/bulk-attributes
+     * @param request
+     * @return images in the bulk attributes uploaded
      */
     @PutMapping("/admin/bulk-attributes")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -316,6 +369,9 @@ public class ImageController {
     /**
      * Merge same attributes onto all images of a species
      * PUT /images/admin/species/{speciesId}/attributes
+     * @param speciesId
+     * @param attributes
+     * @return images in species with new merged attributes
      */
     @PutMapping("/admin/species/{speciesId}/attributes")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -332,6 +388,9 @@ public class ImageController {
     /**
      * Remove specific attribute keys from a single image
      * DELETE /images/admin/{imageId}/attributes
+     * @param imageId
+     * @param request
+     * @return image info with newly deleted attribute
      */
     @DeleteMapping("/admin/{imageId}/attributes")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -351,6 +410,8 @@ public class ImageController {
     /**
      * Remove specific attribute keys from a list of images
      * DELETE /images/admin/bulk-attributes
+     * @param request
+     * @return images info with newly deleted attribute
      */
     @DeleteMapping("/admin/bulk-attributes")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -377,6 +438,8 @@ public class ImageController {
     /**
      * Clear all attributes from a single image
      * DELETE /images/admin/{imageId}/attributes/all
+     * @param imageId
+     * @return image info with cleared attributes
      */
     @DeleteMapping("/admin/{imageId}/attributes/all")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -392,6 +455,8 @@ public class ImageController {
     /**
      * Delete image from database and storage
      * DELETE /images/admin/{imageId}
+     * @param imageId
+     * @return message that image is deleted
      */
     @DeleteMapping("/admin/{imageId}")
     @PreAuthorize("hasAuthority('ADMIN')")

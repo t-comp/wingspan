@@ -6,6 +6,9 @@ import lombok.Data;
 
 import java.util.Map;
 
+/**
+ * @author Taylor Bauer
+ */
 @Data
 @Builder
 public class SpeciesDTO {
@@ -20,6 +23,11 @@ public class SpeciesDTO {
     private String thumbnailUrl;
     private Map<String, String> attributeDef;
 
+    /**
+     * @param s
+     * @param url
+     * @return all species info
+     */
     public static SpeciesDTO fromSpecies(Species s, String url) {
         return SpeciesDTO.builder()
                 .id(s.getId())

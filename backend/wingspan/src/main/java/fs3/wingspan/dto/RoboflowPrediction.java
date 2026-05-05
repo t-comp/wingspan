@@ -5,7 +5,9 @@ import lombok.Setter;
 
 import java.util.List;
 
-
+/**
+ * @author Abby Van Der Brink
+ */
 @Getter
 @Setter
 public class RoboflowPrediction {

@@ -16,6 +16,9 @@ import java.util.Base64;
 import java.util.Comparator;
 import java.util.Map;
 
+/**
+ * @author Abby Van Der Brink
+ */
 @Service
 @Slf4j
 public class RoboflowService {
@@ -28,6 +31,12 @@ public class RoboflowService {
 
     private static final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * classify an image by lifecycle stage through a roboflow AI model
+     * @param file
+     * @return
+     * @throws IOException
+     */
     public static RoboflowPrediction classifyImage(MultipartFile file) throws IOException{
         String url = "https://classify.roboflow.com/" + modelId + "?api_key=" + apiKey;
 
@@ -45,6 +54,12 @@ public class RoboflowService {
         return response.getBody();
     }
 
+    /**
+     * returns the lifecycle stage that is predicted
+     * @param file
+     * @return
+     * @throws IOException
+     */
     public static String getLifecycleStage(MultipartFile file) throws IOException {
         RoboflowPrediction prediction = classifyImage(file);
 

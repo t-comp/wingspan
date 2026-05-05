@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * @author Taylor Bauer
+ * @author Abby Van Der Brink
+ */
 @RestController
 @RequestMapping("/species")
 public class SpeciesController {
@@ -34,6 +38,8 @@ public class SpeciesController {
     /**
      * create new species
      * POST /species/create
+     * @param s
+     * @return newly created species info
      */
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -57,6 +63,7 @@ public class SpeciesController {
     /**
      * get all species
      * GET /species/all
+     * @return all species in db
      */
     @GetMapping("/all")
     public ResponseEntity<List<SpeciesDTO>> getAllSpecies() {
@@ -69,6 +76,8 @@ public class SpeciesController {
     /**
      * get species by ID
      * GET /species/{speciesId}
+     * @param speciesId
+     * @return the species that matches the given id
      */
     @GetMapping("/{speciesId}")
     public ResponseEntity<?> getSpeciesById(@PathVariable int speciesId) {
@@ -83,6 +92,8 @@ public class SpeciesController {
     /**
      * get species by name or scientific name
      * GET /species/name/{name}
+     * @param name
+     * @return species info of the species that matches the given name
      */
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getSpeciesByName(@PathVariable String name) {
@@ -97,6 +108,10 @@ public class SpeciesController {
     /**
      * filter species by taxonomy (all params optional)
      * GET /species/filter?orderName=Lepidoptera&family=Nymphalidae&genus=Danaus
+     * @param orderName
+     * @param family
+     * @param genus
+     * @return species filtered by orderName/family/genus
      */
     @GetMapping("/filter")
     public ResponseEntity<List<SpeciesDTO>> filterSpecies(@RequestParam(required = false) String orderName, @RequestParam(required = false) String family, @RequestParam(required = false) String genus) {
@@ -110,6 +125,7 @@ public class SpeciesController {
      * get all distinct values for filter dropdowns
      * populated from whatever is actually in the database
      * GET /species/filter-options
+     * @return the filter options for orders/families/genera
      */
     @GetMapping("/filter-options")
     public ResponseEntity<?> getFilterOptions() {
@@ -123,6 +139,9 @@ public class SpeciesController {
     /**
      * set thumbnail image for species card
      * PUT /species/{speciesId}/set-thumbnail?imageId=5
+     * @param speciesId
+     * @param imageId
+     * @return message that new thumbnail has been set
      */
     @PutMapping("/{speciesId}/set-thumbnail")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -148,6 +167,8 @@ public class SpeciesController {
     /**
      * remove thumbnail from species (falls back to first image or null)
      * PUT /species/{speciesId}/remove-thumbnail
+     * @param speciesId
+     * @return message that image is no longer the thumbnail
      */
     @PutMapping("/{speciesId}/remove-thumbnail")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -167,6 +188,9 @@ public class SpeciesController {
     /**
      * update species info
      * PUT /species/{speciesId}/update
+     * @param speciesId
+     * @param updatedSpecies
+     * @return message that the species info has been updated
      */
     @PutMapping("/{speciesId}/update")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -203,6 +227,8 @@ public class SpeciesController {
     /**
      * delete species by ID
      * DELETE /species/{speciesId}
+     * @param speciesId
+     * @return message the species is deleted by given ID
      */
     @DeleteMapping("/{speciesId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -228,6 +254,8 @@ public class SpeciesController {
      * if thumbnail set -> use it
      * if no thumbnail but has images -> use first image
      * if no images at all -> null (fe handle placeholder)
+     * @param s
+     * @return string url for thumbnail if none is set
      */
     private String thumbnailFallback(Species s) {
         if (s.getThumbnail() != null) {
@@ -246,6 +274,9 @@ public class SpeciesController {
      * set attribute definitions for a species (what custom fields this species has)
      * PUT /species/{speciesId}/attributes
      * body: { "Wing Pattern": "text", "Wingspan (inches)": "number" }
+     * @param speciesId
+     * @param defs
+     * @return message that attribute definition have been updated for specific species
      */
     @PutMapping("/{speciesId}/attributes")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -262,6 +293,8 @@ public class SpeciesController {
     /**
      * get attribute definitions for a species
      * GET /species/{speciesId}/attributes
+     * @param speciesId
+     * @return attribute definition for a given speciesId
      */
     @GetMapping("/{speciesId}/attributes")
     public ResponseEntity<?> getAttributeDefinitions(@PathVariable int speciesId) {
@@ -275,6 +308,7 @@ public class SpeciesController {
     /**
      * get all species with all their images nested
      * GET /species/all-with-images
+     * @return all species with images connected to them
      */
     @GetMapping("/all-with-images")
     public ResponseEntity<List<SpeciesWithImagesDTO>> getAllSpeciesWithImages() {
@@ -296,6 +330,8 @@ public class SpeciesController {
     /**
      * get a single species with all its images by common name or scientific name
      * GET /species/name/{name}/with-images
+     * @param name
+     * @return a single species (found by name) with all of its connected images
      */
     @GetMapping("/name/{name}/with-images")
     public ResponseEntity<?> getSpeciesWithImagesByName(@PathVariable String name) {
@@ -316,6 +352,9 @@ public class SpeciesController {
     /**
      * get coverage of core tags across species
      * GET /species/core?tagNames=wings-open,male,female,horizontal,vertical
+     * @param tagNames
+     * @param speciesNames
+     * @return the coverage of core tags across given species
      */
     @GetMapping("/core")
     public ResponseEntity<?> getSpeciesCoreCovg(@RequestParam List<String> tagNames, @RequestParam(required = false) List<String> speciesNames) {
