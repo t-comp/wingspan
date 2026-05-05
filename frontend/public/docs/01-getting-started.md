@@ -1,15 +1,15 @@
 # Getting Started
 
-Wingspan is a centralized butterfly and insect image library built for senior design and capstone student teams at Iowa State University. It's purpose is to allow students access to a collection of images to use in their applications instead of blank or building  own pipeline. This application was built by Taylor Bauer, Lexi Last name, Abby Van Der Brink, and Siri.  The images and application are maintained by Nathan Brockman at Reiman Gardens
+Wingspan is a centralized butterfly and insect image library built for senior design and capstone student teams at Iowa State University. Its purpose is to allow students access to a collection of images to use in their applications instead of building their own pipeline. This application was built by Taylor Bauer, Lexi, Abby Van Den Brink, and Siri. The images and application are maintained by Nathan Brockman at Reiman Gardens.
 
-> **Important:** Always use scientific name (e.g. `Cethosia biblis`) as your identifier when calling endpoints. Common names like "Red Lacewing" can be shared by multiple species but scientific names are unique and will never be duplicated.
+>**Important:** Always use scientific name (e.g. `Cethosia biblis`) as your identifier when calling endpoints. Common names like "Red Lacewing" can be shared by multiple species but scientific names are unique and will never be duplicated.
 
 ---
 
 You can use Wingspan in two ways:
 
-1. **Programmatically** — use your team's API key to pull images, species info, and metadata directly into your application via the Wingspan API. This is the main use case for most teams.
-2. **Through the frontend** — log into the Wingspan app, browse the library, find specific images you want, and copy the URL for the size you need directly into your project.
+1. **Programmatically:** use your team's API key to pull images, species info, and metadata directly into your application via the Wingspan API. This is the main use case for most teams.
+2. **Through the frontend:** log into the Wingspan app, browse the library, find specific images you want, and copy the URL for the size you need directly into your project.
 
 ---
 
@@ -47,7 +47,7 @@ If your key is valid you will get back a list of species objects. If you get a `
 
 ## What You Can Access
 
-With your API key you have read only access to:
+With your API key you have read-only access to:
 
 - All species and their info (name, scientific name, description, taxonomy)
 - All images for any species, with multiple size URLs ready to use
@@ -62,4 +62,4 @@ You cannot upload, edit, or delete anything in the Wingspan library.
 
 Each image comes with multiple URL fields for different sizes. Use the URL directly in an `img` tag, so no authentication will be needed for the images themselves. Please always use `mediumUrl` as your default because it will always have a value.
 
-See **Image Sizing** for more details.
+See Image Sizing for more details.

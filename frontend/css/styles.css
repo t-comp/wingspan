@@ -2543,6 +2543,89 @@ textarea.form-control-lg {
   overflow-x: auto;
 }
 
+.docs-markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.docs-markdown-body table th {
+  background: #0399b0;
+  color: white;
+  padding: 0.6rem 1rem;
+  text-align: left;
+}
+
+.docs-markdown-body table td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+}
+
+.docs-markdown-body table tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+/* blockquote side line */
+.docs-markdown-body blockquote {
+  border-left: 4px solid #0399b0;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  background: #e8f7fa;
+  border-radius: 0 6px 6px 0;
+  color: #444;
+}
+
+.docs-markdown-body blockquote p {
+  margin: 0;
+}
+
+/* headings spacing */
+.docs-markdown-body h1 {
+  color: #0399b0;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.docs-markdown-body h2 {
+  color: #333;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.docs-markdown-body h3 {
+  color: #333;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* paragraph and list spacing */
+.docs-markdown-body p {
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.docs-markdown-body ul,
+.docs-markdown-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.docs-markdown-body li {
+  line-height: 1.7;
+  margin-bottom: 0.25rem;
+}
+
+/* hr styling */
+.docs-markdown-body hr {
+  border: none;
+  border-top: 1px solid #dee2e6;
+  margin: 2rem 0;
+}
+
 .input-group {
   position: relative;
   display: flex;

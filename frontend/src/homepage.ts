@@ -310,6 +310,7 @@ export async function initHome(userRole, userEmail) {
 
   document.getElementById("navDocsBtn")?.addEventListener("click", (e) => {
   e.preventDefault();
+  localStorage.setItem("activeView", "docs");
   if (portfolio) portfolio.style.display = "none";
   if (speciesView) speciesView.style.display = "none";
   if (teamView) teamView.style.display = "none";

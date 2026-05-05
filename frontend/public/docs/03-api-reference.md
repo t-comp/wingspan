@@ -10,19 +10,6 @@ All requests require your API key in the `X-API-Key` header. API key access is r
 
 ---
 
-## Choosing the Right Endpoint
-
-There are two ways to get images for a species. Choose based on what your app needs:
-
-| If you need... | Use... |
-| --- | --- |
-| Just the images for a species (flat array) | `GET /images/species/name/{name}` |
-| The species info AND all its images in one call | `GET /species/name/{name}/with-images` |
-
-Both return the same full image objects. The difference is just the shape of the response — the first gives you a plain array of images, the second wraps everything inside the species object.
-
----
-
 ## Species
 
 ### Get all species
@@ -31,9 +18,9 @@ Both return the same full image objects. The difference is just the shape of the
 GET /species/all
 ```
 
-Returns all species with their info and `thumbnailUrl`. The `thumbnailUrl` here is the representative photo Nathan chose for that species card — it is not a size tier.
+Returns all species with their info and `thumbnailUrl`. The `thumbnailUrl` here is the representative photo Nathan chose for that species card, it is not a size tier.
 
-**Example response:**
+Example response:
 ```json
 [
   {
@@ -60,13 +47,13 @@ GET /species/name/{name}
 
 Returns a single species. Works with both common name and scientific name.
 
-**Examples:**
+Examples:
 ```
 GET /species/name/Red Lacewing
 GET /species/name/Cethosia biblis
 ```
 
-**Example response:**
+Example response:
 ```json
 {
   "id": 122,
@@ -89,15 +76,15 @@ GET /species/name/Cethosia biblis
 GET /species/name/{name}/with-images
 ```
 
-Returns the species object with all its images in a nested `images` array. Use this when you need species info and images in a single call. Works with both common and scientific name.
+Returns the species object with all its images in a nested `images` array. Works with both common and scientific name.
 
-**Examples:**
+Examples:
 ```
 GET /species/name/Cethosia biblis/with-images
 GET /species/name/Red Lacewing/with-images
 ```
 
-**Example response:**
+Example response:
 ```json
 {
   "id": 122,
@@ -158,12 +145,12 @@ GET /species/filter?orderName={}&family={}&genus={}
 
 All parameters are optional and can be combined.
 
-**Example:**
+Example:
 ```
 GET /species/filter?family=Nymphalidae
 ```
 
-**Example response:**
+Example response:
 ```json
 [
   {
@@ -186,7 +173,7 @@ GET /species/filter-options
 
 Returns all distinct orders, families, and genera currently in the database.
 
-**Example response:**
+Example response:
 ```json
 {
   "orders": ["Lepidoptera"],
@@ -207,13 +194,13 @@ GET /images/species/name/{name}
 
 Returns a flat array of all images for a species. Use this when you already have the species info and just need the images. Works with both common and scientific name. Featured images are returned first automatically.
 
-**Examples:**
+Examples:
 ```
 GET /images/species/name/Red Lacewing
 GET /images/species/name/Cethosia biblis
 ```
 
-**Example response:**
+Example response:
 ```json
 [
   {
@@ -254,17 +241,17 @@ GET /images/species/name/{name}/filter
 
 Filter images within a species by tag names and featured status. Works with both common and scientific name. Featured images are returned first automatically.
 
-**Query parameters (all optional, can be combined):**
-- `tagNames` — comma separated tag names, returns images that have **all** specified tags
-- `featured` — if `true`, returns Nathan's preferred image for that exact tag combination first
+Query parameters (all optional, can be combined):
+- `tagNames`: comma separated tag names, returns images that have all specified tags
+- `featured`: if `true`, returns Nathan's preferred image for that exact tag combination first
 
-**Examples:**
+Examples:
 ```
 GET /images/species/name/Cethosia biblis/filter?tagNames=Wings Open,Female
 GET /images/species/name/Cethosia biblis/filter?tagNames=Wings Open,Female&featured=true
 ```
 
-**Example response:**
+Example response:
 ```json
 [
   {
@@ -301,6 +288,8 @@ Returns a single image by its ID.
 
 ## Tags
 
+For full tag documentation and filtering examples see Tags and Filtering.
+
 ### Get all tags
 
 ```
@@ -309,7 +298,7 @@ GET /tags
 
 Returns all tags in the library.
 
-**Example response (abbreviated):**
+Example response (abbreviated):
 ```json
 [
   { "tagId": 9, "tagName": "Male", "tagCategory": "Sex" },
@@ -330,14 +319,14 @@ GET /tags/category/{category}
 
 Returns all tags in a given category. Category names are case sensitive.
 
-**Examples:**
+Examples:
 ```
 GET /tags/category/Sex
 GET /tags/category/Layout
 GET /tags/category/Life Stage
 ```
 
-**Example response for `GET /tags/category/Sex`:**
+Example response for `GET /tags/category/Sex`:
 ```json
 [
   { "tagId": 9, "tagName": "Male", "tagCategory": "Sex" },
@@ -364,7 +353,7 @@ Returns a single tag by its ID.
 X-API-Key: your_api_key_here
 ```
 
-- API keys are **read-only**. Any non-GET request returns a `403` error.
-- `401` — your key is missing, invalid, inactive, or expired. Check your dashboard or contact Nathan.
-- `403` — you are trying something that requires admin access.
-- `CORS error` — make sure you are on an allowed origin (localhost:3000, 5173, or 8080)
+- API keys are read-only. Any non-GET request returns a `403` error.
+- `401`: your key is missing, invalid, inactive, or expired. Check your dashboard or contact Nathan.
+- `403`: you are trying something that requires admin access.
+- `CORS error`: make sure you are on an allowed origin (localhost:3000, 5173, or 8080).

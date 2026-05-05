@@ -45,11 +45,18 @@ export function initDocs(): void {
       const file = btn.getAttribute("data-file");
       if (!file) return;
       setActiveBtn(btn);
+      localStorage.setItem("activeDocSection", file);
       loadDoc(file);
     });
   });
-
-  const firstBtn = navBtns[0] as HTMLButtonElement;
-  setActiveBtn(firstBtn);
-  loadDoc(firstBtn.getAttribute("data-file") || "01-getting-started.md");
+const savedDoc = localStorage.getItem("activeDocSection") || "01-getting-started.md";
+const savedBtn = Array.from(navBtns).find(b => b.getAttribute("data-file") === savedDoc) as HTMLButtonElement;
+if (savedBtn) {
+    setActiveBtn(savedBtn);
+    loadDoc(savedDoc);
+} else {
+    const firstBtn = navBtns[0] as HTMLButtonElement;
+    setActiveBtn(firstBtn);
+    loadDoc(firstBtn.getAttribute("data-file") || "01-getting-started.md");
+}
 }
