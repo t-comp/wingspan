@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * SQL DB Model file for users
+ * @author Taylor Bauer
+ */
 @Entity
 @Getter
 @Setter
@@ -54,26 +58,41 @@ public class Users implements UserDetails {
 
     // ********** UserDetails implementation **********
 
+    /**
+     * @return list of users with admin access
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(utype.toString()));
     }
 
+    /**
+     * @return true
+     */
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    /**
+     * @return true
+     */
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    /**
+     * @return true
+     */
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    /**
+     * @return true or false if enabled or not
+     */
     @Override
     public boolean isEnabled() {
         return isActive != null && isActive;

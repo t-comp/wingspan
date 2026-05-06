@@ -9,6 +9,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service layer for user details
+ * @author Taylor Bauer
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService{
     @Autowired
@@ -16,6 +20,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 
     /**
      * loads user by username for Spring Security session validation & checks email on fallback
+     * @param username
+     * @return user info connected to given username
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

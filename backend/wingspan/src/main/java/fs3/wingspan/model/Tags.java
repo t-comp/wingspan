@@ -7,6 +7,10 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * SQL DB Model file for tags
+ * @author Abby Van Der Brink
+ */
 @Getter
 @Setter
 @Entity
@@ -30,6 +34,10 @@ public class Tags {
 
     }
 
+    /**
+     * @param name
+     * @param category
+     */
     public Tags(String name, String category) {
         this.name = name;
         this.category = category;

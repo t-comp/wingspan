@@ -22,6 +22,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * This file holds the endpoints for teams actions
+ * @author Taylor Bauer
+ */
 @RestController
 @RequestMapping("/teams")
 public class TeamsController {
@@ -38,6 +42,8 @@ public class TeamsController {
     /**
      * create a new team with auto gen api key
      * POST /teams/create
+     * @param t
+     * @return message that team has been created
      */
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -78,6 +84,7 @@ public class TeamsController {
     /**
      * get all teams
      * GET /teams/all
+     * @return all teams in db
      */
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -88,6 +95,8 @@ public class TeamsController {
     /**
      * get team by ID
      * GET /teams/{teamId}
+     * @param teamId
+     * @return team info of team that matches teamId
      */
     @GetMapping("/{teamId}")
     public ResponseEntity<?> getTeam(@PathVariable Integer teamId) {
@@ -102,6 +111,7 @@ public class TeamsController {
     /**
      * get all unassigned students (ntahn drag/drop students)
      * GET /teams/unassigned-students
+     * @return names of students not assigned to a team
      */
     @GetMapping("/unassigned-students")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -116,6 +126,8 @@ public class TeamsController {
     /**
      * get all members of a team
      * GET /teams/{teamId}/members
+     * @param teamId
+     * @return all students in the given team
      */
     @GetMapping("/{teamId}/members")
     public ResponseEntity<?> getTeamMembers(@PathVariable Integer teamId) {
@@ -132,6 +144,9 @@ public class TeamsController {
     /**
      * add member to team
      * PUT /teams/{teamId}/add-member
+     * @param teamId
+     * @param request
+     * @return message that confirms given student is added to given team
      */
     @PutMapping("/{teamId}/add-member")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -164,6 +179,9 @@ public class TeamsController {
     /**
      * remove member from team
      * PUT /teams/{teamId}/remove-member
+     * @param teamId
+     * @param request
+     * @return message that user is removed from a team
      */
     @PutMapping("/{teamId}/remove-member")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -190,6 +208,9 @@ public class TeamsController {
     /**
      * update team info
      * PUT /teams/{teamId}/update
+     * @param teamId
+     * @param nTeam
+     * @return message that team is updated successfully
      */
     @PutMapping("/{teamId}/update")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -217,6 +238,8 @@ public class TeamsController {
     /**
      * delete team
      * DELETE /teams/{teamId}
+     * @param teamId
+     * @return message that team has been deleted
      */
     @DeleteMapping("/{teamId}")
     @PreAuthorize("hasAuthority('ADMIN')")

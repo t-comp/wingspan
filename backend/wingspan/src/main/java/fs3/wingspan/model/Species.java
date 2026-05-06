@@ -11,6 +11,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * SQL DB Model file for species
+ * @author Taylor Bauer
+ */
 @Entity
 @Getter
 @Setter

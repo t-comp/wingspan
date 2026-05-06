@@ -5,6 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
+/**
+ * Repository file for API KEYS
+ * @author Taylor Bauer
+ */
 @Repository
 public interface APIKeyRepository extends JpaRepository<APIKeys, Integer>{
     APIKeys findByKeyVal(String keyVal);

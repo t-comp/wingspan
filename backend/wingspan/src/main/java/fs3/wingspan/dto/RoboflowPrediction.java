@@ -5,7 +5,10 @@ import lombok.Setter;
 
 import java.util.List;
 
-
+/**
+ * The Roboflow AI model controller that classifies images by lifecycle stage
+ * @author Abby Van Der Brink
+ */
 @Getter
 @Setter
 public class RoboflowPrediction {
@@ -13,6 +16,9 @@ public class RoboflowPrediction {
     private List<Detection> predictions;
 
 
+    /**
+     * Creates a class named Detection with several different variables
+     */
     @Getter
     @Setter
     public static class Detection {

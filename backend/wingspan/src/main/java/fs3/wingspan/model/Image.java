@@ -13,7 +13,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * SQL DB Model file for images
+ * @author Abby Van Der Brink
+ */
 @Getter
 @Setter
 @Entity
@@ -97,11 +100,17 @@ public class Image {
         this.nathansnotes = nathans_notes;
     }
 
+    /**
+     * @param tag
+     */
     public void removeTag(Tags tag) {
         this.tags.remove(tag);
         tag.getImages().remove(this);
     }
 
+    /**
+     * @param tag
+     */
     public void addTag(Tags tag) {
         this.tags.add(tag);
         tag.getImages().add(this);

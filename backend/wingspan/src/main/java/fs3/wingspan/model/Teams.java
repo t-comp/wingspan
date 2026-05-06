@@ -5,6 +5,10 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * SQL DB Model file for teams
+ * @author Taylor Bauer
+ */
 @Entity
 @Getter
 @Setter

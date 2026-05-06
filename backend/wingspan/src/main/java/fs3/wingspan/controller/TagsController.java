@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This file holds the endpoints for tags actions
+ * @author Abby Van Der Brink
+ */
 @RestController
 @RequestMapping("/tags")
 @Validated
@@ -33,6 +37,7 @@ public class TagsController {
     /**
      * Get all tags
      * GET /tags
+     * @return all tags currently in db
      */
     @GetMapping
     public ResponseEntity<List<TagDTO>> getAllTags(){
@@ -45,6 +50,8 @@ public class TagsController {
 
     /**
      * Get tags by category
+     * @param category
+     * @return all tags under specific category
      */
     @GetMapping("/category/{category}")
     public ResponseEntity<List<TagDTO>> getTagsByCategory(@PathVariable String category){
@@ -63,6 +70,8 @@ public class TagsController {
     /**
      * Get single tag by ID
      * GET /api/v1/tags/{tagId}
+     * @param tagId
+     * @return a tag that matches given id
      */
     @GetMapping("/{tagId}")
     public ResponseEntity<TagDTO> getTagById(@PathVariable Integer tagId){
@@ -76,6 +85,8 @@ public class TagsController {
 
     /**
      * Create a New Tag
+     * @param request
+     * @return message that tag has been created
      */
     @PostMapping("/admin")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -92,6 +103,9 @@ public class TagsController {
 
     /**
      * Update existing tag
+     * @param tagId
+     * @param request
+     * @return updated tag + message that it was successfully updated
      */
     @PutMapping("/admin/{tagId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -113,6 +127,8 @@ public class TagsController {
 
     /**
      * Delete tag
+     * @param tagId
+     * @return message that tag was deleted successfully
      */
     @DeleteMapping("/admin/{tagId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -127,6 +143,9 @@ public class TagsController {
 
     /**
      * Add tag to image
+     * @param tagId
+     * @param imageId
+     * @return message that tag has been added to image successfully
      */
     @PostMapping("/{tagId}/images/{imageId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -142,6 +161,9 @@ public class TagsController {
 
     /**
      * Remove tag from image
+     * @param tagId
+     * @param imageId
+     * @return message that tag has been removed from image successfully
      */
     @DeleteMapping("/{tagId}/images/{imageId}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -159,6 +181,8 @@ public class TagsController {
 
     /**
      * Bulk create tags
+     * @param requests
+     * @return the newly created tags + message they were created successfully
      */
     @PostMapping("/admin/bulk")
     @PreAuthorize("hasAuthority('ADMIN')")

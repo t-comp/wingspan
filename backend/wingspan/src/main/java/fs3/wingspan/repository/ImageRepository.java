@@ -10,27 +10,47 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Repository file for Images
+ * @author Abby Van Der Brink
+ */
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Integer> {
-    Optional<Image> findByFilename(String filename);
 
+    /**
+     * Find images by a species ID
+     * @param speciesId
+     * @return List of images
+     */
     List<Image> findBySpeciesId(Integer speciesId);
-    List<Image> findByLifecyclestage(String lifecyclestage);
 
+    /**
+     * find images by tag id
+     * @param tagId
+     * @return list of images
+     */
     @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.id = :tagId")
     List<Image> findByTagId(@Param("tagId") Integer tagId);
 
+    /**
+     * find images by tag category
+     * @param category
+     * @return list of images
+     */
     @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.category = :category")
     List<Image> findByTagCategory(@Param("category") String category);
 
+    /**
+     * find images by species and lifecycle stage
+     * @param speciesId
+     * @param stage
+     * @return list of images
+     */
     @Query("SELECT i FROM Image i WHERE i.species.id = :speciesId AND i.lifecyclestage = :stage")
     List<Image> findBySpeciesAndLifecycle_stage(
             @Param("speciesId") Integer speciesId,
             @Param("stage") String stage
     );
-
-    boolean existsByFilename(String fileName);
-    long countBySpeciesId(Integer speciesID);
 
     @Query("""
         SELECT i FROM Image i
@@ -39,10 +59,23 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
         GROUP BY i
         HAVING COUNT(DISTINCT t.id) = :tagCount
         """)
+    /**
+     * find images that match all given tags
+     * @param tagIds
+     * @param tagCount
+     * @return list of images
+     */
     List<Image> findByAllTags(
             @Param("tagIds") List<Integer> tagIds,
             @Param("tagCount") Long tagCount);
 
+    /**
+     * find all images that match species and all given tags
+     * @param speciesId
+     * @param tagIds
+     * @param tagCount
+     * @return list of images
+     */
     @Query("""
         SELECT i FROM Image i
         JOIN i.tags t
@@ -56,7 +89,13 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
             @Param("tagIds") List<Integer> tagIds,
             @Param("tagCount") Long tagCount);
 
-    // filter images by species + tag names (must have ALL tags)
+    /**
+     * filter images by species + tag names (must have ALL tags)
+     * @param speciesId
+     * @param tagNames
+     * @param tagCount
+     * @return list of images
+     */
     @Query("""
         SELECT i FROM Image i
         JOIN i.tags t
@@ -70,7 +109,13 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
             @Param("tagNames") List<String> tagNames,
             @Param("tagCount") Long tagCount);
 
-    // get featured image for a species + exact tag name set
+    /**
+     * get featured image for a species + exact tag name set
+     * @param speciesId
+     * @param tagNames
+     * @param tagCount
+     * @return list of images
+     */
     @Query("""
         SELECT i FROM Image i
         JOIN i.tags t
@@ -86,6 +131,14 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
             @Param("tagCount") Long tagCount);
 
 
+    /**
+     * find the images that are feature for given tag/species combination
+     * @param speciesId
+     * @param tagNames
+     * @param tagCount
+     * @param excludeId
+     * @return list of images
+     */
     @Query("""
         SELECT i FROM Image i
         JOIN i.tags t
@@ -102,7 +155,12 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
             @Param("tagCount") Long tagCount,
             @Param("excludeId") Integer excludeId);
 
-    //gets scientific name from species for longvity to pull from
+    /**
+     * gets scientific name from species for longvity to pull from
+     * @param scientificName
+     * @param lifecyclestage
+     * @return list of images
+     */
     @Query("""
     SELECT i FROM Image i
     JOIN i.species s
@@ -113,7 +171,11 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
             @Param("scientificName") String scientificName,
             @Param("lifecyclestage") String lifecyclestage);
 
-    // Also add a fallback that ignores lifecycle stage
+    /**
+     * Also add a fallback that ignores lifecycle stage
+     * @param scientificName
+     * @return list of images
+     */
     @Query("""
     SELECT i FROM Image i
     JOIN i.species s
@@ -122,5 +184,11 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
     List<Image> findBySpeciesScientificName(
             @Param("scientificName") String scientificName);
 
+    /**
+     * Find an image by species id and lifecycle stage
+     * @param speciesId
+     * @param lifecyclestage
+     * @return list of images
+     */
     List<Image> findBySpeciesIdAndLifecyclestage(int speciesId, String lifecyclestage);
 }

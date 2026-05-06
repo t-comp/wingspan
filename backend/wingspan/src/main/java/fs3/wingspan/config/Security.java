@@ -20,6 +20,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Security for application
+ * @author Taylor Bauer
+ */
 @Configuration
 @EnableWebSecurity
 public class Security {
@@ -38,6 +42,12 @@ public class Security {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     *
+     * @param http
+     * @return built http
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -55,6 +65,10 @@ public class Security {
         return http.build();
     }
 
+    /**
+     * Configures the cors
+     * @return configuration of source
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -75,11 +89,20 @@ public class Security {
         return source;
     }
 
+    /**
+     * @param c
+     * @return AuthenticationManager
+     * @throws Exception
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration c) throws Exception {
         return c.getAuthenticationManager();
     }
 
+    /**
+     *
+     * @return new DaoAuthenticationProvider
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider p = new DaoAuthenticationProvider();

@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-
+/**
+ * Tags service layer
+ * @author Abby Van Der Brink
+ */
 @Service
 @Slf4j
 public class TagsService {
@@ -26,6 +29,7 @@ public class TagsService {
 
     /**
      * Get all tags
+     * @return all tags in db
      */
     public List<Tags> getAllTags(){
         return tagRepository.findAll();
@@ -34,7 +38,7 @@ public class TagsService {
     /**
      * Get all Tags in a category
      * @param category
-     * @return
+     * @return all tags in given category
      */
     public List<Tags> getTagsByCategory(String category) {
         return tagRepository.findByCategory(category);
@@ -42,6 +46,8 @@ public class TagsService {
 
     /**
      * Get Tag by ID
+     * @param tagId
+     * @return tag by given id
      */
     public Tags getTagById(Integer tagId) {
         return tagRepository.findById(tagId)
@@ -50,6 +56,9 @@ public class TagsService {
 
     /**
      * Create new tag
+     * @param name
+     * @param category
+     * @return newly created tag
      */
     @Transactional
     public Tags createTag(String name, String category){
@@ -70,6 +79,10 @@ public class TagsService {
 
     /**
      * Update tag
+     * @param tagId
+     * @param name
+     * @param category
+     * @return newly updated tag
      */
     @Transactional
     public Tags updateTag(Integer tagId, String name, String category){
@@ -88,6 +101,7 @@ public class TagsService {
 
     /**
      * Delete Tag
+     * @param tagId
      */
     @Transactional
     public void deleteTag(Integer tagId) {
@@ -104,6 +118,8 @@ public class TagsService {
 
     /**
      * Add tag to image
+     * @param tagId
+     * @param imageId
      */
     @Transactional
     public void addTagToImage(Integer tagId, Integer imageId) {
@@ -118,6 +134,8 @@ public class TagsService {
 
     /**
      * Remove tag from image
+     * @param tagId
+     * @param imageId
      */
     public void removeTagFromImage(Integer tagId, Integer imageId) {
         Image image = imageRepository.findById(imageId).orElseThrow(() -> new RuntimeException("Image not found"));
@@ -131,6 +149,8 @@ public class TagsService {
 
     /**
      * Get all images with a specific tag
+     * @param tagId
+     * @return all images connected to given tag
      */
     public List<Image> getImagesByTag(Integer tagId) {
         Tags tag = getTagById(tagId);
@@ -139,6 +159,8 @@ public class TagsService {
 
     /**
      * Get all images in a category
+     * @param category
+     * @return all images in a given category
      */
     public List<Image> getImagesByCategory(String category) {
         return imageRepository.findByTagCategory(category);
@@ -146,6 +168,8 @@ public class TagsService {
 
     /**
      * Bulk create tags
+     * @param requests
+     * @return all newly created tags
      */
     @Transactional
     public List<Tags> bulkCreateTags(List<CreateTagRequest> requests) {

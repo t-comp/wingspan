@@ -6,6 +6,10 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * SQL DB Model file for API KEYS
+ * @author Taylor Bauer
+ */
 @Entity
 @Getter
 @Setter
