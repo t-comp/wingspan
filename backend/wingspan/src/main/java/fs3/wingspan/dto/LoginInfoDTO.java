@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * DTO layer for login info
  * @author Taylor Bauer
  */
 @Getter

@@ -21,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 /**
+ * Security for application
  * @author Taylor Bauer
  */
 @Configuration
@@ -65,7 +66,7 @@ public class Security {
     }
 
     /**
-     *
+     * Configures the cors
      * @return configuration of source
      */
     @Bean
@@ -89,7 +90,6 @@ public class Security {
     }
 
     /**
-     *
      * @param c
      * @return AuthenticationManager
      * @throws Exception

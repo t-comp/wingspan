@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
+ * DTO layer for tags
  * @author Abby Van Der Brink
  */
 @Data
@@ -15,6 +16,7 @@ public class TagDTO {
     private String tagCategory;
 
     /**
+     * builds tags with given attributes
      * @param tag
      * @return all tag info
      */

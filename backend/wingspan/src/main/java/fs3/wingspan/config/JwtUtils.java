@@ -9,6 +9,7 @@ import java.security.Key;
 import java.util.Date;
 
 /**
+ * file creates token for user when they log in
  * @author Taylor Bauer
  */
 @Component
@@ -18,7 +19,6 @@ public class JwtUtils {
     private static final long EXPIRATION_MS = 86400000; // 24 hours
 
     /**
-     *
      * @return JWS key
      */
     private Key getKey() {
@@ -26,7 +26,7 @@ public class JwtUtils {
     }
 
     /**
-     *
+     * Generates a JWTS token for a user
      * @param user
      * @return JWTS token that was generated
      */

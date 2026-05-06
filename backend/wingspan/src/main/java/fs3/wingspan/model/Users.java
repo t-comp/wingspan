@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * SQL DB Model file for users
  * @author Taylor Bauer
  */
 @Entity

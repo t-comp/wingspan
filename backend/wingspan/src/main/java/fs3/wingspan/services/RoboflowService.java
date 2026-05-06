@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.Map;
 
 /**
+ * Service layer for the Roboflow AI model
  * @author Abby Van Der Brink
  */
 @Service
@@ -34,7 +35,7 @@ public class RoboflowService {
     /**
      * classify an image by lifecycle stage through a roboflow AI model
      * @param file
-     * @return
+     * @return RoboflowPrediction of lifecycle stage for image
      * @throws IOException
      */
     public static RoboflowPrediction classifyImage(MultipartFile file) throws IOException{
@@ -57,7 +58,7 @@ public class RoboflowService {
     /**
      * returns the lifecycle stage that is predicted
      * @param file
-     * @return
+     * @return predicted lifecycle stage
      * @throws IOException
      */
     public static String getLifecycleStage(MultipartFile file) throws IOException {

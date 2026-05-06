@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
+ * File that handles image storage in Digital Ocean Bucket
  * @author Abby Van Der Brink
  * @author Taylor Bauer
  */
@@ -306,6 +307,7 @@ public class ImageStorageService {
     }
 
     /**
+     * Filter images by tags
      * @param tagIds
      * @return all images that are connected to the tags given
      */
@@ -617,7 +619,7 @@ public class ImageStorageService {
     /**
      * return the dimensions of an image
      * @param file
-     * @return
+     * @return image dimensions
      */
     private int[] getImageDimensions(MultipartFile file){
         try{
@@ -634,7 +636,7 @@ public class ImageStorageService {
     /**
      * returns the size range for file sizes
      * @param fileSize
-     * @return
+     * @return size range for file sizes
      */
     private String getSizeRange(long fileSize){
         if(fileSize >= LARGE_RANGE_MIN)  return "large (10MB-20MB)";
@@ -646,7 +648,7 @@ public class ImageStorageService {
     /**
      * returns file extension of an image
      * @param filename
-     * @return
+     * @return file extension
      */
     private String getFileExtension(String filename){
         if(filename == null || filename.isEmpty() || !filename.contains(".")){

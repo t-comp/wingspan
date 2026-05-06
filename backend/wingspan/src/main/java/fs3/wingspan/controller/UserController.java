@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 /**
+ * This file holds the endpoints for user actions
  * @author Taylor Bauer
  */
 @RestController

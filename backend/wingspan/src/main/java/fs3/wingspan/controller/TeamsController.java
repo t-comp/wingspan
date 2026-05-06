@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
+ * This file holds the endpoints for teams actions
  * @author Taylor Bauer
  */
 @RestController

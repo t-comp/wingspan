@@ -7,6 +7,7 @@ import lombok.Data;
 import java.util.Map;
 
 /**
+ * DTO layer for species
  * @author Taylor Bauer
  */
 @Data
@@ -24,6 +25,7 @@ public class SpeciesDTO {
     private Map<String, String> attributeDef;
 
     /**
+     * builds Species with all its given attributes
      * @param s
      * @param url
      * @return all species info

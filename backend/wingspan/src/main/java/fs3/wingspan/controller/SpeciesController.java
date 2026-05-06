@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * This file holds the endpoints for species actions
  * @author Taylor Bauer
  * @author Abby Van Der Brink
  */

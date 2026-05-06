@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * SQL DB Model file for tags
  * @author Abby Van Der Brink
  */
 @Getter

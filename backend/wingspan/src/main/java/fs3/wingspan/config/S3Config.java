@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.net.URI;
 
 /**
+ * Configuration file for Digital Ocean Server
  * @author Taylor Bauer
  */
 @Configuration

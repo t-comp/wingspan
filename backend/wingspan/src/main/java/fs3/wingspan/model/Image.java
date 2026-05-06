@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * SQL DB Model file for images
  * @author Abby Van Der Brink
  */
 @Getter

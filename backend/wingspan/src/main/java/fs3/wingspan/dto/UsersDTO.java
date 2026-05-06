@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
+ * DTO layer for users
  * @author Taylor Bauer
  */
 @Data
@@ -20,6 +21,7 @@ public class UsersDTO {
     private String lastName;
 
     /**
+     * builds user with given attributes
      * @param u
      * @return all user info
      */

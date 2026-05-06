@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * DTO layer for Species with Images
  * @author Taylor Bauer
  */
 @Data
@@ -26,6 +27,7 @@ public class SpeciesWithImagesDTO {
     private List<ImageDTO> images;
 
     /**
+     * Builds Species with Images with given attributes
      * @param s
      * @param thumbnailUrl
      * @param images

@@ -1,9 +1,6 @@
 package fs3.wingspan.dto;
 
 
-/**
- * @author Abby Van Der Brink
- */
 import fs3.wingspan.model.Image;
 import lombok.*;
 
@@ -12,6 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * The DTO layer for Images
+ */
 @Data
 @Builder
 public class ImageDTO {
@@ -36,6 +36,7 @@ public class ImageDTO {
     private Map<String, String> attributes;
 
     /**
+     * builds image with all needed fields
      * @param image
      * @return all info of an image
      */
@@ -84,6 +85,7 @@ public class ImageDTO {
     }
 
     /**
+     * formats the image size in bytes/MB/KB depending on the size
      * @param bytes
      * @return string of # of bytes
      */

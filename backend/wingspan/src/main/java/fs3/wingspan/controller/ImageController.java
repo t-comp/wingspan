@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 
 /**
+ * This file holds the endpoints for image actions
  * @author Abby Van Der Brink
  * @author Taylor Bauer
  */
@@ -471,6 +472,11 @@ public class ImageController {
         }
     }
 
+    /**
+     * Handles the error of image upload being too large
+     * @param e
+     * @return message that image being uploaded is too large
+     */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
