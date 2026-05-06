@@ -16,15 +16,54 @@ const CORE_TAGS = [
 ];
 
 export function initCoverageDashboard() {
+  // =========================================================
+  // ✨ DEBUG LOGS: Let's see what the browser is finding! ✨
+  // =========================================================
+  console.log("--- COVERAGE DASHBOARD INIT CHECK ---");
+
+  const modalElement = document.getElementById("coverageTagModal");
+  console.log("1. Did it find the Modal HTML?", modalElement);
+
+  const checkboxContainer = document.getElementById("coverageFullTagGrid");
+  console.log("2. Did it find the Checkbox Container?", checkboxContainer);
+
+  const saveModalBtn = document.getElementById("saveCoverageTagsBtn");
+  console.log("3. Did it find the Save Button?", saveModalBtn);
+  // =========================================================
+
+  // =========================================================
+  // ✨ CLICK TRACKER LOGS ✨
+  // =========================================================
+  const triggerBtn = document.querySelector(
+    '[data-bs-target="#coverageTagModal"]',
+  );
+  console.log("4. Did it find the Trigger Button?", triggerBtn);
+
+  if (triggerBtn) {
+    triggerBtn.addEventListener("click", async () => {
+      await loadCoverageTags();
+
+      console.log("🚨 BUTTON CLICKED!");
+      const modalInDom = document.getElementById("coverageTagModal");
+      console.log("🚨 Is the modal in the DOM right now?", modalInDom);
+
+      if (!modalInDom) {
+        console.error(
+          "❌ ERROR: The modal is missing or commented out in the HTML!",
+        );
+      } else {
+        console.log("✅ SUCCESS: Bootstrap should be opening the modal now.");
+      }
+    });
+  }
+  // =========================================================
+
   const navBtn = document.getElementById("navCoverageBtn");
   const dashboard = document.getElementById("coverageDashboard");
   const checkBtn = document.getElementById("checkCoverageBtn");
   const input = document.getElementById(
     "speciesCoverageInput",
   ) as HTMLTextAreaElement;
-  const extraTagsInput = document.getElementById(
-    "extraTagsInput",
-  ) as HTMLInputElement;
   const resultsSection = document.getElementById("coverageResultsSection");
   const tableHead = document.getElementById("coverageTableHead");
   const tableBody = document.getElementById("coverageTableBody");
@@ -42,71 +81,124 @@ export function initCoverageDashboard() {
 
   // Keep track of the extra tags Nathan selects from the modal
   let selectedExtraTags = new Set<string>();
+  let allFetchedTags: any[] = []; // Store them here so we can search instantly!
 
-  // Helper function to load and render the checkboxes
+  // Helper function to load tags from the database
   async function loadCoverageTags() {
-    const container = document.getElementById("coverageTagCategoriesContainer");
-    if (!container) return;
+    const grid = document.getElementById("coverageFullTagGrid");
+    if (!grid) return;
 
     try {
-      const tags = await ButterflyAPI.getAllTags();
-      const categories: Record<string, any[]> = {};
-
-      tags.forEach((tag: any) => {
-        // Skip core tags so they don't appear in the modal options
-        if (CORE_TAGS.includes(tag.name.toLowerCase())) return;
-
-        const cat = tag.category || "Uncategorized";
-        if (!categories[cat]) categories[cat] = [];
-        categories[cat].push(tag);
-      });
-
-      let html = "";
-      for (const [category, catTags] of Object.entries(categories)) {
-        html += `
-          <div class="mb-4">
-            <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">${category}</h6>
-            <div class="d-flex flex-wrap gap-2">
-              ${catTags
-                .map(
-                  (tag) => `
-                <div class="form-check form-check-inline bg-white border rounded px-3 py-2 shadow-sm m-0">
-                  <input class="form-check-input coverage-tag-checkbox" type="checkbox" id="covTag_${tag.id}" value="${tag.name}">
-                  <label class="form-check-label ms-1" style="cursor:pointer;" for="covTag_${tag.id}">${tag.name}</label>
-                </div>
-              `,
-                )
-                .join("")}
-            </div>
-          </div>
-        `;
-      }
-      container.innerHTML =
-        html || "<p class='text-muted'>No additional tags found.</p>";
+      console.log("DEBUG: All tags from API:", allFetchedTags);
+      allFetchedTags = await ButterflyAPI.getAllTags();
+      renderCoverageTagGrid(""); // Render initially with no search filter
     } catch (err) {
-      container.innerHTML = `<div class="text-danger">Failed to load tags.</div>`;
+      console.error("DEBUG: loadCoverageTags failed!", err);
+      grid.innerHTML = `<div class="text-danger w-100 text-center">Failed to load tags.</div>`;
     }
   }
 
-  // Handle saving the selected tags
+  // Helper function to draw the beautiful card grid based on the search term
+  function renderCoverageTagGrid(searchTerm: string) {
+    const grid = document.getElementById("coverageFullTagGrid");
+    if (!grid) return;
+
+    const search = searchTerm.toLowerCase().trim();
+    const categories: Record<string, any[]> = {};
+
+    allFetchedTags.forEach((tag: any) => {
+      // FIX: Check for tagName too! If neither exists, then we skip.
+      const tagName = tag.name || tag.tagName || "";
+      if (!tagName) return;
+
+      // Skip core tags so they don't appear in the modal options
+      if (CORE_TAGS.includes(tagName.toLowerCase())) return;
+
+      const cat = tag.category || "Uncategorized";
+
+      // Use the new tagName variable for the search filter
+      if (
+        !search ||
+        tagName.toLowerCase().includes(search) ||
+        cat.toLowerCase().includes(search)
+      ) {
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push(tag);
+      }
+    });
+    let html = Object.keys(categories)
+      .sort()
+      .map(
+        (catName) => `
+    <div class="col">
+      <h6 class="fw-bold pb-2 mb-3" style="color: #0399b0; border-bottom: 2px solid #f8f9fa;">
+        ${catName}
+      </h6>
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        ${categories[catName]
+          .map((t) => {
+            // Ensure you use the same tagName fallback here for the label!
+            const tName = t.name || t.tagName || "Unknown";
+            const isChecked = selectedExtraTags.has(tName.toLowerCase())
+              ? "checked"
+              : "";
+            return `
+              <div class="tag-chip-item">
+                <input type="checkbox" class="tag-chip-checkbox d-none coverage-tag-checkbox"
+                       id="cov-picker-tag-${t.id}" value="${tName}" ${isChecked}>
+                <label for="cov-picker-tag-${t.id}" class="tag-chip">
+                  ${tName}
+                </label>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `,
+      )
+      .join("");
+    grid.innerHTML =
+      html ||
+      `<div class="text-muted w-100 text-center mt-5">No tags found matching "${searchTerm}".</div>`;
+
+    // Attach listeners to checkboxes so they instantly update our Set when clicked
+    const checkboxes = document.querySelectorAll(
+      ".coverage-tag-checkbox",
+    ) as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach((cb) => {
+      cb.addEventListener("change", (e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.checked) {
+          selectedExtraTags.add(target.value.toLowerCase());
+        } else {
+          selectedExtraTags.delete(target.value.toLowerCase());
+        }
+      });
+    });
+  }
+
+  // Hook up the search bar to filter as Nathan types
+  const searchInput = document.getElementById(
+    "coverageTagPickerSearch",
+  ) as HTMLInputElement;
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      renderCoverageTagGrid((e.target as HTMLInputElement).value);
+    });
+  }
+
+  // Handle saving the selected tags and drawing the visual badges on the dashboard
   const saveBtn = document.getElementById("saveCoverageTagsBtn");
   const display = document.getElementById("coverageSelectedTagsDisplay");
 
   if (saveBtn) {
     saveBtn.addEventListener("click", () => {
-      selectedExtraTags.clear();
-      const checkboxes = document.querySelectorAll(
-        ".coverage-tag-checkbox:checked",
-      ) as NodeListOf<HTMLInputElement>;
-
-      checkboxes.forEach((cb) => selectedExtraTags.add(cb.value.toLowerCase()));
-
-      // Draw the beautiful pill badges in the UI
       if (display) {
         display.innerHTML = Array.from(selectedExtraTags)
           .map(
             (tag) =>
-              `<span class="badge bg-secondary px-3 py-2 rounded-pill"><i class="fas fa-tag me-1"></i>${tag}</span>`,
+              `<span class="badge bg-secondary px-3 py-2 rounded-pill shadow-sm"><i class="fas fa-tag me-1"></i>${tag}</span>`,
           )
           .join("");
       }
@@ -114,7 +206,7 @@ export function initCoverageDashboard() {
   }
 
   // Trigger the load function immediately so it's ready when he clicks
-  loadCoverageTags();
+  //loadCoverageTags();
 
   // Action Logic
   checkBtn.addEventListener("click", async () => {
@@ -128,6 +220,7 @@ export function initCoverageDashboard() {
     const currentSearchTags = Array.from(
       new Set([...CORE_TAGS, ...Array.from(selectedExtraTags)]),
     );
+
     checkBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Checking...`;
     checkBtn.toggleAttribute("disabled", true);
 
@@ -176,7 +269,6 @@ export function initCoverageDashboard() {
                   (typeof tag === "string" ? tag : null);
                 if (tagText) {
                   const tagNameLower = tagText.toLowerCase();
-                  // Check against our newly combined dynamic array!
                   if (currentSearchTags.includes(tagNameLower)) {
                     coverageRow.coverage[tagNameLower] = true;
                   }
@@ -188,7 +280,6 @@ export function initCoverageDashboard() {
         coverageData.push(coverageRow);
       }
 
-      // Pass the custom tags array to the render function!
       renderTable(coverageData, currentSearchTags);
       if (resultsSection) resultsSection.style.display = "block";
     } catch (error: any) {
@@ -199,7 +290,6 @@ export function initCoverageDashboard() {
     }
   });
 
-  // Notice we now accept `tags` as a parameter so it knows how many columns to draw!
   function renderTable(data: any[], tags: string[]) {
     if (!tableHead || !tableBody) return;
 
