@@ -15,7 +15,7 @@ let currentPage = 1;
 const itemsPerPage = 40;
 let currentGalleryData: any[] = [];
 let observer: IntersectionObserver | null = null;
-let savedScrollPosition = 0; // 🛑 ADD THIS VARIABLE
+let savedScrollPosition = 0;
 
 export function refreshGallery(data = AppState.butterflies, page = 1) {
   currentPage = page;

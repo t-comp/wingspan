@@ -32,6 +32,7 @@ import {
   refreshGallery,
   goToGallery,
 } from "./features/gallery/gallery_core.js";
+import { initCoverageDashboard } from "./features/admin/admin_coverage_dashboard.js";
 
 export async function initHome(userRole, userEmail) {
   console.log(
@@ -309,22 +310,22 @@ export async function initHome(userRole, userEmail) {
     });
 
   document.getElementById("navDocsBtn")?.addEventListener("click", (e) => {
-  e.preventDefault();
-  localStorage.setItem("activeView", "docs");
-  if (portfolio) portfolio.style.display = "none";
-  if (speciesView) speciesView.style.display = "none";
-  if (teamView) teamView.style.display = "none";
-  if (docsView) docsView.style.display = "block";
-  if (filterPanel) filterPanel.classList.remove("show");
+    e.preventDefault();
+    localStorage.setItem("activeView", "docs");
+    if (portfolio) portfolio.style.display = "none";
+    if (speciesView) speciesView.style.display = "none";
+    if (teamView) teamView.style.display = "none";
+    if (docsView) docsView.style.display = "block";
+    if (filterPanel) filterPanel.classList.remove("show");
 
-  const footer = document.querySelector("footer.footer") as HTMLElement;
-  const copyright = document.querySelector(".copyright") as HTMLElement;
-  if (footer) footer.style.display = "block";
-  if (copyright) copyright.style.display = "block";
+    const footer = document.querySelector("footer.footer") as HTMLElement;
+    const copyright = document.querySelector(".copyright") as HTMLElement;
+    if (footer) footer.style.display = "block";
+    if (copyright) copyright.style.display = "block";
 
-  window.scrollTo(0, 0);
-  initDocs();
-});
+    window.scrollTo(0, 0);
+    initDocs();
+  });
 
   // Pass 'true' into the back button so it knows to restore the spot in the gallery after visiting a species page
   if (backBtn) backBtn.addEventListener("click", () => goToGallery(true));
@@ -370,6 +371,7 @@ export async function initHome(userRole, userEmail) {
   initAdminApiKeys(loadAdminData);
   initAdminTeams(loadAdminData);
   initAdminUsers(loadAdminData);
+  initCoverageDashboard();
 
   initSpeciesEditor(
     async (freshSpecies) => {

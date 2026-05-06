@@ -1,0 +1,101 @@
+<section
+  class="page-section bg-light"
+  id="coverageDashboard"
+  style="display: none; padding-top: 100px"
+>
+  <div class="container-fluid px-4">
+    <h2
+      class="page-section-heading text-center text-uppercase text-secondary mb-0"
+    >
+      Image Coverage Dashboard
+    </h2>
+    <div class="divider-custom">
+      <div class="divider-custom-line"></div>
+      <div class="divider-custom-icon"><i class="fas fa-table"></i></div>
+      <div class="divider-custom-line"></div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <p class="text-center text-muted">
+          Paste a list of species names (one per line) to check core image
+          coverage.
+        </p>
+
+        <div class="mb-3">
+          <textarea
+            class="form-control shadow-sm"
+            id="speciesCoverageInput"
+            rows="5"
+            placeholder="Monarch&#10;Eastern Tiger Swallowtail..."
+          ></textarea>
+        </div>
+
+        <div
+          class="modal fade"
+          id="coverageTagModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div
+            class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+          >
+            <div class="modal-content border-0 shadow-lg">
+              <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-secondary">
+                  <i class="fas fa-tags me-2"></i>Select Additional Tags
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body p-4">
+                <div id="coverageTagCategoriesContainer">
+                  <div class="text-center text-muted">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Loading tags...
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer bg-light">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary px-4"
+                  id="saveCoverageTagsBtn"
+                  data-bs-dismiss="modal"
+                >
+                  Save Selection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary w-100 shadow-sm" id="checkCoverageBtn">
+          <i class="fas fa-search me-2"></i>Check Coverage
+        </button>
+      </div>
+    </div>
+
+    <div class="row mt-5" id="coverageResultsSection" style="display: none">
+      <div class="col-12 table-responsive">
+        <table
+          class="table table-bordered table-hover bg-white text-center align-middle"
+          id="coverageTable"
+        >
+          <thead class="table-light" id="coverageTableHead"></thead>
+          <tbody id="coverageTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
