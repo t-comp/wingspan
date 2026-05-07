@@ -219,11 +219,14 @@ export async function initGalleryFilters(
             noImagePlaceholder;
 
           const li = document.createElement("li");
+
           li.innerHTML = `
             <a class="dropdown-item d-flex align-items-center py-2 px-3" href="#" style="cursor: pointer;">
               <img src="${thumbUrl}" class="rounded shadow-sm me-3" style="width: 36px; height: 36px; object-fit: cover; border: 1px solid #eaeaea;" alt="Thumb">
-              <span class="fw-bold text-dark">${primaryName}</span>
-              ${secondaryName ? `<span class="small text-muted ms-2 fst-italic">(${secondaryName})</span>` : ""}
+              
+              <span class="fw-bold search-main-text">${primaryName}</span>
+              
+              ${secondaryName ? `<span class="search-sub-text ms-2">| ${secondaryName}</span>` : ""}
             </a>`;
 
           li.addEventListener("click", (evt) => {

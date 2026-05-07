@@ -1,0 +1,275 @@
+/* =========================================
+   WINGSPAN DARK MODE MASTER SHEET
+   ========================================= */
+
+/* 1. ROOT VARIABLES (Moved from effects.css) */
+[data-bs-theme="dark"] {
+  --card-bg: #2c3e50;
+  --card-text: #ffffff;
+  --card-border: #495057;
+  --btn-color: #ffffff;
+  --btn-hover-bg: rgba(255, 255, 255, 0.1);
+  --btn-hover-text: #ffffff;
+  --tag-bg: #34495e;
+  --tag-text: #ecf0f1;
+  --input-bg: #212529;
+  --input-border: #495057;
+  --input-text: #ffffff;
+  --glow-color: rgba(26, 188, 156, 0.4);
+  
+  /* Bootstrap Override Foundations */
+  --bs-body-bg: #1a252f;
+  --bs-body-color: #f8f9fa;
+  --bs-light: #2c3e50;
+  --bs-white: #212529;
+  --bs-border-color: #495057;
+}
+
+/* 2. UNIVERSAL BACKGROUND & TEXT OVERRIDES */
+/* Forces hardcoded 'bg-white' and 'bg-light' elements to turn dark */
+[data-bs-theme="dark"] .bg-white,
+[data-bs-theme="dark"] .bg-light,
+[data-bs-theme="dark"] .card {
+  background-color: var(--bs-light) !important;
+  color: var(--bs-body-color) !important;
+}
+
+/* Forces hardcoded dark text to lighten up */
+[data-bs-theme="dark"] .text-dark,
+[data-bs-theme="dark"] .text-muted,
+[data-bs-theme="dark"] .text-secondary {
+  color: #adb5bd !important;
+}
+
+/* Forces all standard borders to use the dark theme border color */
+[data-bs-theme="dark"] .border,
+[data-bs-theme="dark"] .border-bottom,
+[data-bs-theme="dark"] .border-top,
+[data-bs-theme="dark"] .border-end,
+[data-bs-theme="dark"] .border-start {
+  border-color: var(--bs-border-color) !important;
+}
+
+/* 3. INPUTS, DROPDOWNS & SEARCH BARS */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .input-group-text,
+[data-bs-theme="dark"] .form-select {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--input-text) !important;
+}
+
+[data-bs-theme="dark"] .form-control::placeholder,
+[data-bs-theme="dark"] .form-select {
+  color: #adb5bd !important;
+}
+
+/* Custom 'X' clear button brightness fix */
+[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminTeamSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminUserSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #coverageTagPickerSearch::-webkit-search-cancel-button {
+  filter: brightness(1.5);
+}
+
+/* 4. MODALS & MENUS */
+[data-bs-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .dropdown-menu {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: white !important;
+}
+
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-footer {
+  border-color: var(--card-border) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item {
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item:hover {
+  background-color: #34495e !important;
+}
+
+/* Make Bootstrap's close "X" visible on dark backgrounds */
+[data-bs-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* 5. COVERAGE DASHBOARD FIXES (TABLES) */
+[data-bs-theme="dark"] .table {
+  color: var(--bs-body-color) !important;
+  border-color: var(--bs-border-color) !important;
+}
+
+/* Fixes the header columns */
+[data-bs-theme="dark"] .table-light,
+[data-bs-theme="dark"] .table-light th,
+[data-bs-theme="dark"] .table-light td {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+  border-color: #495057 !important;
+}
+
+/* Fixes the actual data rows */
+[data-bs-theme="dark"] .coverage-row-sync td,
+[data-bs-theme="dark"] .coverage-row-sync th {
+  background-color: var(--bs-light) !important;
+  border-color: var(--bs-border-color) !important;
+}
+
+/* 6. TAG CHIPS AND UPLOAD MODAL FIXES */
+[data-bs-theme="dark"] .tag-chip {
+  background-color: var(--tag-bg) !important;
+  border-color: var(--card-border) !important;
+  color: var(--tag-text) !important;
+}
+
+[data-bs-theme="dark"] .tag-chip:hover {
+  background-color: #495057 !important;
+  color: white !important;
+}
+
+/* Drag and drop boxes */
+[data-bs-theme="dark"] #imageDropZone,
+[data-bs-theme="dark"] #noImageSelectedPrompt {
+  background-color: #212529 !important;
+  border-color: #495057 !important;
+}
+
+/* 7. CIRCLE NAVIGATION BUTTONS */
+[data-bs-theme="dark"] .btn-back-circle,
+[data-bs-theme="dark"] .btn-modal-nav-circle {
+  background-color: #34495e !important;
+  color: #ffffff !important;
+  border-color: #495057 !important;
+}
+
+[data-bs-theme="dark"] .btn-back-circle:hover,
+[data-bs-theme="dark"] .btn-modal-nav-circle:hover {
+  background-color: #0399b0 !important;
+  border-color: #0399b0 !important;
+}
+
+/* =========================================
+   8. NAVBAR & SEARCH BAR (DARK MODE)
+   ========================================= */
+
+/* 1. Override the bright green gradient with a sleek dark slate background */
+[data-bs-theme="dark"] .wingspan-nav {
+  background: #151e27 !important; /* Very dark slate, slightly darker than the page body */
+  border-bottom: 1px solid #2c3e50 !important;
+}
+
+/* 2. Override the inline 'background-color: white' on the search container */
+[data-bs-theme="dark"] .search-pill-container {
+  background-color: #212b36 !important; /* Slightly lighter than the navbar so it pops */
+  border: 1px solid #34495e !important;
+}
+
+/* 3. Make the inner search elements completely transparent so the pill background shows cleanly */
+[data-bs-theme="dark"] .search-pill-container .input-group-text,
+[data-bs-theme="dark"] .search-pill-container .search-input-field,
+[data-bs-theme="dark"] .search-pill-container .filter-symbol-btn {
+  background-color: transparent !important;
+  color: #ecf0f1 !important;
+  border-color: #34495e !important;
+}
+
+/* 4. ✨ BLUE-TO-GREEN OMBRE FOR WINGSPAN TEXT AND LOGO ✨ */
+[data-bs-theme="dark"] .nav-brand span {
+  /* The second half of the continuous ombre (Teal to Green) */
+  background: linear-gradient(90deg, #20a79f 0%, #7ed957 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important; 
+  transition: all 0.3s ease;
+}
+
+[data-bs-theme="dark"] .nav-logo {
+  /* Hides the original white image so we can color it with CSS backgrounds */
+  content: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') !important;
+  
+  /* The first half of the continuous ombre (Blue to Teal) */
+  background: linear-gradient(90deg, #0097b2 0%, #20a79f 100%) !important;
+  
+  /* Masks the beautiful gradient perfectly into your butterfly shape */
+  -webkit-mask-image: url('../assets/img/butterfly.png');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  
+  /* Remove the old amber filter */
+  filter: none !important;
+}
+
+/* 5. Keep the Account dropdown button pure white */
+[data-bs-theme="dark"] #settingsDropdown span,
+[data-bs-theme="dark"] #settingsDropdown i {
+  color: #ffffff !important;
+}
+
+/* 6. Make the icons (like the plus button and filter) pop */
+[data-bs-theme="dark"] .filter-symbol-btn i {
+  color: #1abc9c !important;
+}
+
+/* =========================================
+   9. CLEAR FILTERS BUTTON (DARK MODE)
+   ========================================= */
+[data-bs-theme="dark"] .btn-clear-filters {
+  color: #adb5bd !important; /* Soft light grey so it stands out against the dark background */
+}
+
+[data-bs-theme="dark"] .btn-clear-filters:hover {
+  color: #ffffff !important; /* Bright white when hovered */
+  border-color: #495057 !important; /* Dark mode style border */
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Subtle highlight effect */
+}
+
+/* =========================================
+   10. SEARCH DROPDOWN TEXT STYLING
+   ========================================= */
+
+/* Ensure the common name is brilliant white in the dropdown */
+[data-bs-theme="dark"] .species-option .fw-bold {
+  color: #ffffff !important;
+}
+
+/* Make the scientific name significantly dimmer */
+[data-bs-theme="dark"] .search-scientific-dim {
+  color: rgba(255, 255, 255, 0.45) !important; /* Muted white fade */
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* Make it look nice when you hover over an option */
+[data-bs-theme="dark"] .species-option:hover .search-scientific-dim {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* =========================================
+   10. SEARCH DROPDOWN CONTRAST (DARK MODE)
+   ========================================= */
+
+/* The Main Name: Brilliant, high-contrast white */
+[data-bs-theme="dark"] .search-main-text {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* The Sub Name: Dimmer, faded grey-blue with italic styling */
+[data-bs-theme="dark"] .search-sub-text {
+  color: rgba(160, 174, 192, 0.6) !important; /* Muted opacity */
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* Make both pop a bit more when you hover over the row */
+[data-bs-theme="dark"] #searchAutocompleteDropdown .dropdown-item:hover .search-sub-text {
+  color: rgba(255, 255, 255, 0.8) !important;
+}

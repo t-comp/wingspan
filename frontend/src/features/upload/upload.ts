@@ -190,10 +190,10 @@ export function initUpload(callbacks: UploadCallbacks) {
           const cName = s.name || "Unknown";
           const sName = s.scientificName || "";
 
-          // Inject BOTH names into the display, and into a hidden data-search attribute!
-          html += `<button type="button" class="dropdown-item species-option py-2" data-value="${s.id}" data-search="${cName.toLowerCase()} ${sName.toLowerCase()}">
-            <span class="fw-bold text-dark">${cName}</span> 
-            ${sName ? `<span class="text-muted small ms-1 fst-italic">- ${sName}</span>` : ""}
+          // Swapped (parentheses) for | and added the 'search-scientific-dim' class
+          html += `<button type="button" class="dropdown-item species-option py-2 d-flex align-items-center" data-value="${s.id}" data-search="${cName.toLowerCase()} ${sName.toLowerCase()}">
+            <span class="fw-bold text-white">${cName}</span> 
+            ${sName ? `<span class="ms-2 search-scientific-dim">| ${sName}</span>` : ""}
           </button>`;
         });
 
