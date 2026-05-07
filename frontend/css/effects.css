@@ -964,3 +964,103 @@ button[data-bs-target="#coverageTagModal"]:active {
   text-shadow: 0 0 10px #ffffff;
   transform: scale(1.1);
 }
+
+/* =========================================
+   DOCS SIDEBAR (LIGHT MODE)
+   ========================================= */
+.docs-sidebar {
+  position: sticky;
+  top: 90px;
+  background: #ffffff; /* Crisp white for light mode */
+  border-radius: 10px;
+  padding: 1.25rem 1rem;
+  border-left: 4px solid #0399b0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06); /* Soft floating shadow */
+}
+
+.docs-sidebar-title {
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #0399b0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.docs-nav-btn {
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: #4b5563; /* Slate grey text */
+  transition: all 0.2s ease;
+}
+
+.docs-nav-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.docs-nav-btn.active {
+  background: #e0f2f4; /* Signature light teal */
+  color: #0399b0;
+  font-weight: bold;
+}
+
+/* =========================================
+   CUSTOM FOOTER (LIGHT MODE - DEFAULT)
+   ========================================= */
+.custom-footer {
+  background-color: #f8f9fa; /* Light grey background */
+  border-top: 4px solid #0399b0;
+}
+
+
+
+.custom-footer .footer-text, 
+.custom-footer .footer-text-list {
+  color: #4b5563; /* Medium grey text */
+}
+
+.custom-footer .footer-photo-box {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.custom-footer .footer-photo-text {
+  color: #6b7280;
+}
+
+.custom-footer .footer-bottom-bar {
+  background-color: #e5e7eb; /* Slightly darker bottom bar */
+}
+
+.custom-footer .footer-bottom-text,
+.custom-footer .footer-link {
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.custom-footer .footer-link:hover {
+  color: #0399b0;
+}
+
+
+.custom-footer .footer-brand {
+  background: linear-gradient(90deg, #20a79f 0%, #7ed957 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.custom-footer .footer-logo {
+  content: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'); /* Hides original PNG */
+  background: linear-gradient(90deg, #0097b2 0%, #20a79f 100%);
+  -webkit-mask-image: url('../assets/img/butterfly.png');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  filter: none; /* Removes the old dark slate filter */
+}

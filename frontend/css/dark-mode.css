@@ -274,3 +274,85 @@
   color: rgba(255, 255, 255, 0.8) !important;
 }
 
+
+/* =========================================
+   DOCS SIDEBAR (DARK MODE)
+   ========================================= */
+[data-bs-theme="dark"] .docs-sidebar {
+  background: #1f2937 !important; /* Premium dark slate background */
+  border-left: 4px solid #0399b0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+[data-bs-theme="dark"] .docs-sidebar-title {
+  color: #0399b0 !important;
+}
+
+[data-bs-theme="dark"] .docs-nav-btn {
+  color: #9ca3af !important; /* Soft grey text */
+}
+
+[data-bs-theme="dark"] .docs-nav-btn:hover {
+  background: #374151 !important; /* Lighter slate hover */
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .docs-nav-btn.active {
+  background: #111827 !important; /* Deep contrast for active */
+  color: #0399b0 !important;
+  font-weight: bold;
+  border: 1px solid rgba(3, 153, 176, 0.3);
+}
+
+/* =========================================
+   CUSTOM FOOTER (DARK MODE)
+   ========================================= */
+[data-bs-theme="dark"] .custom-footer {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%) !important;
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-brand {
+  background: none !important;
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-logo {
+  background: #ffffff !important;
+  filter: none !important; 
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-text,
+[data-bs-theme="dark"] .custom-footer .footer-text-list {
+  color: #9ca3af !important;
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-photo-box {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-bottom-bar {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-bottom-text,
+[data-bs-theme="dark"] .custom-footer .footer-link {
+  color: #9ca3af !important;
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-link:hover {
+  color: #0399b0 !important;
+}
+
+[data-bs-theme="dark"] .custom-footer .footer-logo {
+  filter: brightness(0) invert(1) !important;
+}
+
+[data-bs-theme="dark"] #logoutLink {
+  color: #dc3545 !important; /* Bootstrap text-danger red */
+}
+
+[data-bs-theme="dark"] #logoutLink:hover {
+  background-color: rgba(220, 53, 69, 0.15) !important;
+  color: #dc3545 !important;
+}
