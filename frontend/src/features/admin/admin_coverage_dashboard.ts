@@ -42,10 +42,10 @@ export function initCoverageDashboard() {
 
       if (!modalInDom) {
         console.error(
-          "❌ ERROR: The modal is missing or commented out in the HTML!",
+          "ERROR: The modal is missing or commented out in the HTML!",
         );
       } else {
-        console.log("✅ SUCCESS: Bootstrap should be opening the modal now.");
+        console.log("UCCESS: Bootstrap should be opening the modal now.");
       }
     });
   }
@@ -176,7 +176,6 @@ export function initCoverageDashboard() {
   const display = document.getElementById("coverageSelectedTagsDisplay");
 
   // Helper function to draw and manage the selected tags display
-  // Helper function to draw and manage the selected tags display
   function renderSelectedCoverageTagsDisplay() {
     if (!display) return;
 
@@ -205,7 +204,6 @@ export function initCoverageDashboard() {
       )
       .join("");
 
-    // Add click listeners to the PROTECTED span wrappers!
     const removeBtns = display.querySelectorAll(".coverage-tag-remove");
     removeBtns.forEach((btn) => {
       btn.addEventListener("click", (e) => {
@@ -215,13 +213,13 @@ export function initCoverageDashboard() {
         );
 
         if (tagToRemove) {
-          // 1. Remove from our active Set
+          // Remove from our active Set
           selectedExtraTags.delete(tagToRemove.toLowerCase());
 
-          // 2. Re-render the display to make it instantly disappear
+          // Re-render the display to make it instantly disappear
           renderSelectedCoverageTagsDisplay();
 
-          // 3. Silently uncheck it in the modal so it's accurate next time you open it
+          // Silently uncheck it in the modal so it's accurate next time you open it
           const checkboxes = document.querySelectorAll(
             ".coverage-tag-checkbox",
           ) as NodeListOf<HTMLInputElement>;
@@ -254,7 +252,6 @@ export function initCoverageDashboard() {
       new Set([...CORE_TAGS, ...Array.from(selectedExtraTags)]),
     );
 
-    // ✨ TEXT BUTTON UPDATES HERE
     checkBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Checking...`;
     checkBtn.toggleAttribute("disabled", true);
 
@@ -318,7 +315,6 @@ export function initCoverageDashboard() {
     } catch (error: any) {
       alert("Error fetching coverage data: " + error.message);
     } finally {
-      // ✨ TEXT BUTTON UPDATES HERE
       checkBtn.innerHTML = `<i class="fas fa-search me-2"></i>Check Coverage`;
       checkBtn.toggleAttribute("disabled", false);
     }
