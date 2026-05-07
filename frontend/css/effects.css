@@ -960,3 +960,40 @@
 .modal-content {
   pointer-events: auto !important;
 }
+
+/* Split Table Row Synchronization */
+.coverage-row-sync {
+  height: 80px; /* Forces identical row heights between the split tables */
+}
+.coverage-row-sync-head {
+  height: 55px; /* Forces identical header heights */
+}
+/* =========================================
+   COVERAGE BUTTON PRESSED STATES
+   ========================================= */
+#checkCoverageBtn:active,
+button[data-bs-target="#coverageTagModal"]:active {
+  background-color: #108b74 !important; /* Nice distinct grey */
+  border-color: #868e96 !important;
+  color: white !important;
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125) !important; /* Gives it a pushed-in look */
+  transform: scale(0.98); /* Physically shrinks it a tiny bit when pressed */
+}
+
+/* =========================================
+   COVERAGE DASHBOARD TAG REMOVE BUTTON
+   ========================================= */
+.coverage-tag-remove {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #0399b0; /* Match the text color */
+  opacity: 0.6;   /* Fade it slightly so it doesn't distract */
+  transition: all 0.2s ease;
+  padding-left: 2px;
+}
+
+.coverage-tag-remove:hover {
+  color: #545454 !important; /* Turn danger red! */
+  opacity: 1;
+  transform: scale(1.2); /* Slight pop effect */
+}

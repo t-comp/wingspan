@@ -63,17 +63,6 @@ export const ButterflyAPI = {
       return []; // Now it safely returns an empty array!
     }
   },
-  // async getAll() {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/species/all`, {
-  //       headers: getHeaders(),
-  //     });
-  //     return await response.json();
-  //   } catch (error) {
-  //     console.error("Error fetching species. Is the server running?", error);
-  //     return [];
-  //   }
-  // },
 
   async getSpeciesById(speciesId) {
     const response = await fetch(`${API_BASE_URL}/species/${speciesId}`, {
@@ -618,5 +607,4 @@ export const ButterflyAPI = {
     );
     return checkResponse(response);
   },
-  
 };
