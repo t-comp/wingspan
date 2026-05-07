@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
+
+/** NOTE: test cases were developed with the assistance of Anthropic's LLM using Claude Sonnet 4.6 and have been validated for correctness **/
 class UserRepositoryTest {
 
     @Container

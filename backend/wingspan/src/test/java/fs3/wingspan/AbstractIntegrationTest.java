@@ -47,20 +47,20 @@ import static org.mockito.Mockito.when;
 @Testcontainers
 public abstract class AbstractIntegrationTest {
 
-    // ─── Shared Testcontainers PostgreSQL ────────────────────────────────────
+    // shared test containers for postgresql
     @Container
     @ServiceConnection
     static final PostgreSQLContainer<?> POSTGRES =
             new PostgreSQLContainer<>("postgres:15-alpine");
 
-    // ─── S3 mocks ────────────────────────────────────────────────────────────
+    // s3 mocks
     @MockBean
     protected S3Client s3Client;
 
     @MockBean
     protected S3Template s3Template;
 
-    // ─── Spring beans ────────────────────────────────────────────────────────
+
     @Autowired
     protected MockMvc mockMvc;
 
@@ -88,7 +88,6 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected BCryptPasswordEncoder passwordEncoder;
 
-    // ─── Tokens populated by setUp() ─────────────────────────────────────────
     protected String adminToken;
     protected String studentToken;
     protected Users savedAdmin;
@@ -96,7 +95,6 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeEach
     void baseSetUp() {
-        // Clean slate – order matters for FK constraints
         imageRepository.deleteAll();
         speciesRepository.deleteAll();
         apiKeyRepository.deleteAll();
@@ -115,8 +113,6 @@ public abstract class AbstractIntegrationTest {
                 .thenReturn(PutObjectResponse.builder().build());
         doNothing().when(s3Template).deleteObject(any(), any());
     }
-
-    // ─── Helper factory methods ───────────────────────────────────────────────
 
     protected Users createUser(String username, String email, UType role) {
         Users u = new Users();
