@@ -234,10 +234,11 @@
 /* CUSTOM WINGSPAN NAV STYLING */
 .wingspan-nav {
   background: linear-gradient(90deg, #0097b2 0%, #7ed957 100%); 
-  height: 80px;
+  min-height: 80px;     
+  height: auto;        
   display: flex;
   align-items: center;
-  padding: 0 40px; /* Added a bit more side padding */
+  padding: 10px 40px;   
   z-index: 1050;
 }
 
@@ -245,8 +246,11 @@
   display: flex;
   width: 100%;
   align-items: center;
-  height: 100%;
+  flex-wrap: wrap;      
+  gap: 15px;            
+  min-height: 60px;
 }
+
 
 .nav-brand {
   display: flex;

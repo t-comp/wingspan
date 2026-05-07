@@ -16,7 +16,7 @@ export async function loadStudentData(email: string) {
     let myApiKey = "No active API Key found";
     let teamKeyFull: any = null;
 
-    // 1. Fetch user data from local storage for the unified dashboard
+    // Fetch user data from local storage for the unified dashboard
     const currentUserStr = localStorage.getItem("butterflyUser");
     let currentUser: any = {};
     if (currentUserStr) {
@@ -52,7 +52,7 @@ export async function loadStudentData(email: string) {
     const container = document.getElementById("studentTeamDynamicContent");
     if (!container) return;
 
-    // Handle the empty state beautifully
+    // We use if/else instead of returning early, so the code always reaches the button logic! ✨
     if (!myTeam) {
       container.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -87,96 +87,96 @@ export async function loadStudentData(email: string) {
                 </div>
             </div>
         </div>`;
-      return;
-    }
-
-    // 2. Format team members using First/Last Name with Email fallback
-    const members = await ButterflyAPI.getTeamMembers(myTeam.id);
-    const membersHtml = members
-      .map((m: any) => {
-        const mFName = m.firstName || "";
-        const mLName = m.lastName || "";
-        const mFullName = `${mFName} ${mLName}`.trim() || m.email; // Fallback to email
-        return `<span class="d-inline-flex align-items-center gap-1 me-2 mb-2 px-3 py-1 rounded-pill border small fw-bold shadow-sm"
-               style="background: #ffffff; font-size: 0.85rem; color: #495057;">
-            ${mFullName}
-        </span>`;
-      })
-      .join("");
-
-    // Format API Key section
-    let apiKeyHtml = "";
-    if (!teamKeyFull) {
-      apiKeyHtml = `<div class="bg-light border rounded p-3 text-muted fst-italic shadow-sm">No active API key found for this team.</div>`;
     } else {
-      const isActive =
-        teamKeyFull.active !== false && teamKeyFull.status !== "INACTIVE";
-      const expiresText = teamKeyFull.expiration
-        ? "Expires " + new Date(teamKeyFull.expiration).toLocaleDateString()
-        : "No expiry set";
+      // Format team members using First/Last Name with Email fallback
+      const members = await ButterflyAPI.getTeamMembers(myTeam.id);
+      const membersHtml = members
+        .map((m: any) => {
+          const mFName = m.firstName || "";
+          const mLName = m.lastName || "";
+          const mFullName = `${mFName} ${mLName}`.trim() || m.email; // Fallback to email
+          return `<span class="d-inline-flex align-items-center gap-1 me-2 mb-2 px-3 py-1 rounded-pill border small fw-bold shadow-sm"
+                 style="background: #ffffff; font-size: 0.85rem; color: #495057;">
+              ${mFullName}
+          </span>`;
+        })
+        .join("");
 
-      apiKeyHtml = `
-        <div class="bg-light border rounded p-3 shadow-sm">
-            <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
-                <span class="badge rounded-pill px-3 py-1" style="font-size:0.75rem; background: ${isActive ? "#d1fae5" : "#fef3c7"}; color: ${isActive ? "#065f46" : "#92400e"};">
-                    ${isActive ? "Active" : "Inactive"}
-                </span>
-                <span class="text-muted" style="font-size:0.85rem;">${expiresText}</span>
-            </div>
-            <div class="font-monospace text-break fw-bold mt-2" style="font-size: 1rem; color: #0399b0;">
-                ${myApiKey}
-            </div>
-        </div>
-      `;
-    }
+      // Format API Key section
+      let apiKeyHtml = "";
+      if (!teamKeyFull) {
+        apiKeyHtml = `<div class="bg-light border rounded p-3 text-muted fst-italic shadow-sm">No active API key found for this team.</div>`;
+      } else {
+        const isActive =
+          teamKeyFull.active !== false && teamKeyFull.status !== "INACTIVE";
+        const expiresText = teamKeyFull.expiration
+          ? "Expires " + new Date(teamKeyFull.expiration).toLocaleDateString()
+          : "No expiry set";
 
-    // 3. Inject the completely merged layout
-    container.innerHTML = `
-      <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="text-muted fw-bold mb-0">Student Dashboard</h2>
-      </div>
-      
-<div class="card border-0 bg-white overflow-hidden" style="border-radius: 15px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);">          <div class="row g-0">
-           <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
-    <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-        <i class="fas fa-user"></i>
-    </div>
-  <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>
-    <p class="text-muted small mb-2">
-        <span class="text-secondary fw-bold">@${currentUser.username}</span> 
-        <span class="mx-2 text-opacity-25">|</span> 
-        ${email}
-    </p>
-    <span class="badge rounded-pill px-4 py-1 mt-2 shadow-sm fw-bold" style="background-color: #0399b0; color: white;">STUDENT</span>
-    
-  <div class="action-tooltip-container position-absolute" style="bottom: 15px; left: 15px;">
-        <button id="openStudentEditBtn" class="btn-icon-only" style="color: #0399b0; width: 35px; height: 35px; font-size: 1.1rem;">
-            <i class="fas fa-pencil-alt"></i>
-        </button>
-        <span class="action-tooltip" style="bottom: 100%; left: 0; transform: none; margin-bottom: 8px; white-space: nowrap;">Edit Profile</span>
-    </div>
-</div>
-              
-              <div class="col-md-8 p-5">
-                  <h4 class="fw-bold mb-1" style="color: #0399b0;">${myTeam.name}</h4>
-                  <p class="text-muted mb-4">${myTeam.projectName} &nbsp;·&nbsp; ${myTeam.semester}</p>
-                  
-                  <div class="mb-4">
-                      <h6 class="fw-bold text-dark mb-2 border-bottom pb-2">Team Members</h6>
-                      <div class="d-flex flex-wrap mt-3">${membersHtml}</div>
-                  </div>
-                  
-                  <div class="mb-2">
-                      <h6 class="fw-bold text-dark mb-2 border-bottom pb-2">API Key</h6>
-                      <div class="mt-3">
-                          ${apiKeyHtml}
-                      </div>
-                  </div>
+        apiKeyHtml = `
+          <div class="bg-light border rounded p-3 shadow-sm">
+              <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+                  <span class="badge rounded-pill px-3 py-1" style="font-size:0.75rem; background: ${isActive ? "#d1fae5" : "#fef3c7"}; color: ${isActive ? "#065f46" : "#92400e"};">
+                      ${isActive ? "Active" : "Inactive"}
+                  </span>
+                  <span class="text-muted" style="font-size:0.85rem;">${expiresText}</span>
+              </div>
+              <div class="font-monospace text-break fw-bold mt-2" style="font-size: 1rem; color: #0399b0;">
+                  ${myApiKey}
               </div>
           </div>
-      </div>`;
+        `;
+      }
 
-    // --- 4. STUDENT EDIT PROFILE LOGIC ---
+      // Inject the completely merged layout
+      container.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-muted fw-bold mb-0">Student Dashboard</h2>
+        </div>
+        
+  <div class="card border-0 bg-white overflow-hidden" style="border-radius: 15px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);">          <div class="row g-0">
+             <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
+      <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <i class="fas fa-user"></i>
+      </div>
+    <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>
+      <p class="text-muted small mb-2">
+          <span class="text-secondary fw-bold">@${currentUser.username}</span> 
+          <span class="mx-2 text-opacity-25">|</span> 
+          ${email}
+      </p>
+      <span class="badge rounded-pill px-4 py-1 mt-2 shadow-sm fw-bold" style="background-color: #0399b0; color: white;">STUDENT</span>
+      
+    <div class="action-tooltip-container position-absolute" style="bottom: 15px; left: 15px;">
+          <button id="openStudentEditBtn" class="btn-icon-only" style="color: #0399b0; width: 35px; height: 35px; font-size: 1.1rem;">
+              <i class="fas fa-pencil-alt"></i>
+          </button>
+          <span class="action-tooltip" style="bottom: 100%; left: 0; transform: none; margin-bottom: 8px; white-space: nowrap;">Edit Profile</span>
+      </div>
+  </div>
+                
+                <div class="col-md-8 p-5">
+                    <h6 class="fw-bold text-dark mb-2 border-bottom pb-2">Team Information</h6>
+                    <h4 class="fw-bold mb-1" style="color: #0399b0;">${myTeam.name}</h4>
+                    <p class="text-muted mb-4">${myTeam.projectName} &nbsp;·&nbsp; ${myTeam.semester}</p>
+                    
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-2 border-bottom pb-2">Team Members</h6>
+                        <div class="d-flex flex-wrap mt-3">${membersHtml}</div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <h6 class="fw-bold text-dark mb-2 border-bottom pb-2">API Key</h6>
+                        <div class="mt-3">
+                            ${apiKeyHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // --- STUDENT EDIT PROFILE LOGIC ---
     const editBtn = document.getElementById("openStudentEditBtn");
     if (editBtn) {
       editBtn.addEventListener("click", () => {
@@ -203,7 +203,6 @@ export async function loadStudentData(email: string) {
 
         const modalEl = document.getElementById("studentEditProfileModal");
         if (modalEl) {
-          // @ts-ignore
           new bootstrap.Modal(modalEl).show();
         }
       });
@@ -268,7 +267,7 @@ export async function loadStudentData(email: string) {
             await ButterflyAPI.resetPassword(newEmail, newPass);
           }
 
-          // Update Local Storage so the navbar stays in sync!
+          // Update Local Storage so the navbar stays in sync
           currentUser.firstName = newFName;
           currentUser.lastName = newLName;
           currentUser.username = newUsername;
@@ -279,7 +278,6 @@ export async function loadStudentData(email: string) {
 
           const modal = document.getElementById("studentEditProfileModal");
           if (modal) {
-            // @ts-ignore
             bootstrap.Modal.getInstance(modal)?.hide();
           }
 

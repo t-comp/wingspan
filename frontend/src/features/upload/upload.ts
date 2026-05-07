@@ -42,7 +42,7 @@ export function initUpload(callbacks: UploadCallbacks) {
 
         // Add the negative lookbehind (?<!['’]) before the \b\w
         target.value = target.value.replace(/(?<!['’])\b\w/g, (char) =>
-          char.toUpperCase()
+          char.toUpperCase(),
         );
 
         target.setSelectionRange(start, end);
@@ -82,7 +82,7 @@ export function initUpload(callbacks: UploadCallbacks) {
     const summaryArea = document.getElementById("selectedTagsSummary");
 
     const checkedBoxes = document.querySelectorAll(
-      '#fullTagGrid input[type="checkbox"]:checked'
+      '#fullTagGrid input[type="checkbox"]:checked',
     ) as NodeListOf<HTMLInputElement>;
 
     if (summaryArea) {
@@ -109,11 +109,9 @@ export function initUpload(callbacks: UploadCallbacks) {
     }
   };
 
-  
   // --- Main Upload Modal Logic ---
   if (universalUploadForm) {
     const uploadModal = document.getElementById("addButterflyModal");
-    
 
     if (uploadModal) {
       uploadModal.addEventListener("show.bs.modal", async (e) => {
@@ -124,19 +122,19 @@ export function initUpload(callbacks: UploadCallbacks) {
         const listContainer = document.getElementById("speciesDropdownList");
         const btnText = document.getElementById("speciesDropdownText");
         const hiddenInput = document.getElementById(
-          "speciesSelectorValue"
+          "speciesSelectorValue",
         ) as HTMLInputElement;
 
         currentSpeciesId = hiddenInput.value || "NEW";
 
         console.log(
           "Modal opened. Restored currentSpeciesId:",
-          currentSpeciesId
+          currentSpeciesId,
         );
 
         const newSpeciesFields = document.getElementById("newSpeciesFields");
         const searchInput = document.getElementById(
-          "searchSpeciesInput"
+          "searchSpeciesInput",
         ) as HTMLInputElement;
 
         const phase1 = document.getElementById("uploadPhase1");
@@ -167,11 +165,13 @@ export function initUpload(callbacks: UploadCallbacks) {
         } else {
           console.log(
             "Modal opened, but keeping existing species:",
-            hiddenInput.value
+            hiddenInput.value,
           );
         }
 
-        let html = `<button type="button" class="dropdown-item species-option border-bottom py-2" data-value="NEW"><span class="text-primary fw-bold">Create New Species</span></button>`;
+        // data-search to the "Create New" option so it never breaks
+        let html = `<button type="button" class="dropdown-item species-option border-bottom py-2" data-value="NEW" data-search="create new species"><span class="text-primary fw-bold">Create New Species</span></button>`;
+
         const sortedForDropdown = [...AppState.butterflies].sort((a, b) => {
           const nameA =
             AppState.currentDisplayMode === "scientific" && a.scientificName
@@ -187,13 +187,18 @@ export function initUpload(callbacks: UploadCallbacks) {
         });
 
         sortedForDropdown.forEach((s) => {
-          const displayName =
-            AppState.currentDisplayMode === "scientific" && s.scientificName
-              ? s.scientificName
-              : s.name;
-          html += `<button type="button" class="dropdown-item species-option py-2" data-value="${s.id}">${displayName}</button>`;
+          const cName = s.name || "Unknown";
+          const sName = s.scientificName || "";
+
+          // Inject BOTH names into the display, and into a hidden data-search attribute!
+          html += `<button type="button" class="dropdown-item species-option py-2" data-value="${s.id}" data-search="${cName.toLowerCase()} ${sName.toLowerCase()}">
+            <span class="fw-bold text-dark">${cName}</span> 
+            ${sName ? `<span class="text-muted small ms-1 fst-italic">- ${sName}</span>` : ""}
+          </button>`;
         });
+
         listContainer.innerHTML = html;
+
         listContainer.querySelectorAll(".species-option").forEach((item) => {
           item.addEventListener("click", (e) => {
             const btn = e.currentTarget as HTMLElement;
@@ -208,7 +213,7 @@ export function initUpload(callbacks: UploadCallbacks) {
             }
 
             const hiddenInput = document.getElementById(
-              "speciesSelectorValue"
+              "speciesSelectorValue",
             ) as HTMLInputElement;
             currentSpeciesId = val;
             hiddenInput.value = val;
@@ -222,7 +227,7 @@ export function initUpload(callbacks: UploadCallbacks) {
             }
 
             const bsDropdown = bootstrap.Dropdown.getInstance(
-              document.getElementById("speciesDropdownBtn")
+              document.getElementById("speciesDropdownBtn"),
             );
             if (bsDropdown) bsDropdown.hide();
           });
@@ -232,10 +237,17 @@ export function initUpload(callbacks: UploadCallbacks) {
           searchInput.addEventListener("input", (e) => {
             const term = (e.target as HTMLInputElement).value.toLowerCase();
             const options = listContainer.querySelectorAll(".species-option");
+
             options.forEach((opt) => {
               const val = opt.getAttribute("data-value");
-              const text = opt.textContent?.toLowerCase() || "";
-              if (val === "NEW" || text.includes(term)) {
+
+              // Look at our secret data-search attribute instead of just the text content!
+              const searchStr =
+                opt.getAttribute("data-search") ||
+                opt.textContent?.toLowerCase() ||
+                "";
+
+              if (val === "NEW" || searchStr.includes(term)) {
                 (opt as HTMLElement).style.display = "block";
               } else {
                 (opt as HTMLElement).style.display = "none";
@@ -243,7 +255,6 @@ export function initUpload(callbacks: UploadCallbacks) {
             });
           });
         }
-
         if (btnNext && phase1 && phase2) {
           btnNext.onclick = () => {
             const speciesId = hiddenInput.value;
@@ -274,7 +285,7 @@ export function initUpload(callbacks: UploadCallbacks) {
         if (selectedUploadFiles.length > 0) {
           console.log(
             "Preserving existing session with files:",
-            selectedUploadFiles.length
+            selectedUploadFiles.length,
           );
         } else {
           console.log("Starting a fresh upload session.");
@@ -283,7 +294,7 @@ export function initUpload(callbacks: UploadCallbacks) {
 
         const dropZone = document.getElementById("imageDropZone");
         const fileInput = document.getElementById(
-          "newImageFile"
+          "newImageFile",
         ) as HTMLInputElement;
         const fileListContainer = document.getElementById("selectedFilesList");
         const fileCounter = document.getElementById("uploadFileCounter");
@@ -291,14 +302,14 @@ export function initUpload(callbacks: UploadCallbacks) {
         const previewSection = document.getElementById("imagePreviewSection");
         const noImagePrompt = document.getElementById("noImageSelectedPrompt");
         const previewImg = document.getElementById(
-          "uploadImagePreview"
+          "uploadImagePreview",
         ) as HTMLImageElement;
         const notesInput = document.getElementById(
-          "nathanNotes"
+          "nathanNotes",
         ) as HTMLTextAreaElement;
         const tagCheckboxes = () =>
           document.querySelectorAll(
-            '#tagCheckboxContainer input[type="checkbox"]'
+            '#tagCheckboxContainer input[type="checkbox"]',
           ) as NodeListOf<HTMLInputElement>;
 
         const saveCurrentMetadata = () => {
@@ -312,8 +323,8 @@ export function initUpload(callbacks: UploadCallbacks) {
 
             const selectedTags = Array.from(
               document.querySelectorAll(
-                '#fullTagGrid input[type="checkbox"]:checked'
-              )
+                '#fullTagGrid input[type="checkbox"]:checked',
+              ),
             ).map((cb) => (cb as HTMLInputElement).value);
 
             selectedUploadFiles[currentSelectedFileIndex].tags = selectedTags;
@@ -334,7 +345,7 @@ export function initUpload(callbacks: UploadCallbacks) {
             if (notesInput) notesInput.value = data.notes;
 
             const pickerCheckboxes = document.querySelectorAll(
-              '#fullTagGrid input[type="checkbox"]'
+              '#fullTagGrid input[type="checkbox"]',
             ) as NodeListOf<HTMLInputElement>;
             pickerCheckboxes.forEach((cb) => {
               cb.checked = data.tags.includes(cb.value);
@@ -398,7 +409,7 @@ export function initUpload(callbacks: UploadCallbacks) {
                 saveCurrentMetadata();
                 const idx = parseInt(
                   (e.currentTarget as HTMLElement).getAttribute("data-index") ||
-                    "0"
+                    "0",
                 );
                 URL.revokeObjectURL(selectedUploadFiles[idx].url);
                 selectedUploadFiles.splice(idx, 1);
@@ -460,7 +471,7 @@ export function initUpload(callbacks: UploadCallbacks) {
         if (notesInput)
           notesInput.addEventListener("input", saveCurrentMetadata);
         tagCheckboxes().forEach((cb) =>
-          cb.addEventListener("change", saveCurrentMetadata)
+          cb.addEventListener("change", saveCurrentMetadata),
         );
         await TagManager.renderFullTagPicker();
 
@@ -484,38 +495,41 @@ export function initUpload(callbacks: UploadCallbacks) {
         renderFileList();
         updatePreviewPanel();
       });
-      
+
       uploadModal.addEventListener("hidden.bs.modal", (e) => {
         if ((e.target as HTMLElement).id === "tagPickerModal") return;
 
         if (e.target === uploadModal) {
-            console.log("Modal closed via cancel/click-away. Resetting for next time.");
-            
-            currentSpeciesId = "NEW";
-            const hInput = document.getElementById("speciesSelectorValue") as HTMLInputElement;
-            if (hInput) hInput.value = "NEW";
+          console.log(
+            "Modal closed via cancel/click-away. Resetting for next time.",
+          );
 
-            document.getElementById("uploadPhase1")?.classList.remove("d-none");
-            document.getElementById("uploadPhase2")?.classList.add("d-none");
-            document.getElementById("uploadLoadingScreen")?.classList.add("d-none");
+          currentSpeciesId = "NEW";
+          const hInput = document.getElementById(
+            "speciesSelectorValue",
+          ) as HTMLInputElement;
+          if (hInput) hInput.value = "NEW";
 
-            selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
-            selectedUploadFiles = [];
-            
-            const fileListContainer = document.getElementById("selectedFilesList");
-            if (fileListContainer) fileListContainer.innerHTML = "";
-            
-            const btnText = document.getElementById("speciesDropdownText");
-            if (btnText) {
-                btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
-            }
+          document.getElementById("uploadPhase1")?.classList.remove("d-none");
+          document.getElementById("uploadPhase2")?.classList.add("d-none");
+          document
+            .getElementById("uploadLoadingScreen")
+            ?.classList.add("d-none");
+
+          selectedUploadFiles.forEach((d) => URL.revokeObjectURL(d.url));
+          selectedUploadFiles = [];
+
+          const fileListContainer =
+            document.getElementById("selectedFilesList");
+          if (fileListContainer) fileListContainer.innerHTML = "";
+
+          const btnText = document.getElementById("speciesDropdownText");
+          if (btnText) {
+            btnText.innerHTML = `<span class="text-primary fw-bold">Create New Species</span>`;
+          }
         }
       });
-
-      
     }
-
-    
 
     console.log("REGISTERING CLOSE PICKER LISTENER");
     const openTagPickerBtn = document.getElementById("openTagPickerBtn");
@@ -556,35 +570,43 @@ export function initUpload(callbacks: UploadCallbacks) {
 
       if (!speciesId) {
         return alert(
-          "Error: Species ID was lost. Please re-select the species."
+          "Error: Species ID was lost. Please re-select the species.",
         );
       }
 
       const notesInput = document.getElementById(
-        "nathanNotes"
+        "nathanNotes",
       ) as HTMLTextAreaElement;
       const tagCheckboxes = () =>
         document.querySelectorAll(
-          '#tagPickerModal input[type="checkbox"]'
+          '#tagPickerModal input[type="checkbox"]',
         ) as NodeListOf<HTMLInputElement>;
 
-        if (currentSelectedFileIndex >= 0 && currentSelectedFileIndex < selectedUploadFiles.length) {
-          if (notesInput) selectedUploadFiles[currentSelectedFileIndex].notes = notesInput.value;
-          
-          selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(tagCheckboxes())
-            .filter((cb) => cb.checked)
-            .map((cb) => cb.value);
+      if (
+        currentSelectedFileIndex >= 0 &&
+        currentSelectedFileIndex < selectedUploadFiles.length
+      ) {
+        if (notesInput)
+          selectedUploadFiles[currentSelectedFileIndex].notes =
+            notesInput.value;
+
+        selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(
+          tagCheckboxes(),
+        )
+          .filter((cb) => cb.checked)
+          .map((cb) => cb.value);
+      }
+
+      // 2. CHECK if any files are selected
+      if (selectedUploadFiles.length === 0)
+        return alert("Please select at least one image file.");
+
+      // 3. NEW: VALIDATE ALL FILES in the upload queue
+      for (const fileData of selectedUploadFiles) {
+        if (!validateTagsForFile(fileData.tags, fileData.file.name)) {
+          return; // Stop the submit right here if validation fails
         }
-  
-        // 2. CHECK if any files are selected
-        if (selectedUploadFiles.length === 0) return alert("Please select at least one image file.");
-  
-        // 3. NEW: VALIDATE ALL FILES in the upload queue
-        for (const fileData of selectedUploadFiles) {
-          if (!validateTagsForFile(fileData.tags, fileData.file.name)) {
-            return; // Stop the submit right here if validation fails
-          }
-        }
+      }
 
       // if (
       //   currentSelectedFileIndex >= 0 &&
@@ -626,17 +648,17 @@ export function initUpload(callbacks: UploadCallbacks) {
         currentSelectedFileIndex < selectedUploadFiles.length
       ) {
         const notesInput = document.getElementById(
-          "nathanNotes"
+          "nathanNotes",
         ) as HTMLTextAreaElement;
         if (notesInput)
           selectedUploadFiles[currentSelectedFileIndex].notes =
             notesInput.value;
 
         const checkedTags = document.querySelectorAll(
-          '#fullTagGrid input[type="checkbox"]:checked'
+          '#fullTagGrid input[type="checkbox"]:checked',
         );
         selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(
-          checkedTags
+          checkedTags,
         ).map((cb) => (cb as HTMLInputElement).value);
       }
 
@@ -653,7 +675,7 @@ export function initUpload(callbacks: UploadCallbacks) {
 
         if (!nameInput || !sciInput) {
           return alert(
-            "Common and Scientific names are required for new species."
+            "Common and Scientific names are required for new species.",
           );
         }
 
@@ -723,14 +745,14 @@ export function initUpload(callbacks: UploadCallbacks) {
       console.log(
         "Hidden input value =",
         (document.getElementById("speciesSelectorValue") as HTMLInputElement)
-          ?.value
+          ?.value,
       );
 
       // ==========================================
       // CLEANUP AFTER UPLOAD (SUCCESS STATE)
       // ==========================================
       const spinnerContainer = document.getElementById(
-        "loadingSpinnerContainer"
+        "loadingSpinnerContainer",
       );
       const successIcon = document.getElementById("uploadSuccessIcon");
       const loadingTitle = document.getElementById("loadingScreenTitle");
@@ -795,13 +817,13 @@ export function initUpload(callbacks: UploadCallbacks) {
           currentSelectedFileIndex = -1;
 
           const form = document.getElementById(
-            "universalUploadForm"
+            "universalUploadForm",
           ) as HTMLFormElement;
 
           form?.reset();
 
           const hInput = document.getElementById(
-            "speciesSelectorValue"
+            "speciesSelectorValue",
           ) as HTMLInputElement;
 
           if (hInput) hInput.value = "NEW";
@@ -844,49 +866,49 @@ export function initUpload(callbacks: UploadCallbacks) {
         };
       }
     });
-
-    
   }
 
-function validateTagsForFile(tagIds: string[], fileName: string): boolean {
-  const required = ["Sex", "Layout", "Wings View"];
-  const categoryCounts: { [key: string]: number } = {};
+  function validateTagsForFile(tagIds: string[], fileName: string): boolean {
+    const required = ["Sex", "Layout", "Wings View"];
+    const categoryCounts: { [key: string]: number } = {};
 
-  tagIds.forEach(id => {
-      const checkbox = document.querySelector(`input[name="tagIds"][value="${id}"]`);
-      const categoryBlock = checkbox?.closest('.tag-category-block');
-      const categoryName = categoryBlock?.querySelector('h6')?.innerText || "";
-      
-      required.forEach(req => {
-          if (categoryName.includes(req)) {
-              categoryCounts[req] = (categoryCounts[req] || 0) + 1;
-          }
+    tagIds.forEach((id) => {
+      const checkbox = document.querySelector(
+        `input[name="tagIds"][value="${id}"]`,
+      );
+      const categoryBlock = checkbox?.closest(".tag-category-block");
+      const categoryName = categoryBlock?.querySelector("h6")?.innerText || "";
+
+      required.forEach((req) => {
+        if (categoryName.includes(req)) {
+          categoryCounts[req] = (categoryCounts[req] || 0) + 1;
+        }
       });
-  });
+    });
 
-  const missing = required.filter(req => !categoryCounts[req]);
-  
-  const multiples = required.filter(req => categoryCounts[req] > 1);
+    const missing = required.filter((req) => !categoryCounts[req]);
 
-  if (missing.length > 0 || multiples.length > 0) {
+    const multiples = required.filter((req) => categoryCounts[req] > 1);
+
+    if (missing.length > 0 || multiples.length > 0) {
       let errorMsg = `Tagging Error for: ${fileName}\n`;
-      
+
       if (missing.length > 0) {
-          errorMsg += `\nMissing Required Category:\n• ${missing.join("\n• ")}`;
+        errorMsg += `\nMissing Required Category:\n• ${missing.join("\n• ")}`;
       }
-      
+
       if (multiples.length > 0) {
-          errorMsg += `\n\nToo Many Selected for Categories Listed(Pick only 1):\n• ${multiples.join("\n• ")}`;
+        errorMsg += `\n\nToo Many Selected for Categories Listed(Pick only 1):\n• ${multiples.join("\n• ")}`;
       }
 
       alert(errorMsg);
       return false;
+    }
+    return true;
   }
-  return true;
-}
   // --- Add Images to Existing Species Form ---
   const addImageToSpeciesForm = document.getElementById(
-    "addImageToSpeciesForm"
+    "addImageToSpeciesForm",
   );
   if (addImageToSpeciesForm) {
     addImageToSpeciesForm.addEventListener("submit", async (e) => {
@@ -895,7 +917,7 @@ function validateTagsForFile(tagIds: string[], fileName: string): boolean {
         document.getElementById("targetSpeciesId") as HTMLInputElement
       ).value;
       const fileInput = document.getElementById(
-        "speciesImageFiles"
+        "speciesImageFiles",
       ) as HTMLInputElement;
       const notes = (
         document.getElementById("speciesImageNotes") as HTMLInputElement
@@ -925,11 +947,11 @@ function validateTagsForFile(tagIds: string[], fileName: string): boolean {
       alert(
         `${successCount} image(s) uploaded${
           failCount > 0 ? `, ${failCount} failed` : ""
-        }!`
+        }!`,
       );
       (e.target as HTMLFormElement).reset();
       bootstrap.Modal.getInstance(
-        document.getElementById("addImageToSpeciesModal")
+        document.getElementById("addImageToSpeciesModal"),
       )?.hide();
 
       AppState.butterflies = await ButterflyAPI.getAll();
