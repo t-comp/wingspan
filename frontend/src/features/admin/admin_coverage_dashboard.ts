@@ -16,9 +16,6 @@ const CORE_TAGS = [
 ];
 
 export function initCoverageDashboard() {
-  // =========================================================
-  // ✨ DEBUG LOGS: Let's see what the browser is finding! ✨
-  // =========================================================
   console.log("--- COVERAGE DASHBOARD INIT CHECK ---");
 
   const modalElement = document.getElementById("coverageTagModal");
@@ -29,11 +26,7 @@ export function initCoverageDashboard() {
 
   const saveModalBtn = document.getElementById("saveCoverageTagsBtn");
   console.log("3. Did it find the Save Button?", saveModalBtn);
-  // =========================================================
 
-  // =========================================================
-  // ✨ CLICK TRACKER LOGS ✨
-  // =========================================================
   const triggerBtn = document.querySelector(
     '[data-bs-target="#coverageTagModal"]',
   );
@@ -56,10 +49,7 @@ export function initCoverageDashboard() {
       }
     });
   }
-  // =========================================================
 
-  const navBtn = document.getElementById("navCoverageBtn");
-  const dashboard = document.getElementById("coverageDashboard");
   const checkBtn = document.getElementById("checkCoverageBtn");
   const input = document.getElementById(
     "speciesCoverageInput",
@@ -68,20 +58,11 @@ export function initCoverageDashboard() {
   const tableHead = document.getElementById("coverageTableHead");
   const tableBody = document.getElementById("coverageTableBody");
 
-  if (!navBtn || !dashboard || !checkBtn) return;
-
-  // Navigation Logic
-  navBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    document
-      .querySelectorAll("section")
-      .forEach((sec) => ((sec as HTMLElement).style.display = "none"));
-    dashboard.style.display = "block";
-  });
+  if (!checkBtn) return;
 
   // Keep track of the extra tags Nathan selects from the modal
   let selectedExtraTags = new Set<string>();
-  let allFetchedTags: any[] = []; // Store them here so we can search instantly!
+  let allFetchedTags: any[] = [];
 
   // Helper function to load tags from the database
   async function loadCoverageTags() {
@@ -91,7 +72,7 @@ export function initCoverageDashboard() {
     try {
       console.log("DEBUG: All tags from API:", allFetchedTags);
       allFetchedTags = await ButterflyAPI.getAllTags();
-      renderCoverageTagGrid(""); // Render initially with no search filter
+      renderCoverageTagGrid("");
     } catch (err) {
       console.error("DEBUG: loadCoverageTags failed!", err);
       grid.innerHTML = `<div class="text-danger w-100 text-center">Failed to load tags.</div>`;
@@ -107,16 +88,14 @@ export function initCoverageDashboard() {
     const categories: Record<string, any[]> = {};
 
     allFetchedTags.forEach((tag: any) => {
-      // FIX: Check for tagName too! If neither exists, then we skip.
       const tagName = tag.name || tag.tagName || "";
       if (!tagName) return;
 
       // Skip core tags so they don't appear in the modal options
       if (CORE_TAGS.includes(tagName.toLowerCase())) return;
 
-      const cat = tag.category || "Uncategorized";
+      const cat = tag.category || tag.tagCategory || "Uncategorized";
 
-      // Use the new tagName variable for the search filter
       if (
         !search ||
         tagName.toLowerCase().includes(search) ||
@@ -126,43 +105,49 @@ export function initCoverageDashboard() {
         categories[cat].push(tag);
       }
     });
+
     let html = Object.keys(categories)
       .sort()
       .map(
         (catName) => `
     <div class="col">
-      <h6 class="fw-bold pb-2 mb-3" style="color: #0399b0; border-bottom: 2px solid #f8f9fa;">
-        ${catName}
-      </h6>
-      <div class="d-flex flex-wrap gap-2 mb-4">
-        ${categories[catName]
-          .map((t) => {
-            // Ensure you use the same tagName fallback here for the label!
-            const tName = t.name || t.tagName || "Unknown";
-            const isChecked = selectedExtraTags.has(tName.toLowerCase())
-              ? "checked"
-              : "";
-            return `
-              <div class="tag-chip-item">
+      <div class="bg-white p-3 rounded border shadow-none h-100">
+        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+          ${catName}
+        </h6>
+        <div class="d-flex flex-wrap gap-2">
+            ${categories[catName]
+              .map((t) => {
+                const tName = t.name || t.tagName || "Unknown";
+                const isChecked = selectedExtraTags.has(tName.toLowerCase())
+                  ? "checked"
+                  : "";
+                const cleanCat = catName.replace(/[^a-z0-9]/gi, "-");
+                const cleanTag = tName.replace(/[^a-z0-9]/gi, "-");
+                const uniqueId = `cov-${cleanCat}-${cleanTag}-${t.id}`;
+
+                return `
+            <div class="tag-chip-item">
                 <input type="checkbox" class="tag-chip-checkbox d-none coverage-tag-checkbox"
-                       id="cov-picker-tag-${t.id}" value="${tName}" ${isChecked}>
-                <label for="cov-picker-tag-${t.id}" class="tag-chip">
-                  ${tName}
+                    id="${uniqueId}" value="${tName}" ${isChecked}>
+                <label for="${uniqueId}" class="tag-chip">
+                ${tName}
                 </label>
-              </div>
+            </div>
             `;
-          })
-          .join("")}
+              })
+              .join("")}
+        </div>
       </div>
     </div>
   `,
       )
       .join("");
+
     grid.innerHTML =
       html ||
       `<div class="text-muted w-100 text-center mt-5">No tags found matching "${searchTerm}".</div>`;
 
-    // Attach listeners to checkboxes so they instantly update our Set when clicked
     const checkboxes = document.querySelectorAll(
       ".coverage-tag-checkbox",
     ) as NodeListOf<HTMLInputElement>;
@@ -178,7 +163,6 @@ export function initCoverageDashboard() {
     });
   }
 
-  // Hook up the search bar to filter as Nathan types
   const searchInput = document.getElementById(
     "coverageTagPickerSearch",
   ) as HTMLInputElement;
@@ -188,27 +172,77 @@ export function initCoverageDashboard() {
     });
   }
 
-  // Handle saving the selected tags and drawing the visual badges on the dashboard
   const saveBtn = document.getElementById("saveCoverageTagsBtn");
   const display = document.getElementById("coverageSelectedTagsDisplay");
 
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      if (display) {
-        display.innerHTML = Array.from(selectedExtraTags)
-          .map(
-            (tag) =>
-              `<span class="badge bg-secondary px-3 py-2 rounded-pill shadow-sm"><i class="fas fa-tag me-1"></i>${tag}</span>`,
-          )
-          .join("");
-      }
+  // Helper function to draw and manage the selected tags display
+  // Helper function to draw and manage the selected tags display
+  function renderSelectedCoverageTagsDisplay() {
+    if (!display) return;
+
+    if (selectedExtraTags.size === 0) {
+      display.innerHTML = `<span class="text-muted small italic">No additional tags selected</span>`;
+      return;
+    }
+
+    display.innerHTML = Array.from(selectedExtraTags)
+      .map(
+        (tag) => `
+      <span class="badge rounded-pill shadow-sm border d-inline-flex align-items-center" 
+            style="background-color: #f8f9fa; 
+                   color: #0399b0; 
+                   border-color: #0399b0 !important; 
+                   font-size: 0.75rem; 
+                   padding: 6px 14px;
+                   height: fit-content;
+                   margin: 2px;
+                   white-space: nowrap;">
+        <i class="fas fa-tag me-2" style="font-size: 0.65rem;"></i>${tag}
+        <span class="coverage-tag-remove ms-2 d-inline-flex align-items-center" data-tag="${tag}" title="Remove tag">
+            <i class="fas fa-times"></i>
+        </span>
+      </span>`,
+      )
+      .join("");
+
+    // Add click listeners to the PROTECTED span wrappers!
+    const removeBtns = display.querySelectorAll(".coverage-tag-remove");
+    removeBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        // e.currentTarget guarantees we get the span, even if they clicked the SVG inside it
+        const tagToRemove = (e.currentTarget as HTMLElement).getAttribute(
+          "data-tag",
+        );
+
+        if (tagToRemove) {
+          // 1. Remove from our active Set
+          selectedExtraTags.delete(tagToRemove.toLowerCase());
+
+          // 2. Re-render the display to make it instantly disappear
+          renderSelectedCoverageTagsDisplay();
+
+          // 3. Silently uncheck it in the modal so it's accurate next time you open it
+          const checkboxes = document.querySelectorAll(
+            ".coverage-tag-checkbox",
+          ) as NodeListOf<HTMLInputElement>;
+          checkboxes.forEach((cb) => {
+            if (cb.value.toLowerCase() === tagToRemove.toLowerCase()) {
+              cb.checked = false;
+            }
+          });
+        }
+      });
     });
   }
 
-  // Trigger the load function immediately so it's ready when he clicks
-  //loadCoverageTags();
+  // When the modal saves, just call our new drawing function
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      renderSelectedCoverageTagsDisplay();
+    });
+  }
+  renderSelectedCoverageTagsDisplay;
 
-  // Action Logic
   checkBtn.addEventListener("click", async () => {
     const speciesList = input.value
       .split("\n")
@@ -216,11 +250,11 @@ export function initCoverageDashboard() {
       .filter((s) => s.length > 0);
     if (speciesList.length === 0) return;
 
-    // Combine CORE_TAGS with whatever is currently in the Set
     const currentSearchTags = Array.from(
       new Set([...CORE_TAGS, ...Array.from(selectedExtraTags)]),
     );
 
+    // ✨ TEXT BUTTON UPDATES HERE
     checkBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Checking...`;
     checkBtn.toggleAttribute("disabled", true);
 
@@ -251,7 +285,6 @@ export function initCoverageDashboard() {
           coverage: {} as Record<string, boolean>,
         };
 
-        // Initialize ALL search tags to false for this row
         currentSearchTags.forEach((tag) => (coverageRow.coverage[tag] = false));
 
         if (foundSpecies) {
@@ -285,38 +318,48 @@ export function initCoverageDashboard() {
     } catch (error: any) {
       alert("Error fetching coverage data: " + error.message);
     } finally {
+      // ✨ TEXT BUTTON UPDATES HERE
       checkBtn.innerHTML = `<i class="fas fa-search me-2"></i>Check Coverage`;
       checkBtn.toggleAttribute("disabled", false);
     }
   });
 
   function renderTable(data: any[], tags: string[]) {
-    if (!tableHead || !tableBody) return;
+    const fixedHead = document.getElementById("fixedTableHead");
+    const fixedBody = document.getElementById("fixedTableBody");
+    const scrollHead = document.getElementById("scrollTableHead");
+    const scrollBody = document.getElementById("scrollTableBody");
 
-    // Build Header
-    let theadHtml = `<tr><th class="text-start">Species</th>`;
+    if (!fixedHead || !scrollHead || !fixedBody || !scrollBody) return;
+
+    fixedHead.innerHTML = `<tr class="coverage-row-sync-head"><th class="text-start ps-3 align-middle">Species</th></tr>`;
+
+    let sHeadHtml = `<tr class="coverage-row-sync-head">`;
     tags.forEach((tag) => {
       const displayTag = tag.replace(/\b\w/g, (l) => l.toUpperCase());
-      theadHtml += `<th>${displayTag}</th>`;
+      sHeadHtml += `<th class="px-3 text-center align-middle" style="font-size: 0.85rem;">${displayTag}</th>`;
     });
-    theadHtml += `</tr>`;
-    tableHead.innerHTML = theadHtml;
+    sHeadHtml += `</tr>`;
+    scrollHead.innerHTML = sHeadHtml;
 
-    // Build Body
-    let tbodyHtml = "";
+    let fBodyHtml = "";
+    let sBodyHtml = "";
+
     data.forEach((item) => {
-      tbodyHtml += `<tr><td class="fw-bold text-start">${item.species}</td>`;
+      fBodyHtml += `<tr class="coverage-row-sync"><td class="fw-bold text-start ps-3 align-middle">${item.species}</td></tr>`;
 
+      sBodyHtml += `<tr class="coverage-row-sync">`;
       tags.forEach((tag) => {
         const hasTag = item.coverage[tag];
         const icon = hasTag
           ? `<i class="fas fa-check text-success fs-5"></i>`
           : `<i class="fas fa-times text-danger opacity-25"></i>`;
-
-        tbodyHtml += `<td>${icon}</td>`;
+        sBodyHtml += `<td class="text-center align-middle">${icon}</td>`;
       });
-      tbodyHtml += `</tr>`;
+      sBodyHtml += `</tr>`;
     });
-    tableBody.innerHTML = tbodyHtml;
+
+    fixedBody.innerHTML = fBodyHtml;
+    scrollBody.innerHTML = sBodyHtml;
   }
 }

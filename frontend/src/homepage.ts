@@ -97,6 +97,7 @@ export async function initHome(userRole, userEmail) {
   const speciesView = document.getElementById("speciesView");
   const filterPanel = document.getElementById("filterPanel");
   const docsView = document.getElementById("docsView");
+  const coverageDashboard = document.getElementById("coverageDashboard");
 
   const adminTeamContent = document.getElementById("adminTeamContent");
   const studentTeamContent = document.getElementById("studentTeamContent");
@@ -218,6 +219,14 @@ export async function initHome(userRole, userEmail) {
     if (teamView) teamView.style.display = "block";
     if (docsView) docsView.style.display = "none";
 
+    if (tab === "coverage") {
+      if (teamView) teamView.style.display = "none";
+      if (coverageDashboard) coverageDashboard.style.display = "block";
+    } else {
+      if (teamView) teamView.style.display = "block";
+      if (coverageDashboard) coverageDashboard.style.display = "none";
+    }
+
     const footer = document.querySelector("footer.footer") as HTMLElement;
     const copyright = document.querySelector(".copyright") as HTMLElement;
     if (footer) footer.style.display = "block";
@@ -286,6 +295,10 @@ export async function initHome(userRole, userEmail) {
     }
   };
 
+  document.getElementById("navCoverageBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    openDashboard("coverage");
+  });
   document.getElementById("navAdminTeams")?.addEventListener("click", (e) => {
     e.preventDefault();
     openDashboard("teams");
@@ -328,10 +341,21 @@ export async function initHome(userRole, userEmail) {
   });
 
   // Pass 'true' into the back button so it knows to restore the spot in the gallery after visiting a species page
-  if (backBtn) backBtn.addEventListener("click", () => goToGallery(true));
-  if (navBrand) navBrand.addEventListener("click", () => goToGallery());
+  if (backBtn)
+    backBtn.addEventListener("click", () => {
+      if (coverageDashboard) coverageDashboard.style.display = "none";
+      goToGallery(true);
+    });
+  if (navBrand)
+    navBrand.addEventListener("click", () => {
+      if (coverageDashboard) coverageDashboard.style.display = "none";
+      goToGallery();
+    });
   if (viewGalleryBtn)
-    viewGalleryBtn.addEventListener("click", () => goToGallery());
+    viewGalleryBtn.addEventListener("click", () => {
+      if (coverageDashboard) coverageDashboard.style.display = "none";
+      goToGallery();
+    });
 
   // Show/Hide Top Nav buttons based on role
   const viewTeamBtn = document.getElementById("viewTeamBtn");

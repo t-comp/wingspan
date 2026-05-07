@@ -80,10 +80,12 @@ export function initSettings(userEmail: string) {
     const portfolio = document.getElementById("portfolio");
     const speciesView = document.getElementById("speciesView");
     const teamView = document.getElementById("teamView");
+    const coverageDashboard = document.getElementById("coverageDashboard");
 
     if (portfolio) portfolio.style.display = "none";
     if (speciesView) speciesView.style.display = "none";
     if (teamView) teamView.style.display = "none";
+    if (coverageDashboard) coverageDashboard.style.display = "none";
 
     //  Hide the navbar filter controls
     const galleryControls = document.getElementById("galleryControlsWrapper");
