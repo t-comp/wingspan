@@ -1064,3 +1064,23 @@ button[data-bs-target="#coverageTagModal"]:active {
   -webkit-mask-position: center;
   filter: none; /* Removes the old dark slate filter */
 }
+
+/* =========================================
+   SPECIES VIEW COLORS (LIGHT MODE)
+   ========================================= */
+.species-edit-box {
+  background-color: #f8f9fa; /* Standard Bootstrap bg-light */
+  border-color: #0399b0 !important; /* Keeps your teal border */
+}
+
+.species-edit-link {
+  color: #027a8d; 
+}
+
+.species-edit-link:hover {
+  color: #015c6a; 
+}
+
+.species-filter-box {
+  background-color: #f1f8f9; 
+}

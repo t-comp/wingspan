@@ -356,3 +356,69 @@
   background-color: rgba(220, 53, 69, 0.15) !important;
   color: #dc3545 !important;
 }
+
+/* =========================================
+   SPECIES VIEW COLORS (DARK MODE)
+   ========================================= */
+
+[data-bs-theme="dark"] #speciesName {
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .species-edit-box {
+  background-color: #2c3238 !important; 
+  border-color: #0399b0 !important;
+}
+
+[data-bs-theme="dark"] .species-edit-link {
+  color: #0399b0 !important; 
+}
+
+[data-bs-theme="dark"] .species-edit-link:hover {
+  color: #027e91 !important; 
+}
+
+[data-bs-theme="dark"] .species-filter-box {
+  background-color: #212529 !important; 
+  border-color: #34495e !important; 
+}
+
+[data-bs-theme="dark"] .filter-pill.btn-outline-secondary {
+  color: #ecf0f1 !important; /* Bright off-white text */
+  border-color: #495057 !important; /* Crisp slate border */
+  background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] .filter-pill.btn-outline-secondary:hover {
+  background-color: #34495e !important; /* Fills in with slate when hovering */
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .filter-pill.btn-primary.active {
+  background-color: #0399b0 !important; /* Solid Wingspan Teal when selected */
+  border-color: #0399b0 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+/* =========================================
+   SPECIES VIEW: HERO TAGS & ICONS (DARK MODE)
+   ========================================= */
+
+[data-bs-theme="dark"] #heroImageTags .badge {
+  background-color: #34495e !important; /* Permanently filled with the slate color */
+  color: #ffffff !important; /* Bright white text */
+  border: 1px solid #495057 !important; /* Crisp slate border */
+  pointer-events: none; 
+}
+
+[data-bs-theme="dark"] #editSpeciesBtn {
+  color: #0399b0 !important; 
+  border-color: #495057 !important; 
+}
+
+[data-bs-theme="dark"] #editSpeciesBtn:hover {
+  color: #ffffff !important; 
+  background-color: #0399b0 !important; 
+  border-color: #0399b0 !important;
+}
