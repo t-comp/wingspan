@@ -102,10 +102,10 @@ export async function loadTeams() {
               const lName = m.lastName || "";
               const fullName = `${fName} ${lName}`.trim() || m.email;
               return `
-                <span class="d-inline-flex align-items-center gap-1 me-1 mb-1 px-3 py-1 rounded-pill border small fw-bold"
-                      style="background: #f8f9fa; font-size: 0.75rem; color: #495057;">
+               <span class="d-inline-flex align-items-center gap-1 me-1 mb-1 px-3 py-1 rounded-pill border small fw-bold team-member-pill"
+                      style="font-size: 0.75rem;">
                     ${fullName}
-                    <span style="cursor:pointer; font-size:11px; color:#adb5bd; margin-left:6px; padding: 2px;"
+                    <span class="team-member-remove" style="cursor:pointer; font-size:11px; margin-left:6px; padding: 2px;"
                           onclick="window.removeStudentFromTeam('${team.id}', '${m.userId}')"><i class="fas fa-times"></i></span>
                 </span>`;
             })
@@ -114,8 +114,7 @@ export async function loadTeams() {
     let apiKeyHtml = "";
     if (!teamKey) {
       apiKeyHtml = `
-        <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
-            <span class="text-muted small fst-italic">No API key found</span>
+      <div class="d-flex align-items-center justify-content-between p-2 rounded api-key-box">            <span class="text-muted small fst-italic">No API key found</span>
             <div class="action-tooltip-container">
                 <button class="btn-icon-only" onclick="window.regenerateTeamKey('${team.name}', '${team.projectName}', '${team.semester}')">
                     <i class="fas fa-key"></i>
@@ -144,16 +143,15 @@ export async function loadTeams() {
       }
 
       apiKeyHtml = `
-        <div class="p-2 rounded" style="background:#f8f9fa; border: 0.5px solid #dee2e6;">
+        <div class="p-2 rounded api-key-box">
             <div class="d-flex align-items-center justify-content-between mb-1">
-                <span class="badge rounded-pill px-2 py-1" style="font-size:0.7rem; background: ${isActive ? "#d1fae5" : "#fef3c7"}; color: ${isActive ? "#065f46" : "#92400e"};">
+              <span class="badge rounded-pill px-2 py-1 api-status-badge ${isActive ? "active" : "inactive"}" style="font-size:0.7rem;">
                     ${isActive ? "Active" : "Inactive"}
                 </span>
                 ${expiresHtml}
             </div>
             <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
-                <div class="font-monospace text-break mb-0" style="font-size:0.72rem; color:#555; word-break:break-all;">
-                    ${teamKey.keyVal}
+              <div class="font-monospace text-break mb-0 api-key-text" style="font-size:0.72rem; word-break:break-all;">                    ${teamKey.keyVal}
                 </div>
                 <div class="d-flex flex-wrap gap-1 flex-shrink-0 ms-3">
                     <div class="action-tooltip-container">

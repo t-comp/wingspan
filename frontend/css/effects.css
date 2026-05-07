@@ -1109,3 +1109,33 @@ button[data-bs-target="#coverageTagModal"]:active {
   font-size: 0.85rem;
   font-style: italic;
 }
+
+/* =========================================
+   ADMIN TEAMS DASHBOARD
+   ========================================= */
+.team-member-pill {
+  background-color: #f8f9fa;
+  color: #495057;
+  border-color: #dee2e6 !important;
+}
+.team-member-remove {
+  color: #adb5bd;
+}
+.team-member-remove:hover {
+  color: #dc3545;
+}
+.api-key-box {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+.api-key-text {
+  color: #555555;
+}
+.api-status-badge.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+.api-status-badge.inactive {
+  background-color: #fef3c7;
+  color: #92400e;
+}
