@@ -155,7 +155,9 @@
 /* Custom 'X' Clear Button */
 #searchInput::-webkit-search-cancel-button,
 #adminTeamSearch::-webkit-search-cancel-button,
-#adminUserSearch::-webkit-search-cancel-button {
+#adminUserSearch::-webkit-search-cancel-button,
+#searchSpeciesInput::-webkit-search-cancel-button, 
+#tagPickerSearch::-webkit-search-cancel-button { 
   -webkit-appearance: none;
   height: 18px;
   width: 18px;
@@ -165,7 +167,6 @@
   cursor: pointer;
   margin-right: 12px;
 }
-
 
 
 .divider-custom-icon img {
@@ -853,8 +854,8 @@
 /* Hover effect */
 .tag-chip:hover {
   background-color: #e9ecef;
-  border-color: #0399b0;
-  color: #0399b0;
+  border-color: #1abc9c !important; 
+  color: #1abc9c;
 }
 
 /* THE FIX: When the checkbox is checked, style the chip */
@@ -1028,8 +1029,8 @@ button[data-bs-target="#coverageTagModal"]:active {
 
 .custom-footer .footer-photo-box {
   background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid #dee2e6; 
 }
-
 .custom-footer .footer-photo-text {
   color: #6b7280;
 }
@@ -1096,4 +1097,15 @@ button[data-bs-target="#coverageTagModal"]:active {
 .filter-pill.btn-primary:hover {
   background-color: #028094 !important; /* Slightly darker teal on hover */
   border-color: #028094 !important;
+}
+
+/* Upload Search Dropdown (Light Mode) */
+.search-main-text {
+  color: #212529; /* Dark text for readability */
+}
+
+.search-scientific-dim {
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-style: italic;
 }

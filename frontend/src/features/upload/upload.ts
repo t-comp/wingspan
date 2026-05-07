@@ -192,7 +192,7 @@ export function initUpload(callbacks: UploadCallbacks) {
 
           // Swapped (parentheses) for | and added the 'search-scientific-dim' class
           html += `<button type="button" class="dropdown-item species-option py-2 d-flex align-items-center" data-value="${s.id}" data-search="${cName.toLowerCase()} ${sName.toLowerCase()}">
-            <span class="fw-bold text-white">${cName}</span> 
+            <span class="fw-bold search-main-text">${cName}</span> 
             ${sName ? `<span class="ms-2 search-scientific-dim">| ${sName}</span>` : ""}
           </button>`;
         });
@@ -248,9 +248,12 @@ export function initUpload(callbacks: UploadCallbacks) {
                 "";
 
               if (val === "NEW" || searchStr.includes(term)) {
-                (opt as HTMLElement).style.display = "block";
+                (opt as HTMLElement).style.display = ""; // Clears the inline style
+                (opt as HTMLElement).classList.remove("d-none");
+                (opt as HTMLElement).classList.add("d-flex"); // Preserves the alignment
               } else {
-                (opt as HTMLElement).style.display = "none";
+                (opt as HTMLElement).classList.remove("d-flex");
+                (opt as HTMLElement).classList.add("d-none");
               }
             });
           });
@@ -478,10 +481,32 @@ export function initUpload(callbacks: UploadCallbacks) {
         document
           .getElementById("tagPickerSearch")
           ?.addEventListener("input", (e) => {
-            const term = (e.target as HTMLInputElement).value;
-            TagManager.renderFullTagPicker(term);
-          });
+            const term = (e.target as HTMLInputElement).value.toLowerCase();
 
+            // 1. Hide/Show individual tags based on text match (No DOM rebuild!)
+            const tagLabels = document.querySelectorAll(
+              "#fullTagGrid .tag-chip",
+            );
+            tagLabels.forEach((label) => {
+              const text = label.textContent?.toLowerCase() || "";
+              if (term === "" || text.includes(term)) {
+                (label as HTMLElement).style.display = "inline-block";
+              } else {
+                (label as HTMLElement).style.display = "none";
+              }
+            });
+
+            // 2. Hide entire category columns if they don't have any visible tags left
+            const categoryColumns =
+              document.querySelectorAll("#fullTagGrid > div");
+            categoryColumns.forEach((col) => {
+              const visibleTags = Array.from(
+                col.querySelectorAll(".tag-chip"),
+              ).filter((l) => (l as HTMLElement).style.display !== "none");
+              (col as HTMLElement).style.display =
+                visibleTags.length === 0 ? "none" : "";
+            });
+          });
         document
           .getElementById("universalUploadForm")
           ?.addEventListener("submit", (e) => {

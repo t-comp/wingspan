@@ -329,6 +329,7 @@
 
 [data-bs-theme="dark"] .custom-footer .footer-photo-box {
   background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid #34495e !important;
 }
 
 [data-bs-theme="dark"] .custom-footer .footer-bottom-bar {
@@ -461,4 +462,41 @@
   background-color: #34495e !important; /* Slate fill */
   color: #ffffff !important; /* Bright white text */
   border: 1px solid #495057 !important; /* Slate border */
+}
+
+/* Custom 'X' clear button brightness fix */
+[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminTeamSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminUserSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #coverageTagPickerSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #searchSpeciesInput::-webkit-search-cancel-button {
+  filter: brightness(1.5);
+}
+
+/* Force "Create New Species" to always stay Wingspan Green in both modes */
+.dropdown-item[data-value="NEW"] span,
+[data-bs-theme="dark"] .dropdown-item[data-value="NEW"] span {
+  color: #1abc9c !important; 
+}
+
+[data-bs-theme="dark"] #searchInput::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminTeamSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #adminUserSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #coverageTagPickerSearch::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #searchSpeciesInput::-webkit-search-cancel-button,
+[data-bs-theme="dark"] #tagPickerSearch::-webkit-search-cancel-button { 
+  filter: brightness(1.5);
+}
+
+[data-bs-theme="dark"] .tag-chip:hover {
+  background-color: #495057 !important;
+  border-color: #1abc9c !important; 
+  color: white !important;
+}
+
+[data-bs-theme="dark"] .tag-chip-checkbox:checked + .tag-chip {
+  background-color: #1abc9c !important; 
+  color: #ffffff !important;
+  border-color: #1abc9c !important;
+  box-shadow: 0 2px 4px rgba(26, 188, 156, 0.4) !important; /* Green glow instead of teal! */
 }
