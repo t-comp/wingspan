@@ -13,9 +13,7 @@
         <div class="flex-grow-1 d-flex flex-column">
           <div
             class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center position-relative image-hover-container mb-2"
-            style="aspect-ratio: 4/3; overflow: hidden; cursor: pointer"
-            data-bs-toggle="modal"
-            data-bs-target="#butterflyModal"
+            style="aspect-ratio: 4/3; overflow: hidden"
           >
             <img
               id="speciesImage"
@@ -26,10 +24,81 @@
                 height: 100%;
                 object-fit: cover;
                 transition: transform 0.3s ease;
+                cursor: pointer;
               "
+              data-bs-toggle="modal"
+              data-bs-target="#butterflyModal"
             />
             <div
+              class="position-absolute premium-admin-pill-nav d-none"
+              id="adminControlsPill"
+              style="z-index: 100; top: 15px; right: 15px"
+            >
+              <div class="action-tooltip-container">
+                <button
+                  id="setAsThumbnailBtn"
+                  class="btn p-0 border-0 d-flex align-items-center justify-content-center"
+                  style="width: 32px; height: 32px"
+                ></button>
+                <span
+                  class="action-tooltip"
+                  style="
+                    top: 100%;
+                    bottom: auto;
+                    margin-top: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                  "
+                  >Set as Thumbnail</span
+                >
+              </div>
+
+              <div class="action-tooltip-container">
+                <button
+                  id="featureMainImageBtn"
+                  class="btn p-0 border-0 d-flex align-items-center justify-content-center"
+                  style="width: 32px; height: 32px"
+                ></button>
+                <span
+                  class="action-tooltip"
+                  style="
+                    top: 100%;
+                    bottom: auto;
+                    margin-top: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                  "
+                  >Feature Image</span
+                >
+              </div>
+
+              <div class="action-tooltip-container">
+                <button
+                  id="deleteMainImageBtn"
+                  class="btn p-0 border-0 d-flex align-items-center justify-content-center"
+                  style="width: 32px; height: 32px"
+                >
+                  <i class="fas fa-trash-alt fs-5 text-danger"></i>
+                </button>
+                <span
+                  class="action-tooltip"
+                  style="
+                    top: 100%;
+                    bottom: auto;
+                    margin-top: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                  "
+                  >Delete Image</span
+                >
+              </div>
+            </div>
+
+            <div
               class="image-overlay d-flex justify-content-center align-items-center"
+              style="cursor: pointer"
+              data-bs-toggle="modal"
+              data-bs-target="#butterflyModal"
             >
               <span
                 class="text-white fw-bold px-4 py-2 rounded-pill shadow"
@@ -39,6 +108,7 @@
               </span>
             </div>
           </div>
+
           <div id="heroImageTags" class="d-flex flex-wrap gap-2 mb-3"></div>
 
           <div class="d-flex align-items-center mb-3">
@@ -179,20 +249,6 @@
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold mb-0" style="color: #0399b0">Filter Tags</h6>
             <div>
-              <button
-                id="setAsThumbnailBtn"
-                class="btn btn-sm btn-outline-info d-none me-2"
-                title="Set this image as the main gallery thumbnail"
-              >
-                <i class="fas fa-image me-1"></i> Use as Thumbnail
-              </button>
-              <button
-                id="featureMainImageBtn"
-                class="btn btn-sm btn-outline-warning d-none me-2"
-                title="Feature this image for its tags"
-              >
-                <i id="featureMainStarIcon" class="far fa-star"></i> Feature
-              </button>
               <button
                 id="clearFiltersBtn"
                 class="btn btn-sm btn-link text-decoration-none p-0"

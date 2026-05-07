@@ -934,3 +934,33 @@ button[data-bs-target="#coverageTagModal"]:active {
   opacity: 1;
   transform: scale(1.2); /* Slight pop effect */
 }
+
+/* =========================================
+   WINGSPAN PREMIUM ADMIN CONTROLS (PILL NAV)
+   ========================================= */
+
+/* The main, single, transparent grey pill container (Universal) */
+.premium-admin-pill-nav {
+  display: flex;
+  flex-direction: row; /* ✨ Horizontal layout! ✨ */
+  gap: 12px;
+  background-color: rgba(0, 0, 0, 0.5) !important; /* Perfect photo overlay grey */
+  backdrop-filter: blur(4px); 
+  padding: 8px 14px; 
+  border-radius: 30px; 
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Individual icons inside the pill */
+.premium-admin-pill-nav .btn {
+  color: #ffffff !important;
+  font-size: 1.15rem !important; 
+  background: transparent !important; 
+  transition: all 0.2s ease;
+}
+
+.premium-admin-pill-nav .btn:hover {
+  text-shadow: 0 0 10px #ffffff;
+  transform: scale(1.1);
+}

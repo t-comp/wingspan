@@ -21,12 +21,12 @@ export function initSpeciesView() {
   if (deleteSpeciesBtn) {
     deleteSpeciesBtn.addEventListener("click", async (e) => {
       const id = (e.currentTarget as HTMLElement).getAttribute(
-        "data-species-id"
+        "data-species-id",
       );
       if (
         id &&
         confirm(
-          "Are you sure you want to completely delete this species and all of its images?"
+          "Are you sure you want to completely delete this species and all of its images?",
         )
       ) {
         try {
@@ -41,25 +41,33 @@ export function initSpeciesView() {
   }
 }
 
-const backBtn = document.querySelector('[onclick*="speciesView"]') || document.getElementById("backToGalleryBtn");
-  if (backBtn) {
-    backBtn.addEventListener("click", () => {
-      if ((window as any).galleryNeedsRefresh) {
-        (window as any).galleryNeedsRefresh = false;
-        location.reload();
+const backBtn =
+  document.querySelector('[onclick*="speciesView"]') ||
+  document.getElementById("backToGalleryBtn");
+if (backBtn) {
+  backBtn.addEventListener("click", () => {
+    if ((window as any).galleryNeedsRefresh) {
+      (window as any).galleryNeedsRefresh = false;
+
+      if (typeof (window as any).applyAllFilters === "function") {
+        (window as any).applyAllFilters();
       }
-    });
-  }
+    }
+  });
+}
 
 export async function showSpeciesView(b: any) {
+  //Tracker to remember exactly which image you are looking at!
+  let currentActiveImageId: number | null = null;
+
   const portfolio = document.getElementById("portfolio");
   const speciesView = document.getElementById("speciesView");
   const teamView = document.getElementById("teamView");
   const topSearchBarContainer = document.getElementById(
-    "topSearchBarContainer"
+    "topSearchBarContainer",
   );
   const filterPanel = document.getElementById("filterPanel");
-  const galleryControls = document.getElementById("galleryControlsWrapper"); 
+  const galleryControls = document.getElementById("galleryControlsWrapper");
 
   if (galleryControls) {
     galleryControls.classList.add("d-none");
@@ -97,7 +105,7 @@ export async function showSpeciesView(b: any) {
   // Render the attributes for the "View" mode
 
   const customAttrContainer = document.getElementById(
-    "customAttributesDisplay"
+    "customAttributesDisplay",
   );
   if (customAttrContainer) {
     customAttrContainer.innerHTML = ""; // Clear old ones
@@ -121,7 +129,7 @@ export async function showSpeciesView(b: any) {
   const actionSection = document.getElementById("speciesActionButtons");
   const openUploadBtn = document.getElementById("openSpeciesUploadBtn");
   const deleteBtn = document.getElementById(
-    "deleteSpeciesFullBtn"
+    "deleteSpeciesFullBtn",
   ) as HTMLButtonElement;
 
   if (actionSection && isAdmin) {
@@ -132,7 +140,7 @@ export async function showSpeciesView(b: any) {
     if (openUploadBtn) {
       openUploadBtn.onclick = () => {
         const hiddenInput = document.getElementById(
-          "speciesSelectorValue"
+          "speciesSelectorValue",
         ) as HTMLInputElement;
         const btnText = document.getElementById("speciesDropdownText");
 
@@ -194,45 +202,162 @@ export async function showSpeciesView(b: any) {
   }
 
   const setMainImage = (img: any) => {
+    // Update the tracker so the gallery grid knows we are looking at this specific image!
+    currentActiveImageId = img.id;
+
     const url = img.url || noImagePlaceholder;
     const speciesImg = document.getElementById(
-      "speciesImage"
+      "speciesImage",
     ) as HTMLImageElement | null;
     if (speciesImg) speciesImg.src = url;
 
+    // --- ADMIN PILL & ICON CONTROLS ---
+    const adminPill = document.getElementById("adminControlsPill");
     const thumbBtn = document.getElementById("setAsThumbnailBtn");
+    const featureBtn = document.getElementById("featureMainImageBtn");
+    const deleteMainImgBtn = document.getElementById("deleteMainImageBtn");
     const isAdmin = AppState.userRole === "ADMIN";
 
-    if (thumbBtn && isAdmin) {
-      thumbBtn.classList.remove("d-none");
+    if (adminPill) {
+      // Target the parent wrappers so we can completely remove them from the flex layout!
+      const thumbWrapper = thumbBtn?.parentElement;
+      const featureWrapper = featureBtn?.parentElement;
+      const deleteWrapper = deleteMainImgBtn?.parentElement;
 
+      if (isAdmin) {
+        // Show everything for Admins
+        adminPill.classList.remove("d-none");
+        adminPill.style.padding = ""; // Reset to default pill padding
+
+        if (thumbWrapper) thumbWrapper.classList.remove("d-none");
+        if (deleteWrapper) deleteWrapper.classList.remove("d-none");
+
+        if (featureWrapper) {
+          featureWrapper.classList.remove("d-none");
+        }
+        if (featureBtn) {
+          featureBtn.style.pointerEvents = "auto";
+          const featureTooltip = featureBtn.nextElementSibling as HTMLElement;
+          if (featureTooltip) featureTooltip.classList.remove("d-none");
+        }
+      } else {
+        // STUDENT VIEW LOGIC
+        if (img.isFeatured) {
+          // Show the pill, but ONLY with the static white star
+          adminPill.classList.remove("d-none");
+
+          // Make the pill padding perfectly even for a single icon
+          adminPill.style.padding = "8px 10px";
+
+          // Completely hide the other wrappers so they don't take up empty space
+          if (thumbWrapper) thumbWrapper.classList.add("d-none");
+          if (deleteWrapper) deleteWrapper.classList.add("d-none");
+
+          if (featureWrapper) featureWrapper.classList.remove("d-none");
+
+          if (featureBtn) {
+            featureBtn.innerHTML = `<i class="fas fa-star fs-5 text-white"></i>`;
+            featureBtn.style.pointerEvents = "none"; // Makes it unclickable
+
+            // Hide the hover tooltip for students
+            const featureTooltip = featureBtn.nextElementSibling as HTMLElement;
+            if (featureTooltip) featureTooltip.classList.add("d-none");
+          }
+        } else {
+          // Hide completely if not favorited
+          adminPill.classList.add("d-none");
+        }
+      }
+    }
+
+    // Keep your existing 'if (isAdmin && thumbBtn && featureBtn) { ...' block exactly as it is right below this!
+
+    // Keep your existing 'if (isAdmin && thumbBtn && featureBtn) { ...' block right here!
+
+    if (isAdmin && thumbBtn && featureBtn) {
+      const filledCheck = `<i class="fas fa-check-circle fs-5"></i>`;
+      const outlineCheck = `<i class="far fa-check-circle fs-5"></i>`;
+
+      // 1. SYNC THUMBNAIL STATE
       const isCurrentThumb = b.thumbnailUrl === img.mediumUrl;
 
       if (isCurrentThumb) {
-        thumbBtn.className = "btn btn-sm btn-info text-white me-2";
-        thumbBtn.innerHTML = `<i class="fas fa-check-circle me-1"></i> Current Thumbnail`;
-        thumbBtn.onclick = null; 
+        thumbBtn.innerHTML = filledCheck;
+        thumbBtn.onclick = (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        };
       } else {
-        thumbBtn.className = "btn btn-sm btn-outline-info me-2";
-        thumbBtn.innerHTML = `<i class="fas fa-image me-1"></i> Set as Thumbnail`;
-
-        thumbBtn.onclick = async () => {
+        thumbBtn.innerHTML = outlineCheck;
+        thumbBtn.onclick = async (e) => {
+          e.stopPropagation();
+          e.preventDefault();
           try {
             await ButterflyAPI.setThumbnail(b.id, img.id);
-            b.thumbnailUrl = img.mediumUrl; 
-            (window as any).galleryNeedsRefresh = true; 
-            setMainImage(img); // Refresh button UI
-            alert("Success! Gallery thumbnail updated.");
-          } catch (err) {
+            b.thumbnailUrl = img.mediumUrl; // Sync local state
+            (window as any).galleryNeedsRefresh = true;
+
+            setMainImage(img); // Redraw main image checkmark
+
+            // Force the gallery grid below to re-render so the checkmark updates instantly!
+            const activePills = document.querySelectorAll(
+              "#filterTagCloud .filter-pill.active",
+            );
+            const selectedIds = Array.from(activePills).map(
+              (p) => p.getAttribute("data-tag") as string,
+            );
+            renderInnerGrid(selectedIds.length === 0 ? "all" : selectedIds);
+          } catch (err: any) {
             console.error("Thumbnail update failed", err);
-            alert("Failed to update thumbnail.");
+            alert("Thumbnail update failed: " + err.message);
           }
         };
       }
-    } else if (thumbBtn) {
-      thumbBtn.classList.add("d-none");
+
+      // 2. SYNC FEATURE/STAR STATE
+      const isFeatured = img.isFeatured;
+
+      // Filled star if featured, outline star if not
+      featureBtn.innerHTML = isFeatured
+        ? `<i class="fas fa-star fs-5"></i>`
+        : `<i class="far fa-star fs-5"></i>`;
+
+      featureBtn.onclick = async (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        try {
+          if (isFeatured) await ButterflyAPI.unsetFeaturedImage(img.id);
+          else await ButterflyAPI.setFeaturedImage(img.id);
+
+          // Sync local state instantly without a full page refresh
+          img.isFeatured = !isFeatured;
+          setMainImage(img); // Redraw the main image icons!
+
+          // Force the gallery grid below to re-render so the yellow star updates there instantly too!
+          const activePills = document.querySelectorAll(
+            "#filterTagCloud .filter-pill.active",
+          );
+          const selectedIds = Array.from(activePills).map(
+            (p) => p.getAttribute("data-tag") as string,
+          );
+          renderInnerGrid(selectedIds.length === 0 ? "all" : selectedIds);
+        } catch (err: any) {
+          console.error("Feature toggle failed", err);
+          alert("Feature toggle failed: " + err.message);
+        }
+      };
+
+      // 3. DELETE IMAGE LOGIC
+      if (deleteMainImgBtn) {
+        deleteMainImgBtn.onclick = async (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          (window as any).handleDeleteSingleImage(img.id);
+        };
+      }
     }
 
+    // --- HERO TAGS ---
     const heroTagContainer = document.getElementById("heroImageTags");
 
     if (heroTagContainer) {
@@ -256,8 +381,10 @@ export async function showSpeciesView(b: any) {
         });
       }
     }
+
+    // --- IMAGE DETAILS & TEXT FIELDS ---
     const modalImg = document.getElementById(
-      "butterflyModalImage"
+      "butterflyModalImage",
     ) as HTMLImageElement | null;
     if (modalImg) modalImg.src = url;
 
@@ -280,56 +407,16 @@ export async function showSpeciesView(b: any) {
         e.preventDefault();
         openImageDetailsModal(img, async () => {
           const freshSpecies = await ButterflyAPI.getSpeciesById(
-            AppState.currentSpeciesId
+            AppState.currentSpeciesId,
           );
           await showSpeciesView(freshSpecies);
         });
       };
     }
-
-    // --- FEATURED IMAGE LOGIC ---
-    const featureBtn = document.getElementById("featureMainImageBtn");
-    const featureIcon = document.getElementById("featureMainStarIcon");
-
-    if (featureBtn && featureIcon) {
-      if (isAdmin) {
-        featureBtn.classList.remove("d-none");
-        const isFeatured = img.isFeatured;
-
-        // THE FIX: Only use setAttribute here inside the Admin check!
-        featureIcon.setAttribute(
-          "class",
-          isFeatured ? "fas fa-star" : "far fa-star"
-        );
-
-        featureBtn.className = isFeatured
-          ? "btn btn-sm btn-warning me-2"
-          : "btn btn-sm btn-outline-warning me-2";
-
-        featureBtn.onclick = async () => {
-          try {
-            if (isFeatured) await ButterflyAPI.unsetFeaturedImage(img.id);
-            else await ButterflyAPI.setFeaturedImage(img.id);
-
-            // Reload the view to sync the data and remove stars from old images!
-            const freshSpecies = await ButterflyAPI.getSpeciesById(
-              AppState.currentSpeciesId
-            );
-            await showSpeciesView(freshSpecies);
-          } catch (err) {
-            console.error("Feature toggle failed", err);
-            alert("Failed to update featured status.");
-          }
-        };
-      } else {
-        featureBtn.classList.add("d-none");
-      }
-    }
   };
 
   let fetchedImages: any[] = [];
   try {
-    // fetchedImages = await ButterflyAPI.getImagesBySpecies(b.id);
     fetchedImages = await ButterflyAPI.getImagesBySpecies(b.scientificName);
     console.log("1. RAW BACKEND DATA:", fetchedImages);
   } catch (err) {
@@ -369,13 +456,21 @@ export async function showSpeciesView(b: any) {
   const gridContainer = document.getElementById("speciesImages");
 
   const sortImagesByFeatured = (images: any[]) => {
-    return [...images].sort((a, b) => {
-      const primaryFeaturedSort =
-        (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
-      if (primaryFeaturedSort === 0) {
-        return a.id - b.id;
-      }
-      return primaryFeaturedSort;
+    return [...images].sort((imgA, imgB) => {
+      // 1. Absolute Priority: Is it the designated species thumbnail?
+      // (We use imgA and imgB to avoid confusing the code with the 'b' species object)
+      const aIsThumb = imgA.mediumUrl === b.thumbnailUrl;
+      const bIsThumb = imgB.mediumUrl === b.thumbnailUrl;
+
+      if (aIsThumb && !bIsThumb) return -1; // Move imgA to the front
+      if (!aIsThumb && bIsThumb) return 1; // Move imgB to the front
+
+      // 2. Secondary Priority: Is it a favorited (featured) image?
+      if (imgA.isFeatured && !imgB.isFeatured) return -1;
+      if (!imgA.isFeatured && imgB.isFeatured) return 1;
+
+      // 3. Fallback: Sort by ID so the order stays consistent
+      return imgA.id - imgB.id;
     });
   };
 
@@ -418,27 +513,35 @@ export async function showSpeciesView(b: any) {
                   style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
           </div>
           
-          ${
-            imgObj.isFeatured
-              ? `
-            <div class="position-absolute bottom-0 start-0 m-1" style="z-index: 5;">
-              <i class="fas fa-star text-warning" style="filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.8));"></i>
+       ${
+         isAdmin
+           ? `
+              <div class="position-absolute premium-admin-pill-nav" style="z-index: 10; top: 8px; right: 8px; padding: 4px 8px; gap: 8px; display: flex; flex-direction: row; align-items: center;">
+                ${
+                  imgObj.mediumUrl === b.thumbnailUrl
+                    ? `<div class="d-flex align-items-center justify-content-center text-white" style="width: 20px; height: 20px;"><i class="fas fa-check-circle" style="font-size: 0.95rem;"></i></div>`
+                    : ""
+                }
+                ${
+                  imgObj.isFeatured
+                    ? `<div class="d-flex align-items-center justify-content-center text-white" style="width: 20px; height: 20px;"><i class="fas fa-star" style="font-size: 0.95rem;"></i></div>`
+                    : ""
+                }
+              <button class="btn p-0 border-0 d-flex align-items-center justify-content-center delete-single-img-btn" style="width: 20px; height: 20px;" title="Delete this image">
+                  <i class="fas fa-trash-alt text-danger" style="font-size: 0.95rem;"></i>
+                </button>
+              </div>
+          `
+           : imgObj.isFeatured
+             ? `
+            <div class="position-absolute premium-admin-pill-nav" style="z-index: 10; top: 8px; right: 8px; padding: 4px 8px; display: flex; flex-direction: row; align-items: center; pointer-events: none;">
+                <div class="d-flex align-items-center justify-content-center text-white" style="width: 20px; height: 20px;">
+                    <i class="fas fa-star" style="font-size: 0.95rem;"></i>
+                </div>
             </div>
           `
-              : ""
-          }
-          
-          ${
-            isAdmin
-              ? `
-              <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle delete-single-img-btn"
-                      style="width:24px; height:24px; padding:0; font-size:10px; z-index:5; opacity:0; transition: opacity 0.2s;"
-                      title="Delete this image">
-                  <i class="fas fa-times"></i>
-              </button>
-          `
-              : ""
-          }
+             : ""
+       }
       `;
 
       const thumbnail = col.querySelector("img") as HTMLImageElement | null;
@@ -447,37 +550,42 @@ export async function showSpeciesView(b: any) {
           document
             .querySelectorAll(".gallery-thumb-wrapper img")
             .forEach((el) =>
-              (el as HTMLElement).classList.remove("border-primary", "border-3")
+              (el as HTMLElement).classList.remove(
+                "border-primary",
+                "border-3",
+              ),
             );
           (e.currentTarget as HTMLElement).classList.add(
             "border-primary",
-            "border-3"
+            "border-3",
           );
           setMainImage(imgObj);
         };
       }
 
       const deleteBtn = col.querySelector(
-        ".delete-single-img-btn"
+        ".delete-single-img-btn",
       ) as HTMLElement | null;
       if (deleteBtn) {
         deleteBtn.onclick = (e) => {
           e.stopPropagation();
           (window as any).handleDeleteSingleImage(imgObj.id);
         };
-        col.addEventListener("mouseenter", () => {
-          deleteBtn.style.opacity = "0.85";
-        });
-        col.addEventListener("mouseleave", () => {
-          deleteBtn.style.opacity = "0";
-        });
       }
 
       if (gridContainer) gridContainer.appendChild(col);
     });
 
-    //  the featured image becomes the main hero image
-    if (sortedFilteredImages.length > 0) setMainImage(sortedFilteredImages[0]);
+    // When the grid finishes building, figure out what image should be the main image!
+    if (sortedFilteredImages.length > 0) {
+      // Check if we are currently looking at a specific image, and if it still exists in this filter...
+      const activeImg = sortedFilteredImages.find(
+        (i: any) => i.id === currentActiveImageId,
+      );
+
+      // Keep displaying the current image! If it doesn't exist in the filter, fall back to the first one.
+      setMainImage(activeImg ? activeImg : sortedFilteredImages[0]);
+    }
   };
 
   const renderFilterPills = () => {
@@ -488,8 +596,8 @@ export async function showSpeciesView(b: any) {
       new Map(
         allImgs
           .flatMap((img) => img.tags || [])
-          .map((t) => [t.tagId || t.id, t])
-      ).values()
+          .map((t) => [t.tagId || t.id, t]),
+      ).values(),
     );
     let html = `<button class="btn btn-sm btn-primary filter-pill active" data-tag="all">All</button>`;
 
@@ -511,7 +619,7 @@ export async function showSpeciesView(b: any) {
           filterBar.querySelectorAll(".filter-pill").forEach((b) => {
             (b as HTMLElement).classList.replace(
               "btn-primary",
-              "btn-outline-secondary"
+              "btn-outline-secondary",
             );
             (b as HTMLElement).classList.remove("active");
           });
@@ -523,7 +631,7 @@ export async function showSpeciesView(b: any) {
           btn.classList.toggle("btn-outline-secondary");
 
           const allBtn = filterBar.querySelector(
-            '[data-tag="all"]'
+            '[data-tag="all"]',
           ) as HTMLElement;
           if (allBtn) {
             allBtn.classList.replace("btn-primary", "btn-outline-secondary");
@@ -533,12 +641,12 @@ export async function showSpeciesView(b: any) {
 
         const activePills = filterBar.querySelectorAll(".filter-pill.active");
         const selectedIds = Array.from(activePills).map(
-          (p) => p.getAttribute("data-tag") as string
+          (p) => p.getAttribute("data-tag") as string,
         );
 
         if (selectedIds.length === 0) {
           const allBtn = filterBar.querySelector(
-            '[data-tag="all"]'
+            '[data-tag="all"]',
           ) as HTMLElement;
           if (allBtn) {
             allBtn.classList.replace("btn-outline-secondary", "btn-primary");
