@@ -1084,3 +1084,16 @@ button[data-bs-target="#coverageTagModal"]:active {
 .species-filter-box {
   background-color: #f1f8f9; 
 }
+/* Active Tag Filter Pill (Light Mode) */
+.filter-pill.btn-primary,
+.filter-pill.btn-primary.active {
+  background-color: #0399b0 !important; /* Wingspan Teal */
+  border-color: #0399b0 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.filter-pill.btn-primary:hover {
+  background-color: #028094 !important; /* Slightly darker teal on hover */
+  border-color: #028094 !important;
+}

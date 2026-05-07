@@ -422,3 +422,43 @@
   background-color: #0399b0 !important; 
   border-color: #0399b0 !important;
 }
+
+[data-bs-theme="dark"] .modal-image .modal-content {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Make "Add Another Attribute" button visible in dark mode */
+[data-bs-theme="dark"] #addNewSpeciesFieldBtn {
+  color: #ecf0f1 !important; /* Bright off-white text */
+  border-color: #6c757d !important; /* Visible gray border */
+  background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] #addNewSpeciesFieldBtn:hover {
+  background-color: #34495e !important; /* Slate fill on hover */
+  color: #ffffff !important;
+  border-color: #495057 !important;
+}
+
+
+[data-bs-theme="dark"] #imageDetailsModal h6,
+[data-bs-theme="dark"] #imageDetailsModal .text-dark {
+  color: #ffffff !important; 
+}
+
+[data-bs-theme="dark"] #imageDownloadOptions .text-muted {
+  color: #9ca3af !important; /* Muted gray so the white title pops */
+}
+
+[data-bs-theme="dark"] #imageDetailsModal .btn-icon-only:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important; 
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] #modalTags .badge {
+  background-color: #34495e !important; /* Slate fill */
+  color: #ffffff !important; /* Bright white text */
+  border: 1px solid #495057 !important; /* Slate border */
+}
