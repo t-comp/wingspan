@@ -172,6 +172,7 @@ export const TagManager = {
         });
 
       containers.forEach((c) => (c.innerHTML = finalHtml));
+
     } catch (err) {
       console.error(err);
     }
@@ -184,20 +185,6 @@ export const TagManager = {
 
       dbTags.forEach((tag) => {
         let cat = tag.tagCategory;
-
-        // if (!cat || cat === "Uncategorized" || cat.trim() === "") {
-        //   const cleanName = (tag.tagName || "").toLowerCase().trim();
-        //   for (const [categoryName, tagNames] of Object.entries(
-        //     TagManager.tagData
-        //   )) {
-        //     if (
-        //       tagNames.map((n) => n.toLowerCase().trim()).includes(cleanName)
-        //     ) {
-        //       cat = categoryName;
-        //       break;
-        //     }
-        //   }
-        // }
 
         const finalCat = cat || "Uncategorized";
 

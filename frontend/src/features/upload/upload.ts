@@ -568,22 +568,40 @@ export function initUpload(callbacks: UploadCallbacks) {
           '#tagPickerModal input[type="checkbox"]'
         ) as NodeListOf<HTMLInputElement>;
 
-      if (
-        currentSelectedFileIndex >= 0 &&
-        currentSelectedFileIndex < selectedUploadFiles.length
-      ) {
-        if (notesInput)
-          selectedUploadFiles[currentSelectedFileIndex].notes =
-            notesInput.value;
-        selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(
-          tagCheckboxes()
-        )
-          .filter((cb) => cb.checked)
-          .map((cb) => cb.value);
-      }
+        if (currentSelectedFileIndex >= 0 && currentSelectedFileIndex < selectedUploadFiles.length) {
+          if (notesInput) selectedUploadFiles[currentSelectedFileIndex].notes = notesInput.value;
+          
+          selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(tagCheckboxes())
+            .filter((cb) => cb.checked)
+            .map((cb) => cb.value);
+        }
+  
+        // 2. CHECK if any files are selected
+        if (selectedUploadFiles.length === 0) return alert("Please select at least one image file.");
+  
+        // 3. NEW: VALIDATE ALL FILES in the upload queue
+        for (const fileData of selectedUploadFiles) {
+          if (!validateTagsForFile(fileData.tags, fileData.file.name)) {
+            return; // Stop the submit right here if validation fails
+          }
+        }
 
-      if (selectedUploadFiles.length === 0)
-        return alert("Please select at least one image file.");
+      // if (
+      //   currentSelectedFileIndex >= 0 &&
+      //   currentSelectedFileIndex < selectedUploadFiles.length
+      // ) {
+      //   if (notesInput)
+      //     selectedUploadFiles[currentSelectedFileIndex].notes =
+      //       notesInput.value;
+      //   selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(
+      //     tagCheckboxes()
+      //   )
+      //     .filter((cb) => cb.checked)
+      //     .map((cb) => cb.value);
+      // }
+
+      // if (selectedUploadFiles.length === 0)
+      //   return alert("Please select at least one image file.");
 
       // ==========================================
       // NEW: TRANSITION TO LOADING SCREEN
@@ -829,8 +847,43 @@ export function initUpload(callbacks: UploadCallbacks) {
 
     
   }
-  
 
+function validateTagsForFile(tagIds: string[], fileName: string): boolean {
+  const required = ["Sex", "Layout", "Wings View"];
+  const categoryCounts: { [key: string]: number } = {};
+
+  tagIds.forEach(id => {
+      const checkbox = document.querySelector(`input[name="tagIds"][value="${id}"]`);
+      const categoryBlock = checkbox?.closest('.tag-category-block');
+      const categoryName = categoryBlock?.querySelector('h6')?.innerText || "";
+      
+      required.forEach(req => {
+          if (categoryName.includes(req)) {
+              categoryCounts[req] = (categoryCounts[req] || 0) + 1;
+          }
+      });
+  });
+
+  const missing = required.filter(req => !categoryCounts[req]);
+  
+  const multiples = required.filter(req => categoryCounts[req] > 1);
+
+  if (missing.length > 0 || multiples.length > 0) {
+      let errorMsg = `Tagging Error for: ${fileName}\n`;
+      
+      if (missing.length > 0) {
+          errorMsg += `\nMissing Required Category:\n• ${missing.join("\n• ")}`;
+      }
+      
+      if (multiples.length > 0) {
+          errorMsg += `\n\nToo Many Selected for Categories Listed(Pick only 1):\n• ${multiples.join("\n• ")}`;
+      }
+
+      alert(errorMsg);
+      return false;
+  }
+  return true;
+}
   // --- Add Images to Existing Species Form ---
   const addImageToSpeciesForm = document.getElementById(
     "addImageToSpeciesForm"
