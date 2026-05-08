@@ -120,10 +120,18 @@ export const TagManager = {
   },
 
   async initTagContainer() {
+    // const containers = document.querySelectorAll(
+    //   "#tagCheckboxContainer, #tagCheckboxList, .tag-container-sync"
+    // );
+    // if (containers.length === 0) return;
     const containers = document.querySelectorAll(
       "#tagCheckboxContainer, #tagCheckboxList, .tag-container-sync"
     );
-    if (containers.length === 0) return;
+    
+    const fullGrid = document.getElementById("fullTagGrid");
+    
+    // Only bail if NOTHING exists anywhere
+    if (containers.length === 0 && !fullGrid) return;
 
     try {
       const dbTags = await ButterflyAPI.getAllTags();
