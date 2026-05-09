@@ -1139,3 +1139,79 @@ button[data-bs-target="#coverageTagModal"]:active {
   background-color: #fef3c7;
   color: #92400e;
 }
+
+.custom-tag-modal {
+  max-width: 95vw;
+  width: 95vw;
+}
+
+.custom-tag-modal .modal-content {
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-tag-modal .modal-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make the scrollable area on the right flex-friendly */
+#imageDetailsModal .col-md-5 {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Force the tag list to be larger when expanded */
+#tagCheckboxList {
+  min-height: 300px !important; /* Makes the box physically bigger */
+  max-height: 400px !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-content: flex-start;
+}
+
+/* Ensure the category headers in the list stand out */
+.tag-category-block {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* Fix the Done Footer positioning */
+#doneExpandFooter {
+  margin-top: auto; /* Pushes it to the very bottom of the right column */
+  border-top: 1px solid #dee2e6;
+  background: #fff;
+  z-index: 10;
+}
+
+/* Make the category headers bold and clear */
+.tag-category-block {
+  width: 100%;
+  margin-top: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+/* Make the individual tag items larger and easier to click */
+#tagCheckboxList .form-check {
+  width: 20%; /* 5 columns of tags */
+  min-width: 150px;
+  margin-bottom: 8px;
+  padding: 10px;
+  transition: background 0.2s;
+}
+
+#tagCheckboxList .form-check:hover {
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+/* Force the right-side column to allow the tag list to push its height */
+#editTagsContainer.expanded {
+  display: block !important;
+  height: auto;
+}

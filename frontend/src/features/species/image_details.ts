@@ -14,7 +14,7 @@ const WINGSPAN_TEAL = "#0399b0";
 
 export function openImageDetailsModal(
   img: any,
-  reloadSpeciesCallback: () => Promise<void>,
+  reloadSpeciesCallback: () => Promise<void>
 ) {
   console.log("2. MODAL RECEIVED THIS IMAGE:", img);
   const editBtn = document.getElementById("editImageBtn");
@@ -36,6 +36,7 @@ export function openImageDetailsModal(
   }
 
   saveWrapper?.classList.add("d-none");
+  document.getElementById("expandTagsBtn")?.classList.add("d-none");
   notesDisplay.classList.remove("d-none");
   notesInput.classList.add("d-none");
   tagsDisplay.classList.remove("d-none");
@@ -66,6 +67,56 @@ export function openImageDetailsModal(
   }
 
   setupImageEditing(img, reloadSpeciesCallback);
+  const expandTagsBtn = document.getElementById("expandTagsBtn");
+  expandTagsBtn?.addEventListener("click", async () => {
+    const container = document.getElementById("editTagsContainer");
+    const footer = document.getElementById("doneExpandFooter");
+    const checkboxList = document.getElementById("tagCheckboxList");
+    const mainFooter = document.getElementById("mainActionFooter"); // The wrapper for Edit/Save
+    const doneFooter = document.getElementById("doneExpandFooter");
+
+    if (!container || !footer || !checkboxList) return;
+
+    container.classList.remove("d-none");
+    container.classList.add("expanded");
+
+    footer.classList.remove("d-none");
+
+    // 🔥 CRITICAL: ensure tags are loaded BEFORE checking state
+    mainFooter?.classList.add("d-none");
+    doneFooter?.classList.remove("d-none");
+    await TagManager.initTagContainer();
+
+    const currentTagIds = (img.tags || []).map((t: any) =>
+      String(t.tagId ?? t.id)
+    );
+
+    const allCheckboxes = Array.from(
+      checkboxList.querySelectorAll('input[type="checkbox"]')
+    ) as HTMLInputElement[];
+
+    allCheckboxes.forEach((cb) => {
+      cb.checked = currentTagIds.includes(String(cb.value));
+    });
+  });
+  const doneExpandTagsBtn = document.getElementById("doneExpandTagsBtn");
+doneExpandTagsBtn?.addEventListener("click", () => {
+    const container = document.getElementById("editTagsContainer");
+    const mainFooter = document.getElementById("mainActionFooter");
+    const doneFooter = document.getElementById("doneExpandFooter");
+
+    // Collapse the tag area
+    container?.classList.add("d-none");
+    
+    // SWAP FOOTERS BACK: Hide Done, Show Edit/Save
+    doneFooter?.classList.add("d-none");
+    mainFooter?.classList.remove("d-none");
+});
+
+  (window as any)._currentImgTags = (img.tags || []).map((t: any) =>
+    String(t.tagId ?? t.id)
+  );
+
 
   const downloadContainer = document.getElementById("imageDownloadOptions");
   if (downloadContainer) downloadContainer.innerHTML = "";
@@ -73,33 +124,13 @@ export function openImageDetailsModal(
   // Keep track of pixel dimensions we've already shown
   const renderedDimensions = new Set<string>();
 
-  // const setupDownloadRow = async (label: string, urlKey: string) => {
-  //   const targetUrl = img[urlKey];
-
-  //   console.log(
-  //     `3. Building Row [${label}]: Looking for key [${urlKey}]. Found:`,
-  //     targetUrl,
-  //   );
-
-  //   if (!targetUrl && urlKey !== "originalUrl") {
-  //     console.log(`   -> STOPPED: No URL found for ${label}`);
-  //     return;
-  //   }
-
-  //   const finalUrl = targetUrl || img.url || img.originalUrl;
-
-  //   // Change the condition to only check against the originalUrl:
-  //   if (urlKey !== "originalUrl" && finalUrl === img.originalUrl) {
-  //     return;
-  //   }
-
   const setupDownloadRow = async (label: string, urlKey: string) => {
     // Safely convert to a string to catch weird backend data types
     const targetUrl = img[urlKey] ? String(img[urlKey]) : null;
 
     console.log(
       `3. Building Row [${label}]: Looking for key [${urlKey}]. Found:`,
-      targetUrl,
+      targetUrl
     );
 
     // Stops the row from building if the URL is missing, empty, or literally "null"
@@ -149,7 +180,10 @@ export function openImageDetailsModal(
     if (urlKey === "originalUrl" && img.size && img.size !== "Unknown") {
       const byteNum = parseInt(String(img.size).replace(/\D/g, ""));
       if (!isNaN(byteNum)) {
-        sizeText = `<span class="fw-bold text-dark">${(byteNum / (1024 * 1024)).toFixed(2)} MB</span> &nbsp;•&nbsp; `;
+        sizeText = `<span class="fw-bold text-dark">${(
+          byteNum /
+          (1024 * 1024)
+        ).toFixed(2)} MB</span> &nbsp;•&nbsp; `;
       }
     }
 
@@ -203,7 +237,7 @@ export function openImageDetailsModal(
         // 2. Unsecure Context (HTTP IP Address)
         else {
           console.log(
-            "Status: Unsecure HTTP context detected. Using fallback method.",
+            "Status: Unsecure HTTP context detected. Using fallback method."
           );
 
           // Get the modal so we can append the text box inside it!
@@ -233,14 +267,14 @@ export function openImageDetailsModal(
             } else {
               window.prompt(
                 "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
-                clipboardUrl,
+                clipboardUrl
               );
             }
           } catch (err) {
             console.error("Error: ExecCommand threw an exception.", err);
             window.prompt(
               "Auto-copy blocked on this unsecure IP address. Press Cmd/Ctrl+C to copy:",
-              clipboardUrl,
+              clipboardUrl
             );
           } finally {
             // Clean it up from the modal
@@ -284,9 +318,35 @@ export function openImageDetailsModal(
   }
 }
 
+document.addEventListener("click", async (e) => {
+  const target = e.target as HTMLElement;
+
+  if (!target.closest("#expandTagsBtn")) return;
+
+  const container = document.getElementById("editTagsContainer");
+  const footer = document.getElementById("doneExpandFooter");
+
+  if (!container || !footer) return;
+
+  container.classList.remove("d-none");
+  footer.classList.remove("d-none");
+
+  await TagManager.initTagContainer();
+
+  const checkboxList = document.getElementById("tagCheckboxList");
+  if (!checkboxList) return;
+
+  const currentTagIds = (window as any)._currentImgTags || [];
+
+  checkboxList.querySelectorAll("input[type='checkbox']").forEach((cb) => {
+    const input = cb as HTMLInputElement;
+    input.checked = currentTagIds.includes(String(input.value));
+  });
+});
+
 function setupImageEditing(
   img: any,
-  reloadSpeciesCallback: () => Promise<void>,
+  reloadSpeciesCallback: () => Promise<void>
 ) {
   const editBtn = document.getElementById("editImageBtn");
   const saveBtn = document.getElementById("saveImageBtn");
@@ -299,9 +359,10 @@ function setupImageEditing(
   editBtn.onclick = async () => {
     document.getElementById("editBtnWrapper")?.classList.add("d-none");
     document.getElementById("saveBtnWrapper")?.classList.remove("d-none");
+    document.getElementById("expandTagsBtn")?.classList.remove("d-none");
 
     const notesInput = document.getElementById(
-      "editNotesInput",
+      "editNotesInput"
     ) as HTMLTextAreaElement;
     const currentNotes =
       notesDisplay && notesDisplay.innerText === "No notes available."
@@ -321,16 +382,21 @@ function setupImageEditing(
       await TagManager.initTagContainer();
       const checkboxList = document.getElementById("tagCheckboxList");
       if (checkboxList) {
+        // const currentTagIds = (img.tags || []).map((t: any) =>
+        //   String(t.tagId || t.id || t),
+        // );
         const currentTagIds = (img.tags || []).map((t: any) =>
-          String(t.tagId || t.id || t),
+          String(t.tagId ?? t.id)
         );
         const allCheckboxes = Array.from(
-          checkboxList.querySelectorAll('input[type="checkbox"]'),
+          checkboxList.querySelectorAll('input[type="checkbox"]')
         );
 
         allCheckboxes.forEach((node) => {
           const cb = node as HTMLInputElement;
-          if (currentTagIds.includes(cb.value)) cb.checked = true;
+          if (currentTagIds.includes(String(cb.value))) {
+            cb.checked = true;
+          }
         });
       }
     } catch (err) {
@@ -350,15 +416,15 @@ function setupImageEditing(
     const numId = Number(id);
 
     const editInput = document.getElementById(
-      "editNotesInput",
+      "editNotesInput"
     ) as HTMLTextAreaElement | null;
 
     const selectedCheckboxes = document.querySelectorAll(
-      '#tagCheckboxList input[type="checkbox"]:checked',
+      '#tagCheckboxList input[type="checkbox"]:checked'
     );
 
     const newTagIds = Array.from(selectedCheckboxes).map((cb) =>
-      Number((cb as HTMLInputElement).value),
+      Number((cb as HTMLInputElement).value)
     );
 
     const oldTagIds = (img.tags || []).map((t: any) => Number(t.id || t.tagId));
@@ -366,7 +432,7 @@ function setupImageEditing(
     const toRemove = oldTagIds.filter((tagId) => !newTagIds.includes(tagId));
 
     const modalNotesElem = document.getElementById(
-      "modalNotes",
+      "modalNotes"
     ) as HTMLElement | null;
     const updatedNotes = editInput?.value ?? (modalNotesElem?.innerText || "");
 
@@ -402,10 +468,15 @@ function setupImageEditing(
     if (editTagsContainer) editTagsContainer.classList.add("d-none");
 
     img.nathansNotes = updatedNotes;
+
     img.tags = Array.from(selectedCheckboxes).map((cb) => ({
-      id: (cb as HTMLInputElement).value,
+      tagId: Number((cb as HTMLInputElement).value),
       tagName: cb.nextElementSibling?.textContent || "Tag",
     }));
+    // img.tags = Array.from(selectedCheckboxes).map((cb) => ({
+    //   id: (cb as HTMLInputElement).value,
+    //   tagName: cb.nextElementSibling?.textContent || "Tag",
+    // }));
 
     // ==============================================================
     // BACKGROUND API CALLS
@@ -432,12 +503,15 @@ function setupImageEditing(
       // Send the params object to our newly updated API function
       await ButterflyAPI.updateImageDetails(id, params);
       console.log("Main image details (Notes & Tags) updated successfully!");
+      document.getElementById("expandTagsBtn")?.classList.add("d-none");
+document.getElementById("doneExpandFooter")?.classList.add("d-none"); // Hide Done Footer
+document.getElementById("mainActionFooter")?.classList.remove("d-none"); // Ensure Main Footer is back
 
       // Fire individual tag endpoints as a safety fallback
       const tagPromises = [
         ...toAdd.map((tagId) => ButterflyAPI.addTagToImage(tagId, numId)),
         ...toRemove.map((tagId) =>
-          ButterflyAPI.removeTagFromImage(tagId, numId),
+          ButterflyAPI.removeTagFromImage(tagId, numId)
         ),
       ];
 
@@ -448,6 +522,14 @@ function setupImageEditing(
 
       await reloadSpeciesCallback();
       console.log("=== SAVE PROCESS COMPLETE ===");
+      document.getElementById("expandTagsBtn")?.classList.add("d-none");
+      document.getElementById("doneExpandTagsBtn")?.classList.add("d-none");
+
+      const editTagsContainer = document.getElementById("editTagsContainer");
+      if (editTagsContainer) {
+        editTagsContainer.classList.add("d-none");
+        editTagsContainer.classList.remove("expanded");
+      }
     } catch (err: any) {
       console.error("!!! BACKGROUND SAVE ERROR !!!", err);
     }
