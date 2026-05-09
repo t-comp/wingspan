@@ -468,12 +468,7 @@
   color: white !important;
 }
 
-[data-bs-theme="dark"] .tag-chip-checkbox:checked + .tag-chip {
-  background-color: #1abc9c !important; 
-  color: #ffffff !important;
-  border-color: #1abc9c !important;
-  box-shadow: 0 2px 4px rgba(26, 188, 156, 0.4) !important; /* Green glow instead of teal! */
-}
+
 
 /* =========================================
    ADMIN TEAMS DASHBOARD (DARK MODE)
@@ -678,11 +673,6 @@
   border-color: #4b5563 !important;
 }
 
-/* When a tag is selected, keep your primary color but ensure white text */
-[data-bs-theme="dark"] .tag-chip-checkbox:checked + .tag-chip {
-  background-color: #0399b0 !important; 
-  color: #ffffff !important;
-}
 
 /* Seamless Coverage Table styling */
 [data-bs-theme="dark"] #coverageResultsSection .table,
@@ -713,13 +703,7 @@
   color: #ffffff !important;
 }
 
-/* 3. Styling for "Checked" tags (Active selections in the modal) */
-[data-bs-theme="dark"] .tag-chip-checkbox:checked + .tag-chip {
-  background-color: #0399b0 !important; /* Solid Wingspan Teal */
-  border-color: #0399b0 !important;
-  color: #ffffff !important;
-  box-shadow: 0 0 12px rgba(3, 153, 176, 0.4) !important; /* Premium glow effect */
-}
+
 
 /* 4. Fix for the 'X' remove icon on dashboard tags */
 [data-bs-theme="dark"] .coverage-tag-remove {
@@ -764,4 +748,46 @@
   background-color: #1f2937 !important;
   color: #0399b0 !important; /* Wingspan Teal for headers */
   border-color: #374151 !important;
+}
+
+
+
+/* =========================================
+   UNIVERSAL TAG DISPLAY (DARK MODE)
+   ========================================= */
+[data-bs-theme="dark"] #selectedTagsSummary .badge,
+[data-bs-theme="dark"] #detailsSelectedTagsSummary .badge,
+[data-bs-theme="dark"] #coverageSelectedTagsDisplay .badge,
+[data-bs-theme="dark"] #modalTags .badge {
+  background-color: #0399b0 !important; 
+  color: #ffffff !important;           
+  border-color: #0399b0 !important;
+  box-shadow: 0 0 8px rgba(3, 153, 176, 0.4) !important; /* Premium dark mode glow */
+}
+
+/* Ensure the empty state text is visible */
+[data-bs-theme="dark"] #selectedTagsSummary .text-muted,
+[data-bs-theme="dark"] #detailsSelectedTagsSummary .text-muted,
+[data-bs-theme="dark"] #coverageSelectedTagsDisplay .text-muted {
+  color: #adb5bd !important;
+}
+
+/* Keep the 'X' button visible in the coverage panel */
+[data-bs-theme="dark"] .coverage-tag-remove {
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+[data-bs-theme="dark"] .coverage-tag-remove:hover {
+  color: #ff6b6b !important;
+  opacity: 1;
+}
+
+/* Unify Grid Tag Checkboxes - Enforce one clear style with ID specificity! */
+[data-bs-theme="dark"] .tag-chip-checkbox:checked + .tag-chip,
+[data-bs-theme="dark"] #fullTagGrid .tag-chip-checkbox:checked + .tag-chip,
+[data-bs-theme="dark"] #coverageFullTagGrid .tag-chip-checkbox:checked + .tag-chip {
+  background-color: #0399b0 !important; /* Solid Wingspan Teal */
+  color: #ffffff !important;
+  border-color: #0399b0 !important;
+  box-shadow: 0 0 12px rgba(3, 153, 176, 0.5) !important; /* Stronger glow to stand out */
 }

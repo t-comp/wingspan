@@ -49,11 +49,23 @@
               <div id="editTagsContainer" class="d-none">
                 <hr class="my-3" />
                 <h6 class="small fw-bold text-muted mb-2">Manage Tags:</h6>
+
                 <div
-                  id="tagCheckboxList"
-                  class="d-flex flex-wrap border p-2 rounded bg-white shadow-sm"
-                  style="max-height: 200px; overflow-y: auto"
-                ></div>
+                  id="detailsSelectedTagsSummary"
+                  class="d-flex flex-wrap gap-1 mb-2 p-2 bg-white border rounded shadow-sm"
+                  style="min-height: 42px"
+                >
+                  <span class="text-muted small italic">No tags selected</span>
+                </div>
+
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary w-100 fw-bold shadow-sm py-2"
+                  id="openDetailsTagPickerBtn"
+                >
+                  <i class="fas fa-external-link-alt me-1"></i> Manage Tags
+                  (Full View)
+                </button>
               </div>
             </div>
 

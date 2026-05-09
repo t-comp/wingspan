@@ -16,34 +16,29 @@
       </div>
 
       <div class="col-md-5 d-flex flex-column">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <label class="form-label text-muted small fw-bold mb-0"
-            >Additional Tags to Check</label
-          >
-
-          <div class="action-tooltip-container">
-            <button
-              type="button"
-              class="btn btn-upload rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
-              data-bs-toggle="modal"
-              data-bs-target="#coverageTagModal"
-              style="width: 38px; height: 38px"
-            >
-              <i class="fas fa-tags text-white"></i>
-            </button>
-            <span class="action-tooltip" style="bottom: -30px">Add Tags</span>
-          </div>
-        </div>
+        <label class="form-label text-muted small fw-bold mb-2"
+          >Additional Tags to Check</label
+        >
 
         <div
           id="coverageSelectedTagsDisplay"
-          class="d-flex flex-wrap align-content-start gap-2 p-3 bg-white border rounded shadow-sm flex-grow-1 overflow-auto"
+          class="d-flex flex-wrap align-content-start gap-2 p-3 bg-white border rounded shadow-sm flex-grow-1 overflow-auto mb-2"
           style="min-height: 150px"
         >
           <span class="text-muted small italic"
             >No additional tags selected</span
           >
         </div>
+
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-primary w-100 fw-bold shadow-sm py-2 mt-auto"
+          data-bs-toggle="modal"
+          data-bs-target="#coverageTagModal"
+          id="openCoverageTagPickerBtn"
+        >
+          <i class="fas fa-external-link-alt me-1"></i> Manage Tags (Full View)
+        </button>
       </div>
     </div>
 

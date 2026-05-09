@@ -166,9 +166,37 @@ export function initCoverageDashboard() {
   const searchInput = document.getElementById(
     "coverageTagPickerSearch",
   ) as HTMLInputElement;
+
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
-      renderCoverageTagGrid((e.target as HTMLInputElement).value);
+      const term = (e.target as HTMLInputElement).value.toLowerCase();
+
+      // 1. Hide/Show individual tags based on text match (No DOM rebuild!)
+      const tagItems = document.querySelectorAll(
+        "#coverageFullTagGrid .tag-chip-item",
+      );
+      tagItems.forEach((item) => {
+        const text =
+          item.querySelector(".tag-chip")?.textContent?.toLowerCase() || "";
+        if (term === "" || text.includes(term)) {
+          (item as HTMLElement).style.display = "inline-block";
+        } else {
+          (item as HTMLElement).style.display = "none";
+        }
+      });
+
+      // 2. Hide entire category columns if they don't have any visible tags left
+      const categoryColumns = document.querySelectorAll(
+        "#coverageFullTagGrid > div.col",
+      );
+      categoryColumns.forEach((col) => {
+        const visibleTags = Array.from(
+          col.querySelectorAll(".tag-chip-item"),
+        ).filter((l) => (l as HTMLElement).style.display !== "none");
+
+        (col as HTMLElement).style.display =
+          visibleTags.length === 0 ? "none" : "";
+      });
     });
   }
 

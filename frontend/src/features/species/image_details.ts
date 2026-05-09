@@ -73,26 +73,6 @@ export function openImageDetailsModal(
   // Keep track of pixel dimensions we've already shown
   const renderedDimensions = new Set<string>();
 
-  // const setupDownloadRow = async (label: string, urlKey: string) => {
-  //   const targetUrl = img[urlKey];
-
-  //   console.log(
-  //     `3. Building Row [${label}]: Looking for key [${urlKey}]. Found:`,
-  //     targetUrl,
-  //   );
-
-  //   if (!targetUrl && urlKey !== "originalUrl") {
-  //     console.log(`   -> STOPPED: No URL found for ${label}`);
-  //     return;
-  //   }
-
-  //   const finalUrl = targetUrl || img.url || img.originalUrl;
-
-  //   // Change the condition to only check against the originalUrl:
-  //   if (urlKey !== "originalUrl" && finalUrl === img.originalUrl) {
-  //     return;
-  //   }
-
   const setupDownloadRow = async (label: string, urlKey: string) => {
     // Safely convert to a string to catch weird backend data types
     const targetUrl = img[urlKey] ? String(img[urlKey]) : null;
@@ -296,6 +276,56 @@ function setupImageEditing(
 
   if (!editBtn || !saveBtn) return;
 
+  // --- NEW: Helper to update the summary box ---
+  const updateDetailsSummary = () => {
+    const summaryArea = document.getElementById("detailsSelectedTagsSummary");
+    const checkedBoxes = document.querySelectorAll(
+      '#fullTagGrid input[type="checkbox"]:checked',
+    ) as NodeListOf<HTMLInputElement>;
+
+    if (summaryArea) {
+      if (checkedBoxes.length === 0) {
+        summaryArea.innerHTML =
+          '<span class="text-muted small italic">No tags selected</span>';
+      } else {
+        const badges = Array.from(checkedBoxes).map((cb) => {
+          const label =
+            document
+              .querySelector(`label[for="${cb.id}"]`)
+              ?.textContent?.trim() || "Tag";
+
+          return `<span class="badge bg-primary rounded-pill px-2 py-1" style="font-size: 10px;">${label}</span>`;
+        });
+        summaryArea.innerHTML = badges.join(" ");
+      }
+    }
+  };
+
+  // --- NEW: Open Full Tag Picker Modal ---
+  // Clone and replace to prevent duplicate listeners if reopened
+  const openPickerBtn = document.getElementById("openDetailsTagPickerBtn");
+  const newOpenPickerBtn = openPickerBtn?.cloneNode(true);
+  if (openPickerBtn && openPickerBtn.parentNode) {
+    openPickerBtn.parentNode.replaceChild(newOpenPickerBtn!, openPickerBtn);
+  }
+
+  document
+    .getElementById("openDetailsTagPickerBtn")
+    ?.addEventListener("click", () => {
+      const pickerEl = document.getElementById("tagPickerModal");
+      if (pickerEl) {
+        pickerEl.style.zIndex = "1070"; // Ensures it sits above the details modal
+        let modalInstance = bootstrap.Modal.getInstance(pickerEl);
+        if (!modalInstance) modalInstance = new bootstrap.Modal(pickerEl);
+        modalInstance.show();
+      }
+    });
+
+  // Keep the summary updated live
+  document
+    .getElementById("fullTagGrid")
+    ?.addEventListener("change", updateDetailsSummary);
+
   editBtn.onclick = async () => {
     document.getElementById("editBtnWrapper")?.classList.add("d-none");
     document.getElementById("saveBtnWrapper")?.classList.remove("d-none");
@@ -319,27 +349,33 @@ function setupImageEditing(
 
     try {
       await TagManager.initTagContainer();
-      const checkboxList = document.getElementById("tagCheckboxList");
-      if (checkboxList) {
-        const currentTagIds = (img.tags || []).map((t: any) =>
-          String(t.tagId || t.id || t),
-        );
-        const allCheckboxes = Array.from(
-          checkboxList.querySelectorAll('input[type="checkbox"]'),
-        );
 
-        allCheckboxes.forEach((node) => {
-          const cb = node as HTMLInputElement;
-          if (currentTagIds.includes(cb.value)) cb.checked = true;
-        });
+      // Ensure the full grid is rendered
+      if ((TagManager as any).renderFullTagPicker) {
+        await (TagManager as any).renderFullTagPicker();
       }
+
+      const currentTagIds = (img.tags || []).map((t: any) =>
+        String(t.tagId || t.id || t),
+      );
+
+      // Select the active image's tags in the main #fullTagGrid
+      const allCheckboxes = Array.from(
+        document.querySelectorAll('#fullTagGrid input[type="checkbox"]'),
+      );
+
+      allCheckboxes.forEach((node) => {
+        const cb = node as HTMLInputElement;
+        cb.checked = currentTagIds.includes(cb.value);
+      });
+
+      updateDetailsSummary();
     } catch (err) {
       console.error("Edit Tag UI Error:", err);
     }
   };
 
   saveBtn.onclick = async () => {
-    // --- ARIA FIX: Remove focus from whatever button was clicked! ---
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
@@ -348,13 +384,13 @@ function setupImageEditing(
     if (!id) return alert("Error: Could not find the ID for this image.");
 
     const numId = Number(id);
-
     const editInput = document.getElementById(
       "editNotesInput",
     ) as HTMLTextAreaElement | null;
 
+    // Grab selected check-boxes from the full picker!
     const selectedCheckboxes = document.querySelectorAll(
-      '#tagCheckboxList input[type="checkbox"]:checked',
+      '#fullTagGrid input[type="checkbox"]:checked',
     );
 
     const newTagIds = Array.from(selectedCheckboxes).map((cb) =>
@@ -386,7 +422,12 @@ function setupImageEditing(
       tagsDisplay.innerHTML = "";
       if (selectedCheckboxes.length > 0) {
         selectedCheckboxes.forEach((cb) => {
-          const labelText = cb.nextElementSibling?.textContent || "Tag";
+          // Grab label text safely from the grid layout
+          const labelText =
+            document
+              .querySelector(`label[for="${cb.id}"]`)
+              ?.textContent?.trim() || "Tag";
+
           const span = document.createElement("span");
           span.className =
             "badge rounded-pill border border-info text-dark me-1 px-2 py-1";
@@ -404,36 +445,30 @@ function setupImageEditing(
     img.nathansNotes = updatedNotes;
     img.tags = Array.from(selectedCheckboxes).map((cb) => ({
       id: (cb as HTMLInputElement).value,
-      tagName: cb.nextElementSibling?.textContent || "Tag",
+      tagName:
+        document.querySelector(`label[for="${cb.id}"]`)?.textContent?.trim() ||
+        "Tag",
     }));
 
     // ==============================================================
     // BACKGROUND API CALLS
     // ==============================================================
     console.log("=== STARTING IMAGE SAVE PROCESS ===");
-
-    // We use URLSearchParams to perfectly match Spring Boot's @RequestParam
     const params = new URLSearchParams();
 
-    // Add our notes and lifecycle stage. These names match the backend exactly!
     params.append("nathansNotes", updatedNotes);
     params.append("life_cycle", "Adult");
 
-    // Loop through the selected tags and append them using the plural "tagIds"
     if (newTagIds.length > 0) {
       newTagIds.forEach((tagId) => {
         params.append("tagIds", tagId.toString());
       });
     }
 
-    console.log("Sending URL-Encoded Params to updateImageDetails...");
-
     try {
-      // Send the params object to our newly updated API function
       await ButterflyAPI.updateImageDetails(id, params);
       console.log("Main image details (Notes & Tags) updated successfully!");
 
-      // Fire individual tag endpoints as a safety fallback
       const tagPromises = [
         ...toAdd.map((tagId) => ButterflyAPI.addTagToImage(tagId, numId)),
         ...toRemove.map((tagId) =>

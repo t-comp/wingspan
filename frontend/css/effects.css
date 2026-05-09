@@ -1139,3 +1139,35 @@ button[data-bs-target="#coverageTagModal"]:active {
   background-color: #fef3c7;
   color: #92400e;
 }
+
+/* =========================================
+   UNIVERSAL TAG DISPLAY UNIFICATION
+   (Upload, Details, Coverage)
+   ========================================= */
+#selectedTagsSummary .badge,
+#detailsSelectedTagsSummary .badge,
+#coverageSelectedTagsDisplay .badge,
+#modalTags .badge {
+  background-color: #0399b0 !important; /* Solid Wingspan Teal */
+  color: #ffffff !important;           /* Bright White Text */
+  border: 1px solid #027a8d !important; /* Slightly darker teal border */
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  padding: 6px 12px !important;
+  border-radius: 50rem !important;     /* Perfect pill shape */
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Fix the remove 'x' icon specifically for Coverage tags */
+#coverageSelectedTagsDisplay .coverage-tag-remove {
+  color: #ffffff !important;
+  opacity: 0.8;
+  margin-left: 6px;
+}
+
+#coverageSelectedTagsDisplay .coverage-tag-remove:hover {
+  color: #ffcfcf !important; /* Soft red hover */
+  opacity: 1;
+  transform: scale(1.1);
+}
