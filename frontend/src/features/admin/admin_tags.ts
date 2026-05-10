@@ -9,6 +9,29 @@
 import { ButterflyAPI } from "../../core/api";
 
 export const TagManager = {
+  exclusiveCategories: new Set<string>(),
+
+  // 1. The Local Storage Loader
+  async loadExclusiveRules() {
+    const saved = localStorage.getItem("wingspan_exclusive_categories");
+    if (saved) {
+      try {
+        this.exclusiveCategories = new Set(JSON.parse(saved));
+        return;
+      } catch (e) {
+        console.error("Could not parse saved categories", e);
+      }
+    }
+    // Default fallback if nothing is saved in this browser yet
+    this.exclusiveCategories = new Set([
+      "Wings View",
+      "Layout",
+      "Sex",
+      "Life Stage",
+      "View / Anatomy",
+    ]);
+  },
+
   tagData: {
     "Life Stage": [
       "Egg",
@@ -121,7 +144,7 @@ export const TagManager = {
 
   async initTagContainer() {
     const containers = document.querySelectorAll(
-      "#tagCheckboxContainer, #tagCheckboxList, .tag-container-sync"
+      "#tagCheckboxContainer, #tagCheckboxList, .tag-container-sync",
     );
     if (containers.length === 0) return;
 
@@ -158,7 +181,7 @@ export const TagManager = {
                     <input class="form-check-input" type="checkbox" name="tagIds" value="${t.tagId}">
                     <label class="form-check-label small text-dark">${t.tagName}</label>
                 </div>
-            `
+            `,
             )
             .join("");
 
@@ -172,7 +195,6 @@ export const TagManager = {
         });
 
       containers.forEach((c) => (c.innerHTML = finalHtml));
-
     } catch (err) {
       console.error(err);
     }
@@ -202,17 +224,17 @@ export const TagManager = {
             <button class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" 
                     onclick="TagManager.renderTagEditor('${cat.replace(
                       /'/g,
-                      "\\'"
+                      "\\'",
                     )}', ${JSON.stringify(grouped[cat]).replace(
-            /"/g,
-            "&quot;"
-          )})">
+                      /"/g,
+                      "&quot;",
+                    )})">
                 <span class="fw-bold">${cat}</span>
                 <span class="badge bg-primary rounded-pill">${
                   grouped[cat].length
                 }</span>
             </button>
-        `
+        `,
         )
         .join("");
     } catch (err) {
@@ -228,37 +250,66 @@ export const TagManager = {
 
     emptyState?.classList.add("d-none");
     editor?.classList.remove("d-none");
-    if (title) title.innerText = categoryName;
+
+    if (title) {
+      // Inject the title and the Mutual Exclusion toggle switch
+      title.innerHTML = `
+        <div class="d-flex align-items-center justify-content-between w-100">
+          <span>${categoryName}</span>
+          <div class="form-check form-switch bg-white border rounded px-3 py-1 shadow-sm d-flex align-items-center mb-0" style="gap: 10px;">
+            <input class="form-check-input ms-0 mt-0" type="checkbox" id="categoryExclusiveToggle" 
+                   ${this.exclusiveCategories.has(categoryName) ? "checked" : ""} 
+                   style="cursor: pointer; width: 2.5em; height: 1.25em;">
+            <label class="form-check-label small text-muted fw-bold mb-0" for="categoryExclusiveToggle" style="cursor: pointer;">
+              Mutually Exclusive
+            </label>
+          </div>
+        </div>
+      `;
+
+      const toggle = document.getElementById(
+        "categoryExclusiveToggle",
+      ) as HTMLInputElement;
+      if (toggle) {
+        toggle.onchange = () => {
+          if (toggle.checked) {
+            this.exclusiveCategories.add(categoryName);
+          } else {
+            this.exclusiveCategories.delete(categoryName);
+          }
+
+          // 2. Save directly to the browser's memory!
+          localStorage.setItem(
+            "wingspan_exclusive_categories",
+            JSON.stringify(Array.from(this.exclusiveCategories)),
+          );
+        };
+      }
+    }
 
     if (grid) {
-      // MATCHING TagDTO: tagId
       const uniqueTags = Array.from(
-        new Map(tags.map((t) => [t.tagId, t])).values()
+        new Map(tags.map((t) => [t.tagId, t])).values(),
       );
 
       grid.innerHTML = uniqueTags
         .map(
           (tag) => `
                 <div class="btn-group shadow-sm m-1">
-                    <span class="btn btn-sm btn-white border border-end-0 fw-medium">${
-                      tag.tagName
-                    }</span>
+                    <span class="btn btn-sm btn-white border border-end-0 fw-medium">${tag.tagName}</span>
                     <button class="btn btn-sm btn-white border border-start-0 text-danger" 
-        onclick="TagManager.deleteTag(${tag.tagId}, '${categoryName.replace(
-            /'/g,
-            "\\'"
-          )}')">
+        onclick="TagManager.deleteTag(${tag.tagId}, '${categoryName.replace(/'/g, "\\'")}')">
     <i class="fas fa-times"></i>
     </button>
                 </div>
-            `
+            `,
         )
         .join("");
     }
 
     const addBtn = document.getElementById("adminAddTagSubmit");
     const input = document.getElementById(
-      "adminNewTagName"
+      "adminNewTagName",
     ) as HTMLInputElement;
 
     if (addBtn) {
@@ -272,21 +323,19 @@ export const TagManager = {
           });
           input.value = "";
 
-          // THE SYNC CALL
           await TagManager.globalRefresh();
 
-          // Re-filter for the current view
           const allTags = await ButterflyAPI.getAllTags();
           const updatedTags = allTags.filter(
             (t) =>
               (t.tagCategory || "").toLowerCase() ===
                 categoryName.toLowerCase() ||
-              (t.tagName || "").toLowerCase() === nameValue.toLowerCase()
+              (t.tagName || "").toLowerCase() === nameValue.toLowerCase(),
           );
           TagManager.renderTagEditor(categoryName, updatedTags);
         } catch (err: any) {
           alert(
-            "Action completed. If tag doesn't appear, check if it's a duplicate."
+            "Action completed. If tag doesn't appear, check if it's a duplicate.",
           );
         }
       };
@@ -305,7 +354,7 @@ export const TagManager = {
         const updatedTags = allTags.filter(
           (t) =>
             (t.tagCategory || "").toLowerCase() ===
-            currentCategory.toLowerCase()
+            currentCategory.toLowerCase(),
         );
 
         if (updatedTags.length > 0) {
@@ -325,31 +374,40 @@ export const TagManager = {
     }
   },
 
-async renderFullTagPicker(searchTerm: string = "") {
-  const grid = document.getElementById("fullTagGrid");
-  if (!grid) return;
+  async renderFullTagPicker(searchTerm: string = "") {
+    const grid = document.getElementById("fullTagGrid");
+    if (!grid) return;
 
-  const dbTags = await ButterflyAPI.getAllTags();
-  const search = searchTerm.toLowerCase();
-  const grouped: { [key: string]: any[] } = {};
+    const dbTags = await ButterflyAPI.getAllTags();
+    const search = searchTerm.toLowerCase();
+    const grouped: { [key: string]: any[] } = {};
 
-  dbTags.forEach(t => {
-    const cat = t.tagCategory || "Uncategorized";
-    if (t.tagName.toLowerCase().includes(search) || cat.toLowerCase().includes(search)) {
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(t);
-    }
-  });
+    dbTags.forEach((t) => {
+      const cat = t.tagCategory || "Uncategorized";
+      if (
+        t.tagName.toLowerCase().includes(search) ||
+        cat.toLowerCase().includes(search)
+      ) {
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(t);
+      }
+    });
 
-  grid.innerHTML = Object.keys(grouped).sort().map(catName => `
-    <div class="col">
+    grid.innerHTML = Object.keys(grouped)
+      .sort()
+      .map(
+        (catName) => `
+    <div class="col category-card-wrapper" data-category="${catName.replace(/"/g, "&quot;")}">
       <div class="card h-100 border-0 shadow-sm">
         <div class="card-body p-3">
-          <h6 class="fw-bold text-primary border-bottom pb-2 mb-3" style="font-size: 0.8rem;">
-            ${catName}
+          <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
+            <span>${catName}</span>
+            ${this.exclusiveCategories.has(catName) ? '<span class="badge bg-light border text-secondary fw-normal px-2" style="font-size: 0.65rem;">Pick 1</span>' : ""}
           </h6>
           <div class="d-flex flex-wrap gap-2">
-            ${grouped[catName].map(t => `
+            ${grouped[catName]
+              .map(
+                (t) => `
               <div class="tag-chip-item">
                 <input type="checkbox" class="tag-chip-checkbox d-none" 
                        id="picker-tag-${t.tagId}" value="${t.tagId}">
@@ -357,13 +415,45 @@ async renderFullTagPicker(searchTerm: string = "") {
                   ${t.tagName}
                 </label>
               </div>
-            `).join("")}
+            `,
+              )
+              .join("")}
           </div>
         </div>
       </div>
     </div>
-  `).join("");
-},
+  `,
+      )
+      .join("");
+
+    // --- MUTUAL EXCLUSION LOGIC ---
+    // Listen to all the checkboxes we just created
+    const checkboxes = grid.querySelectorAll(".tag-chip-checkbox");
+    checkboxes.forEach((cb) => {
+      cb.addEventListener("change", (e) => {
+        const target = e.target as HTMLInputElement;
+
+        // Only run logic if the user is checking a box (not unchecking)
+        if (target.checked) {
+          const card = target.closest(".category-card-wrapper") as HTMLElement;
+          const categoryName = card?.getAttribute("data-category");
+
+          // If this category is on the exclusive list...
+          if (categoryName && this.exclusiveCategories.has(categoryName)) {
+            // Find all other checkboxes in this specific category card
+            const siblingCheckboxes =
+              card.querySelectorAll(".tag-chip-checkbox");
+            siblingCheckboxes.forEach((sibling) => {
+              if (sibling !== target) {
+                // Uncheck them
+                (sibling as HTMLInputElement).checked = false;
+              }
+            });
+          }
+        }
+      });
+    });
+  },
 
   async globalRefresh() {
     console.log("Syncing all tag components...");

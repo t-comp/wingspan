@@ -12,7 +12,6 @@ import { AppState } from "./core/state.js";
 import { initSettings } from "./core/settings.js";
 import { AttributeManager } from "./features/admin/admin_attributes.js";
 import { initDocs } from "./features/student/docs.js";
-// imported features
 import { TagManager } from "./features/admin/admin_tags.js";
 import { loadStudentData } from "./features/student/student_dashboard.js";
 import { initAdminApiKeys } from "./features/admin/admin_api_keys.js";
@@ -48,6 +47,7 @@ export async function initHome(userRole, userEmail) {
   AppState.userRole = userRole;
   AppState.userEmail = userEmail;
   AppState.butterflies = await ButterflyAPI.getAll();
+  await TagManager.loadExclusiveRules();
 
   let studentApiKey = "";
   if (userRole !== "ADMIN") {

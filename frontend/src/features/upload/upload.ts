@@ -631,23 +631,6 @@ export function initUpload(callbacks: UploadCallbacks) {
         }
       }
 
-      // if (
-      //   currentSelectedFileIndex >= 0 &&
-      //   currentSelectedFileIndex < selectedUploadFiles.length
-      // ) {
-      //   if (notesInput)
-      //     selectedUploadFiles[currentSelectedFileIndex].notes =
-      //       notesInput.value;
-      //   selectedUploadFiles[currentSelectedFileIndex].tags = Array.from(
-      //     tagCheckboxes()
-      //   )
-      //     .filter((cb) => cb.checked)
-      //     .map((cb) => cb.value);
-      // }
-
-      // if (selectedUploadFiles.length === 0)
-      //   return alert("Please select at least one image file.");
-
       // ==========================================
       // NEW: TRANSITION TO LOADING SCREEN
       // ==========================================
@@ -892,44 +875,39 @@ export function initUpload(callbacks: UploadCallbacks) {
   }
 
   function validateTagsForFile(tagIds: string[], fileName: string): boolean {
-    const required = ["Sex", "Layout", "Wings View"];
+    // 1. Get the dynamic rules directly from TagManager instead of hardcoding
+    const exclusiveCategories = TagManager.exclusiveCategories;
     const categoryCounts: { [key: string]: number } = {};
 
     tagIds.forEach((id) => {
-      const checkbox = document.querySelector(
-        `input[name="tagIds"][value="${id}"]`,
-      );
-      const categoryBlock = checkbox?.closest(".tag-category-block");
-      const categoryName = categoryBlock?.querySelector("h6")?.innerText || "";
+      // 2. Find the checkbox in the Tag Picker modal by its ID
+      const checkbox = document.querySelector(`#picker-tag-${id}`);
 
-      required.forEach((req) => {
-        if (categoryName.includes(req)) {
-          categoryCounts[req] = (categoryCounts[req] || 0) + 1;
-        }
-      });
+      // 3. Find its parent card to see what category it belongs to
+      const categoryBlock = checkbox?.closest(".category-card-wrapper");
+      const categoryName = categoryBlock?.getAttribute("data-category") || "";
+
+      // 4. If this tag belongs to an exclusive category, count it
+      if (categoryName && exclusiveCategories.has(categoryName)) {
+        categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
+      }
     });
 
-    const missing = required.filter((req) => !categoryCounts[req]);
+    // 5. Only check if there are MULTIPLES (No "Missing Required" checks anymore!)
+    const multiples = Object.keys(categoryCounts).filter(
+      (cat) => categoryCounts[cat] > 1,
+    );
 
-    const multiples = required.filter((req) => categoryCounts[req] > 1);
-
-    if (missing.length > 0 || multiples.length > 0) {
-      let errorMsg = `Tagging Error for: ${fileName}\n`;
-
-      if (missing.length > 0) {
-        errorMsg += `\nMissing Required Category:\n• ${missing.join("\n• ")}`;
-      }
-
-      if (multiples.length > 0) {
-        errorMsg += `\n\nToo Many Selected for Categories Listed(Pick only 1):\n• ${multiples.join("\n• ")}`;
-      }
-
+    if (multiples.length > 0) {
+      let errorMsg = `Tagging Error for: ${fileName}\n\n`;
+      errorMsg += `Too Many Selected for Mutually Exclusive Categories (Pick only 1):\n• ${multiples.join("\n• ")}`;
       alert(errorMsg);
       return false;
     }
+
     return true;
   }
-  // --- Add Images to Existing Species Form ---
+
   const addImageToSpeciesForm = document.getElementById(
     "addImageToSpeciesForm",
   );
