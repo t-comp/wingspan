@@ -1177,3 +1177,73 @@ button[data-bs-target="#coverageTagModal"]:active {
   opacity: 1;
   transform: scale(1.1);
 }
+
+/* =========================================
+   DOCS MARKDOWN TYPOGRAPHY (LIGHT MODE)
+   ========================================= */
+#docsMarkdownBody h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+#docsMarkdownBody h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+#docsMarkdownBody code {
+  background-color: #f6f8fa;
+  color: #b45309; /* Deep orange for contrast */
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  font-family: monospace;
+}
+#docsMarkdownBody pre {
+  background-color: #1e1e1e;
+  padding: 1.25rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+#docsMarkdownBody pre code {
+  background-color: transparent;
+  color: #d4d4d4;
+  border: none;
+  padding: 0;
+}
+#docsMarkdownBody blockquote {
+  border-left: 4px solid #0399b0;
+  background-color: #e8f7fa;
+  padding: 1rem;
+  border-radius: 0 6px 6px 0;
+  color: #027a8d;
+  margin: 1rem 0;
+}
+#docsMarkdownBody table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+#docsMarkdownBody th {
+  background-color: #0399b0;
+  color: white;
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+#docsMarkdownBody td {
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  background-color: #ffffff;
+}
+#docsMarkdownBody tr:nth-child(even) td {
+  background-color: #f8f9fa;
+}

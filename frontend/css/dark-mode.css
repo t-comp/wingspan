@@ -25,6 +25,21 @@
   --bs-border-color: #495057;
 }
 
+/* Prevent the white flash by locking the root and body backgrounds */
+[data-bs-theme="dark"],
+[data-bs-theme="dark"] body {
+  background-color: #1a252f !important;
+}
+
+/* Ensure the docs container itself doesn't have a background-color transition 
+   that might cause a lag in color application */
+[data-bs-theme="dark"] #docsView,
+[data-bs-theme="dark"] #docsContent,
+[data-bs-theme="dark"] #docsMarkdownBody {
+  background-color: #1a252f !important;
+  transition: none !important; /* Remove transitions to keep it instant */
+}
+
 /* 2. UNIVERSAL BACKGROUND & TEXT OVERRIDES */
 /* Forces hardcoded 'bg-white' and 'bg-light' elements to turn dark */
 [data-bs-theme="dark"] .bg-white,
@@ -252,36 +267,6 @@
 /* Make both pop a bit more when you hover over the row */
 [data-bs-theme="dark"] #searchAutocompleteDropdown .dropdown-item:hover .search-sub-text {
   color: rgba(255, 255, 255, 0.8) !important;
-}
-
-
-/* =========================================
-   DOCS SIDEBAR (DARK MODE)
-   ========================================= */
-[data-bs-theme="dark"] .docs-sidebar {
-  background: #1f2937 !important; /* Premium dark slate background */
-  border-left: 4px solid #0399b0;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-[data-bs-theme="dark"] .docs-sidebar-title {
-  color: #0399b0 !important;
-}
-
-[data-bs-theme="dark"] .docs-nav-btn {
-  color: #9ca3af !important; /* Soft grey text */
-}
-
-[data-bs-theme="dark"] .docs-nav-btn:hover {
-  background: #374151 !important; /* Lighter slate hover */
-  color: #ffffff !important;
-}
-
-[data-bs-theme="dark"] .docs-nav-btn.active {
-  background: #111827 !important; /* Deep contrast for active */
-  color: #0399b0 !important;
-  font-weight: bold;
-  border: 1px solid rgba(3, 153, 176, 0.3);
 }
 
 
@@ -990,4 +975,131 @@
 /* Force the profile name to be brilliant white instead of muted */
 [data-bs-theme="dark"] #studentTeamDynamicContent .student-sidebar h4.text-dark {
   color: #ffffff !important;
+}
+
+/* =========================================
+   DOCS MARKDOWN TYPOGRAPHY (DARK MODE)
+   ========================================= */
+/* Headers & Text */
+[data-bs-theme="dark"] #docsMarkdownBody h1,
+[data-bs-theme="dark"] #docsMarkdownBody h2,
+[data-bs-theme="dark"] #docsMarkdownBody h3 {
+  color: #ffffff !important;
+  border-bottom-color: #374151 !important; 
+}
+[data-bs-theme="dark"] #docsMarkdownBody p,
+[data-bs-theme="dark"] #docsMarkdownBody li {
+  color: #e2e8f0 !important;
+}
+
+/* Links */
+[data-bs-theme="dark"] #docsMarkdownBody a {
+  color: #0399b0 !important;
+}
+[data-bs-theme="dark"] #docsMarkdownBody a:hover {
+  color: #027a8d !important;
+}
+
+/* Inline Code (e.g., `mediumUrl`) */
+[data-bs-theme="dark"] #docsMarkdownBody code {
+  background-color: #212529 !important;
+  color: #1abc9c !important; /* Bright teal for visibility */
+  border: 1px solid #495057 !important;
+}
+
+/* Code Blocks */
+[data-bs-theme="dark"] #docsMarkdownBody pre {
+  background-color: #111827 !important; /* Deepest slate */
+  border: 1px solid #374151 !important;
+}
+[data-bs-theme="dark"] #docsMarkdownBody pre code {
+  background-color: transparent !important;
+  border: none !important;
+  color: #e2e8f0 !important;
+}
+
+/* Blockquotes (Warnings/Notes) */
+[data-bs-theme="dark"] #docsMarkdownBody blockquote {
+  background-color: rgba(3, 153, 176, 0.1) !important;
+  border-left: 4px solid #0399b0 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Tables */
+[data-bs-theme="dark"] #docsMarkdownBody table {
+  color: #e2e8f0 !important;
+}
+[data-bs-theme="dark"] #docsMarkdownBody th {
+  background-color: #1a252f !important;
+  color: #0399b0 !important;
+  border: 1px solid #374151 !important;
+}
+[data-bs-theme="dark"] #docsMarkdownBody td {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
+}
+[data-bs-theme="dark"] #docsMarkdownBody tr:nth-child(even) td {
+  background-color: #111827 !important; /* Alternating row color */
+}
+
+/* =========================================
+   DOCS VIEW STABILITY (DARK MODE)
+   ========================================= */
+
+/* Pins the background to the entire view so white never flashes */
+[data-bs-theme="dark"] #docsView,
+[data-bs-theme="dark"] #docsContent {
+  background-color: #1a252f !important;
+}
+
+/* Ensures the text area never collapses to zero height while loading */
+[data-bs-theme="dark"] #docsMarkdownBody {
+  background-color: #1a252f !important;
+  min-height: 70vh; 
+  border-radius: 8px;
+}
+
+/* =========================================
+   DOCS VIEW: SEAMLESS BACKGROUND SYNC
+   ========================================= */
+
+/* Matches the docs background exactly to the footer color */
+[data-bs-theme="dark"] #docsView,
+[data-bs-theme="dark"] #docsContent,
+[data-bs-theme="dark"] #docsMarkdownBody {
+  background-color: #111827 !important; /* Matches footer */
+  transition: none !important;
+}
+
+/* =========================================
+   DOCS SIDEBAR (DARK MODE)
+   ========================================= */
+
+[data-bs-theme="dark"] .docs-sidebar {
+  background-color: #1f2937 !important; /* Match card backgrounds */
+  border-left: 4px solid #0399b0 !important; /* Keep Wingspan Teal accent */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-bs-theme="dark"] .docs-sidebar-title {
+  color: #0399b0 !important; /* Signature teal title */
+}
+
+/* Sidebar Buttons */
+[data-bs-theme="dark"] .docs-nav-btn {
+  color: #adb5bd !important; /* Soft grey text */
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+[data-bs-theme="dark"] .docs-nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+/* Active Section Styling */
+[data-bs-theme="dark"] .docs-nav-btn.active {
+  background-color: rgba(3, 153, 176, 0.15) !important; /* Subtle teal glow */
+  color: #0399b0 !important;
+  font-weight: bold;
 }
