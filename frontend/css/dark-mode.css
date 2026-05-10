@@ -1103,3 +1103,30 @@
   color: #0399b0 !important;
   font-weight: bold;
 }
+
+/* =========================================
+   STUDENT DASHBOARD: HEADER & API KEY TWEAKS
+   ========================================= */
+
+/* 1. Force Team Info, Members, and API Key headers to White */
+[data-bs-theme="dark"] #studentTeamDynamicContent h6.text-dark {
+  color: #ffffff !important;
+  border-bottom-color: #495057 !important; /* Subtle divider for headers */
+}
+
+[data-bs-theme="dark"] .api-key-box {
+  background-color: #435263 !important; /* Significantly lighter than the card */
+  border: 1px solid #566575 !important; /* Defined border to match the light mode feel */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 10px !important;
+}
+
+/* Brighten the internal divider to keep it visible */
+[data-bs-theme="dark"] .api-key-box .border-bottom {
+  border-color: #566575 !important;
+}
+
+/* Ensure the status badge and expiration text sit cleanly on the lighter background */
+[data-bs-theme="dark"] .api-key-box .text-muted {
+  color: #c1c9d2 !important; /* Slightly brighter muted text */
+}
