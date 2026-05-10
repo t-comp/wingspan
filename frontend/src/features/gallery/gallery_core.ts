@@ -17,6 +17,10 @@ let currentGalleryData: any[] = [];
 let observer: IntersectionObserver | null = null;
 let savedScrollPosition = 0;
 
+export function getCurrentPage() {
+  return currentPage;
+}
+
 export function refreshGallery(data = AppState.butterflies, page = 1) {
   currentPage = page;
   currentGalleryData = data;

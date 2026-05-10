@@ -4,6 +4,7 @@ import { ButterflyAPI } from "../../core/api.js";
 import { AppState } from "../../core/state.js";
 import Fuse from "fuse.js";
 import noImagePlaceholder from "../../../assets/img/noimage.jpg";
+import { getCurrentPage } from "./gallery_core.js";
 
 export async function initGalleryFilters(
   refreshGalleryCallback: (data: any[], page: number) => void,
@@ -19,11 +20,11 @@ export async function initGalleryFilters(
     keys: ["name", "scientificName"],
     threshold: 0.2, // Tighter threshold to prevent bad matches
     ignoreLocation: true,
-    includeScore: true, // CRITICAL: We need the score to sort by relevance!
+    includeScore: true, // CRITICAL: We need the score to sort by relevance
   });
 
   function applyAllFilters() {
-    // 2. ALWAYS sync Fuse with the latest database state so newly uploaded species appear!
+    //  sync Fuse with the latest database state so newly uploaded species appear
     fuse.setCollection(AppState.butterflies);
 
     const checkedOrders = Array.from(
@@ -64,6 +65,11 @@ export async function initGalleryFilters(
         checkedFamilies.includes(b.family),
       );
     }
+    AppState.currentFilteredData = filtered;
+    const pageToLoad = (window as any).galleryNeedsRefresh
+      ? getCurrentPage()
+      : 1;
+    refreshGalleryCallback(AppState.currentFilteredData, pageToLoad);
 
     // 3. Filter AND Sort by Relevance Score
     if (query) {
