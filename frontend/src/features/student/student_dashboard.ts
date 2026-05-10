@@ -60,8 +60,7 @@ export async function loadStudentData(email: string) {
         </div>
         <div class="card shadow-sm border-0 bg-white overflow-hidden" style="border-radius: 15px;">
             <div class="row g-0">
-              <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
-    <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+<div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative student-sidebar bg-light border-end">    <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
         <i class="fas fa-user"></i>
     </div>
   <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>
@@ -95,8 +94,8 @@ export async function loadStudentData(email: string) {
           const mFName = m.firstName || "";
           const mLName = m.lastName || "";
           const mFullName = `${mFName} ${mLName}`.trim() || m.email; // Fallback to email
-          return `<span class="d-inline-flex align-items-center gap-1 me-2 mb-2 px-3 py-1 rounded-pill border small fw-bold shadow-sm"
-                 style="background: #ffffff; font-size: 0.85rem; color: #495057;">
+          return `<span class="team-member-pill d-inline-flex align-items-center gap-1 me-2 mb-2 px-3 py-1 rounded-pill border small fw-bold shadow-sm"
+             style="font-size: 0.85rem;">
               ${mFullName}
           </span>`;
         })
@@ -114,14 +113,14 @@ export async function loadStudentData(email: string) {
           : "No expiry set";
 
         apiKeyHtml = `
-          <div class="bg-light border rounded p-3 shadow-sm">
+          <div class="api-key-box bg-light border rounded p-3 shadow-sm">
               <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
                   <span class="badge rounded-pill px-3 py-1" style="font-size:0.75rem; background: ${isActive ? "#d1fae5" : "#fef3c7"}; color: ${isActive ? "#065f46" : "#92400e"};">
                       ${isActive ? "Active" : "Inactive"}
                   </span>
                   <span class="text-muted" style="font-size:0.85rem;">${expiresText}</span>
               </div>
-              <div class="font-monospace text-break fw-bold mt-2" style="font-size: 1rem; color: #0399b0;">
+        <div class="api-key-text font-monospace text-break fw-bold mt-2" style="font-size: 1rem;">
                   ${myApiKey}
               </div>
           </div>
@@ -130,13 +129,10 @@ export async function loadStudentData(email: string) {
 
       // Inject the completely merged layout
       container.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-muted fw-bold mb-0">Student Dashboard</h2>
-        </div>
+
         
   <div class="card border-0 bg-white overflow-hidden" style="border-radius: 15px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);">          <div class="row g-0">
-             <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative" style="background-color: #f8f9fa; border-right: 1px solid #eaeaea;">
-      <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+<div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative student-sidebar bg-light border-end">      <div class="profile-circle shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2rem; background-color: #0399b0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
           <i class="fas fa-user"></i>
       </div>
     <h4 class="fw-bold text-dark mb-1">${currentFullName}</h4>

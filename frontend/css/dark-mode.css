@@ -791,3 +791,203 @@
   border-color: #0399b0 !important;
   box-shadow: 0 0 12px rgba(3, 153, 176, 0.5) !important; /* Stronger glow to stand out */
 }
+
+/* ===================================
+   ADMIN USERS TABLE (SOFT DARK MODE)
+   =================================== */
+[data-bs-theme="dark"] .table {
+  --bs-table-bg: var(--card-bg);
+  --bs-table-color: var(--card-text);
+  --bs-table-border-color: var(--card-border); 
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+  --bs-table-hover-color: var(--card-text);
+  border-color: var(--card-border) !important;
+}
+
+[data-bs-theme="dark"] .table thead th,
+[data-bs-theme="dark"] .table-light th {
+  background-color: var(--bs-body-bg) !important;
+  color: #adb5bd !important;
+  border-bottom: 2px solid var(--card-border) !important;
+  border-top: none !important;
+}
+
+[data-bs-theme="dark"] .table .collapse td,
+[data-bs-theme="dark"] .table .collapsing td {
+  background-color: rgba(0, 0, 0, 0.15) !important; 
+  border-bottom: 1px solid var(--card-border) !important;
+}
+
+[data-bs-theme="dark"] .table .collapse hr,
+[data-bs-theme="dark"] .table .collapse .border-bottom,
+[data-bs-theme="dark"] .table .collapse .border-light {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  border-bottom: none !important;
+  opacity: 0 !important;
+}
+
+/* =========================================
+   ADMIN TAGS DASHBOARD (DARK MODE)
+   ========================================= */
+
+/* 1. The Individual Tags in the Grid */
+[data-bs-theme="dark"] #activeTagsGrid .btn-white {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-text) !important;
+  border-color: var(--card-border) !important;
+}
+
+[data-bs-theme="dark"] #activeTagsGrid .btn-white:hover {
+  background-color: var(--card-border) !important;
+}
+
+/* Soften the red 'X' delete icon so it doesn't vibrate on dark backgrounds */
+[data-bs-theme="dark"] #activeTagsGrid .text-danger {
+  color: #ff6b6b !important; 
+}
+
+/* 2. The (+) Add New Category Button in the Sidebar */
+[data-bs-theme="dark"] button[onclick*="promptNewCategory"] {
+  color: #0399b0 !important;
+  border-color: #0399b0 !important;
+  background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] button[onclick*="promptNewCategory"]:hover {
+  background-color: #0399b0 !important;
+  color: #ffffff !important;
+}
+
+/* 3. The Categories Sidebar List (In case it's rendering bright white!) */
+[data-bs-theme="dark"] #adminTagCategoryList .list-group-item {
+  background-color: var(--card-bg) !important;
+  color: var(--card-text) !important;
+  border-color: var(--card-border) !important;
+}
+
+[data-bs-theme="dark"] #adminTagCategoryList .list-group-item:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-bs-theme="dark"] #adminTagCategoryList .badge {
+  background-color: #0399b0 !important; 
+  color: #ffffff !important;
+}
+
+/* 4. The Input Field and (+ Add) Tag Button at the bottom */
+[data-bs-theme="dark"] #adminNewTagName {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+[data-bs-theme="dark"] #adminAddTagSubmit {
+  background-color: #0399b0 !important;
+  border-color: #0399b0 !important;
+  color: #ffffff !important;
+}
+
+
+/* =========================================
+   IMAGE DETAILS MODAL (DARK MODE)
+   ========================================= */
+/* 1. Lighten the subtitle, notes description, and image resolutions */
+[data-bs-theme="dark"] #imageDetailsModal .text-muted,
+[data-bs-theme="dark"] #imageDetailsModal .text-secondary {
+  color: #adb5bd !important; 
+}
+
+/* 2. Catch the dynamically generated resolution text inside the download options */
+[data-bs-theme="dark"] #imageDownloadOptions span,
+[data-bs-theme="dark"] #imageDownloadOptions small {
+  color: #adb5bd !important;
+}
+
+/* 3. Fix the "Notes" and "Tags" headers if they are stuck using .text-dark */
+[data-bs-theme="dark"] #imageDetailsModal .text-dark {
+  color: var(--card-text) !important;
+}
+
+/* =========================================
+   STUDENT DASHBOARD (DARK MODE)
+   ========================================= */
+
+/* 1. API Key Box - Give it a soft, inset look so it sits nicely inside the card */
+[data-bs-theme="dark"] .api-key-box {
+  background-color: rgba(0, 0, 0, 0.15) !important; 
+  border-color: var(--card-border) !important;
+}
+
+/* Lighten the actual API key string so it's readable */
+[data-bs-theme="dark"] .api-key-text {
+  color: #e2e8f0 !important; 
+}
+
+/* 2. Teammate Pills - Map these directly to your custom tag variables */
+[data-bs-theme="dark"] .team-member-pill {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-text) !important;
+  border-color: var(--card-border) !important;
+}
+
+[data-bs-theme="dark"] .team-member-pill .team-member-remove {
+  color: #adb5bd !important;
+}
+
+[data-bs-theme="dark"] .team-member-pill .team-member-remove:hover {
+  color: #ff6b6b !important;
+}
+
+/* 3. Reveal/Copy Key Buttons - Sync them with the dark card aesthetic */
+[data-bs-theme="dark"] #revealKeyBtn,
+[data-bs-theme="dark"] #copyKeyBtn {
+  color: #e2e8f0 !important;
+  border-color: var(--card-border) !important;
+  background-color: var(--tag-bg) !important;
+}
+
+[data-bs-theme="dark"] #revealKeyBtn:hover,
+[data-bs-theme="dark"] #copyKeyBtn:hover {
+  background-color: var(--card-border) !important;
+  color: #ffffff !important;
+}
+
+/* 4. Edit Profile Form - Fix the dark text and white inputs */
+[data-bs-theme="dark"] #studentTeamContent .text-muted {
+  color: #adb5bd !important; /* Fixes "First Name", "Email", etc. labels */
+}
+
+[data-bs-theme="dark"] #studentTeamContent .form-control {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Force the student dashboard form to obey dark mode */
+[data-bs-theme="dark"] #studentTeamDynamicContent .bg-white,
+[data-bs-theme="dark"] #studentTeamDynamicContent .bg-light {
+  background-color: var(--card-bg) !important;
+}
+
+[data-bs-theme="dark"] #studentTeamDynamicContent .text-dark,
+[data-bs-theme="dark"] #studentTeamDynamicContent .text-muted {
+  color: #adb5bd !important; 
+}
+
+[data-bs-theme="dark"] #studentTeamDynamicContent .form-control {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Sync the left profile sidebar with the dark theme */
+[data-bs-theme="dark"] #studentTeamDynamicContent .student-sidebar {
+  background-color: #1a252f !important; /* Deep slate background to match */
+  border-right-color: var(--card-border) !important; /* Sync border color */
+}
+
+/* Force the profile name to be brilliant white instead of muted */
+[data-bs-theme="dark"] #studentTeamDynamicContent .student-sidebar h4.text-dark {
+  color: #ffffff !important;
+}
