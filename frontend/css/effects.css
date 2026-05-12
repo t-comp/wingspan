@@ -1200,7 +1200,7 @@ button[data-bs-target="#coverageTagModal"]:active {
 }
 #docsMarkdownBody code {
   background-color: #f6f8fa;
-  color: #b45309; /* Deep orange for contrast */
+  color: #A47DAB; 
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   border: 1px solid #e5e7eb;
