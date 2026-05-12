@@ -31,28 +31,6 @@ export function initDocs(): void {
     }
   }
 
-  // async function loadDoc(filename: string): Promise<void> {
-  //   markdownBody!.innerHTML = `<p class="text-muted">Loading...</p>`;
-
-  //   try {
-  //     const res = await fetch("/docs/" + filename);
-  //     if (!res.ok) {
-  //       markdownBody!.innerHTML = `<p class="text-danger">Could not load documentation file: ${filename}</p>`;
-  //       return;
-  //     }
-  //     const md = await res.text();
-  //     markdownBody!.innerHTML = marked.parse(md);
-  //   } catch (err) {
-  //     markdownBody!.innerHTML = `<p class="text-danger">Error loading documentation.</p>`;
-  //     console.error("Docs load error:", err);
-  //   }
-
-  //   const docsContent = document.getElementById("docsContent");
-  //   if (docsContent) {
-  //     docsContent.scrollIntoView({ behavior: "smooth", block: "start" });
-  //   }
-  // }
-
   function setActiveBtn(activeBtn: HTMLButtonElement): void {
     navBtns.forEach((btn) => {
       btn.classList.remove("active");

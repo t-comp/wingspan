@@ -339,7 +339,6 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
 
     const modalEl = document.getElementById("adminEditTeamModal");
     if (modalEl) {
-      // @ts-ignore
       new bootstrap.Modal(modalEl).show();
     }
   };
@@ -373,7 +372,6 @@ export function initAdminTeams(refreshAdminData: () => Promise<void>) {
 
         const modal = document.getElementById("adminEditTeamModal");
         if (modal) {
-          // @ts-ignore
           bootstrap.Modal.getInstance(modal)?.hide();
         }
       } catch (error: any) {
