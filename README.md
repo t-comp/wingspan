@@ -12,14 +12,13 @@
 ## Project Overview
 Wingspan is a centralized butterfly and insect image library and REST API built for Reiman Gardens at Iowa State University. Nathan at Reiman Gardens uploads and manages photos through an admin dashboard. Student teams receive API keys and pull images and metadata into their own applications via the Wingspan API.
 
-**Application URL:** http://159.203.134.226
 
 ## Tech Stack
 - Backend: Java Spring Boot 3.2.1, Maven, package `fs3.wingspan`
 - Frontend: Vite, Handlebars, TypeScript, Bootstrap 5
 - Database: PostgreSQL on DigitalOcean
 - File Storage: DigitalOcean Spaces (S3 compatible)
-- Server: DigitalOcean Droplet at 159.203.134.226
+- Server: DigitalOcean Droplet
 
 ## Running Locally
 
