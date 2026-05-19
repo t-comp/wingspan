@@ -1,38 +1,40 @@
-# ug_fs_3
-
-## Project Name
-Wingspan
+# Wingspan
 
 ## Team Members
-Backend Team: Abby Van Der Brink & Taylor Bauer
+**Backend:** Taylor Bauer & Abby Van Den Brink
 
-Frontend Team: Siri Gandhi & Lexi Pachonphai
+**Frontend:** Siri Gandhi & Lexi Pachonphai
+
+**Client:** Nathan Brockman, Reiman Gardens at Iowa State University
+
+**Course:** COMS 4020 Senior Design - Spring 2026
 
 ## Project Overview
+Wingspan is a centralized butterfly and insect image library and REST API built for Reiman Gardens at Iowa State University. Nathan at Reiman Gardens uploads and manages photos through an admin dashboard. Student teams receive API keys and pull images and metadata into their own applications via the Wingspan API.
 
+**Application URL:** http://159.203.134.226
 
+## Tech Stack
+- Backend: Java Spring Boot 3.2.1, Maven, package `fs3.wingspan`
+- Frontend: Vite, Handlebars, TypeScript, Bootstrap 5
+- Database: PostgreSQL on DigitalOcean
+- File Storage: DigitalOcean Spaces (S3 compatible)
+- Server: DigitalOcean Droplet at 159.203.134.226
 
-## File Structure
+## Running Locally
 
+**Prerequisites:** Java 17, Maven, Node.js and npm, local PostgreSQL instance
 
+**Backend:** Create a local `application.properties` file at `src/main/resources/application.properties` with your local database credentials and DigitalOcean Spaces credentials from Nathan. Open `WingspanApplication` in IntelliJ and run.
 
-## Visuals/Graphs
+**Frontend:** cd into the frontend directory, run `npm install` then `npm run dev`.
 
+## Documentation
+Please refer to our [website](https://seniord.cs.iastate.edu/2026-March-16/) !
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+If you choose the tab "Project Artifacts" -> "Final Project Report" this is our most comprehensive report of our application and development process. There are additional tabs to checkout under "Project Artifacts" if you please. Additionally on our website under "Progress Reports" you can see each of our presentations for our Demos and Lightning Talks.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The following two items are coming soon and will be in a docs folder within this project.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- Developer Wiki (coming soon...)
+- API Reference (coming soon...)
